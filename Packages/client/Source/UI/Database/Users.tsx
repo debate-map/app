@@ -63,7 +63,12 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		const [sortedAndFilteredUsers, setSortedAndFilteredUsers] = useState(users);
 
 		const onTableChange = (tableData:TableData)=>{
-			let output: User[] = [...users];
+			setTableData({
+				columnSort: tableData.columnSort,
+				columnSortDirection: tableData.columnSortDirection,
+				filters: [...tableData.filters],
+			});
+			let output: User[] = users;
 
 			if (tableData.columnSort) {
 				switch (tableData.columnSort) {
@@ -104,28 +109,25 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 				output = output.reverse();
 			}
 
-			tableData.filters.forEach(filter=>{
+			for (const filter of tableData.filters) {
 				output = output.filter(a=>{
-					if (filter.key == "displayName") {
-						return a.displayName.toLowerCase().includes(filter.value.toLowerCase());
-					} if (filter.key == "joined") {
-						return Moment(a.joinDate).format("YYYY-MM-DD").includes(filter.value);
-					} if (filter.key == "edits") {
-						return (a.edits || 0).toString().includes(filter.value);
-					} if (filter.key == "lastEdit" && a.lastEditAt) {
-						return Moment(a.lastEditAt).format("YYYY-MM-DD").includes(filter.value);
-					} if (filter.key == "permissions") {
-						return ["basic", "verified", "mod", "admin"].filter(b=>(a.permissionGroups || {})[b]).join(", ").toLowerCase().includes(filter.value.toLowerCase());
-					}
+					if (filter.key == "displayName") return a.displayName.toLowerCase().includes(filter.value.toLowerCase());
+					if (filter.key == "joined") return Moment(a.joinDate).format("YYYY-MM-DD").includes(filter.value);
+					if (filter.key == "edits") return (a.edits || 0).toString().includes(filter.value);
+					if (filter.key == "lastEdit" && a.lastEditAt) return Moment(a.lastEditAt).format("YYYY-MM-DD").includes(filter.value);
+					if (filter.key == "permissions") return ["basic", "verified", "mod", "admin"].filter(b=>(a.permissionGroups || {})[b]).join(", ").toLowerCase().includes(filter.value.toLowerCase());
+					console.error("Unknown filter key:", filter.key);
 				});
-			});
+			}
 
 			setSortedAndFilteredUsers([...output]);
 		};
 
+		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
+
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<TableHeader columns={columns} onTableChange={onTableChange} />
+				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData}/>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>

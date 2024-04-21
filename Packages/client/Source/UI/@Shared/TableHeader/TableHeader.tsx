@@ -21,33 +21,48 @@ export type ColumnData = {
 @Observer
 export class TableHeader extends BaseComponentPlus({} as {
 	columns: ColumnData[],
+	tableData: TableData,
 	onTableChange: (tableData: TableData) => void,
 }, {
 	addingFilter: "",
 	filterValue: "",
-	columnSort: "",
-	columnSortDirection: "asc" as "asc" | "desc" | "",
-	filters: [] as {key: string, value: string}[],
 }) {
 
 	onColumnHeaderClick = (columnKey: string)=>{
-		const {columnSort, columnSortDirection} = this.state;
+		const {columnSort, columnSortDirection} = this.props.tableData;
 
 		if (columnSort == columnKey) {
 			if (columnSortDirection == "asc") {
-				this.SetState({columnSortDirection: "desc"}, this.onTableChangeCb);
+				this.props.onTableChange({
+					columnSort,
+					columnSortDirection: "desc",
+					filters: this.props.tableData.filters,
+				});
 			} else if (columnSortDirection == "desc") {
-				this.SetState({columnSortDirection: "", columnSort: ""}, this.onTableChangeCb);
+				this.props.onTableChange({
+					columnSort: "",
+					columnSortDirection: "",
+					filters: this.props.tableData.filters,
+				});
 			} else {
-				this.SetState({columnSortDirection: "asc"}, this.onTableChangeCb);
+				this.props.onTableChange({
+					columnSort,
+					columnSortDirection: "asc",
+					filters: this.props.tableData.filters,
+				});
 			}
 		} else {
-			this.SetState({columnSort: columnKey, columnSortDirection: "asc"}, this.onTableChangeCb);
+			this.props.onTableChange({
+				columnSort: columnKey,
+				columnSortDirection: "asc",
+				filters: this.props.tableData.filters,
+			});
 		}
+
 	};
 
 	onFilterChange = (key: string, value: string)=>{
-		const {filters} = this.state;
+		const {filters} = this.props.tableData;
 		if (value == "") {
 			this.onFilterRemove(key);
 			return;
@@ -60,28 +75,27 @@ export class TableHeader extends BaseComponentPlus({} as {
 		} else {
 			newFilters.push({key, value});
 		}
-		this.SetState(
-			{filters: newFilters},
-			this.onTableChangeCb,
-		);
+		this.props.onTableChange({
+			columnSort: this.props.tableData.columnSort,
+			columnSortDirection: this.props.tableData.columnSortDirection,
+			filters: newFilters,
+		});
 	};
 
 	onFilterRemove = (key: string)=>{
-		const {filters} = this.state;
+		const {filters} = this.props.tableData;
 		const newFilters = filters.filter(a=>a.key !== key);
-		this.SetState({filters: newFilters}, this.onTableChangeCb);
-	};
-
-	onTableChangeCb = ()=>{
 		this.props.onTableChange({
-			columnSort: this.state.columnSort,
-			columnSortDirection: this.state.columnSortDirection,
-			filters: this.state.filters,
+			columnSort: this.props.tableData.columnSort,
+			columnSortDirection: this.props.tableData.columnSortDirection,
+			filters: newFilters,
 		});
 	};
+
 	render() {
-		const {columns} = this.props;
-		const {addingFilter, filterValue, columnSort, columnSortDirection, filters} = this.state;
+		const {columns, tableData} = this.props;
+
+		const {addingFilter, filterValue} = this.state;
 
 		return (
 			<Column className="clickThrough" style={{background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
@@ -96,18 +110,18 @@ export class TableHeader extends BaseComponentPlus({} as {
 									}
 								}} style={{fontWeight: 500, cursor: column.allowSort ? "pointer" : undefined, fontSize: 17, position: "relative"}}>
 									{column.label}
-									{column.allowSort && columnSort == column.key &&
+									{column.allowSort && tableData.columnSort == column.key &&
 										<span
 											style={{
 												fontSize: 14,
 												marginLeft: 2,
 												position: "absolute",
 												left: "50%",
-												transform: `translate(-50%, ${columnSortDirection == "asc" ? "-" : " "}50%)`,
-												top: columnSortDirection == "asc" ? 0 : undefined,
-												bottom: columnSortDirection == "desc" ? 0 : undefined,
+												transform: `translate(-50%, ${tableData.columnSortDirection == "asc" ? "-" : " "}50%)`,
+												top: tableData.columnSortDirection == "asc" ? 0 : undefined,
+												bottom: tableData.columnSortDirection == "desc" ? 0 : undefined,
 											}}
-											className={columnSortDirection === "asc" ? "mdi mdi-menu-up" : "mdi mdi-menu-down"} />
+											className={tableData.columnSortDirection === "asc" ? "mdi mdi-menu-up" : "mdi mdi-menu-down"} />
 									}
 								</span>
 								{column.allowFilter && <span onClick={e=>{
@@ -140,9 +154,9 @@ export class TableHeader extends BaseComponentPlus({} as {
 						);
 					})}
 				</Row>
-				{filters.length > 0 &&
+				{tableData.filters.length > 0 &&
 					<Row style={{padding: "5px 10px 10px 10px", display: "flex", flexFlow: "row wrap", gap: 4}}>
-						{filters.map(filter=>{
+						{tableData.filters.map(filter=>{
 							return (
 								<div key={filter.key} style={{
 									position: "relative",
@@ -156,7 +170,7 @@ export class TableHeader extends BaseComponentPlus({} as {
 									borderRadius: 10,
 								}}>
 									<span style={{fontWeight: 500, display: "flex", alignItems: "center"}}>
-										{columns.find(a=>a.key == filter.key)?.label}: {filter.value}
+										{columns.find(a=>a.key == filter.key)?.label ?? filter.key.charAt(0).toUpperCase() + filter.key.slice(1)}: {filter.value}
 									</span>
 									<span onClick={e=>{
 										this.onFilterRemove(filter.key);
@@ -169,4 +183,5 @@ export class TableHeader extends BaseComponentPlus({} as {
 			</Column>
 		);
 	}
+
 }
