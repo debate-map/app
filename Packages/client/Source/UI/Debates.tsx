@@ -113,7 +113,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 			for (const filter of tableData.filters) {
 				const filteringOn = key=>filter.key == "global" || filter.key == key;
 				output = output.filter(a=>{
-					if (filteringOn("displayName") && a.name.toLowerCase().includes(filter.value.toLowerCase())) return true;
+					if (filteringOn("name") && a.name.toLowerCase().includes(filter.value.toLowerCase())) return true;
 					if (filteringOn("edits") && (a.edits || 0).toString().includes(filter.value)) return true;
 					if (filteringOn("lastEdit") && Moment(a.editedAt).format("YYYY-MM-DD").includes(filter.value)) return true;
 					if (filteringOn("creator") && GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value)) return true;
