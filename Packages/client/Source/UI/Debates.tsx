@@ -1,11 +1,11 @@
 import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map} from "dm_common";
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {Button, Text, Column, Row, Select, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
@@ -14,6 +14,7 @@ import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
 import {MapUIWrapper} from "./@Shared/Maps/MapUIWrapper";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {MapEntryUI} from "./Debates/MapEntryUI";
+import {ColumnData, TableData, TableHeader} from "./@Shared/TableHeader/TableHeader";
 
 @Observer
 export class DebatesUI extends BaseComponent<{}, {}> {
@@ -66,16 +67,78 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 				});
 		}
 
+		const columns: ColumnData[] = [
+			{key: "name", label: "Title", width: 0.64, allowFilter: true, allowSort: true},
+		];
+
+		if (!SLMode) {
+			columns.push({key: "edits", label: "Edits", width: 0.06, allowFilter: true, allowSort: true});
+		}
+
+		if (!SLMode_AI) {
+			columns.push({key: "lastEdit", label: "Last edit", width: 0.12, allowFilter: true, allowSort: true});
+			columns.push({key: "creator", label: "Creator", width: 0.18, allowFilter: true, allowSort: true});
+		}
+
+		const [filter, setFilter] = useState("");
+
+		const onTableChange = (tableData: TableData)=>{
+			setTableData({
+				columnSort: tableData.columnSort,
+				columnSortDirection: tableData.columnSortDirection,
+				filters: [...tableData.filters],
+			});
+		};
+		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
+
+		const filterMaps = (maps: Map[], tableData: TableData)=>{
+			let output = maps;
+			if (tableData.columnSort) {
+				switch (tableData.columnSort) {
+					case "name": output = output.OrderBy(a=>a.name); break;
+					case "edits": output = output.OrderByDescending(a=>ToNumber(a.edits, 0)); break;
+					case "lastEdit": output = output.OrderByDescending(a=>ToNumber(a.editedAt, 0)); break;
+					case "creator": output = output.OrderBy(a=>a.creator); break;
+					default:
+						console.warn("Unknown column key:", tableData.columnSort);
+						break;
+				}
+
+				if (tableData.columnSortDirection == "desc") {
+					output = output.reverse();
+				}
+			}
+
+			for (const filter of tableData.filters) {
+				switch (filter.key) {
+					case "global":
+						output = output.filter(a=>{
+							return a.name.toLowerCase().includes(filter.value.toLowerCase()) || GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value.toLowerCase());
+						});
+						break;
+					case "name":
+						output = output.filter(a=>a.name.toLowerCase().includes(filter.value.toLowerCase()));
+						break;
+					case "edits": output = output.filter(a=>a.edits == Number(filter.value)); break;
+					case "lastEdit": output = output.filter(a=>a.edits == Number(filter.value)); break;
+					case "creator": output = output.filter(a=>GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value)); break;
+					default: break;
+				}
+			}
+			return output;
+		};
+
 		const maps_featured = maps.filter(a=>a.featured);
 		let listType = uiState.listType;
 		// if in sl-mode, some modes may not have any featured maps; in those cases, set/lock list-type to "all" so user doesn't see an empty list (since default list-type is "featured")
 		if (SLMode && maps_featured.length == 0) {
 			listType = "all";
 		}
-		const maps_toShow_preFilter = listType == "featured" ? maps_featured : maps;
-		const [filter, setFilter] = useState("");
-		const maps_toShow_final = ApplyMapListFilter(maps_toShow_preFilter, filter);
-		const maps_nonFeatured_postFilter = ApplyMapListFilter(maps.filter(a=>!a.featured), filter);
+		const selectedMapsPreFilter = listType == "featured" ? maps_featured : maps;
+
+		const [selectedMapsFiltered, allMapsFiltered] = useMemo(()=>{
+			return [filterMaps(selectedMapsPreFilter, tableData), filterMaps(maps, tableData)];
+		}, [selectedMapsPreFilter, maps, tableData]);
 
 		const listTypeOptions = [{name: `Featured (${maps_featured.length})`, value: "featured"}, {name: `All (${maps.length})`, value: "all"}];
 		return (
@@ -93,7 +156,17 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 							RunInAction("MapListUI.listTypeBar.onChange", ()=>uiState.listType = val);
 						}}/>
 						<Text ml={5}>Filter:</Text>
-						<TextInput ml={5} style={{width: 200}} instant value={filter} onChange={val=>setFilter(val)}/>
+						<TextInput ml={5} style={{width: 200}} instant value={filter} onChange={val=>{
+							setFilter(val);
+							setTableData(oldData=>{
+								if (val == "") return {...oldData, filters: oldData.filters.filter(a=>a.key != "global")};
+								if (oldData.filters.find(a=>a.key == "global")) {
+									return {...oldData, filters: oldData.filters.map(a=>(a.key == "global" ? {key: "global", value: val} : a))};
+								}
+								return {...oldData, filters: [...oldData.filters, {key: "global", value: val}]};
+
+							});
+						}}/>
 						<Button text="Add map" ml="auto"
 							enabled={SLMode && !SLMode_Main ? HasAdminPermissions(MeID()) : CanGetBasicPermissions(MeID())} // in sl-mode, only admins can add maps (except "main" sl-mode, which wants user-contributed maps)
 							onClick={UseCallback(()=>{
@@ -101,26 +174,24 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 								ShowAddMapDialog();
 							}, [userID])}/>
 					</Row>
-					<Row mt={10} p="0 10px" style={{height: 30}}>
+					<TableHeader columns={columns} tableData={tableData} onTableChange={onTableChange}></TableHeader>
+					{/* <Row mt={10} p="0 10px" style={{height: 30}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
 						{!SLMode && <span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Edits</span>}
 						{!SLMode_AI && <span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Last edit</span>}
 						{!SLMode_AI && <span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>}
-					</Row>
+					</Row> */}
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
-					{maps_toShow_final.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>{[
+					{selectedMapsFiltered.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>{[
 						`No results.`,
-						listType == "featured" && maps_nonFeatured_postFilter.length > 0 && ` (+${maps_nonFeatured_postFilter.length} results in "All")`,
+						listType == "featured" && allMapsFiltered.length > 0 && ` (+${allMapsFiltered.length} results in "All")`,
 					].filter(a=>a).join("")}</div>}
-					{maps_toShow_final.map((map, index)=><MapEntryUI key={index} index={index} last={index == maps_toShow_final.length - 1} map={map}/>)}
+					{selectedMapsFiltered.map((map, index)=><MapEntryUI key={index} index={index} last={index == selectedMapsFiltered.length - 1} map={map}/>)}
 				</ScrollView>
 			</>
 		);
 	}
-}
-function ApplyMapListFilter(maps: Map[], filterStr: string) {
-	return maps.filter(a=>filterStr.length == 0 || a.name.toLowerCase().includes(filterStr.toLowerCase()));
 }

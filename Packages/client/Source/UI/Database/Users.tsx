@@ -63,7 +63,12 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		const [sortedAndFilteredUsers, setSortedAndFilteredUsers] = useState(users);
 
 		const onTableChange = (tableData:TableData)=>{
-			let output: User[] = [...users];
+			setTableData({
+				columnSort: tableData.columnSort,
+				columnSortDirection: tableData.columnSortDirection,
+				filters: [...tableData.filters],
+			});
+			let output: User[] = users;
 
 			if (tableData.columnSort) {
 				switch (tableData.columnSort) {
@@ -123,9 +128,11 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 			setSortedAndFilteredUsers([...output]);
 		};
 
+		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
+
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<TableHeader columns={columns} onTableChange={onTableChange} />
+				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData}/>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
