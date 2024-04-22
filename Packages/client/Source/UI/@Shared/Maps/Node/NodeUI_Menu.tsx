@@ -22,6 +22,7 @@ import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
 import {MI_Paste_Old} from "./NodeUI_Menu/MI_Paste_Old.js";
 import {MI_CloneSubtree} from "./NodeUI_Menu/MI_CloneSubtree.js";
+import {SLMode_SFI} from "../../../@SL/SL.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -103,26 +104,18 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 			(childGroup.IsOneOf("generic", "relevance") && GetAddChildItems(node, path, ChildGroup.relevance));
 			//|| (childGroup == "generic" && isPremiseOfSinglePremiseArg && GetAddChildItems(outerNode!, outerPath!, ChildGroup.relevance));
 		const addChildItems_freeform = childGroup.IsOneOf("generic", "freeform") && GetAddChildItems(node, path, ChildGroup.freeform);
-		const addChildGroups_structured = [addChildItems_structured_generic, addChildItems_structured_truth, addChildItems_structured_relevance].filter(a=>a);
-		const addChildGroups = [...addChildGroups_structured, addChildItems_freeform].filter(a=>a);
-		//const multipleAddChildGroups = addChildGroups.length > 1;
-		const multipleAddChildGroups = true;
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		return (
 			<>
-				{multipleAddChildGroups && addChildItems_structured_generic &&
+				{addChildItems_structured_generic && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_generic}</VMenuItem>}
-				{multipleAddChildGroups && addChildItems_structured_truth &&
+				{addChildItems_structured_truth && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child (re. truth)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_truth}</VMenuItem>}
-				{multipleAddChildGroups && addChildItems_structured_relevance &&
+				{addChildItems_structured_relevance && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child (re. relevance)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_relevance}</VMenuItem>}
-				{multipleAddChildGroups && addChildItems_freeform &&
+				{addChildItems_freeform &&
 					<VMenuItem text={`Add freeform child`} enabled={false} style={headerStyle}>{addChildItems_freeform}</VMenuItem>}
-				{/*!multipleAddChildGroups &&
-					<VMenuItem text={`Add child`} style={styles.vMenuItem}>{addChildGroups[0]}</VMenuItem>*/}
-				{!multipleAddChildGroups &&
-					addChildGroups[0]}
 				{!inList && !forChildHolderBox &&
 					<VMenuItem text={<span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(for moving node elsewhere)</span></span> as any}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
@@ -140,7 +133,7 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}*/
 							ACTCopyNode(pathToCut, true);
 						}}/>}
-				{!forChildHolderBox &&
+				{!forChildHolderBox && !SLMode_SFI &&
 					<VMenuItem text={<span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(for linking to 2nd location)</span></span> as any} style={liveSkin.Style_VMenuItem()}
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=>{
@@ -158,34 +151,26 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>}
 				{copiedNode &&
 					<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
-						{multipleAddChildGroups && addChildItems_structured_generic && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.generic}/>}
-						{multipleAddChildGroups && addChildItems_structured_truth && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.truth}/>}
-						{multipleAddChildGroups && addChildItems_structured_relevance && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.relevance}/>}
-						{multipleAddChildGroups && addChildItems_freeform && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.freeform}/>}
+						{addChildItems_structured_generic && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.generic}/>}
+						{addChildItems_structured_truth && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.truth}/>}
+						{addChildItems_structured_relevance && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.relevance}/>}
+						{addChildItems_freeform && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.freeform}/>}
 					</VMenuItem>}
 				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
-				<MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>
-				{// this is too slow, checking the paths merely when right-clicking; instead, just always have the option visible, and delay the path-finding till when clicking it
-				/*pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
+				{!SLMode_SFI && <MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>}
+				{map && !forChildHolderBox && !SLMode_SFI &&
 					<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
-						onClick={e=>{
+						onClick={async e=>{
 							if (e.button != 0) return;
-							for (const path of pathsToChangedInSubtree) {
-								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+							//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+							const sinceTime = 0;
+							// we used to calculate this during menu render, but that slowed down the rendering too much
+							const pathsToChangedNodes = await GetAsync(()=>GetPathsToNodesChangedSinceX(map.id, sinceTime), {maxIterations: 1000}); // this can take a lot of iterations...
+							const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
+							for (const path2 of pathsToChangedInSubtree) {
+								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path2), Date.now()));
 							}
-						}}/>*/}
-				{map && !forChildHolderBox &&
-				<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
-					onClick={async e=>{
-						if (e.button != 0) return;
-						//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
-						const sinceTime = 0;
-						const pathsToChangedNodes = await GetAsync(()=>GetPathsToNodesChangedSinceX(map.id, sinceTime), {maxIterations: 1000}); // this can take a lot of iterations...
-						const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
-						for (const path2 of pathsToChangedInSubtree) {
-							RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path2), Date.now()));
-						}
-					}}/>}
+						}}/>}
 				{inList &&
 					<VMenuItem text="Find in maps" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
@@ -203,14 +188,15 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						}}/>*/}
+				{!SLMode_SFI &&
 				<VMenuItem text="Advanced" childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
 					<MI_MoveUpOrDown direction="up" {...sharedProps}/>
 					<MI_MoveUpOrDown direction="down" {...sharedProps}/>
 					<MI_CloneSubtree {...sharedProps}/>
 					<MI_ImportSubtree {...sharedProps}/>
 					<MI_ExportSubtree {...sharedProps}/>
-				</VMenuItem>
-				<MI_UnlinkNode {...sharedProps}/>
+				</VMenuItem>}
+				{!SLMode_SFI && <MI_UnlinkNode {...sharedProps}/>}
 				<MI_DeleteNode {...sharedProps}/>
 			</>
 		);

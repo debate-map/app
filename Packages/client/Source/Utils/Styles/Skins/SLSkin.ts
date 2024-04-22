@@ -14,14 +14,19 @@ export function GetCinzelStyleForBold() {
 export class SLSkin extends DMSkin {
 	static main = new SLSkin();
 
+	// dm-specific extensions
+	// ==========
+
+	override NodeTextColor = ()=>this.TextColor();
+	override NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.2)");
+	override HasWhiteLeftBoxBackground = ()=>true;
+
 	// scalars
 	// ==========
 
 	override NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
 	override HeaderFont = ()=>"Cinzel";
 	override TextColor = ()=>chroma("rgb(43,55,85)");
-	override NodeTextColor = ()=>this.TextColor();
-	override NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.2)");
 	override ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().alpha(1);
 	override ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 

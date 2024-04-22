@@ -77,7 +77,7 @@ export class NodeBox extends BaseComponentPlus(
 	{panelsPosition: "left"} as NodeBox_Props,
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false,
-		hoverPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
+		lastHoveredPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
 	},
 ) {
 	root: ExpandableBox|n;
@@ -114,7 +114,7 @@ export class NodeBox extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, treePath, forLayoutHelper, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
-		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, lastHoveredPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
@@ -234,7 +234,7 @@ export class NodeBox extends BaseComponentPlus(
 		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 		const toolbarShow = toolbarItemsToShow.length > 0;
 		const toolbar_hasRightAnchoredItems = toolbarItemsToShow.filter(a=>a.panel != "prefix").length > 0;
-		const panelToShow = hoverPanel || nodeView?.openPanel;
+		const panelToShow = (selected || hovered) ? ((leftPanelHovered && lastHoveredPanel) || nodeView?.openPanel || lastHoveredPanel) : undefined;
 		const leftPanelShow = (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 		const subPanelShow = attachments_forSubPanel.length > 0;
@@ -250,7 +250,11 @@ export class NodeBox extends BaseComponentPlus(
 		}, []);
 		const onMouseLeave = UseCallback(e=>{
 			if (!IsMouseLeaveReal(e, this.DOM_HTML)) return;
-			this.SetState({hovered: false});
+			this.SetState({
+				hovered: false,
+				// also clear last-hovered-panel
+				lastHoveredPanel: null,
+			});
 			this.checkStillHoveredTimer.Stop();
 		}, []);
 		const onClick = UseCallback(e=>{
@@ -291,6 +295,32 @@ export class NodeBox extends BaseComponentPlus(
 			//return false;
 		}, [expanded, graph, map?.id, path, treePath]);
 
+		const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel" | "bottom-panel-click")=>{
+			/*if (useLocalPanelState) {
+				UpdateLocalNodeView({openPanel: undefined});
+				this.SetState({hoverPanel: null});
+				return;
+			}*/
+
+			RunInAction("NodeBox.onPanelButtonClick", ()=>{
+				const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
+
+				// if clicking on a not-currently open panel, set panel to that; else, must be clicking on currently-open panel, so clear
+				const newPanel = panel != nodeView_final.openPanel ? panel : undefined;
+				if (newPanel == null && source == "bottom-panel-click") return; // bottom-panel-click should never *unshow* the currently-shown panel
+				nodeView_final.openPanel = newPanel;
+
+				//nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
+				nodeView_final.leftPanelPinned = source == "left-panel" && newPanel != null ? true : undefined;
+
+				if (newPanel == null) {
+					this.SetState({lastHoveredPanel: null});
+				}
+
+				// if using local-panel-state, manually trigger update at end (since mobx not activated for the local-node-view object)
+				if (useLocalPanelState) this.Update();
+			});
+		};
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
 			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
@@ -298,31 +328,6 @@ export class NodeBox extends BaseComponentPlus(
 				hovered = false;
 				//local_openPanel = null; // todo: reimplement equivalent (if still needed)
 			}
-			const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel")=>{
-				/*if (useLocalPanelState) {
-					UpdateLocalNodeView({openPanel: undefined});
-					this.SetState({hoverPanel: null});
-					return;
-				}*/
-
-				RunInAction("NodeBox.onPanelButtonClick", ()=>{
-					const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
-
-					// if clicking on a not-currently open panel, set panel to that; else, must be clicking on currently-open panel, so clear
-					const newPanel = panel != nodeView_final.openPanel ? panel : undefined;
-					nodeView_final.openPanel = newPanel;
-
-					//nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
-					nodeView_final.leftPanelPinned = source == "left-panel" && newPanel != null ? true : undefined;
-
-					if (newPanel == null) {
-						this.SetState({hoverPanel: null});
-					}
-
-					// if using local-panel-state, manually trigger update at end (since mobx not activated for the local-node-view object)
-					if (useLocalPanelState) this.Update();
-				});
-			};
 
 			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
@@ -437,7 +442,10 @@ export class NodeBox extends BaseComponentPlus(
 							<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
 								ref={c=>this.leftPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
-								onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+								onPanelButtonHover={panel=>{
+									// ignore unhovers
+									if (panel) this.SetState({lastHoveredPanel: panel});
+								}}
 								onPanelButtonClick={panel=>onPanelButtonClick(panel, "left-panel")}
 								onHoverChange={hovered=>this.SetState({leftPanelHovered: hovered})}
 							>
@@ -476,7 +484,7 @@ export class NodeBox extends BaseComponentPlus(
 							{bottomPanelShow
 								&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
 									ref={c=>this.bottomPanel = c}
-									usePortal={usePortalForDetailBoxes} nodeUI={this}
+									usePortal={usePortalForDetailBoxes} nodeUI={this} onClick={()=>onPanelButtonClick(panelToShow, "bottom-panel-click")}
 									panelsPosition={panelsPosition!} panelToShow={panelToShow!}
 									hoverTermIDs={hoverTermIDs} onTermHover={termIDs=>this.SetState({hoverTermIDs: termIDs})}/>}
 							{reasonScoreValues && showReasonScoreValues

@@ -11,6 +11,7 @@ import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
+import {SLMode_SFI} from "../../../../../@SL/SL.js";
 
 AddGlobalStyle(`
 	@keyframes spin {
@@ -75,7 +76,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							{saveState === "error" && <span style={{color: "red"}} className="mdi mdi-alert-circle"/>}
 						</div>
 						{/* error && <Pre>{error.message}</Pre> */}
-						{HasModPermissions(MeID()) &&
+						{HasModPermissions(MeID()) && !SLMode_SFI &&
 						<Button ml="auto" text="Force refresh" onClick={async()=>{
 							const result = await apolloClient.mutate({
 								mutation: gql`

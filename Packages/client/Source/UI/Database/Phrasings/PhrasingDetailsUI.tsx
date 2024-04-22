@@ -8,7 +8,7 @@ import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, Map, 
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
-import {SLMode_GAD} from "UI/@SL/SL";
+import {SLMode_GAD, SLMode_SFI} from "UI/@SL/SL";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {RunCommand_AddNodePhrasing} from "Utils/DB/Command";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
@@ -69,7 +69,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>}
 				<Title_Base {...sharedProps}/>
-				<OtherTitles {...sharedProps}/>
+				{!SLMode_SFI && <OtherTitles {...sharedProps}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>{noteField_label}: </Pre>
 					<TextArea enabled={enabled} autoSize={true} style={E({flex: 1, minWidth: 0})}

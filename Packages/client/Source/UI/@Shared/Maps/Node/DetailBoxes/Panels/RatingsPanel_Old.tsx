@@ -21,6 +21,7 @@ import {SLMode} from "UI/@SL/SL.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../../NodeLayoutConstants.js";
+import {liveSkin} from "../../../../../../Utils/Styles/SkinManager.js";
 
 type RatingsPanel_Props = {
 	node: NodeL3, path: string, ratingType: NodeRatingType,
@@ -239,7 +240,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				</div>}
 				{!asNodeUIOverlay &&
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
-					<Pre style={{fontSize: 12, color: "rgba(255,255,255,.5)"}}>
+					<Pre style={{fontSize: 12, color: liveSkin.TextColor_Dark().css()}}>
 						{ratingType == "impact"
 							? `Cannot rate impact directly. Instead, rate the "truth/agreement" and "relevance".`
 							: "Click to rate. Right-click to remove rating."}
@@ -249,9 +250,9 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 						Note also that the "average impact" score (shown in panel-button to the left) will sometimes not seem to match the ratings shown in the chart.
 						This is because the chart ignores ratings that are missing one of the truth/relevance scores (eg. rating the argument's relevance, but not all the premises), whereas the "average" includes them.
 					`.AsMultiline(0)}/>}
-					<Row ml="auto">
+					<Row ml="auto" center>
 						{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
-						<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>RunInAction_Set(this, ()=>store.main.ratingUI.smoothing = val)}/>
+						<Pre style={{fontSize: 11}}>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>RunInAction_Set(this, ()=>store.main.ratingUI.smoothing = val)}/>
 					</Row>
 				</div>}
 

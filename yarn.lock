@@ -1694,7 +1694,7 @@ __metadata:
     patch-package: "npm:^6.4.7"
     postinstall-postinstall: "npm:^2.1.0"
     sync-directory: "npm:^2.2.22"
-    tree-grapher: "npm:0.0.11"
+    tree-grapher: "npm:0.0.12"
     ts-loader: "npm:9.2.3"
     ts-node: "npm:^10.9.2"
     ts-node-dev: "npm:2.0.0"
@@ -12678,7 +12678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tree-grapher@npm:0.0.11, tree-grapher@workspace:.yalc/tree-grapher":
+"tree-grapher@npm:0.0.12, tree-grapher@workspace:.yalc/tree-grapher":
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:

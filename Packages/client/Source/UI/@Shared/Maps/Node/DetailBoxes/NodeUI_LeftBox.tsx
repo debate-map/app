@@ -3,7 +3,7 @@ import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {DefaultLoadingUI, Observer} from "web-vcore";
+import {Chroma, DefaultLoadingUI, Observer} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
@@ -13,6 +13,7 @@ import {BaseComponent, BaseComponentPlus, cssHelper, UseEffect} from "web-vcore/
 import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
+import {SLMode_SFI} from "../../../../@SL/SL.js";
 
 export const NodeUI_LeftBox_width = 130;
 
@@ -174,23 +175,23 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 						background: backgroundColor.alpha(0.7).css(),
 						//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 					}}/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>
+					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>}
+					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>}
 					{/* <PanelButton {...{ onPanelButtonHover, onPanelButtonClick, map, path, openPanel }} panel="discussion" text="Discussion"/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="social" text="Social"/> */}
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="details"
 						text={`Details${IsUserCreatorOrMod(MeID(), node) ? " (edit)" : ""}`}/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="tags" text="Tags"/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="others" text="Others"/>
-					<Button text="..."
+					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>}
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="tags" text="Tags" lastButtonInSeries={SLMode_SFI}/>
+					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="others" text="Others" lastButtonInSeries={true}/>}
+					{/*<Button text="..."
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", // alignItems: "center",
 							background: null, boxShadow: null, border: null,
 							borderRadius: "0 0 5px 5px",
 							":hover": {background: backgroundColor.alpha(0.5).css()},
-						}}/>
+						}}/>*/}
 				</div>
 			</div>,
 			nodeDetailBoxesLayer_container,
@@ -199,13 +200,16 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 }
 
 type PanelButton_Props = {
-	map: Map|n, path: string, openPanel: string|n, panel: string, text: string, style?,
+	map: Map|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
 	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
 };
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 	render() {
-		const {map, path, openPanel, panel, text, style, children} = this.props;
+		const {map, path, openPanel, panel, text, lastButtonInSeries, style, children} = this.props;
 		const {css} = cssHelper(this);
+
+		const regularBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,0)") : Chroma("rgba(255,255,255,.1)");
+		const hoverBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,.15)") : Chroma("rgba(255,255,255,.25)");
 		return (
 			<Button text={text}
 				className="useLightText"
@@ -215,10 +219,11 @@ class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 						// border: "1px outset rgba(0,0,0,.35)",
 						border: "solid rgba(0,0,0,.4)", borderWidth: "0 0 1px 0",
 						boxShadow: "none", borderRadius: 0,
-						backgroundColor: "rgba(255,255,255,.1)", ":hover": {backgroundColor: "rgba(255,255,255,.2)"},
+						backgroundColor: regularBackground.css(), ":hover": {backgroundColor: hoverBackground.css()},
 						color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
 					},
-					openPanel == panel && {backgroundColor: "rgba(255,255,255,.2)"},
+					openPanel == panel && {backgroundColor: hoverBackground.css()},
+					lastButtonInSeries && {borderRadius: "0 0 5px 5px", borderWidth: 0},
 					style,
 				)}
 				onClick={()=>{

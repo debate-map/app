@@ -11,6 +11,18 @@ globalThis.chroma = chroma;
 export class DMSkin extends Skin {
 	static main = new DMSkin();
 
+	// dm-specific extensions
+	// ==========
+
+	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
+	NodeTextColor = ()=>{
+		if (nodeLightBackground) return Chroma("rgba(0,0,0,.8)");
+		return Chroma("rgba(255,255,255,.8)");
+	};
+	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
+	HasLightBackground = ()=>this.TextColor() == this.TextColor_Dark();
+	HasWhiteLeftBoxBackground = ()=>false;
+
 	// scalars
 	// ==========
 
@@ -23,19 +35,13 @@ export class DMSkin extends Skin {
 	override OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
 	override HeaderFont = ()=>this.MainFont();
 	override MainFont = ()=>"Quicksand, Symbola, AdobeNotDef, sans-serif";
-	override TextColor = ()=>Chroma("rgb(50,50,50)");
+	override TextColor = ()=>this.TextColor_Dark();
+	override TextColor_Dark = ()=>Chroma("rgb(50,50,50)");
+	override TextColor_Light = ()=>Chroma("rgba(255,255,255,.7)");
 	override NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
 	override HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
 	override ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 	override ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.15 * chroma_maxDarken).alpha(1);
-
-	// dm-specific
-	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
-	NodeTextColor = ()=>{
-		if (nodeLightBackground) return Chroma("rgba(0,0,0,.8)");
-		return Chroma("rgba(255,255,255,.8)");
-	};
-	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 
 	// styles
 	// ==========

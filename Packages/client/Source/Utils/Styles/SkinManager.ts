@@ -7,4 +7,3 @@ export const liveSkin = (()=>{
 	if (SLMode) skin = SLSkin.main;
 	return skin;
 })();
-//export function SetLiveSkin(skin: Skin) { liveSkin = skin; }

@@ -90,7 +90,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 	OnTermHover = (termIDs: string[], hovered: boolean)=>{
 		const {parent} = this.props;
-		parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermIDs: hovered ? termIDs : null});
+		parent.SetState({lastHoveredPanel: hovered ? "definitions" : null, hoverTermIDs: hovered ? termIDs : null});
 	};
 	OnTermClick = (termIDs: string[])=>{
 		const {map, path} = this.props;

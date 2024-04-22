@@ -35,7 +35,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		minWidth: number|n, // is this still needed?
 		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
 		backgroundColor: chroma.Color,
-		usePortal?: boolean, nodeUI?: NodeBox,
+		usePortal?: boolean, nodeUI?: NodeBox, onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>)=>any,
 	},
 	{hoverTermID: null as string|n},
 ) {
@@ -53,7 +53,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 			map, node, path, parent,
 			width, minWidth, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
 			backgroundColor,
-			usePortal, nodeUI,
+			usePortal, nodeUI, onClick,
 		} = this.props;
 		const nodeView = GetNodeView(map?.id, path);
 
@@ -105,30 +105,33 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		let uiRoot: HTMLDivElement;
 		return MaybeCreatePortal(
 			// <ErrorBoundary>
-			<div ref={c=>uiRoot = c!} className="NodeUI_BottomPanel useLightText" style={ES(
-				{
-					position: "absolute",
-					zIndex: hovered ? 6 : 5,
-					minWidth: (minWidth ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
-					padding: 5, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-					background: backgroundColor.css(),
-					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
-					color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
-				},
-				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdown},
-				!usePortal && {
-					left: panelsPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
-					width: width ?? "100%",
-					//boxShadow: "rgba(255,255,255,.3) 0px 3px 3px",
-					//filter: "drop-shadow(rgba(255,255,255,.3) 0px 3px 3px)",
-					//filter: "drop-shadow(rgba(0,0,0,1) 0px 12px 12px)",
-					filter: "drop-shadow(rgba(0,0,0,1) 0px 10px 10px)",
-				},
-				usePortal && {
-					display: "none", // wait for UseEffect func to align position and make visible
-					filter: GetMapUICSSFilter(), clipPath: "inset(-1px -150px -150px -1px)",
-				},
-			)}>
+			<div ref={c=>uiRoot = c!} className="NodeUI_BottomPanel useLightText"
+				onClick={onClick}
+				style={ES(
+					{
+						position: "absolute",
+						zIndex: hovered ? 6 : 5,
+						minWidth: (minWidth ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
+						padding: 5, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						background: backgroundColor.css(),
+						//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
+						color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
+					},
+					panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdown},
+					!usePortal && {
+						left: panelsPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
+						width: width ?? "100%",
+						//boxShadow: "rgba(255,255,255,.3) 0px 3px 3px",
+						//filter: "drop-shadow(rgba(255,255,255,.3) 0px 3px 3px)",
+						//filter: "drop-shadow(rgba(0,0,0,1) 0px 12px 12px)",
+						filter: "drop-shadow(rgba(0,0,0,1) 0px 10px 10px)",
+					},
+					usePortal && {
+						display: "none", // wait for UseEffect func to align position and make visible
+						filter: GetMapUICSSFilter(), clipPath: "inset(-1px -150px -150px -1px)",
+					},
+				)}
+			>
 				{GetValues(NodeRatingType).Contains(panelToShow) && (()=>{
 					if (["impact", "relevance"].Contains(panelToShow) && node.type == NodeType.claim) {
 						const argumentNode = NN(parent);

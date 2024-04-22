@@ -11,7 +11,7 @@ Notes:
 2) Changes that affect the data-structure of nodes, or otherwise "change what people enter into the map" (eg. bracketed prefix-text), should be done via the child-layout setting.
 */
 
-export const SL_extraFlags = ["sl", "gad", "cov", "2020", "ai", "ia", "climate"]; // if entry is changed/added, do the same for line in index.html
+export const SL_extraFlags = ["sl", "gad", "cov", "2020", "ai", "ia", "climate", "sfinstance"]; // if entry is changed/added, do the same for line in index.html
 export const slSkin_fromExtra = SL_extraFlags.includes(startURL.GetQueryVar("extra") ?? "") ? startURL.GetQueryVar("extra") : null;
 export const slSkin = (()=>{
 	if (slSkin_fromExtra != null) return slSkin_fromExtra;
@@ -28,6 +28,7 @@ export const SLMode_2020 = slSkin == "2020";
 export const SLMode_AI = slSkin == "ai";
 export const SLMode_IA = slSkin == "ia";
 export const SLMode_Climate = slSkin == "climate";
+export const SLMode_SFI = slSkin == "sfinstance";
 
 export const ShowHeader = startURL.GetQueryVar("header") != "0"; // todo: probably rename to URL_HideHeader
 export const URL_HideNodeHover = startURL.GetQueryVar("nodeHover") == "0";

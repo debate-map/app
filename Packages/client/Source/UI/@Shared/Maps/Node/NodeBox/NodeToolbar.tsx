@@ -18,7 +18,7 @@ import {NodeBox_Props} from "../NodeBox.js";
 
 //export type NodeToolbar_SharedProps = NodeBox_Props & {backgroundColor: Color};
 export type NodeToolbar_Props = {
-	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
+	backgroundColor: Color, panelToShow?: string|n, onPanelButtonClick: (panel: string)=>any,
 	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
 	nodeUI_width_final: number,
 	leftPanelShow: boolean,
@@ -155,7 +155,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 @Observer
 class ToolBarButton extends BaseComponent<{
 	node: NodeL3, text: string, textComp?: JSX.Element, enabled?: boolean, disabledInfo?: string, panel?: string,
-	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
+	first?: boolean, last?: boolean, panelToShow?: string|n, onPanelButtonClick: (panel: string)=>any,
 	onClick?: (e: React.MouseEvent)=>any, onHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean, style?: any,
 } & NodeToolbar_SharedProps, {}> {

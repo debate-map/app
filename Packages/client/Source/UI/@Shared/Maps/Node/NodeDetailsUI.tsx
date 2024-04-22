@@ -14,6 +14,7 @@ import {TextPanel} from "./NodeDetailsUI/TextPanel.js";
 import {QuoteInfoEditorUI} from "../../Attachments/AttachmentPanel/QuoteInfoEditorUI.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
+import {SLMode_SFI} from "../../../@SL/SL.js";
 
 type Props = {
 	map: Map|n, parent: NodeL3|n,
@@ -62,7 +63,10 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 				<Row mb={5}>
 					<Select displayType="button bar"
 						// only show permissions panel when first creating node (afterward, setting is changed in node's Others panel)
-						options={GetEntries(DetailsPanel_Subpanel, "ui").filter(a=>a.value != DetailsPanel_Subpanel.permissions || forNew)}
+						options={GetEntries(DetailsPanel_Subpanel, "ui").filter(a=>{
+							if (SLMode_SFI && a.value?.IsOneOf(DetailsPanel_Subpanel.permissions, DetailsPanel_Subpanel.others)) return false;
+							return a.value != DetailsPanel_Subpanel.permissions || forNew;
+						})}
 						value={subpanel} onChange={val=>{
 							RunInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
 						}}/>
