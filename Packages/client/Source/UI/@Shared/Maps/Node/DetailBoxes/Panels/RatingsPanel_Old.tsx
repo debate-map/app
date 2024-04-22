@@ -240,7 +240,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				</div>}
 				{!asNodeUIOverlay &&
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
-					<Pre style={{fontSize: 12, color: liveSkin.TextColor_Dark().css()}}>
+					<Pre style={{fontSize: 12, color: liveSkin.HasWhiteLeftBoxBackground() ? liveSkin.TextColor_Dark().css() : liveSkin.TextColor_Light().css()}}>
 						{ratingType == "impact"
 							? `Cannot rate impact directly. Instead, rate the "truth/agreement" and "relevance".`
 							: "Click to rate. Right-click to remove rating."}
