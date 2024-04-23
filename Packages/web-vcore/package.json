@@ -139,7 +139,7 @@
 		"updeep": "^1.2.1",
 		"uplot": "^1.6.5",
 		"uplot-vplugins": "0.0.7",
-		"webpack": "5.90.3",
+		"webpack": "5.91.0",
 		"webpack-cli": "5.1.4",
 		"webpack-dependency-tools": "0.0.1",
 		"webpack-dev-middleware": "7.0.0",

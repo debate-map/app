@@ -273,6 +273,48 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 		console.log("Symlink-plugin disabled...");
 	};*/
 
+	// fix so that webpack can detect additions/removals of folders/symlinks in the "node_modules" folder, as caused by "yarn install" (as called by "Scripts/zalc2.js" during its operations)
+	// ==========
+
+	const potentialYalcFolders = [
+		PathFromWebVCoreRoot("../../.yalc"), // in parent project
+		//PathFromWebVCoreRoot(".yalc"), // in web-vcore itself
+		PathFromWebVCoreRoot("../../node_modules/web-vcore/.yalc"), // in web-vcore itself (targeting the paths under node_modules, since that's what webpack needs to watch to detect yarn-executed folder/symlink additions/removals)
+	];
+	const packagesThatMayBeYalcLinked = [] as {name: string, path: string}[];
+	for (const yalcFolder of potentialYalcFolders) {
+		if (!fs.existsSync(yalcFolder)) continue;
+		const packagesInYalcFolder = [] as string[];
+		for (const folderName of fs.readdirSync(yalcFolder)) {
+			if (folderName.startsWith("@")) {
+				for (const subfolderName of fs.readdirSync(pathModule.join(yalcFolder, folderName))) {
+					packagesInYalcFolder.push(`${folderName}/${subfolderName}`);
+				}
+			} else {
+				packagesInYalcFolder.push(folderName);
+			}
+		}
+		for (const packageName of packagesInYalcFolder) {
+			packagesThatMayBeYalcLinked.push({name: packageName, path: pathModule.join(yalcFolder, packageName)});
+			//packagesThatMayBeYalcLinked.push({name: packageName, path: pathModule.join(yalcFolder, packageName).replace(/\\/g, "/")});
+		}
+	}
+
+	console.log("Telling webpack of packages that may be yalc-linked (unmanaged paths):", packagesThatMayBeYalcLinked.map(a=>a.name).join(", "));
+	//webpackConfig.snapshot = {unmanagedPaths: packagesThatMayBeYalcLinked.map(a=>a.path)};
+
+	// use the "unmanagedPaths" field didn't work; using managedPaths instead (with a regex matching all *except* the target packages) worked for some reason
+	// [webpack 5.91.0 had commit message suggesting it would fix the issue; it seemed to help, though still flaky, relating to errors of "mobx-graphlink/node_modules/updeep" becoming missing from "npm run yalc-[up/down]"]
+	const sep = `[\\\\/]`;
+	const packagesThatMayBeYalcLinked_asRegexSubstrings = packagesThatMayBeYalcLinked.map(a=>a.name.replace("/", sep)).join("|");
+	// based on example at: https://webpack.js.org/configuration/other-options/#managedpaths
+	const regexForAllNodeModulesExceptPotentialYalcLinked = new RegExp(`^(.+?${sep}node_modules${sep}(?!(${packagesThatMayBeYalcLinked_asRegexSubstrings}))(@.+?${sep})?.+?)${sep}`);
+	webpackConfig.snapshot = {managedPaths: [regexForAllNodeModulesExceptPotentialYalcLinked]};
+
+	// even the usage of the "managedPaths" field above had some flakiness; perhaps the most reliable is to just enable watching on the entire node_modules folder
+	// (devs don't recommend this [https://github.com/webpack/webpack/issues/11612#issuecomment-705806843], but it seems at least roughly as reliable as the managedPaths regex approach above) 
+	//webpackConfig.snapshot = {managedPaths: []};
+
 	// plugins
 	// ==========
 

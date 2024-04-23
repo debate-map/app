@@ -86,6 +86,11 @@ function SetResolutionsForPackagesInYalcFolder(pkgData, /*yarnLockSections, yarn
 
 		for (const package of packagesHere) {
 			if (operation == "up") {
+				// Advantages of "file:" protocol:
+				// * Seems more stable for subdependency versions. (ie. yarn.lock based persistence of old version of subdep seems to have fewer/maybe-no cases of getting "broken free" to a new version after yalc-up -> yalc-down cycle)
+				// Advantages of "portal:" protocol:
+				// * Doesn't require a "yarn install" after a "npm run yalc-up" (since it's a symlink, rather than a copy)
+				//pkgData.resolutions[package] = `file:${yalcFolderPath}/${package}`;
 				pkgData.resolutions[package] = `portal:${yalcFolderPath}/${package}`;
 			} else {
 				delete pkgData.resolutions[package];
