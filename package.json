@@ -7,10 +7,10 @@
   "main": "./Packages/deploy/Pulumi/index.ts",
   "workspaces": [
     "Packages/client",
+    "Packages/deploy",
     "Packages/js-common",
     "Packages/monitor-client",
-    "Packages/deploy",
-    ".yalc/*"
+    "Packages/web-vcore"
   ],
   "scripts": {
     "start": "nps",
@@ -61,8 +61,7 @@
     "sync-directory": "^2.2.22",
     "tree-grapher": "0.0.12",
     "ui-debug-kit": "0.0.7",
-    "wavesurfer.js": "7.6.0",
-    "web-vcore": "0.0.105"
+    "wavesurfer.js": "7.6.0"
   },
   "packageManager": "yarn@4.0.2"
 }

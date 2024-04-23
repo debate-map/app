@@ -1,0 +1,12 @@
+diff --git a/node_modules/graphql-tag/package.json b/node_modules/graphql-tag/package.json
+index 1a022a8..3f4eedf 100644
+--- a/node_modules/graphql-tag/package.json
++++ b/node_modules/graphql-tag/package.json
+@@ -5,6 +5,7 @@
+   "main": "./main.js",
+   "module": "./lib/index.js",
+   "jsnext:main": "./lib/index.js",
++  "type": "module",
+   "types": "./lib/index.d.ts",
+   "sideEffects": false,
+   "scripts": {

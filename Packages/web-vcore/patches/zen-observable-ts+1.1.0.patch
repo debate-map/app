@@ -1,0 +1,12 @@
+diff --git a/node_modules/zen-observable-ts/package.json b/node_modules/zen-observable-ts/package.json
+index 8d8a6be..379b420 100644
+--- a/node_modules/zen-observable-ts/package.json
++++ b/node_modules/zen-observable-ts/package.json
+@@ -5,6 +5,7 @@
+   "license": "MIT",
+   "main": "index.js",
+   "module": "module.js",
++  "type": "module",
+   "types": "index.d.ts",
+   "repository": {
+     "type": "git",

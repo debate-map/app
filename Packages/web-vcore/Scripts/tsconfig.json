@@ -1,0 +1,57 @@
+{
+	"compilerOptions": {
+		// general
+		//"outDir": "Source_JS",
+		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
+		"resolveJsonModule": true,
+
+		// compilation
+		"target": "ES2015",
+		/*"target": "esnext",
+		"lib": [
+			"es5",
+			"es6",
+			"ESNext",
+			"dom"
+		],*/
+		"jsx": "react",
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		"noImplicitAny": false,
+		"alwaysStrict": true, // alternative: "@babel/plugin-transform-strict-mode"; went with this since doesn't require another npm package
+		"strictNullChecks": true,
+
+		// modules/paths
+		"composite": true,
+		"esModuleInterop": true,
+		//"module": "ES2015",
+		//"module": "commonjs", // needed, since ts-node does not yet support imports from es2015-modules
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"rootDir": ".",
+		"baseUrl": ".",
+		"outDir": "../Scripts_Dist",
+		//"declarationMap": true,
+		//"baseUrl": ".", // we need it at root so we can apply path-overrides, even when requester is outside of Source folder
+		"paths": { // ("paths" is relative to "baseUrl")
+			// remove @types/node and such (conflicts with typescript web definitions)
+			"@types/node": ["../Typings/empty.d.ts"],
+			// remove @types/react/global.d.ts, as it breaks the auto-import-finder for react-vcomponents/Text
+			"react/global.d.ts": ["../Typings/empty.d.ts"],
+			"react-vextensions/node_modules/react/global.d.ts": ["../Typings/empty.d.ts"],
+			"react-vcomponents/node_modules/react/global.d.ts": ["../Typings/empty.d.ts"]
+			//"WebpackConfig": ["./Build/WebpackConfig.ts"]
+		},
+	},
+	"include": [
+		"../Typings/**/*.d.ts",
+		"../Scripts/**/*.ts",
+		"../Scripts/**/*.tsx",
+		"../Scripts/@CJS/**/*.js",
+		"../Scripts/@CJS/**/*.jsx",
+		"Config.ts",
+		"Build/WebpackConfig.ts",
+		//"../node_modules/js-vextensions/**/*.ts",
+	],
+	"compileOnSave": true
+}

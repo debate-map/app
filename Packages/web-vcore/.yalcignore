@@ -1,0 +1,2 @@
+# commented (see end of readme for explanation; basically, the .yalc-folder subdeps are just included in general, through the "files" field in package.json)
+#!.yalc/**/*

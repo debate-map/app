@@ -1,0 +1,36 @@
+// NOTE: All the font-faces being declared in this file rely on the user-project to provide the actual font-files, at the subpaths specified (ie. ./Resources/<subpath>).
+// TODO: Maybe make the step above unnecessary, by having web-vcore include these font-files itself (with the webpack-config set up to include them in its resources-serving).
+
+// Declare font-face for Quicksand font (the standard "main font"). CSS-block generated from: https://gwfh.mranftl.com/fonts/quicksand?subsets=latin,latin-ext,vietnamese
+@font-face { /* quicksand-500 - latin_latin-ext_vietnamese */
+	font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+	font-family: 'Quicksand'; font-style: normal; font-weight: 500;
+	src: url('/Fonts/quicksand-v30-latin_latin-ext_vietnamese-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+@font-face { /* quicksand-600 - latin_latin-ext_vietnamese */
+	font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+	font-family: 'Quicksand'; font-style: normal; font-weight: 600;
+	src: url('/Fonts/quicksand-v30-latin_latin-ext_vietnamese-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+@font-face { /* quicksand-700 - latin_latin-ext_vietnamese */
+	font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+	font-family: 'Quicksand'; font-style: normal; font-weight: 700;
+	src: url('/Fonts/quicksand-v30-latin_latin-ext_vietnamese-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+// Declare font-face for Symbola font; we use this to ensure that some handy unicode characters (eg. play/pause) are available regardless of device's available fonts.
+// TODO: Maybe replace Symbola with a "lighter" font, that still has the most useful symbols; Symbola.woff2 is almost 1mb in size!
+@font-face {
+	font-family: "Symbola";
+	src: url("/Fonts/Symbola_10.03.woff2") format("woff2");
+	//font-display: swap; font-style: normal; font-weight: 500;
+}
+
+// Declare font-face for "Adobe NotDef" font; this can help you notice when a font doesn't support a given character. To use it:
+// 1) Ensure the "/Fonts/AdobeNotDef-Regular.otf" file is present/served from your dev-server. (can download-then-rename from: https://github.com/adobe-fonts/adobe-notdef/blob/master/AND-Regular.otf)
+// 2) Change css of element temporarily, to have `fontFamily` include `AdobeNotDef` as the entry just after your chosen font. (eg. `MyFont, AdobeNotDef`}
+@font-face {
+	font-family: "AdobeNotDef";
+	src: url("/Fonts/AdobeNotDef-Regular.otf") format("opentype");
+	//font-display: swap; font-style: normal; font-weight: 500;
+}

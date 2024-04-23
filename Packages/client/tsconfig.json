@@ -24,6 +24,7 @@
 	"references": [
 		// in-repo packages
 		{"path": "../js-common"},
+		{"path": "../web-vcore"},
 		// external packages
 		//{"path": "../../node_modules/web-vcore"},
 	],

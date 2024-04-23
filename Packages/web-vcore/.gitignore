@@ -1,0 +1,17 @@
+**/tsconfig.tsbuildinfo
+
+/node_modules
+/Dist
+/nm
+/Scripts_Dist
+
+# yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+/yalc.lock
+/.yalc

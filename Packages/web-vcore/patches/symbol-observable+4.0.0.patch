@@ -1,0 +1,12 @@
+diff --git a/node_modules/symbol-observable/package.json b/node_modules/symbol-observable/package.json
+index bd03d4f..aa0c0cf 100644
+--- a/node_modules/symbol-observable/package.json
++++ b/node_modules/symbol-observable/package.json
+@@ -26,6 +26,7 @@
+   "main": "lib/index.js",
+   "module": "es/index.js",
+   "jsnext:main": "es/index.js",
++  "type": "module",
+   "typings": "index.d.ts",
+   "keywords": [
+     "symbol",

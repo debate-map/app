@@ -1,0 +1,15 @@
+diff --git a/node_modules/@wry/equality/package.json b/node_modules/@wry/equality/package.json
+index 702fd27..547319b 100644
+--- a/node_modules/@wry/equality/package.json
++++ b/node_modules/@wry/equality/package.json
+@@ -4,8 +4,9 @@
+   "author": "Ben Newman <ben@eloper.dev>",
+   "description": "Structural equality checking for JavaScript values",
+   "license": "MIT",
+-  "main": "lib/equality.js",
++  "main": "lib/equality.esm.js",
+   "module": "lib/equality.esm.js",
++  "type": "module",
+   "types": "lib/equality.d.ts",
+   "keywords": [],
+   "homepage": "https://github.com/benjamn/wryware",

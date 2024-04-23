@@ -1,0 +1,75 @@
+{
+	"compilerOptions": {
+		// general
+		"sourceMap": true,
+		//"module": "ESNext",
+		"moduleResolution": "node",
+		//"maxNodeModulesJsDepth": 1,
+
+		// compilation
+		//"target": "es2015",
+		//"target": "esnext", // babel targets es2015 (ie. transpiles our code to it), so it's fine for TS to target es-next
+		"target": "ES2018", // need es2018 for ts-loader (it doesn't understand esnext)
+		/*"lib": [
+			"es5",
+			"es6",
+			"ESNext",
+			"dom"
+		],*/
+		//"allowJs": true,
+		"jsx": "react",
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		//"declaration": true,
+		//"declarationDir": "Dist",
+		"resolveJsonModule": true,
+		// needed to fix "cannot find [wvc file] under rootDir [of some other linked package]" compile error that occurs sometimes
+		//"composite": true
+		//"useDefineForClassFields": true, // needed for mobx @observable
+		// strictness settings
+		//"strict": true, // enables all of the below (other than noImplicitReturns)
+		//"noImplicitAny": true,
+		"noImplicitAny": false,
+		//"noImplicitThis": true,
+		//"noImplicitReturns": true,
+		"alwaysStrict": true,
+		//"strictBindCallApply": true,
+		"strictNullChecks": true,
+		//"strictFunctionTypes": true,
+		//"strictPropertyInitialization": true,
+
+		// modules/paths
+		"composite": true,
+		"rootDir": "Source",
+		"baseUrl": "Source", // keep commented; this way, we remember to always use relative paths (needed for in-node-modules typescript type-resolving)
+		"outDir": "Dist",
+		"declarationMap": true,
+		"paths": { // ("paths" is relative to "baseUrl")
+			/*"*": [
+				"../node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
+				"*"
+			],*/
+			// remove @types/node and such (conflicts with typescript web definitions)
+			"@types/node": ["Typings/empty.d.ts"],
+			// remove @types/react/global.d.ts, as it breaks the auto-import-finder for react-vcomponents/Text
+			"react/global.d.ts": ["Typings/empty.d.ts"],
+			"react-vextensions/node_modules/react/global.d.ts": ["Typings/empty.d.ts"],
+			"react-vcomponents/node_modules/react/global.d.ts": ["Typings/empty.d.ts"]
+		},
+	},
+	//"files": ["Source/index.ts"],
+	"include": [
+		"./Typings/**/*.d.ts",
+		"./Source/**/*.ts",
+		"./Source/**/*.tsx"
+	],
+	/*"exclude": [
+		"Dist",
+		"node_modules"
+	],*/
+	"references": [
+		{"path": "./nm_Source"},
+		{"path": "./Scripts"},
+	],
+	"compileOnSave": true
+}

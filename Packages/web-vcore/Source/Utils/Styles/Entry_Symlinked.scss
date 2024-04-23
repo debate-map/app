@@ -1,0 +1,10 @@
+@import "~rc-tooltip/assets/bootstrap.css";
+@import "~rc-slider/assets/index.css";
+@import "~react-datetime/css/react-datetime.css";
+// keep the .css extension; without it, it imports from the symlinked/source wvc node_modules rather than the higher-project's, fsr
+/*@import "../../../node_modules/codemirror/lib/codemirror.css";
+@import "../../../node_modules/codemirror/addon/scroll/simplescrollbars.css";*/
+@import "~codemirror/lib/codemirror.css";
+@import "~codemirror/addon/scroll/simplescrollbars.css";
+
+@import "Main";

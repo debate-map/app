@@ -1,0 +1,267 @@
+// Do not include this file directly, since it omits the subdep imports; instead, import the "Entry_Base" in this folder, from user-project.
+// If WVC is symlinked, WVC's webpack-config will then detect its own symlinking, and change the import to "Entry_Symlinked", fixing the subdep paths.
+// TODO: Confirm whether the note above is still accurate. (I think it is no longer accurate, now that yalc is used instead of "npm link" and such.)
+
+@import "Markdown";
+@import "Fonts";
+//@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+//@import "bootstrap";
+@import "bootstrap-limited";
+@import "bootstrap-social";
+
+// include declaration of font-face for Roboto, using google-fonts
+// todo: perhaps remove this at some point, to avoid an unnecessary/extra resource-request (since Quicksand is now my standard "main font")
+//@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,100,500,900);
+@import url("//fonts.googleapis.com/css?family=Roboto:300,400,100,500,900");
+
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	font-size: 14px;
+
+	// keep list in-sync with DefaultSkin.ts (also, see there for the comments on the list) [included in both places, because fonts are something we want loaded asap, ie. before reactjs tree has finished rendering]
+	font-family: (
+		"Quicksand", "Symbola",
+		"Roboto", "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "sans-serif",
+		"Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", "EmojiOne Mozilla", "TweMoji Mozilla", "Segoe UI Symbol",
+	);
+}
+* {
+	//box-sizing: inherit;
+	box-sizing: border-box;
+
+	// If element has {flex: 1}, css-spec dictates that minWidth/minHeight be set to "auto".
+	// We revert that by having all elements default minWidth/minHeight to 0.
+	// Why? Because otherwise, given:
+	//	<container style="display:flex">
+	//		<child1 style="height: 10">
+	//		<child2 style="flex: 1">
+	// </container>
+	// ...child2 would, rather than fill the remaining space, just expand to the height its children "want"/default-to-being. (causing problems for scroll-views and such)
+	// An alternate fix, is to use "style={{display: flex, minHeight: 0}}" or "style={ES({display: flex})}" for the "container" element (in the example above).
+	/*min-width: 0;
+	min-height: 0;*/
+}
+*:before, *:after {
+	//box-sizing: inherit;
+	box-sizing: border-box;
+}
+[type=button] {
+	-webkit-appearance: none !important;
+}
+
+// by tag
+// ==========
+
+// these tags do not, by default, inherit from the html/body standards -- so make them do so
+textarea, input, button, select {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+div:focus {
+	outline: none;
+}
+
+a {
+	//text-decoration: none !important;
+	text-decoration: none;
+	&:not(.ignoreBaseCSS) {
+		color: rgba(100,255,100,.7);
+		&:hover { color: rgba(100,255,100,1); }
+
+		> sup, > sub { color: inherit; }
+	}
+}
+
+select {
+	background: rgba(255,255,255,.8);
+	color: rgba(0,0,0,1);
+}
+input {
+	background: rgba(255,255,255,.8);
+	color: rgba(0,0,0,1);
+	border: 1px solid rgba(0,0,0,.5);
+	padding: 2px;
+}
+input[type=spinner] {
+	min-width: 50px; // set more reasonable default (the default default is 254)
+}
+input[type=checkbox] {
+	margin: 0; // remove odd "margin: 3px 3px 3px 4px;" default
+}
+textarea:not(neverMatch) {
+	background: rgba(255,255,255,.8);
+	border: 1px solid rgba(0,0,0,.5);
+	color: rgba(0,0,0,1);
+}
+
+input:invalid {
+	//outline: 1px solid rgba(255,0,0,1);
+	outline: none;
+	background: rgba(255,200,200,.7);
+}
+
+.onlyTopMargin p { margin-bottom: 0; }
+p:first-child { margin-top: 0; }
+p:last-child { margin-bottom: 0; }
+
+table {    
+	border-collapse: collapse;
+	border-spacing: 0;
+	empty-cells: show;
+	//min-width: 300;
+}
+table th {
+	//color: #222;
+	background-color: rgba(0,0,0,.7);
+	//font-size: 12px;
+	font-weight: 600;
+	padding: 1px 3px;
+	border: 1px solid rgba(0,0,0,.5);
+}
+table.lighterBackground th {
+	background-color: rgba(0,0,0,.5);
+}	
+table td {
+	color: rgba(255,255,255,.7);
+	//font-size: 12px;
+	padding: 1px 3px;
+	border: 1px solid rgba(0,0,0,.5);
+}
+
+// by class
+// ==========
+
+.unselectable { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+//.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+//.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+
+// selectable -- with auto-cursor
+.selectableAC { -moz-user-select: text; -webkit-user-select: text; user-select: text; cursor: auto; }
+//.selectableAC * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+
+//.cursorAuto { cursor: auto; }
+//.cursorAuto * { cursor: auto; }
+
+/*.unselectable {
+	&:not(.neverMatch) { cursor: default; }
+	div, span, p, th, td { cursor: default; }
+}
+.selectable {
+	&:not(.neverMatch) { cursor: auto; }
+	div, span, p, th, td { cursor: auto; }
+}
+/*.cursorAuto:not(.neverMatch) {
+	cursor: auto;
+	* { cursor: auto; }
+}*#/
+.cursorSet:not(.neverMatch) {
+	cursor: inherit;
+	* { cursor: inherit; }
+}*/
+
+div, span, p, th, td {
+	//-moz-user-select: inherit; -webkit-user-select: inherit; user-select: inherit;
+	cursor: inherit;
+}
+
+.clickThrough > * { pointer-events: auto; }
+// define clickThrough after `.clickThrough > *`, so that it takes precedence
+.clickThrough { pointer-events: none; }
+
+// define clickThroughChain after clickThrough-group, so that it takes precedence
+.clickThroughChain { pointer-events: none; }
+.clickThroughChain * { pointer-events: none; } // line needed to outprioritize the `clickThrough > *`
+.clickThroughChain-break { pointer-events: auto; }
+.clickThroughChain-break * { pointer-events: auto; } // line needed to outprioritize the `.clickThroughChain *`
+
+.hideScrollbar::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+
+/*.recharts-cartesian-axis-tick { font-size: 12px; }
+#recharts_measurement_span { font-size: 12px; }
+
+.recharts-text.recharts-cartesian-axis-tick-value { fill: #AAA; }*/
+
+/*.Markdown {
+	a {
+		&:not(.ignoreBaseCSS) {
+			color: rgba(100,255,100,.7);
+			&:hover {
+				color: rgba(100,255,100,1);
+			}
+		}
+	}
+}*/
+
+.CodeMirror {
+	color: rgba(255,255,255,.7);
+}
+.CodeMirror-wrap > .CodeMirror-scroll {
+	/*overflow: initial !important;
+	overflow-y: scroll !important;*/
+	// fix for odd display glitch, where first post's editor would show horizontal-scrollbar (even though "marginBottom: -30" is supposed to already fix it) 
+	will-change: transform;
+}
+
+// temp-fix for "ResizeObserver loop limit exceeded" error, for video element
+// see: https://stackoverflow.com/questions/63653605/resizeobserver-loop-limit-exceeded-api-is-never-used and https://bugs.chromium.org/p/chromium/issues/detail?id=809574
+video::-webkit-media-controls-timeline {
+	align-self: center;
+	width: calc(100% - 64px);
+}
+
+// rc-slider
+// ==========
+
+.sliderHandleAbove .rc-slider > [role=slider] {
+	z-index: 1;
+}
+
+.rdtPicker {
+	background: rgba(0,0,0,.7);
+	border: 1px solid rgba(255,255,255,.3);
+}
+.rdtPicker table td {
+	border: none;
+}
+.rdtCounter .rdtBtn:hover {
+	background: rgba(255,255,255,.3);
+}
+
+.rc-tooltip-inner {
+	padding: 4px 7px;
+	background-color: rgb(30,30,30);
+	min-height: initial !important;
+}
+
+// shapes
+// ==========
+
+.triangle {
+	position: relative;
+	background-color: orange;
+	text-align: left;
+}
+.triangle:before,
+.triangle:after {
+	content: '';
+	position: absolute;
+	background-color: inherit;
+}
+.triangle,
+.triangle:before,
+.triangle:after {
+	width: 10px;
+	height: 10px;
+	border-top-right-radius: 30%;
+}
+.triangle:before { transform: rotate(-135deg) skewX(-45deg) scale(1.414,.707) translate(0,-50%); }
+.triangle:after { transform: rotate(135deg) skewY(-45deg) scale(.707,1.414) translate(50%); }
+
+.triangle.up { transform: rotate(-60deg) skewX(-30deg) scale(1,.866); }
+.triangle.down { transform: rotate(-120deg) skewX(-30deg) scale(1,.866); }
+.triangle.left { transform: rotate(-30deg) skewX(-30deg) scale(1,.866); }
+.triangle.right { transform: rotate(-90deg) skewX(-30deg) scale(1,.866); }
