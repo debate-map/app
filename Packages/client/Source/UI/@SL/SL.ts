@@ -44,8 +44,15 @@ export function GetGADExternalSiteURL() {
 	return "https://societylibrary.com";
 }
 
-export function GetAIPrefixInfoFromMapName(mapName: string) {
-	const [matchStr, orderingNumber] = mapName.match(/\[ai(?:-([0-9.]+))?\]( *)/i) ?? [];
+export const namePrefixesForMapsToShowOnlyInAssociatedSkin = ["ai", "gad", "2020"];
+export function GetMapNamePrefixFilterKey() {
+	if (SLMode_AI) return "ai";
+	if (SLMode_GAD) return "gad";
+	if (SLMode_2020) return "2020";
+	return null;
+}
+export function GetSkinPrefixInfoFromMapName(mapName: string, prefixFilterKey: string) {
+	const [matchStr, orderingNumber] = mapName.match(new RegExp(`\\[${prefixFilterKey}(?:-([0-9.]+))?\\]( *)`, "i")) ?? [];
 	return [matchStr, orderingNumber];
 }
 

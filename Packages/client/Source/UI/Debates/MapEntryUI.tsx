@@ -2,7 +2,7 @@ import {VURL, E} from "web-vcore/nm/js-vextensions.js";
 import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {SLMode, SLMode_AI, GetAIPrefixInfoFromMapName} from "UI/@SL/SL.js";
+import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, GetMapNamePrefixFilterKey} from "UI/@SL/SL.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -18,8 +18,9 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		const creator = map && GetUser(map.creator);
 
 		let mapNameToDisplay = map.name;
-		if (SLMode_AI) {
-			const [matchStr, orderingNumber] = GetAIPrefixInfoFromMapName(map.name);
+		const prefixFilterKey = GetMapNamePrefixFilterKey();
+		if (prefixFilterKey) {
+			const [matchStr, orderingNumber] = GetSkinPrefixInfoFromMapName(map.name, prefixFilterKey);
 			if (matchStr) {
 				mapNameToDisplay = mapNameToDisplay.slice(matchStr.length);
 			}

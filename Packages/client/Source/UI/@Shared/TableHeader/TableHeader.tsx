@@ -58,7 +58,6 @@ export class TableHeader extends BaseComponentPlus({} as {
 				filters: this.props.tableData.filters,
 			});
 		}
-
 	};
 
 	onFilterChange = (key: string, value: string)=>{

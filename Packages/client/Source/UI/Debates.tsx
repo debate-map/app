@@ -10,7 +10,7 @@ import {Button, Text, Column, Row, Select, TextInput} from "web-vcore/nm/react-v
 import {BaseComponent, BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import Moment from "moment";
-import {SLMode, SLMode_AI, GetAIPrefixInfoFromMapName, SLMode_Main} from "./@SL/SL";
+import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, SLMode_Main, SLMode_Climate, SLMode_GAD, GetMapNamePrefixFilterKey, namePrefixesForMapsToShowOnlyInAssociatedSkin} from "./@SL/SL";
 import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
 import {MapUIWrapper} from "./@Shared/Maps/MapUIWrapper";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
@@ -54,18 +54,26 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 					return true;
 				});
 		}
-		if (SLMode_AI) {
+		const prefixFilterKey = GetMapNamePrefixFilterKey();
+		if (prefixFilterKey) {
 			maps = maps
 				.filter(a=>{
-					if (!a.name.toLowerCase().startsWith("[ai")) return false;
+					if (!a.name.toLowerCase().startsWith(`[${prefixFilterKey}`)) return false;
 					const creator = GetUser(a.creator);
 					if (!creator?.permissionGroups.admin) return false;
 					return true;
 				})
 				.OrderBy(a=>{
-					const [matchStr, orderingNumber] = GetAIPrefixInfoFromMapName(a.name);
+					const [matchStr, orderingNumber] = GetSkinPrefixInfoFromMapName(a.name, prefixFilterKey!);
 					return orderingNumber != null ? Number(orderingNumber) : 0;
 				});
+		} else {
+			maps = maps.filter(map=>{
+				for (const prefixKey of namePrefixesForMapsToShowOnlyInAssociatedSkin) {
+					if (map.name.toLowerCase().startsWith(`[${prefixKey}`)) return false;
+				}
+				return true;
+			});
 		}
 
 		const columns: ColumnData[] = [
