@@ -17,9 +17,11 @@
     "#preinstall[disabled; can error in docker]": "npx only-allow yarn",
     "postinstall_old": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches",
     "postinstall_old2": "patch-package --patch-dir ./patches",
-    "postinstall_old3": "node ./node_modules/web-vcore/Scripts_Dist/ApplyPatches.js && patch-package --patch-dir ./patches",
-    "postinstall": "patch-package --patch-dir ./patches && node ./Scripts/PostInstall.js && cd ./node_modules/web-vcore && node ./Scripts_Dist/ApplyPatches.js",
-    "postinstall_test": "echo 'Test101'; exit(1)"
+    "postinstall_old3": "node ./node_modules/web-vcore/Scripts/@CJS/ApplyPatches.js && patch-package --patch-dir ./patches",
+    "postinstall": "patch-package --patch-dir ./patches && node ./Scripts/PostInstall.js && cd ./node_modules/web-vcore && node ./Scripts/@CJS/ApplyPatches.js",
+    "postinstall_test": "echo 'Test101'; exit(1)",
+    "yalc-up": "node ./Scripts/zalc2.js up",
+    "yalc-down": "node ./Scripts/zalc2.js down"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "4.1.0",

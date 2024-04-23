@@ -40,6 +40,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [Node revisions](https://github.com/debate-map/app/tree/main/Docs/NodeRevisions.md) (outdated)
 * [Migration notes](https://github.com/debate-map/app/tree/main/Docs/MigrationNotes.md)
 * [Package code-syncing](https://github.com/debate-map/app/tree/main/Docs/PackageCodeSyncing.md)
+* [Local dependency changes](https://github.com/debate-map/app/tree/main/Docs/LocalDependencyChanges.md)
 * [Compilation speed](https://github.com/debate-map/app/tree/main/Docs/CompilationSpeed.md)
 * [Common issues](https://github.com/debate-map/app/tree/main/Docs/CommonIssues.md)
 

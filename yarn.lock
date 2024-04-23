@@ -2176,9 +2176,9 @@ __metadata:
   linkType: hard
 
 "@types/d3-hierarchy@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@types/d3-hierarchy@npm:3.0.2"
-  checksum: 4a86c8cdec40ae604e6d54b2b96c6b81031caaa0b7507638f2d165c72f5fda1020cada3b5df57b912eb375b3275c1d59c48a50defa29ea3608cd10fa35d0aca1
+  version: 3.1.7
+  resolution: "@types/d3-hierarchy@npm:3.1.7"
+  checksum: 873711737d6b8e7b6f1dda0bcd21294a48f75024909ae510c5d2c21fad2e72032e0958def4d9f68319d3aaac298ad09c49807f8bfc87a145a82693b5208613c7
   languageName: node
   linkType: hard
 
@@ -4789,9 +4789,9 @@ __metadata:
   linkType: hard
 
 "d3-hierarchy@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "d3-hierarchy@npm:3.1.1"
-  checksum: b07055b8d9a564121ec990c97712ef7b21a455a9ae249c049ab94ddf6221deaa4c14650948d67a03c7164e782c89c701d284a4c9738770f8faa5038686fd3f87
+  version: 3.1.2
+  resolution: "d3-hierarchy@npm:3.1.2"
+  checksum: 6dcdb480539644aa7fc0d72dfc7b03f99dfbcdf02714044e8c708577e0d5981deb9d3e99bbbb2d26422b55bcc342ac89a0fa2ea6c9d7302e2fc0951dd96f89cf
   languageName: node
   linkType: hard
 
@@ -8716,9 +8716,9 @@ __metadata:
   linkType: hard
 
 "mobx@npm:^6.3.13":
-  version: 6.3.13
-  resolution: "mobx@npm:6.3.13"
-  checksum: ff2ce1b5eaa0696d817c5d08a1f14bfa2225aa925383e91860d5797738f5931f8fd9e812ba7c891d7317458c5c29f6d3d21d691697494738ad80c510f0ce3768
+  version: 6.12.3
+  resolution: "mobx@npm:6.12.3"
+  checksum: 33e1d27d33adea0ceb4de32eb66b4384e81a249be5e01baa6bf556f458fd62a83d23bfa0cf8ba9e87c28f0d810ae301ee0e7322fd48a3bf47db33ffb08d5826c
   languageName: node
   linkType: hard
 
@@ -13231,15 +13231,17 @@ __metadata:
   linkType: hard
 
 "use-callback-ref@npm:^1.2.5":
-  version: 1.2.5
-  resolution: "use-callback-ref@npm:1.2.5"
+  version: 1.3.2
+  resolution: "use-callback-ref@npm:1.3.2"
+  dependencies:
+    tslib: "npm:^2.0.0"
   peerDependencies:
-    "@types/react": ^16.8.0 || ^17.0.0
-    react: ^16.8.0 || ^17.0.0
+    "@types/react": ^16.8.0 || ^17.0.0 || ^18.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: a1d22979e7285f3206c8bb3064302a9b4fbe2de213100954841750ac680663e970864cbed8b647c39dd28dee1d94d7621cab8c29a29206506b0570bd3d8cdc40
+  checksum: d232c37160fe3970c99255da19b5fb5299fb5926a5d6141d928a87feb47732c323d29be2f8137d3b1e5499c70d284cd1d9cfad703cc58179db8be24d7dd8f1f2
   languageName: node
   linkType: hard
 
@@ -13300,11 +13302,11 @@ __metadata:
   linkType: hard
 
 "use-state-with-deps@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "use-state-with-deps@npm:1.1.1"
+  version: 1.1.2
+  resolution: "use-state-with-deps@npm:1.1.2"
   peerDependencies:
     react: "> 16.8.0"
-  checksum: 420715506f6b7ffd62d86ab111078ae531c3efbfa186eb0de26bb73d1b25da5534a7d6b73f13216240bd1fe8c08b31ad6fb3254c7df859b97e722d0968df327a
+  checksum: cc454a483621eea6bd3772b362eb50041a2207b559c08138e3be3ed12a08be48434b1aba49d227ba7ba1ab9c622c498a59a8db858c2ba6d995f56f9f388c3b13
   languageName: node
   linkType: hard
 
