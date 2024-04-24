@@ -7,14 +7,13 @@ import {NotificationMessage} from "./NotificationMessage.js";
 
 @Global
 export class ErrorMessage extends NotificationMessage {
-
 	constructor(text: string, stackTrace: string, pinnedFor?: number) {
-        super(text, pinnedFor);
+		super(text, pinnedFor);
 
-        this.stackTrace = stackTrace;
+		this.stackTrace = stackTrace;
 	}
 
-    stackTrace: string;
+	stackTrace: string;
 }
 
 /** Helper, which tries to add a notification-message to the store, but if that fails, falls back to an alert. (useful, eg. in Start_0.ts) */
