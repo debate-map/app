@@ -23,6 +23,7 @@ export * from "./Store/WVCStore.js";
 
 export * from "./UI/NotificationsUI.js";
 export * from "./UI/NotificationsUI/NotificationMessage.js";
+export * from "./UI/NotificationsUI/ErrorMessage.js";
 
 export * from "./Utils/Audio/AudioNodes.js";
 export * from "./Utils/Audio/SpeechToText.js";

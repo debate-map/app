@@ -1,14 +1,16 @@
-import React from "react";
+import React, {useState} from "react";
 import chroma from "chroma-js";
 import moment from "moment";
 import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponent, cssHelper, Style} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
+import {CopyText} from "js-vextensions";
 import {Observer, RunInAction} from "../Utils/Store/MobX.js";
 import {manager} from "../Manager.js";
 import {wvc_store} from "../Store/WVCStore.js";
 import {Chroma, GetTimeSinceLoad} from "../Utils/General/General.js";
 import {NotificationMessage} from "./NotificationsUI/NotificationMessage.js";
+import {ErrorMessage} from "./NotificationsUI/ErrorMessage.js";
 import {chroma_maxDarken} from "../Utils/UI/Styles.js";
 
 /*AddGlobalStyle(`
@@ -23,7 +25,9 @@ export class NotificationsUI extends BaseComponent<{placement: "topLeft" | "topR
 	scrollView: ScrollView;
 	render() {
 		const {placement, navBarHeight, style} = this.props;
-		const messages = wvc_store.notificationMessages;
+		const messages = [...wvc_store.errorMessages, ...wvc_store.notificationMessages];
+		console.log("Messages:", messages);
+
 		const {css, key} = cssHelper(this);
 		return (
 			<div className="NotificationsUI_outer clickThrough" style={css(
@@ -50,7 +54,8 @@ export class NotificationsUI extends BaseComponent<{placement: "topLeft" | "topR
 							<Row>Database is currently read-only. Reason: {GetDBReadOnlyMessage()}</Row>
 						</MessageUI>*/}
 						{messages.OrderBy(a=>(a.pinnedTill != null ? 0 : 1)).map((message, index)=>{
-							return <MessageUI key={index} message={message} pinned={message.pinnedTill != null && Date.now() < message.pinnedTill}/>;
+							if (message instanceof ErrorMessage) return <ErrorMessageUI key={index} message={message} pinned={message.pinnedTill != null && Date.now() < message.pinnedTill}/>;
+							if (message instanceof NotificationMessage) return <MessageUI key={index} message={message} pinned={message.pinnedTill != null && Date.now() < message.pinnedTill}/>;
 						})}
 					</Column>
 				</ScrollView>
@@ -83,6 +88,74 @@ export class MessageUI extends BaseComponent<{message?: NotificationMessage, pin
 					)}>
 						{message?.text}
 						{children}
+					</Div>
+					{!pinned &&
+					<Button text="X"
+						style={css({
+							display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
+							width: 18, padding: "2px 4px", fontSize: 13, lineHeight: "1px", // keeps text from making meta-theses too tall
+							backgroundColor: backgroundColor_blueified_dark.css(),
+							// boxShadow: "none",
+							border: "none",
+							color: manager.GetSkin().TextColor().css(),
+							":hover": {backgroundColor: backgroundColor_blueified_dark.brighten(.05).css()},
+						})}
+						onClick={e=>{
+							RunInAction("MessageUI.RemoveMessage.onClick", ()=>wvc_store.notificationMessages.Remove(message));
+						}}/>}
+				</div>
+			</Div>
+		);
+	}
+}
+
+export class ErrorMessageUI extends BaseComponent<{message?: ErrorMessage, pinned?: boolean, children?: any}, {}> {
+	render() {
+
+		const {message, pinned, children} = this.props;
+		const backgroundColor_base = manager.GetSkin().NavBarPanelBackgroundColor().alpha(1);
+		const backgroundColor_blueified_normal = chroma.mix(backgroundColor_base, Chroma("rgba(0,175,255,.7)"), .05);
+		const backgroundColor_blueified_dark = backgroundColor_blueified_normal.darken(.1 * chroma_maxDarken);
+
+		const {key, css} = cssHelper(this);
+
+		const [expanded, setExpanded] = useState(false);
+		return (
+			<Div ml={10} mt={10} className={key("MessageUI")} style={{position: "relative", width:"95%", borderRadius: 5, cursor: "default", boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
+				<div style={{display: "flex", background: backgroundColor_blueified_normal.css(), borderRadius: 5 /* cursor: "pointer" */}}>
+					<Div style={css({
+						display: "flex", flexDirection: "column", position: "relative", flexGrow: 1,
+					})}>
+						<Div sel style={css(
+							{
+
+								position: "relative", padding: 5, fontSize: 14, whiteSpace: "pre-wrap", wordBreak: "break-word",
+								borderRadius: "5px 	0 0 5px",
+								color: manager.GetSkin().TextColor().css(),
+							},
+							pinned && {borderRadius: 5},
+						)}>
+							{!expanded && message?.text}
+							{expanded && message?.stackTrace && <Div style={css({whiteSpace: "pre-wrap", wordBreak: "break-word"})}>{message.stackTrace}</Div>}
+							{children}
+						</Div>
+						<Div style={css({
+							display: "flex", justifyContent: "space-between", alignItems: "center", padding: 5, gap: 5,
+						})}>
+							<Button style={css({
+								width: "auto",
+								padding: "2px 4px",
+								fontSize: 12,
+								gap: 5,
+							})} text="Copy" mdIcon="content-copy" onClick={()=>{
+								CopyText(`${message?.stackTrace}`);
+							}} />
+
+							<span style={{color: manager.GetSkin().TextColor().css(), fontSize: 20, cursor: "pointer"}} onClick={()=>{
+								setExpanded(prev=>!prev);
+							}} className={`mdi ${expanded ? "mdi-menu-up" : "mdi-menu-down"}`}/>
+
+						</Div>
 					</Div>
 					{!pinned &&
 					<Button text="X"
