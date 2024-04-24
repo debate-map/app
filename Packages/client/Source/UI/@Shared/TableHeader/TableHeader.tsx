@@ -2,7 +2,6 @@ import {Observer} from "web-vcore";
 import {Button, Column, Row, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {useState} from "react";
 
 export type TableData = {
 	columnSort: string,
@@ -27,7 +26,6 @@ export class TableHeader extends BaseComponentPlus({} as {
 	addingFilter: "",
 	filterValue: "",
 }) {
-
 	onColumnHeaderClick = (columnKey: string)=>{
 		const {columnSort, columnSortDirection} = this.props.tableData;
 
@@ -93,7 +91,6 @@ export class TableHeader extends BaseComponentPlus({} as {
 
 	render() {
 		const {columns, tableData} = this.props;
-
 		const {addingFilter, filterValue} = this.state;
 
 		return (
@@ -182,5 +179,4 @@ export class TableHeader extends BaseComponentPlus({} as {
 			</Column>
 		);
 	}
-
 }

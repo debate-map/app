@@ -4,7 +4,7 @@ import {RootState, store} from "Store/index.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddNotificationMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
+import {ActionFunc, AddErrorMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -68,7 +68,7 @@ export function InitWVC() {
 
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
-				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));
+				RunInAction("WVC.PostHandleError", ()=>AddErrorMessage(error.message, error.stack ?? "No stack trace provided."));
 			});
 		},
 
