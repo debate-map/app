@@ -1,4 +1,4 @@
-import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy, CommandRun_commandNameValues} from "dm_common";
+import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy, CommandRun_commandNameValues, NodeL3, GetMap, globalMapID} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox";
@@ -6,12 +6,13 @@ import useResizeObserver from "use-resize-observer";
 import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
 import {Assert, ModifyString} from "web-vcore/nm/js-vextensions";
-import {Command} from "web-vcore/nm/mobx-graphlink";
+import {Command, RunInAction} from "web-vcore/nm/mobx-graphlink";
 import moment from "web-vcore/nm/moment";
 import {Button, CheckBox, Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {GetOpenMapID} from "../../Store/main.js";
 
 @Observer
 export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boolean}, {}) {
@@ -69,6 +70,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 
 		let messageUI: JSX.Element;
 		let messageUI_row2: JSX.Element|n;
+		let node_final:NodeL3|n;
 		if (run.commandName == "addChildNode") {
 			const payload = run.commandInput as (typeof AddChildNode)["prototype"]["payload"];
 			const returnData = run.commandResult as (typeof AddChildNode)["prototype"]["returnData"];
@@ -81,7 +83,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 			const accessPolicy = GetAccessPolicy(node?.accessPolicy);
 			if (node != null && revision != null && accessPolicy) {
 				const nodeL2 = AsNodeL2(node, revision, accessPolicy);
-				const node_final = AsNodeL3(nodeL2, null);
+				node_final = AsNodeL3(nodeL2, null);
 
 				messageUI = <>
 					<Row center p={5}>
@@ -104,7 +106,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 			const accessPolicy = GetAccessPolicy(node?.accessPolicy);
 			if (revision != null && node != null && accessPolicy) {
 				const nodeL2 = AsNodeL2(node, revision, accessPolicy);
-				const node_final = AsNodeL3(nodeL2, null);
+				node_final = AsNodeL3(nodeL2, null);
 				messageUI = <>
 					<Row center p={5}>
 						{actorLink}
@@ -122,15 +124,39 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 			Assert(false, "Server returned command-runs that did not match the types requested.");
 		}
 
+		const openMapID = GetOpenMapID();
+		const openMap = GetMap(openMapID);
+		const map = GetMap(node_final!.rootNodeForMap);
+		const inCurrentMap = openMap?.id === map?.id;
+
+		console.log("nodeFinal:", node_final);
+
 		return (
 			<Column ref={a=>rootRef(a?.DOM_HTML ?? null)}>
-				<Row mt={index > 0 ? 10 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
+				<Row mt={index > 0 ? 10 : 0} mb={run.commandName == "addChildNode" ? 30 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
 					<Column sel ml={5} mr={5} p={5} center style={{justifyContent: "center"}}>
 						<Pre>{moment(run.runTime).format("YYYY-MM-DD")}</Pre>
 						<Pre>{moment(run.runTime).format("HH:mm:ss")}</Pre>
 					</Column>
 					{messageUI!}
-					<Button ml="auto" text="Details" style={{flexShrink: 0}} onClick={()=>{
+					<Button ml="auto" text={inCurrentMap ? "Find in Map" : "Go to Map"} style={{flexShrink: 0}} onClick={()=>{
+						if (inCurrentMap) {
+							// const path = 
+							// JumpToNode(openMapID!, resultPath);
+						} else {
+							if (map == null) return; // still loading
+							RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+								if (map.id == globalMapID) {
+									store.main.page = "global";
+								} else {
+									store.main.page = "debates";
+									store.main.debates.selectedMapID = map.id;
+								}
+							});
+						}
+
+					}}/>
+					<Button ml={5} text="Details" style={{flexShrink: 0}} onClick={()=>{
 						ShowMessageBox({
 							title: "Command-run details (JSON)",
 							message: ()=>{

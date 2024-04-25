@@ -1,7 +1,7 @@
 import {SleepAsync, Vector2, WaitXThenRun, E, ea} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import moment from "web-vcore/nm/moment";
-import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Div, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction, chroma_maxDarken} from "web-vcore";
@@ -295,7 +295,9 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		return (
-			<Column>
+			<Column style={{
+				display: "flex", flexDirection: "column", gap: 4,
+			}}>
 				<Row mt={index === 0 ? 0 : 5} className="useLightText cursorSet"
 					style={E(
 						{
@@ -315,18 +317,28 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} childGroup={ChildGroup.generic}/>
 				</Row>
 				{findNode_node === nodeID &&
-					<Row>
-						{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
-						{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
-						<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
-						<Button ml={5} text="Close" onClick={()=>{
-							RunInAction("SearchResultRow.Close", ()=>{
-								store.main.search.findNode_state = "inactive";
-								store.main.search.findNode_node = null;
-								store.main.search.findNode_resultPaths = [];
-								store.main.search.findNode_currentSearchDepth = 0;
-							});
-						}}/>
+					<Row style={{
+						justifyContent: "space-between",
+					}}>
+						<Div style={
+							{display: "flex", flexDirection: "row", alignItems: "center"}
+						}>
+							{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
+							{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
+						</Div>
+						<Div style={
+							{display: "flex", flexDirection: "row", alignItems: "center"}
+						}>
+							<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
+							<Button ml={5} text="Close" onClick={()=>{
+								RunInAction("SearchResultRow.Close", ()=>{
+									store.main.search.findNode_state = "inactive";
+									store.main.search.findNode_node = null;
+									store.main.search.findNode_resultPaths = [];
+									store.main.search.findNode_currentSearchDepth = 0;
+								});
+							}}/>
+						</Div>
 					</Row>}
 				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
 					const resultPath_nodeIDs = resultPath.split("/");
@@ -340,23 +352,23 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					}).join(" -> ");
 
 					return (
-						<Row key={resultPath}>
-							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
-								if (inCurrentMap) {
-									JumpToNode(openMapID!, resultPath);
-								} else {
-									if (result_map == null) return; // still loading
-									RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (result_map.id == globalMapID) {
-											store.main.page = "global";
-										} else {
-											store.main.page = "debates";
-											store.main.debates.selectedMapID = result_map.id;
-										}
-									});
-								}
-							}}/>
-						</Row>
+						<Button style={{
+							justifyContent: "flex-start",
+						}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
+							if (inCurrentMap) {
+								JumpToNode(openMapID!, resultPath);
+							} else {
+								if (result_map == null) return; // still loading
+								RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+									if (result_map.id == globalMapID) {
+										store.main.page = "global";
+									} else {
+										store.main.page = "debates";
+										store.main.debates.selectedMapID = result_map.id;
+									}
+								});
+							}
+						}}/>
 					);
 				})}
 			</Column>
