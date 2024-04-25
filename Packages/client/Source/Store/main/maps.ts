@@ -11,6 +11,8 @@ import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
 import {GetPathVisibilityInfoAfterEffects, GetPlaybackEffects} from "./maps/mapStates/PlaybackAccessors/ForEffects.js";
+import {SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/MI_SubtreeOps.js";
+import {SubtreeIncludeKeys} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsHelpers.js";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -60,7 +62,7 @@ export class MapsState {
 	@O tagsPanel = new TagsPanelState();
 	@O addChildDialog = new AddChildDialogState();
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
-	@O exportSubtreeDialog = new ExportSubtreeDialogState();
+	@O subtreeOperationsDialog = new SubtreeOperationsDialogState();
 }
 
 export class NodeStyleRule {
@@ -160,11 +162,15 @@ export enum ExportRetrievalMethod {
 	"server" = "server",
 	"client" = "client",
 }
-export class ExportSubtreeDialogState {
+export class SubtreeOperationsDialogState {
 	constructor() { makeObservable(this); }
 	@O retrievalMethod = ExportRetrievalMethod.server;
 	@O maxExportDepth = 5;
+	@O operation = SubtreeOperation.export;
 	@O @version(2) targetFormat = DataExchangeFormat.json_dm;
+
+	// export
+	@O @ignore export_includeKeys = new SubtreeIncludeKeys();
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor({ctx: 1}, function(nodeID: string) {

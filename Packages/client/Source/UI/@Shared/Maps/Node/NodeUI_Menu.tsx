@@ -14,7 +14,7 @@ import React from "react";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode.js";
-import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
+import {MI_SubtreeOps} from "./NodeUI_Menu/MI_SubtreeOps.js";
 import {MI_Paste} from "./NodeUI_Menu/MI_Paste.js";
 import {MI_CloneNode} from "./NodeUI_Menu/MI_CloneNode.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
@@ -194,7 +194,7 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 					<MI_MoveUpOrDown direction="down" {...sharedProps}/>
 					<MI_CloneSubtree {...sharedProps}/>
 					<MI_ImportSubtree {...sharedProps}/>
-					<MI_ExportSubtree {...sharedProps}/>
+					<MI_SubtreeOps {...sharedProps}/>
 				</VMenuItem>}
 				{!SLMode_SFI && <MI_UnlinkNode {...sharedProps}/>}
 				<MI_DeleteNode {...sharedProps}/>
