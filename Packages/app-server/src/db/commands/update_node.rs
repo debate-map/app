@@ -33,13 +33,13 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Serialize, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct UpdateNodeInput {
 	pub id: String,
 	pub updates: NodeUpdates,
 }
 
-#[derive(SimpleObject, Debug)]
+#[derive(SimpleObject, Debug, Serialize)]
 pub struct UpdateNodeResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }

@@ -13,7 +13,8 @@ import {ExportRetrievalMethod} from "../../../../../Store/main/maps.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {SubtreeOpsUI_Export_Left, SubtreeOpsUI_Export_Right} from "./Dialogs/SubtreeOpsUI_Export.js";
 import {SubtreeOpsUI_SetAccessPolicy_Left, SubtreeOpsUI_SetAccessPolicy_Right} from "./Dialogs/SubtreeOpsUI_SetAccessPolicy.js";
-import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server, SubtreeIncludeKeys} from "./Dialogs/SubtreeOpsHelpers.js";
+import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server} from "./Dialogs/SubtreeOpsHelpers.js";
+import {SubtreeIncludeKeys, SubtreeOperation} from "./Dialogs/SubtreeOpsStructs.js";
 
 @Observer
 export class MI_SubtreeOps extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -33,11 +34,6 @@ export class MI_SubtreeOps extends BaseComponentPlus({} as MI_SharedProps, {}) {
 			}}/>
 		);
 	}
-}
-
-export enum SubtreeOperation {
-	export = "export",
-	setAccessPolicy = "setAccessPolicy",
 }
 
 const splitAt = 140;

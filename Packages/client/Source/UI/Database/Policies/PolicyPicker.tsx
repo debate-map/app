@@ -10,9 +10,9 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 
 /** Basic implementation of a button to be used as the child of the PolicyPicker wrapper component. (many components/use-cases will instead supply their own button with more customized styling) */
 @Observer
-export class PolicyPicker_Button extends BaseComponent<{enabled?: boolean, policyID: string|n, idTrimLength?: number, style?} & ButtonProps, {}> {
+export class PolicyPicker_Button extends BaseComponent<{enabled?: boolean, policyID: string|n, idTrimLength?: number, extraText?: string, style?} & ButtonProps, {}> {
 	render() {
-		const {enabled, policyID, idTrimLength, style, ...rest} = this.props;
+		const {enabled, policyID, idTrimLength, extraText, style, ...rest} = this.props;
 		const policy = GetAccessPolicy(policyID);
 		return (
 			<Button {...rest} enabled={enabled} text={[
@@ -20,7 +20,7 @@ export class PolicyPicker_Button extends BaseComponent<{enabled?: boolean, polic
 				policy && policy.name,
 				policy && idTrimLength == null && ` (id: ${policy.id})`,
 				policy && idTrimLength != null && ` [${policy.id.slice(0, idTrimLength)}]`,
-			].filter(a=>a).join("")} style={style}/>
+			].filter(a=>a).join("") + (extraText ?? "")} style={style}/>
 		);
 	}
 }

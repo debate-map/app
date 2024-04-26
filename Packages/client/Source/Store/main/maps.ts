@@ -11,8 +11,7 @@ import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
 import {GetPathVisibilityInfoAfterEffects, GetPlaybackEffects} from "./maps/mapStates/PlaybackAccessors/ForEffects.js";
-import {SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/MI_SubtreeOps.js";
-import {SubtreeIncludeKeys} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsHelpers.js";
+import {SubtreeIncludeKeys, SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsStructs.js";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -171,6 +170,11 @@ export class SubtreeOperationsDialogState {
 
 	// export
 	@O @ignore export_includeKeys = new SubtreeIncludeKeys();
+
+	// set access policy
+	//@O @ignore setPolicy_oldParentCounts = [] as number[];
+	@O @ignore setPolicy_oldAccessPolicies = [] as string[];
+	@O @ignore setPolicy_newPolicyID: string|n;
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor({ctx: 1}, function(nodeID: string) {

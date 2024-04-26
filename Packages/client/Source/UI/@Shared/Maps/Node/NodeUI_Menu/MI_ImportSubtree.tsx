@@ -334,7 +334,7 @@ class ImportSubtreeUI extends BaseComponent<
 												} catch (ex) {
 													ShowMessageBox({
 														title: `Import failed`,
-														message: `Import has failed. Error details: ${ex}`,
+														message: `Import has failed (no changes *should* have been persisted). Error details: ${ex}`,
 													});
 												}
 												this.SetState({serverImportInProgress: false, serverImport_commandsCompleted: 0});

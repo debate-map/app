@@ -1,11 +1,13 @@
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
+import {NodeL1} from "dm_common";
 import {AddChildNodeInput} from "./Command.js";
 
-export type CommandEntry = {addChildNode?: AddChildNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
+type UpdateNodeInput = {id: string, updates: Partial<NodeL1>};
+export type CommandEntry = {addChildNode?: AddChildNodeInput, updateNode?: UpdateNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
 export type RunCommandBatchResult = {results: Object[], committed: boolean};
 
-export function RunCommandBatch(commands: CommandEntry[], onProgress?: (commandCompleted: number)=>void) {
+export function RunCommandBatch(commands: CommandEntry[], onProgress?: (subcommandsCompleted: number)=>void) {
 	const fetchResult_subscription = apolloClient.subscribe<{runCommandBatch: RunCommandBatchResult}>({
 		query: gql`
 			subscription($input: RunCommandBatchInput!) {
