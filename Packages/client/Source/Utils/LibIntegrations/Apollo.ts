@@ -136,12 +136,12 @@ export function InitApollo() {
 		setContext((_, {headers})=>{
 			// get the authentication token from local storage if it exists
 			const token = GetUserInfoJWTString();
+			const finalHeaders = {...headers};
+			// only attach the "authorization" header if there's a valid token to place there (otherwise server will error)
+			if (token) finalHeaders["authorization"] = `Bearer ${token}`;
 			// return the headers to the context so httpLink can read them
 			return {
-				headers: {
-					...headers,
-					authorization: token ? `Bearer ${token}` : "",
-				},
+				headers: finalHeaders,
 			};
 		}),
 		link,
