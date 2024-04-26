@@ -8,11 +8,9 @@ import {Clone, ModifyString, StartDownload} from "web-vcore/nm/js-vextensions.js
 import {GetSchemaJSON, TableNameToDocSchemaName} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Row, RowLR, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {gql, useQuery} from "web-vcore/nm/@apollo/client";
 import {MI_SharedProps} from "../../NodeUI_Menu.js";
-import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server, SubtreeIncludeKeys} from "./SubtreeOpsHelpers.js";
 import {useSubtreeRetrievalQueryOrAccessors} from "../MI_SubtreeOps.js";
-import {ExportRetrievalMethod} from "../../../../../../Store/main/maps.js";
+import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";
 
 enum ExportSubtreeUI_MidTab {
 	Nodes = 10,
