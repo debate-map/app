@@ -40,7 +40,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 		const {mapID, node: rootNode, path: rootNodePath} = this.props;
 		const {retrievalActive, serverImportInProgress, serverImport_commandsCompleted} = this.state;
 		const dialogState = store.main.maps.subtreeOperationsDialog;
-		const {setPolicy_oldParentCounts, setPolicy_oldAccessPolicies, setPolicy_newPolicyID} = dialogState;
+		const {setPolicy_oldAccessPolicies, setPolicy_newPolicyID} = dialogState;
 		const includeKeys_minimal = new SubtreeIncludeKeys({
 			nodes: ["id", "accessPolicy"],
 			nodeLinks: ["parent", "child"],
@@ -55,20 +55,20 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 		const {subtreeData} = useSubtreeRetrievalQueryOrAccessors(rootNode, rootNodePath, includeKeys_minimal, dialogState.retrievalMethod, dialogState.maxExportDepth, retrievalActive);
 		const nodesRetrieved_orig = subtreeData?.nodes ?? [];
 		const nodesRetrieved_filtered = subtreeData?.nodes?.filter(node=>{
-			const parentIDs = subtreeData.nodeLinks?.filter(a=>a.child == node.id).map(a=>a.parent).Distinct() ?? [];
+			/*const parentIDs = subtreeData.nodeLinks?.filter(a=>a.child == node.id).map(a=>a.parent).Distinct() ?? [];
 			const parentCount = parentIDs.length;
-			if (!setPolicy_oldParentCounts.includes(parentCount)) return false;
+			if (!setPolicy_oldParentCounts.includes(parentCount)) return false;*/
 			if (!setPolicy_oldAccessPolicies.includes(node.accessPolicy)) return false;
 			return true;
 		}) ?? [];
 
-		const nodesInSubtree = subtreeData?.nodes?.map(node=>node.id).Distinct() ?? [];
+		/*const nodesInSubtree = subtreeData?.nodes?.map(node=>node.id).Distinct() ?? [];
 		const nodesInSubtree_parents = nodesInSubtree.map(nodeID=>subtreeData?.nodeLinks?.filter(a=>a.child == nodeID).map(a=>a.parent).Distinct() ?? []);
 		const parentCountsInSubtree = [
 			...nodesInSubtree_parents.map(a=>a.length),
 			...setPolicy_oldParentCounts, // add in any parent-counts that are already "checked" as a filter, even if there are currently no node matches (allows user to uncheck it)
 		].Distinct();
-		const parentCountsInSubtree_matches = parentCountsInSubtree.ToMap(count=>count, count=>nodesInSubtree_parents.filter(a=>a.length == count).length);
+		const parentCountsInSubtree_matches = parentCountsInSubtree.ToMap(count=>count, count=>nodesInSubtree_parents.filter(a=>a.length == count).length);*/
 
 		const accessPoliciesInSubtree = [
 			...(subtreeData?.nodes?.map(a=>a.accessPolicy) ?? []),
@@ -85,7 +85,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 				</Row>
 
 				<Row mt={20} style={{fontWeight: "bold"}}>Filtering</Row>
-				<Column mt={5}>
+				{/*<Column mt={5}>
 					<Text>Filter by parent counts:</Text>
 					<Row mt={5} style={{flexWrap: "wrap", gap: 5}}>
 						{parentCountsInSubtree.OrderBy(a=>a).map(count=>{
@@ -103,7 +103,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 								}}/>;
 						})}
 					</Row>
-				</Column>
+				</Column>*/}
 				<Column mt={5}>
 					<Text>Filter by old access-policies:</Text>
 					<Column>
