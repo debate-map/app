@@ -248,7 +248,10 @@ Required:
 * 1\) Install Rust via the `rustup` toolkit.
 	* 1.1\) Install rustup (installer/updater for rust toolchains): https://www.rust-lang.org/tools/install
 	* 1.2\) Install rust by running (in repo root): `rustc --version` (rustup installs the version specified in `rust-toolchain.toml`)
-	* 1.3\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
+	* 1.3\) If using VSCode (or another compatible IDE), it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
+	* 1.4\) If on Linux, it's recommended to install the clang compiler-frontend and mold linker. This lets you compile the rust crates outside of docker, and for rust-analyzer to run without errors (they both try to use clang+mold due to `.cargo/config.toml`). [An alternative is to comment out the linux sections in `.cargo/config.toml`, though that means file divergence and slower compilations.]
+		* 1.4.1\) Install clang: `sudo apt install clang`
+		* 1.4.2\) Install mold: `sudo apt install mold` (if your distro doesn't include mold, refer to the [mold GitHub repo](https://github.com/rui314/mold))
 * 2\) Install a Docker container system.
 	* 2.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
 		* 2.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
