@@ -88,16 +88,17 @@ exports.FindPackagePath = (packageName, asAbsolute = true)=>{
 // log the start and end times of scripts; this is useful for a variety of purposes (basic benchmarking, remembering precise time of command being run [vsc only shows estimate], etc.)
 exports.SetUpLoggingOfScriptStartAndEndTimes = ()=>{
 	const startTime = new Date();
+	let timingLogsEnabled = true;
 	let scriptStartTimePrinted = false;
 	const PrintStartTimeIfNotYet = ()=>{
-		if (scriptStartTimePrinted) return;
+		if (scriptStartTimePrinted || !timingLogsEnabled) return;
 		scriptStartTimePrinted = true;
 		console.log(`Script start: ${startTime.toLocaleString("sv")}`);
 	};
 
 	let scriptEndTimePrinted = false;
 	const PrintEndTimeIfNotYet = ()=>{
-		if (scriptEndTimePrinted) return;
+		if (scriptEndTimePrinted || !timingLogsEnabled) return;
 		scriptStartTimePrinted = true; // we're also logging the start-time in this call, so interrupt timeout-based log of start-time (if still active)
 		scriptEndTimePrinted = true;
 		const endTime = new Date();
@@ -109,6 +110,13 @@ exports.SetUpLoggingOfScriptStartAndEndTimes = ()=>{
 	setTimeout(PrintStartTimeIfNotYet, 1000).unref(); // call unref, so timer doesn't keep script from exiting
 	process.on("SIGINT", ()=>PrintEndTimeIfNotYet()); //process.exit(); });
 	process.on("exit", ()=>PrintEndTimeIfNotYet());
+
+	return {
+		// some scripts need to block logging of start/end times (eg. if would disrupt reading of user typing/inputs)
+		noTimings: ()=>{
+			timingLogsEnabled = false;
+		},
+	};
 };
 exports.CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 

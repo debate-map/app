@@ -17,7 +17,8 @@ def Start_NGINXGateway(g):
 		repo_name='oci://ghcr.io/nginxinc/charts',
 		release_name='ngf', # affects naming of pods and such; be consistent with helm_resource below
 		#version='1.1.0',
-		version='0.0.0-edge',
+		#version='0.0.0-edge',
+		version='1.2.0',
 		set=[
 			"service.create=false",
 			#"service.type=NodePort",
@@ -30,7 +31,8 @@ def Start_NGINXGateway(g):
 			"workload": "ngf-nginx-gateway-fabric", "new_name": "ngf", "labels": ["gateway"],
 			#"new_name": "ngf", "labels": ["gateway"],
 			"objects": [
-				"nginxgateways.gateway.nginx.org:customresourcedefinition",
+				# commented; had two matches (with same exact id string!) on linux/rancher-desktop (2024-04-27)
+				#"nginxgateways.gateway.nginx.org:customresourcedefinition",
 				"nginx:gatewayclass",
 				"ngf-nginx-gateway-fabric:serviceaccount",
 				"ngf-nginx-gateway-fabric:clusterrole",

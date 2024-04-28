@@ -245,30 +245,33 @@ Notes:
 <details><summary><b>[setup-backend] Setting up base tools needed for local/remote k8s deployments</b></summary>
 
 Required:
-* 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
-	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
-* 2\) Install Tilt: https://github.com/tilt-dev/tilt (I'm currently on version 0.30.13)
-	* 2.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
-* 3\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
-	* 3.1\) On Windows, recommended install steps:
-		* 3.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
-		* 3.1.2\) Run: `choco install kubernetes-helm`
-* 3\) Install a Docker container system.
-	* 3.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
-		* 3.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
-		* 3.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
-	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)) and Kubernetes v1.25.2 (as part of Docker Desktop 4.15.0), so it's recommended to install one of those versions (preferably the newer one).
-	* 3.3\) On Windows and Mac, this means installing Docker Desktop (see step 3.2 above for recommended install link).
-	* 3.4\) On Linux, it's also recommended to install Docker Desktop (see step 3.2 above for recommended install link). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
+* 1\) Install Rust via the `rustup` toolkit.
+	* 1.1\) Install rustup (installer/updater for rust toolchains): https://www.rust-lang.org/tools/install
+	* 1.2\) Install rust by running (in repo root): `rustc --version` (rustup installs the version specified in `rust-toolchain.toml`)
+	* 1.3\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
+* 2\) Install a Docker container system.
+	* 2.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
+		* 2.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
+		* 2.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
+	* 2.2\) Option 1: Install Docker Desktop: https://www.docker.com/products/docker-desktop (currently recommended for Windows and Mac)
+	* 2.3\) Option 2: Install Rancher Desktop: https://docs.rancherdesktop.io/getting-started/installation (currently recommended for Linux)
+* 3\) Install Tilt: https://github.com/tilt-dev/tilt#install-tilt (as of ?, I'm on version 0.30.13)
+	* 3.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
+* 4\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
+	* 4.1\) On Windows, recommended install steps:
+		* 4.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
+		* 4.1.2\) Run: `choco install kubernetes-helm`
+	* 4.2\) On Linux, recommended install route (see link above for alternatives): `sudo snap install helm --classic`
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
 * 1\) Install [Lens](https://k8slens.dev), a very handy, general-purpose k8s inspection tool. 
 * 2\) Install [DBeaver](https://dbeaver.io/download), a ui tool for viewing/modifying postgresql databases.
 
-Additional tools: (frontend devs can skip)
-* 1\) Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+Additional tools: (all optional)
+* 1\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+	* Note: I (Venryx) personally no longer use this extension, due to it performing more background operations (of reading the k8s cluster state) than desired.
 	* 1.1\) Also install the [Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) component, enabling the Kubernetes extension to display the file-tree of running pods, and open their files.
-* 2\) Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
+* 2\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
 * 3\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 </details>
@@ -279,12 +282,28 @@ Additional tools: (frontend devs can skip)
 > Note: While installation of the `psql` tool on your host machine should not strictly be necessary (since there is an instance of it that can be accessed through some postgres-related docker containers), it is best to install it for more ergonomic usage: many of the helper scripts rely on it, and having it on your host machine makes it easier to use certain features, such as execution of .sql files present only on the host machine (eg. for when running the init-db and seed-db scripts).
 
 Steps:
-* 1\) First, make a note of which major version of Postgres you need. This should be Postgres v13 (unless this step has become outdated); to confirm, you can run `npm start ssh.db`, then in that shell run `psql --version`.
+* 1\) First, make a note of which major version of Postgres you need. This should be Postgres v15 (as of 2024-04-27); to confirm a version match, you can run `npm start ssh.db`, then in that shell run `psql --version`.
 * 2\) Next, download/install the package containing the `psql` binary. This means either...
 	* 2.1\) Option 1, installing the full Postgres software (keep same major version noted above): https://www.postgresql.org/download
 	* 2.2\) Option 2, installing just the Postgres binaries needed for `psql` to operate.
 		* 2.2.1\) On Windows, this means downloading and extracting the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
-* 3\) Ensure the `psql` binary is added to your `Path` environment-variable.
+			* 2.2.1.1\) Ensure the `psql` binary is added to your `Path` environment-variable. (I forget if this is automatic)
+		* 2.2.2\) On Linux (Linux Mint, anyway), this means:
+			* 2.2.2.1\) Run: `sudo apt install postgresql-client-common`
+			* 2.2.2.2\) Run: (based on [this Medium post](https://medium.com/@mglaving/how-to-install-postgresql-15-on-linux-mint-21-27cca7918006))
+				```
+				# Create the file repository configuration:
+				sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+
+				# Import the repository signing key:
+				wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+				# Update the package lists:
+				sudo apt update
+
+				# Install the target version of PostgreSQL. (if you don't want the server components, install "postgresql-client-XX" instead)
+				sudo apt install postgresql-15 -y
+				```
 
 </details>
 
@@ -293,27 +312,34 @@ Steps:
 
 Prerequisite steps: [setup-backend](#setup-backend)
 
-> There are multiple ways to set up a local Kubernetes cluster, but this guide-module assumes you'll be using the recommended option of Docker Desktop. If for some reason you instead want to use K3d, Kind, etc., see the [setup-k8s-alt](#setup-k8s-alt) module.
+> There are multiple ways to set up a local Kubernetes cluster, but this guide-module assumes you'll be using the recommended option of either Docker Desktop or Rancher Desktop. If for some reason you instead want to use K3d, Kind, etc., see the [setup-k8s-alt](#setup-k8s-alt) module.
 
-#### Setup for Docker Desktop Kubernetes **(recommended k8s system)**
+#### Setup for Docker Desktop Kubernetes
 
 * 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+
+> To delete and recreate the cluster, use the settings panel.
+
+#### Setup for Rancher Desktop Kubernetes
+
+* 1\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
 
 > To delete and recreate the cluster, use the settings panel.
 
 #### After steps
 
 * 1\) Create an alias/copy of the k8s context you just created, renaming it to "dm-local":
-	* 1.1\) For Docker Desktop, this means:
+	* 1.1\) For Docker Desktop and Rancher Desktop, this means:
 		* 1.1.1\) Open: `$HOME/.kube/config`
-		* 1.1.2\) Find the section with these contents:
+		* 1.1.2\) Find the section with these contents: (Rancher Desktop uses "rancher-desktop" instead)
 		```
 		- context:
 		    cluster: docker-desktop
 		    user: docker-desktop
 		  name: docker-desktop
 		```
-		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: dm-local`.
+		* 1.1.3\) Copy-paste that section just below it, changing the copy's `name: docker-desktop` to `name: dm-local`, then save.
+		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local`
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
 #### Troubleshooting
@@ -544,6 +570,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.1.2\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
 		* 2.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
 		* 2.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+			* 2.1.4.1\) If you hit the error `Error: couldn't find key host in Secret default/debate-map-pguser-...`, kill the tilt-up process, then rerun it. (this will allow tilt / `Reflector.star` to generate a new annotation on the `default/debate-map-pguser-admin` resource, triggering it to reflect the now-populated secret in the `postgres` namespace)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
 		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)

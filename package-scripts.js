@@ -3,7 +3,7 @@ const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
 
-SetUpLoggingOfScriptStartAndEndTimes();
+const {noTimings} = SetUpLoggingOfScriptStartAndEndTimes();
 
 const scripts = {};
 module.exports.scripts = scripts;
@@ -261,7 +261,10 @@ function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
 	let command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context dm-ovh --port ${port}`;
 	if (tiltfileArgsStr) command += ` -- ${tiltfileArgsStr}`;
 	//const command_parts = command.split(" ");
-	const commandProcess = spawn("cmd", ["/c", command]);
+	const commandProcess = process.platform === "win32"
+		? spawn("cmd", ["/c", command])
+		: spawn("bash", ["-c", command]);
+
 	commandProcess.stdout.on("data", chunk=>{
 		const str = chunk.toString();
 		// exclude logs from other pods
@@ -500,6 +503,8 @@ Object.assign(scripts, {
 
 // todo: clean up the initDB stuff, to be more certain to be safe
 function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
+	noTimings();
+
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
 	const password = execSync(getPasswordCmd).toString().trim();
 
@@ -542,15 +547,23 @@ Object.assign(scripts, {
 		// db init/seed commands (using psql to run standard .sql files)
 		buildSeedDBScript: GetBuildSeedDBScriptCommand(),
 		initDB: Dynamic(()=>{
-			// we have to connect to the "postgres" database at first, since the "debate-map" might not exist yet (the @InitDB.sql script will switch to the "debate-map" db once confirmed present)
+			// first connect to the "postgres" db, to run @CreateDB.sql (this creates the "debate-map" db if it doesn't exist yet)
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
-			psqlProcess.stdin.write(`\\i ./Scripts/InitDB/@InitDB.sql\n`);
-			psqlProcess.stdin.write(`exit\n`);
+			psqlProcess.stdin.write(`\\i ./Scripts/InitDB/@CreateDB.sql\n`);
+			psqlProcess.stdin.write(`\\q\n`);
+
+			// on completion of the CreateDB script (without error), run the InitDB script
+			psqlProcess.on("close", code=>{
+				if (code != 0) return void console.error(`psql process exited with code ${code}`);
+				const psqlProcess2 = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
+				psqlProcess2.stdin.write(`\\i ./Scripts/InitDB/@InitDB.sql\n`);
+				psqlProcess2.stdin.write(`\\q\n`);
+			});
 		}),
 		seedDB: Dynamic(()=>{
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
 			psqlProcess.stdin.write(`\\i ./Scripts/SeedDB/@SeedDB.sql\n`);
-			psqlProcess.stdin.write(`exit\n`);
+			psqlProcess.stdin.write(`\\q\n`);
 		}),
 		seedDB_freshScript: Dynamic(()=>{
 			//execSync(`npm start db.buildSeedDBScript`).toString().trim();
@@ -558,7 +571,7 @@ Object.assign(scripts, {
 
 			/*const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
 			psqlProcess.stdin.write(`\\i ./Scripts/SeedDB/@SeedDB.sql\n`);
-			psqlProcess.stdin.write(`exit\n`);*/
+			psqlProcess.stdin.write(`\\q\n`);*/
 			execSync(`npm start "db.seedDB ${K8sContext_Arg_Required()}"`, {stdio: "inherit"});
 		}),
 
@@ -569,7 +582,7 @@ Object.assign(scripts, {
 		dcAllDBSessions_k8s: Dynamic(()=>{
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
 			psqlProcess.stdin.write(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';\n`);
-			psqlProcess.stdin.write(`exit\n`);
+			psqlProcess.stdin.write(`\\q\n`);
 		}),
 		// this script "deletes" the "debate-map" database within the specified k8s-cluster's postgres instance (for safety, it technically renames it rather than deletes it)
 		demoteDebateMapDB_k8s: Dynamic(()=>{
@@ -581,7 +594,7 @@ Object.assign(scripts, {
 			psqlProcess.stdin.write(`ALTER DATABASE "debate-map" RENAME TO "${newName}";\n`);
 			// if you need to find the list of databases, run query (in psql or DBeaver): SELECT datname FROM pg_database WHERE datistemplate = false;
 
-			psqlProcess.stdin.write(`exit\n`);
+			psqlProcess.stdin.write(`\\q\n`);
 		}),
 	},
 });
