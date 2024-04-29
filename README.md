@@ -283,27 +283,24 @@ Additional tools: (all optional)
 
 Steps:
 * 1\) First, make a note of which major version of Postgres you need. This should be Postgres v15 (as of 2024-04-27); to confirm a version match, you can run `npm start ssh.db`, then in that shell run `psql --version`.
-* 2\) Next, download/install the package containing the `psql` binary. This means either...
-	* 2.1\) Option 1, installing the full Postgres software (keep same major version noted above): https://www.postgresql.org/download
-	* 2.2\) Option 2, installing just the Postgres binaries needed for `psql` to operate.
-		* 2.2.1\) On Windows, this means downloading and extracting the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
-			* 2.2.1.1\) Ensure the `psql` binary is added to your `Path` environment-variable. (I forget if this is automatic)
-		* 2.2.2\) On Linux (Linux Mint, anyway), this means:
-			* 2.2.2.1\) Run: `sudo apt install postgresql-client-common`
-			* 2.2.2.2\) Run: (based on [this Medium post](https://medium.com/@mglaving/how-to-install-postgresql-15-on-linux-mint-21-27cca7918006))
-				```
-				# Create the file repository configuration:
-				sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+* 2\) Next, download/install the package containing the `psql` binary.
+	* 2.1\) If on Windows:
+		* 2.1.1\) Option 1: If you want to install the full Postgres software (eg. letting you run a pg server on your host OS [not needed for debate-map]), download and install from here (keep same major version noted above): https://www.postgresql.org/download
+		* 2.1.2\) Option 2: If you want to install just the Postgres binaries needed for `psql` to operate, download and extract the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
+			* 2.1.2.1\) Ensure the `psql` binary is added to your `Path` environment-variable. (I forget if this is automatic)
+	* 2.2\) If on Linux (Linux Mint, anyway):
+		* 2.2.1\) Run: `sudo apt install postgresql-client-common`
+		* 2.2.2\) Run: (based on [this Medium post](https://medium.com/@mglaving/how-to-install-postgresql-15-on-linux-mint-21-27cca7918006))
+			```
+			# add postgres repo, import the repo signing key, then update the package lists
+			sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+			wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+			sudo apt update
 
-				# Import the repository signing key:
-				wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
-				# Update the package lists:
-				sudo apt update
-
-				# Install the target version of PostgreSQL. (if you don't want the server components, install "postgresql-client-XX" instead)
-				sudo apt install postgresql-15 -y
-				```
+			# install the target version of PostgreSQL, client tools only
+			# (if you want to enable a pg server on your host OS [not needed], install "postgres-XX" instead)
+			sudo apt install postgresql-client-15 -y
+			```
 
 </details>
 
@@ -612,7 +609,10 @@ Note: We use Google Cloud here, but others could be used.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
 	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
-	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way:
+		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://gcr.io`
+
 
 </details>
 
