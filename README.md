@@ -612,7 +612,10 @@ Note: We use Google Cloud here, but others could be used.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
 	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
-	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way:
+		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://gcr.io`
+
 
 </details>
 
