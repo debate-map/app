@@ -11,7 +11,7 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::{RwLock, Semaphore};
-use rust_shared::tokio_postgres::Row;
+use rust_shared::tokio_postgres::{IsolationLevel, Row};
 use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
@@ -25,11 +25,13 @@ use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::commands::clone_subtree::clone_subtree;
+use crate::db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx;
 use crate::db::medias::Media;
 use crate::db::node_links::NodeLink;
 use crate::db::node_phrasings::NodePhrasing;
 use crate::db::node_tags::NodeTag;
 use crate::db::terms::Term;
+use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::sql_fragment::SQLFragment;
@@ -111,7 +113,9 @@ impl QueryShard_General_Search {
             let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             info!("Test2:{}", time_since_epoch_ms_i64() - start);
-            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            //let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
+            //let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, true, IsolationLevel::ReadCommitted).await?;
             info!("Test3:{}", time_since_epoch_ms_i64() - start);
             let rows_test = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5)"#, params(&[
                 &query, &search_limit_i32, &search_offset_i32, &alt_phrasing_rank_factor_f64, &quote_rank_factor_f64,

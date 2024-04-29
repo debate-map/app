@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use futures_util::{TryStreamExt, Future};
 use rust_shared::async_graphql;
 use rust_shared::serde::Serialize;
+use rust_shared::tokio_postgres::IsolationLevel;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
 use rust_shared::anyhow::{anyhow, Error, ensure, bail};
 use deadpool_postgres::{Transaction, Pool};
@@ -43,8 +44,8 @@ impl<'a> AccessorContext<'a> {
     }
 
     // low-level constructors
-    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: Option<&'a async_graphql::Context<'a>>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
-        let tx = start_read_transaction(anchor, db_pool).await?;
+    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: Option<&'a async_graphql::Context<'a>>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool, isolation_level: IsolationLevel) -> Result<AccessorContext<'a>, Error> {
+        let tx = start_read_transaction(anchor, db_pool, isolation_level).await?;
         tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
         /*let user_is_admin = TODO;
         tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
@@ -91,7 +92,7 @@ impl<'a> AccessorContext<'a> {
 
     // high-level constructors
     pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &'a async_graphql::Context<'a>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_read_base(anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls).await?)
+        Ok(Self::new_read_base(anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls, IsolationLevel::Serializable).await?)
     }
     pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &'a async_graphql::Context<'a>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
         Ok(Self::new_write_base(anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls).await?)
