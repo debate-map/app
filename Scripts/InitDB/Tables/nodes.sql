@@ -24,5 +24,3 @@ CREATE OR REPLACE VIEW app.my_nodes WITH (security_barrier=off)
         WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
             ("permissions" -> 'nodes' -> 'access')::boolean))
         SELECT app.nodes.* FROM app.nodes JOIN q1 ON "accessPolicy" = ANY(q1.pol);
-
-GRANT SELECT ON app.my_nodes TO PUBLIC;
