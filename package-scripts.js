@@ -517,6 +517,10 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 
 	const argsStr = `-h localhost -p ${context == "dm-ovh" ? 5220 : 5120} -U admin -d ${database}`;
 
+	if (process.platform === "win32") {
+		console.log(`=== NOTE: On Windows, execute \`\\encoding UTF8\` prior to running your queries, if you hit the error: \`character with byte sequence 0xf0 0x9f 0xa7 0x9e in encoding "UTF8" has no equivalent in encoding "WIN1252"\``);
+	}
+
 	const env = {
 		//...process.env,
 		//PGDATABASE: "debate-map",
