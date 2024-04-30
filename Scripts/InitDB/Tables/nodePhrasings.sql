@@ -35,12 +35,12 @@ CREATE INDEX node_phrasings_text_en_idx ON app."nodePhrasings" USING gin (phrasi
 -- CREATE INDEX node_phrasings_text_en_idx ON app."nodePhrasings" USING gin (app.phrasings_to_tsv(text_base, text_question));
 
 
-CREATE OR REPLACE VIEW app.my_node_phrasings AS
-    WITH q1 AS (
+CREATE OR REPLACE VIEW app.my_node_phrasings WITH (security_barrier=off)
+ AS WITH q1 AS (
         SELECT array_agg(concat(id, ':nodes')) AS pol
         FROM app."accessPolicies"
-        WHERE coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
+        WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
             ("permissions" -> 'nodes' -> 'access')::boolean))
-        SELECT app."nodePhrasings".* FROM app."nodePhrasings" JOIN q1 ON (is_user_admin(current_setting('app.current_user_id')) OR ("c_accessPolicyTargets" && q1.pol));
+        SELECT app."nodePhrasings".* FROM app."nodePhrasings" JOIN q1 ON ("c_accessPolicyTargets" && q1.pol);
 
 GRANT SELECT ON app.my_node_phrasings TO PUBLIC;

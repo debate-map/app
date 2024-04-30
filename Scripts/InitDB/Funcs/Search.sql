@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 	slimit INTEGER DEFAULT 20, soffset INTEGER DEFAULT 0,
 	quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95
 ) RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
-	WITH d AS (SELECT id FROM app.nodes),
+	WITH d AS (SELECT id FROM app.my_nodes),
 		 q AS (SELECT websearch_to_tsquery('app.english_nostop'::regconfig, query) AS q),
 		 p AS (
 				SELECT rev.node AS node_id,
