@@ -24,6 +24,7 @@ def Start_GatewayRoutes(g):
 				"route-app-server:httproute",
 				"route-monitor:httproute",
 				"route-grafana:httproute",
+				"redirect-to-https:httproute"
 			],
 		},
 	])

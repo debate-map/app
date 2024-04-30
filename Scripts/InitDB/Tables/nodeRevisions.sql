@@ -19,6 +19,11 @@ ALTER TABLE app."nodeRevisions" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets
 DROP INDEX IF EXISTS node_revisions_node_idx;
 CREATE INDEX node_revisions_node_idx ON app."nodeRevisions" USING btree (node);
 
+-- extra index for RLS-friendly view
+DROP INDEX IF EXISTS node_revisions_access_idx;
+CREATE INDEX node_revisions_access_idx ON app."nodeRevisions" USING gin ("c_accessPolicyTargets");
+
+
 -- indexes for tsvectors
 -- We could just use computed index (in comments) and not materialize the ts_vectors in the table,
 -- but the size cost is small and the speed difference notable (factor of 2-3), at least at current DB scale.
@@ -43,3 +48,13 @@ BEGIN
 END $$;
 DROP TRIGGER IF EXISTS after_insert_node_revision on app."nodeRevisions";
 CREATE TRIGGER after_insert_node_revision AFTER INSERT ON app."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app.after_insert_node_revision();
+
+
+CREATE OR REPLACE VIEW app.my_node_revisions WITH (security_barrier=off)
+    AS WITH q1 AS (
+        SELECT array_agg(concat(id, ':nodes')) AS pol
+        FROM app."accessPolicies"
+        WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
+            ("permissions" -> 'nodes' -> 'access')::boolean))
+        SELECT app."nodeRevisions".* FROM app."nodeRevisions" JOIN q1 ON (
+            ("c_accessPolicyTargets" && q1.pol));
