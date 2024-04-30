@@ -140,7 +140,7 @@ CREATE OR REPLACE FUNCTION app.maps_refresh_targets_for_others() RETURNS TRIGGER
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;
 DROP TRIGGER IF EXISTS maps_refresh_targets_for_others on app."maps";
-CREATE TRIGGER maps_refresh_targets_for_others AFTER UPDATE ON app."maps" FOR EACH ROW EXECUTE FUNCTION app.maps_refresh_targets_for_others();
+CREATE TRIGGER maps_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."maps" FOR EACH ROW EXECUTE FUNCTION app.maps_refresh_targets_for_others();
 
 CREATE OR REPLACE FUNCTION app.nodes_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
 	IF (
@@ -172,4 +172,4 @@ CREATE OR REPLACE FUNCTION app.timelines_refresh_targets_for_others() RETURNS TR
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;
 DROP TRIGGER IF EXISTS timelines_refresh_targets_for_others on app."timelines";
-CREATE TRIGGER timelines_refresh_targets_for_others AFTER UPDATE ON app."timelines" FOR EACH ROW EXECUTE FUNCTION app.timelines_refresh_targets_for_others();
+CREATE TRIGGER timelines_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."timelines" FOR EACH ROW EXECUTE FUNCTION app.timelines_refresh_targets_for_others();
