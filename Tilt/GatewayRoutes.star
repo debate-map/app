@@ -15,16 +15,18 @@ def Start_GatewayRoutes(g):
 	# custom routes
 	# ==========
 
+	route_resources = [
+		"main-gateway:gateway",
+		"route-web-server:httproute",
+		"route-app-server:httproute",
+		"route-monitor:httproute",
+		"route-grafana:httproute",
+	]
+	if g["REMOTE"]:
+		route_resources.append("redirect-to-https:httproute")
 	NEXT_k8s_resource_batch(g, [
 		{
 			"new_name": "app-routes", "labels": ["gateway"],
-			"objects": [
-				"main-gateway:gateway",
-				"route-web-server:httproute",
-				"route-app-server:httproute",
-				"route-monitor:httproute",
-				"route-grafana:httproute",
-				"redirect-to-https:httproute"
-			],
+			"objects": route_resources
 		},
 	])

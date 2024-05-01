@@ -54,6 +54,7 @@ Timings (string-change, docker-desktop, debug, cranelift-msvc): ["Finished dev [
 
 Timings (string-change, docker-desktop, release, rustc): ["Finished release [optimized] target(s) in XXX"]
 * 2023-05-26, SW1: 3m54s, 3m59s, 4m14s (46mb for new-layer, during heavy map-load: 45s,41s to 3000subs [dm debug stats], ~142m,~114m max cpu-usage [kubectl top pod -> app-server], ~15%,~12% max cpu-usage [grafana -> cluster])
+* 2024-05-01, SW2: 3m47s, 3m44s
 
 Timings (string-change, docker-desktop, release, cranelift-msvc): ["Finished release [optimized] target(s) in XXX"]
 * 2023-05-26, SW1: 2m11s,2m8s,2m6s,2m3s (167mb for new-layer, during heavy map-load: ?,?,42s,40s to 3000subs [dm debug stats], ?,~276m,~334m,~325m max cpu-usage [kubectl top pod -> app-server], ?,~15%,~18%,~18% max cpu-usage [grafana -> cluster])

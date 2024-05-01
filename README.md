@@ -252,12 +252,7 @@ Required:
 	* 1.4\) If on Linux, it's recommended to install the clang compiler-frontend and mold linker. This lets you compile the rust crates outside of docker, and for rust-analyzer to run without errors (they both try to use clang+mold due to `.cargo/config.toml`). [An alternative is to comment out the linux sections in `.cargo/config.toml`, though that means file divergence and slower compilations.]
 		* 1.4.1\) Install clang: `sudo apt install clang`
 		* 1.4.2\) Install mold: `sudo apt install mold` (if your distro doesn't include mold, refer to the [mold GitHub repo](https://github.com/rui314/mold))
-* 2\) Install a Docker container system.
-	* 2.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
-		* 2.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
-		* 2.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
-	* 2.2\) Option 1: Install Docker Desktop: https://www.docker.com/products/docker-desktop (currently recommended for Windows and Mac)
-	* 2.3\) Option 2: Install Rancher Desktop: https://docs.rancherdesktop.io/getting-started/installation (currently recommended for Linux)
+* 2\) Install Docker + Kubernetes + kubectl, by following the [setup-k8s](#setup-k8s) module.
 * 3\) Install Tilt: https://github.com/tilt-dev/tilt#install-tilt (as of ?, I'm on version 0.30.13)
 	* 3.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
 * 4\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
@@ -276,6 +271,93 @@ Additional tools: (all optional)
 	* 1.1\) Also install the [Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) component, enabling the Kubernetes extension to display the file-tree of running pods, and open their files.
 * 2\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
 * 3\) See here for more helpful tools: https://collabnix.github.io/kubetools
+
+</details>
+
+<!----><a name="setup-k8s"></a>
+<details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
+
+> There are multiple ways to set up a local Kubernetes cluster. This guide-module **recommends using Docker Desktop on Windows/Mac and k3d on Linux**, but other approaches should also work (though with possibly sparser documentation in this readme).
+
+#### Options
+
+Options discussed in this module: ([X,X,X] = [linux, mac, windows], [X,X] = [linux, mac/windows])
+| Name             | Cluster recreate | Registry delay | VM overhead | Runtime perf |
+| -                | -                | -              | -           | -            |
+| Docker Desktop   | slow             | 0              | Y           | ~5           |
+| K3d              | very fast        | 0/~3m          | N/Y/Y       | 10           |
+| Kind             | fast             | 0/~3m          | N/Y/Y       | ?            |
+| Rancher Desktop  | ?                | ?              | Y           | ?            |
+
+Other notes:
+* General:
+	* The runtime perf numbers are very rough estimates based on anecdotal times observed.
+* Docker Desktop **(recommended for Windows/Mac)**
+	* CON: Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
+* K3d **(recommended for Linux)**: No other notes atm.
+* Rancher Desktop: No other notes atm.
+* Kind: No other notes atm.
+
+#### Base instructions
+
+* 1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
+	* 1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
+	* 1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
+* 2\) Install the docker solution you selected. (see comparison table above)
+	* 2.1\) Option 1: Docker Desktop **(recommended for Windows and Mac)**
+		* 2.1.1\) Follow: https://www.docker.com/products/docker-desktop
+		* 2.1.2\) Create your Kubernetes cluster, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+		* Note: To delete and recreate the cluster, use the settings panel.
+	* 2.2\) Option 2: K3d **(recommended for Linux)**
+		* NOTE: On Linux, these instructions need tweaking to either install docker+k3d as rootless, or have tilt / the tilt scripts include "sudo" in their calls to docker (at the moment, on Linux, these instructions yield a cluster that tilt cannot push to); until this is resolved, other Linux devs should use Docker Desktop or Rancher Desktop instead (Rancher Desktop at least has been confirmed to work with the listed instructions on Linux).
+		* 2.2.1\) Ensure docker engine is installed: https://docs.docker.com/engine/install
+		* 2.2.2\) Follow: https://k3d.io/#installation
+		* 2.2.3\) Create a local registry [remove `sudo` if not on Linux]: `sudo k3d registry create reg.localhost --port 5000`
+		* 2.2.4\) Create a local cluster [remove `sudo` if not on Linux]: `sudo k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
+		* 2.2.5\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
+			* 2.2.5.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
+			* 2.2.5.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
+		* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
+	* 2.3\) Option 3: Kind
+		* 2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+		* 2.3.2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
+		* 2.3.3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+		* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
+	* 2.4\) Option 4: Rancher Desktop
+		* 2.4.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation
+		* 2.4.2\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
+		* Note: To delete and recreate the cluster, use the settings panel.
+* 3\) Install kubectl.
+	* 3.1\) If you installed Docker Desktop or Rancher Desktop, then `kubectl` was already installed along with it.
+	* 3.2\) If you installed K3d or Kind, then you'll need to install `kubectl` yourself: https://kubernetes.io/docs/tasks/tools/#kubectl
+		* Note: On Linux, my personal preference is to use snap to install kubectl: `snap install kubectl --classic` (there are other options of course, as seen in link above)
+		* Note: In some cases, `kubectl` can end up using a kube config file (eg. `~/.kube/config`) that does not contain the contents used by your k8s system. In my case, it was unable to see the k8s cluster created by K3d on my Linux laptop; this may have been caused by my having installed Rancher Desktop prior to installing K3d. I fixed the problem by running `sudo k3d kubeconfig get --all`, and then manually merging the printed contents to my `~/.kube/config` file.
+	* 3.3\) Test if `kubectl` is working properly, by running: `kubectl cluster-info`
+
+#### After steps
+
+* 1\) Various scripts expect the debate-map k8s contexts to be called `dm-local` (or `dm-ovh` for prod cluster). To prevent errors from name mismatches, create an alias/copy of the k8s context you just created, renaming it to `dm-local`:
+	* 1.1\) For Docker Desktop and Rancher Desktop, this means:
+		* 1.1.1\) Open: `$HOME/.kube/config`
+		* 1.1.2\) Find the section with these contents: (Rancher Desktop uses "rancher-desktop" instead, etc.)
+		```
+		- context:
+		    cluster: docker-desktop
+		    user: docker-desktop
+		  name: docker-desktop
+		```
+		* 1.1.3\) Copy-paste that section just below it, changing the copy's `name: docker-desktop` to `name: dm-local`, then save.
+		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local`
+* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
+
+#### Troubleshooting
+
+* 1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards (from your Kubernetes pods to your localhost ports). See [here](https://superuser.com/a/1671710/231129) for the fix. (worth checking ahead of time on Windows, as it wasted considerable time for me)
+* 2\) If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"`
+	* 2.1\) If that is insufficient, you can either:
+		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
+		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
+* 3\) If the list of images/containers gets annoyingly long, see the [docker-trim](#docker-trim) module.
 
 </details>
 
@@ -304,94 +386,6 @@ Steps:
 			# (if you want to enable a pg server on your host OS [not needed], install "postgres-XX" instead)
 			sudo apt install postgresql-client-15 -y
 			```
-
-</details>
-
-<!----><a name="setup-k8s"></a>
-<details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
-
-Prerequisite steps: [setup-backend](#setup-backend)
-
-> There are multiple ways to set up a local Kubernetes cluster, but this guide-module assumes you'll be using the recommended option of either Docker Desktop or Rancher Desktop. If for some reason you instead want to use K3d, Kind, etc., see the [setup-k8s-alt](#setup-k8s-alt) module.
-
-#### Setup for Docker Desktop Kubernetes
-
-* 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-
-> To delete and recreate the cluster, use the settings panel.
-
-#### Setup for Rancher Desktop Kubernetes
-
-* 1\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
-
-> To delete and recreate the cluster, use the settings panel.
-
-#### After steps
-
-* 1\) Create an alias/copy of the k8s context you just created, renaming it to "dm-local":
-	* 1.1\) For Docker Desktop and Rancher Desktop, this means:
-		* 1.1.1\) Open: `$HOME/.kube/config`
-		* 1.1.2\) Find the section with these contents: (Rancher Desktop uses "rancher-desktop" instead)
-		```
-		- context:
-		    cluster: docker-desktop
-		    user: docker-desktop
-		  name: docker-desktop
-		```
-		* 1.1.3\) Copy-paste that section just below it, changing the copy's `name: docker-desktop` to `name: dm-local`, then save.
-		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local`
-* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
-
-#### Troubleshooting
-
-* 1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards (from your Kubernetes pods to your localhost ports). See [here](https://superuser.com/a/1671710/231129) for the fix. (worth checking ahead of time on Windows, as it wasted considerable time for me)
-* 2\) If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"`
-	* 2.1\) If that is insufficient, you can either:
-		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
-		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
-* 3\) When the list of images/containers in Docker Desktop gets annoyingly long, see the [docker-trim](#docker-trim) module.
-
-</details>
-
-<!----><a name="setup-k8s-alt"></a>
-<details><summary><b>[setup-k8s-alt] Setting up local k8s cluster (using alternative k8s systems)</b></summary>
-
-Prerequisite steps: [setup-backend](#setup-backend)
-
-> There are multiple ways to set up a local Kubernetes cluster, with the recommened route being to use Docker Desktop, as described in the [setup-k8s](#setup-k8s) module. This module is for if you're certain you want to use an alternative like K3d or Kind.
-
-Alternative options:
-* K3d
-* Kind
-
-Notes:
-* Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a *lot* of time, if full builds are slow. (for me, the deploy process takes ~3m on K3d, which Docker Desktop cuts out completely)
-* K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
-* Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
-* Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-
-#### Setup for K3d
-
-* 1\) Download and install from here: https://k3d.io/#installation
-* 2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
-* 3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
-* 4\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
-	* 4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
-	* 4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
-
-> To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-
-#### Setup for Kind
-
-* 1\) Download and install from here: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
-* 2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
-* 3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
-
-> To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
-
-#### After steps and troubleshooting
-
-* For this info, open the [setup-k8s](#setup-k8s) module, and read through the "After steps" and "Troubleshooting" sections.
 
 </details>
 
@@ -475,7 +469,7 @@ If you are doing an update of the entire postgres-operator package, here are som
 
 </details>
 
-<!----><a name="docker-trim"></a>
+<!----><a name="image-inspect"></a>
 <details><summary><b>[image-inspect] Docker image/container inspection</b></summary>
 
 Prerequisite steps: [setup-backend](#setup-backend)
