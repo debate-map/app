@@ -552,7 +552,7 @@ Object.assign(scripts, {
 		// general
 		psql_k8s: Dynamic(()=>{
 			const database = commandArgs.find(a=>a.startsWith("db:"))?.slice("db:".length) ?? "debate-map";
-			const pager = commandArgs.find(a=>a.startsWith("pager:"))?.slice("pager:".length);
+			const pager = commandArgs.find(a=>a.startsWith("pager:"))?.slice("pager:".length) ?? (process.platform == "win32" ? null : "less");
 			console.log("Connecting psql to database:", database);
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"}, pager);
 		}),
