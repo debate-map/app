@@ -502,7 +502,7 @@ Object.assign(scripts, {
 });
 
 // todo: clean up the initDB stuff, to be more certain to be safe
-function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
+function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null, pager = null) {
 	noTimings();
 
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
@@ -517,7 +517,7 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 
 	const argsStr = `-h localhost -p ${context == "dm-ovh" ? 5220 : 5120} -U admin -d ${database}`;
 
-	if (process.platform === "win32") {
+	if (process.platform == "win32") {
 		console.log(`=== NOTE: On Windows, execute \`\\encoding UTF8\` prior to running your queries, if you hit the error: \`character with byte sequence 0xf0 0x9f 0xa7 0x9e in encoding "UTF8" has no equivalent in encoding "WIN1252"\``);
 	}
 
@@ -528,6 +528,14 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 		PATH: process.env["PATH"],
 		PGPASSWORD: secret.GetField("password").toString(),
 	};
+	if (pager == "less") {
+		Object.assign(env, {
+			PAGER: "less",
+			LESS: "-iMSx4 -FXR",
+			LESSCHARSET:"utf-8",
+			TERM: "xterm-256color",
+		});
+	}
 	//if (startType == "spawn") {
 	return spawn(`psql`, argsStr.split(" "), {
 		env,
@@ -544,8 +552,9 @@ Object.assign(scripts, {
 		// general
 		psql_k8s: Dynamic(()=>{
 			const database = commandArgs.find(a=>a.startsWith("db:"))?.slice("db:".length) ?? "debate-map";
+			const pager = commandArgs.find(a=>a.startsWith("pager:"))?.slice("pager:".length);
 			console.log("Connecting psql to database:", database);
-			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"});
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"}, pager);
 		}),
 
 		// db init/seed commands (using psql to run standard .sql files)
