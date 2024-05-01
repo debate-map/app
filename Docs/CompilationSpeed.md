@@ -2,82 +2,61 @@
 
 Shortenings:
 * "string-change": simply added an extra character to a string in the file `Packages/app-server/src/main.rs`. (first println in `main` function)
-* "SW": Stephen Wicklund (aka Venryx)
+* "SW": Stephen Wicklund (aka Venryx) [number after SW indicates which of my computers; SW1=desktop, SW12=laptop]
 
 ## Fresh
 
-Timings (fresh, debug, rustc):
-* 2023-05-26, SW (possibly not 100% fresh): "Finished dev [unoptimized + debuginfo] target(s) in 5m 19s"
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 7m 01s"
-* 2023-05-26b, SW (possibly not 100% fresh): "Finished dev [unoptimized + debuginfo] target(s) in 5m 11s"
+Timings (fresh, debug, rustc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1: 7m01s
+* 2023-05-26, SW1 (likely not all fresh): 5m19s, 5m11s
 
-Timings (fresh, debug, cranelift-msvc):
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 5m 55s"
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 4m 25s"
+Timings (fresh, debug, cranelift-msvc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh): 5m55s, 4m25s
 
-Timings (fresh, release, rustc):
-* 2023-05-26, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 9m 47s"
-* 2023-05-26b, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 8m 21s"
+Timings (fresh, release, rustc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; had debug-build artifacts present): 9m47s, 8m21s
 
-Timings (fresh, release, cranelift-msvc):
-* 2023-05-26, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 5m 05s"
-* 2023-05-26b, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 4m 03s"
+Timings (fresh, release, cranelift-msvc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; had debug-build artifacts present): 5m05s, 4m03s
 
 ### In docker
 
-Timings (fresh, in-docker-debug, rustc):
-* 2023-05-26b, SW (likely not 100% fresh; likely read from cache-mount): "Finished dev [unoptimized + debuginfo] target(s) in 2m 39s"
-* 2023-05-26b, SW (likely not 100% fresh; likely read from cache-mount): "Finished dev [unoptimized + debuginfo] target(s) in 2m 50s"
+Timings (fresh, in-docker-debug, rustc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; likely read from cache-mount): 2m39s, 2m50s
 
-Timings (fresh, in-docker-debug, cranelift-msvc):
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished dev [unoptimized + debuginfo] target(s) in 4m 15s"
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished dev [unoptimized + debuginfo] target(s) in 2m 02s"
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished dev [unoptimized + debuginfo] target(s) in 1m 56s"
+Timings (fresh, in-docker-debug, cranelift-msvc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; likely read from cache-mount): 4m15s, 2m02s, 1m56s
 
-Timings (fresh, in-docker-release, rustc):
-* 2023-05-26b, SW (likely not 100% fresh; likely read from cache-mount): "Finished release [optimized] target(s) in 7m 25s"
-* 2023-05-26b, SW (likely not 100% fresh; likely read from cache-mount): "Finished release [optimized] target(s) in 8m 53s"
+Timings (fresh, in-docker-release, rustc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; likely read from cache-mount): 7m25s, 8m53s
 
-Timings (fresh, in-docker-release, cranelift-msvc):
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished release [optimized] target(s) in 4m 00s"
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished release [optimized] target(s) in 3m 35s"
-* 2023-05-26b, SW (possibly not 100% fresh; possibly read from cache-mount): "Finished release [optimized] target(s) in 2m 04s"
+Timings (fresh, in-docker-release, cranelift-msvc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1 (likely not all fresh; likely read from cache-mount): 4m00s, 3m35s, 2m04s
 
 ## Incremental
 
-Timings (string-change, debug, rustc):
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 1m 01s"
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 46.14s"
+Timings (string-change, debug, rustc): "Finished dev [unoptimized + debuginfo] target(s) in XXX"
+* 2023-05-26, SW1: 1m01s,46.14s
 
-Timings (string-change, debug, cranelift-msvc):
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 37.36s"
-* 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 49.32s"
+Timings (string-change, debug, cranelift-msvc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1: 37.36s, 49.32s
 
 Timings (string-change, release, rustc): TODO
 Timings (string-change, release, cranelift-msvc): TODO
 
 ### In docker
 
-Timings (string-change, in-docker-debug, rustc):
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 23.82s" (341mb for new-layer, during heavy map-load: 51s to 3000subs [dm debug stats], ~248m max cpu-usage [kubectl top pod -> app-server], ~15% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 24.49s" (341mb for new-layer, during heavy map-load: 50s to 3000subs [dm debug stats], ~276m max cpu-usage [kubectl top pod -> app-server], ~16% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 21.98s" (341mb for new-layer, during heavy map-load: 40s to 3000subs [dm debug stats], ~365m max cpu-usage [kubectl top pod -> app-server], ~16% max cpu-usage [grafana -> cluster])
+Timings (string-change, docker-desktop, debug, rustc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1: 23.82s, 24.49s, 21.98s (341mb for new-layer, during heavy map-load: 51s,50s,40s to 3000subs [dm debug stats], ~248m,~276m,~365m max cpu-usage [kubectl top pod -> app-server], ~15%,16%,16% max cpu-usage [grafana -> cluster])
 
-Timings (string-change, in-docker-debug, cranelift-msvc):
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 30.75s" (225mb for new-layer, during heavy map-load: 33s to 3000subs [dm debug stats], ~420m max cpu-usage [kubectl top pod -> app-server], ~20% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 26.57s" (225mb for new-layer, during heavy map-load: 40s to 3000subs [dm debug stats], ~410m max cpu-usage [kubectl top pod -> app-server], ~17% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 27.29s" (225mb for new-layer, during heavy map-load: 38s to 3000subs [dm debug stats], ~431m max cpu-usage [kubectl top pod -> app-server], ~18% max cpu-usage [grafana -> cluster])
+Timings (string-change, docker-desktop, debug, cranelift-msvc): ["Finished dev [unoptimized + debuginfo] target(s) in XXX"]
+* 2023-05-26, SW1: 30.75s, 26.57s, 27.29s (225mb for new-layer, during heavy map-load: 33s,40s,38s to 3000subs [dm debug stats], ~420m,~410m,~431m max cpu-usage [kubectl top pod -> app-server], ~20%,~17%,~18% max cpu-usage [grafana -> cluster])
 
-Timings (string-change, in-docker-release, rustc):
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 3m 54s"
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 3m 59s" (46mb for new-layer, during heavy map-load: 45s to 3000subs [dm debug stats], ~142m max cpu-usage [kubectl top pod -> app-server], ~15% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 4m 14s" (46mb for new-layer, during heavy map-load: 41s to 3000subs [dm debug stats], ~114m max cpu-usage [kubectl top pod -> app-server], ~12% max cpu-usage [grafana -> cluster])
+Timings (string-change, docker-desktop, release, rustc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1: 3m54s, 3m59s, 4m14s (46mb for new-layer, during heavy map-load: 45s,41s to 3000subs [dm debug stats], ~142m,~114m max cpu-usage [kubectl top pod -> app-server], ~15%,~12% max cpu-usage [grafana -> cluster])
 
-Timings (string-change, in-docker-release, cranelift-msvc):
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 2m 11s" (167mb for new-layer)
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 2m 08s" (167mb for new-layer, during heavy map-load: ?s to 3000subs [dm debug stats], ~276m max cpu-usage [kubectl top pod -> app-server], ~15% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 2m 06s" (167mb for new-layer, during heavy map-load: 42s to 3000subs [dm debug stats], ~334m max cpu-usage [kubectl top pod -> app-server], ~18% max cpu-usage [grafana -> cluster])
-* 2023-05-26b, SW: "Finished release [optimized] target(s) in 2m 03s" (167mb for new-layer, during heavy map-load: 40s to 3000subs [dm debug stats], ~325m max cpu-usage [kubectl top pod -> app-server], ~18% max cpu-usage [grafana -> cluster])
+Timings (string-change, docker-desktop, release, cranelift-msvc): ["Finished release [optimized] target(s) in XXX"]
+* 2023-05-26, SW1: 2m11s,2m8s,2m6s,2m3s (167mb for new-layer, during heavy map-load: ?,?,42s,40s to 3000subs [dm debug stats], ?,~276m,~334m,~325m max cpu-usage [kubectl top pod -> app-server], ?,~15%,~18%,~18% max cpu-usage [grafana -> cluster])
 
 # Frontend
 
