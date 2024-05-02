@@ -313,22 +313,22 @@ Other notes:
 			* 2.2.1.1\) If on Windows/Mac, install Docker as a prerequisite -- which on these platforms, is done through installation of Docker Desktop (though without need of creating a k8s cluster through its ui as seen in step 2.1.2): https://www.docker.com/products/docker-desktop
 			* 2.2.1.2\) If on Linux, install **docker-engine**, and configure it to rootless mode; note that **docker-engine is not the same as Docker Desktop for Linux**.
 				* Note: Docker-engine begins in normal/root mode, but can be switched to operate in "rootless mode". The scripts and instructions in this repo assume a "rootless" setup (for lower security risk and easier usage from scripts), but operating in normal/root mode should also be possible with some script tweaks (the section below assumes we're aiming for rootless mode though).
-				* 2.2.1.1\) Start by installing docker-engine the normal way (we'll switch it to "rootless mode" shortly): https://docs.docker.com/engine/install
-				* 2.2.1.2\) Open this page, as reference for changing docker-engine to rootless mode: https://docs.docker.com/engine/security/rootless
+				* 2.2.1.2.1\) Start by installing docker-engine the normal way (we'll switch it to "rootless mode" shortly): https://docs.docker.com/engine/install
+				* 2.2.1.2.2\) Open this page, as reference for changing docker-engine to rootless mode: https://docs.docker.com/engine/security/rootless
 				* Note: The remaining instructions on this level are based on the docs page above; and these summarized instructions assume you're using Ubuntu / Linux Mint. So only follow these simplified steps if not conflicting with the instructions on that page.
-				* 2.2.1.3\) Run: `apt install uidmap`
-				* 2.2.1.4\) Run: `sudo apt-get install -y dbus-user-session`
-					* 2.2.1.4.1\) If this resulted in a new version being installed, log out then back in.
-				* 2.2.1.5\) Run: `apt-get install docker-ce-rootless-extras`
-				* 2.2.1.6\) Ensure the system-wide Docker daemon is not already running, by running: `sudo systemctl disable --now docker.service docker.socket`
-				* 2.2.1.7\) Run `/usr/bin/dockerd-rootless-setuptool.sh install`. If this command succeeds, docker-engine should now be runnable in rootless mode.
-				* 2.2.1.8\) If you want docker-engine to be launched in rootless mode immediately, run: `systemctl --user start docker`
-				* 2.2.1.9\) To have docker-engine automatically launched in rootless mode at time of login, run:
+				* 2.2.1.2.3\) Run: `apt install uidmap`
+				* 2.2.1.2.4\) Run: `sudo apt-get install -y dbus-user-session`
+					* 2.2.1.2.4.1\) If this resulted in a new version being installed, log out then back in.
+				* 2.2.1.2.5\) Run: `apt-get install docker-ce-rootless-extras`
+				* 2.2.1.2.6\) Ensure the system-wide Docker daemon is not already running, by running: `sudo systemctl disable --now docker.service docker.socket`
+				* 2.2.1.2.7\) Run `/usr/bin/dockerd-rootless-setuptool.sh install`. If this command succeeds, docker-engine should now be runnable in rootless mode.
+				* 2.2.1.2.8\) If you want docker-engine to be launched in rootless mode immediately, run: `systemctl --user start docker`
+				* 2.2.1.2.9\) To have docker-engine automatically launched in rootless mode at time of login, run:
 					```
 					systemctl --user enable docker
 					sudo loginctl enable-linger $(whoami)
 					```
-				* 2.2.1.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
+				* 2.2.1.2.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
 				* Note: These instructions are a WIP; I've not yet been able to get tilt/k3d operating successfully against the rootless version of docker. (still working on it; alternately, could try going for Kind + rootless-docker instead, but Kind's cluster creations/deletions [take ~3x as long](https://github.com/kumahq/kuma/pull/1841#pullrequestreview-639847453))
 		* 2.2.2\) Follow: https://k3d.io/#installation
 		* 2.2.3\) Create a local registry [remove `sudo` if not on Linux]: `sudo k3d registry create reg.localhost --port 5000`

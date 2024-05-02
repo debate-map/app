@@ -48,13 +48,3 @@ BEGIN
 END $$;
 DROP TRIGGER IF EXISTS after_insert_node_revision on app."nodeRevisions";
 CREATE TRIGGER after_insert_node_revision AFTER INSERT ON app."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app.after_insert_node_revision();
-
-
-CREATE OR REPLACE VIEW app.my_node_revisions WITH (security_barrier=off)
-    AS WITH q1 AS (
-        SELECT array_agg(concat(id, ':nodes')) AS pol
-        FROM app."accessPolicies"
-        WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
-            ("permissions" -> 'nodes' -> 'access')::boolean))
-        SELECT app."nodeRevisions".* FROM app."nodeRevisions" JOIN q1 ON (
-            ("c_accessPolicyTargets" && q1.pol));
