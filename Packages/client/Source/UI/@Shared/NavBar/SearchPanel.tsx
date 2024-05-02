@@ -206,56 +206,6 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			}
 		}
 	} */
-	async StartFindingPathsFromRootsToX(targetNodeY: UUID) {
-	// StartFindingPathsFromXToY = flow(function* StartFindingPathsFromXToY(rootNodeX: UUID, targetNodeY: UUID) {
-		const searchDepth = 100;
-
-		const upPathCompletions = [] as string[];
-		let upPathAttempts = [`${targetNodeY}`];
-		for (let depth = 0; depth < searchDepth; depth++) {
-			const newUpPathAttempts = [] as string[];
-			for (const upPath of upPathAttempts) {
-				const nodeID = upPath.split("/").First();
-				const node = await GetAsync(()=>GetNodeL2(nodeID));
-				// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as NodeL2;
-				if (node == null) {
-					LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
-					continue;
-				}
-
-				if (node.rootNodeForMap != null) {
-					upPathCompletions.push(upPath);
-					// continue; // commented; node may be a map-root, and still have parents
-				}
-
-				//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
-				//const parentIDs = GetNodeLinks(null, node.id).map(a=>a.parent);
-				const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
-				const parentIDs = parentLinks.map(a=>a.parent);
-				for (const parentID of parentIDs) {
-					const newUpPath = `${parentID}/${upPath}`;
-					newUpPathAttempts.push(newUpPath);
-				}
-			}
-			upPathAttempts = newUpPathAttempts;
-
-			// if (depth === 0 || upPathCompletions.length !== State(a => a.main.search.findNode_resultPaths).length) {
-			RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
-				store.main.search.findNode_resultPaths = upPathCompletions.slice();
-				store.main.search.findNode_currentSearchDepth = depth + 1;
-			});
-
-			await SleepAsync(100);
-			// yield SleepAsync(100);
-			// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
-			if (upPathAttempts.length == 0 || this.mounted === false) break;
-			// if (upPathAttempts.length == 0) this.StopSearch();
-			// if search is marked as "starting to stop", actually stop search here by breaking the loop
-			if (store.main.search.findNode_state === "inactive") break;
-		}
-
-		this.StopSearch();
-	}
 	StopSearch() {
 		RunInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
 	}
@@ -279,7 +229,24 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			SearchResultRow.searchInProgress = true;
 			WaitXThenRun(0, ()=>{
 				RunInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
-				this.StartFindingPathsFromRootsToX(nodeID).then(()=>SearchResultRow.searchInProgress = false);
+				FindPathsFromMapRootsToX(nodeID, async(upPathAttempts, upPathCompletions, depth)=>{
+					RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
+						store.main.search.findNode_resultPaths = upPathCompletions.slice();
+						// "depth" is the layer-distance between X/origin-node and the last node whose parents have been acquired; so add 1 (since those parents are already integrated)
+						store.main.search.findNode_currentSearchDepth = depth + 1;
+					});
+
+					await SleepAsync(100);
+
+					// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
+					if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
+					// if search is marked as "starting to stop", actually stop search here by breaking the loop
+					if (store.main.search.findNode_state === "inactive") return {breakIteration: true};
+					return {breakIteration: false};
+				}).then(()=>{
+					this.StopSearch();
+					SearchResultRow.searchInProgress = false;
+				});
 			});
 		}
 		const {findNode_resultPaths} = store.main.search;
@@ -374,6 +341,42 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			</Column>
 		);
 	}
+}
+
+export async function FindPathsFromMapRootsToX(targetNodeY: UUID, actionAfterEachDepthIteration: (upPathAttempts: string[], upPathCompletions: string[], depth: number)=>Promise<{breakIteration: boolean}>, searchDepth = 100) {
+	const upPathCompletions = [] as string[];
+	let upPathAttempts = [`${targetNodeY}`];
+	for (let depth = 0; depth < searchDepth; depth++) {
+		const newUpPathAttempts = [] as string[];
+		for (const upPath of upPathAttempts) {
+			const nodeID = upPath.split("/").First();
+			const node = await GetAsync(()=>GetNodeL2(nodeID));
+			// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as NodeL2;
+			if (node == null) {
+				LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
+				continue;
+			}
+
+			if (node.rootNodeForMap != null) {
+				upPathCompletions.push(upPath);
+				// continue; // commented; node may be a map-root, and still have parents
+			}
+
+			//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
+			//const parentIDs = GetNodeLinks(null, node.id).map(a=>a.parent);
+			const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
+			const parentIDs = parentLinks.map(a=>a.parent);
+			for (const parentID of parentIDs) {
+				const newUpPath = `${parentID}/${upPath}`;
+				newUpPathAttempts.push(newUpPath);
+			}
+		}
+		upPathAttempts = newUpPathAttempts;
+
+		const {breakIteration} = await actionAfterEachDepthIteration(upPathAttempts, upPathCompletions, depth);
+		if (breakIteration) break;
+	}
+	return {upPathCompletions};
 }
 
 export function JumpToNode(mapID: string, path: string) {

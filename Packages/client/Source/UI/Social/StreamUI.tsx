@@ -13,7 +13,7 @@ import {BaseComponentPlus, UseState} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {GetOpenMapID} from "../../Store/main.js";
-import {JumpToNode} from "../@Shared/NavBar/SearchPanel.js";
+import {FindPathsFromMapRootsToX, JumpToNode} from "../@Shared/NavBar/SearchPanel.js";
 
 @Observer
 export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boolean}, {}) {
@@ -30,16 +30,16 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 					<CheckBox ml="auto" text="Add to stream" enabled={userHidden != null} value={userHidden?.addToStream ?? false} onChange={val=>{
 						//new SetUserData_Hidden({id: MeID()!, updates: {addToStream: val}}).RunOnServer();
 						RunCommand_UpdateUserHidden({id: MeID()!, updates: {addToStream: val}});
-					}}/>
-					<InfoButton ml={5} text="When enabled, contributions you make to maps and such will be shown on the Social page and Stream panel. (to users not excluded from the relevant access-policies)"/>
+					}} />
+					<InfoButton ml={5} text="When enabled, contributions you make to maps and such will be shown on the Social page and Stream panel. (to users not excluded from the relevant access-policies)" />
 					{Me()?.permissionGroups.admin && <>
-						<CheckBox ml={10} text="Show all" value={store.main.social.showAll} onChange={val=>RunInAction_Set(this, ()=>store.main.social.showAll = val)}/>
-						<InfoButton ml={5} text="When enabled, private contributions are also shown in the UI. (admin-only option)"/>
+						<CheckBox ml={10} text="Show all" value={store.main.social.showAll} onChange={val=>RunInAction_Set(this, ()=>store.main.social.showAll = val)} />
+						<InfoButton ml={5} text="When enabled, private contributions are also shown in the UI. (admin-only option)" />
 					</>}
 				</Row>
 				<ScrollView>
 					{commandRuns.Take(entryLimit).map((run, index)=>{
-						return <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel ?? false}/>;
+						return <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel ?? false} />;
 					})}
 				</ScrollView>
 			</Column>
@@ -64,14 +64,14 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 					s.main.database.subpage = "users";
 					s.main.database.selectedUserID = actor.id;
 				}
-			}}/>
+			}} />
 		);
 
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 
 		let messageUI: JSX.Element;
 		let messageUI_row2: JSX.Element|n;
-		let node_final:NodeL3|n;
+		let node_final: NodeL3|n;
 		let mapId: string|n;
 		if (run.commandName == "addChildNode") {
 			const payload = run.commandInput as (typeof AddChildNode)["prototype"]["payload"];
@@ -97,7 +97,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeBox indexInNodeList={0} node={node_final} path={node.id} treePath="0" forLayoutHelper={false}
 							backgroundFillPercentOverride={100} width={width}
-							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
+							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"} />}
 				</>;
 			}
 		} else if (run.commandName == "addNodeRevision") {
@@ -120,7 +120,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeBox indexInNodeList={0} node={node_final} path={node.id} treePath="0" forLayoutHelper={false}
 							backgroundFillPercentOverride={100} width={width}
-							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
+							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"} />}
 				</>;
 			}
 		} else {
@@ -141,7 +141,6 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				return "Find in Map";
 			}
 			return "Go to Map";
-
 		};
 
 		return (
@@ -153,28 +152,37 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 					</Column>
 					{messageUI!}
 					{map?.id &&
-					<Button ml="auto" text={buttonText(inCurrentMap, findingPath)} style={{flexShrink: 0}} onClick={()=>{
-						if (inCurrentMap) {
-							setFindingPath(true);
-							 FindNodePath(node_final!.id).then(path=>{
-								if (path[0]) {
-									JumpToNode(openMapID!, path[0]);
-								}
-							 }).finally(()=>setFindingPath(false));
-							// JumpToNode(openMapID!, resultPath);
-						} else {
-							if (map == null) return; // still loading
-							RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-								if (map.id == globalMapID) {
-									store.main.page = "global";
-								} else {
-									store.main.page = "debates";
-									store.main.debates.selectedMapID = map.id;
-								}
-							});
-						}
+						<Button ml="auto" text={buttonText(inCurrentMap, findingPath)} style={{flexShrink: 0}} onClick={()=>{
+							if (inCurrentMap) {
+								setFindingPath(true);
+								FindPathsFromMapRootsToX(node_final!.id, async(upPathAttempts, upPathCompletions, depth)=>{
+									// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
+									if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
 
-					}}/>}
+									// if search is marked as "starting to stop", actually stop search here by breaking the loop
+									// commented atm; this can never actually happen, since the `findingPath` is a closure-held variable (this is fine though, since there is no "stop search" button in this panel atm anyway)
+									//if (!findingPath) return {breakIteration: true};
+
+									return {breakIteration: false};
+								}).then(info=>{
+									const path = info.upPathCompletions[0];
+									if (path) {
+										JumpToNode(openMapID!, path);
+									}
+								}).finally(()=>setFindingPath(false));
+								//JumpToNode(openMapID!, resultPath);
+							} else {
+								if (map == null) return; // still loading
+								RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+									if (map.id == globalMapID) {
+										store.main.page = "global";
+									} else {
+										store.main.page = "debates";
+										store.main.debates.selectedMapID = map.id;
+									}
+								});
+							}
+						}} />}
 					<Button ml={map?.id ? 5 : "auto"} text="Details" style={{flexShrink: 0}} onClick={()=>{
 						console.log(node_final, map);
 						ShowMessageBox({
@@ -187,50 +195,10 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 								);
 							},
 						});
-					}}/>
+					}} />
 				</Row>
 				{messageUI_row2}
 			</Column>
 		);
 	}
-}
-
-// TODO: move this to a more appropriate file, not sure where
-// this function is extremely similar to StartFindingPathsFromRootsToX from the SearchResultRow function. 
-// however this function does not need to cause updates on each depth, so it is simpler. 
-// for now i think we can  get away with a bit of duplication, but if we need to update this function, we should consider 
-// a small refactor to make it more reusable.
-async function FindNodePath(targetNodeY: UUID) {
-	const searchDepth = 100;
-
-	const upPathCompletions = [] as string[];
-	let upPathAttempts = [`${targetNodeY}`];
-	for (let depth = 0; depth < searchDepth; depth++) {
-		const newUpPathAttempts = [] as string[];
-		for (const upPath of upPathAttempts) {
-			const nodeID = upPath.split("/").First();
-			const node = await GetAsync(()=>GetNodeL2(nodeID));
-			if (node == null) {
-				LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
-				continue;
-			}
-
-			if (node.rootNodeForMap != null) {
-				upPathCompletions.push(upPath);
-			}
-
-			const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
-			const parentIDs = parentLinks.map(a=>a.parent);
-			for (const parentID of parentIDs) {
-				const newUpPath = `${parentID}/${upPath}`;
-				newUpPathAttempts.push(newUpPath);
-			}
-		}
-		upPathAttempts = newUpPathAttempts;
-		if (upPathAttempts.length == 0) break;
-
-		if (store.main.search.findNode_state === "inactive") break;
-	}
-
-	return upPathCompletions;
 }
