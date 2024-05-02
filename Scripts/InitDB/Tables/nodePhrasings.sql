@@ -33,12 +33,3 @@ CREATE INDEX node_phrasings_node_idx ON app."nodePhrasings" USING btree (node);
 DROP INDEX IF EXISTS node_phrasings_text_en_idx;
 CREATE INDEX node_phrasings_text_en_idx ON app."nodePhrasings" USING gin (phrasing_tsvector);
 -- CREATE INDEX node_phrasings_text_en_idx ON app."nodePhrasings" USING gin (app.phrasings_to_tsv(text_base, text_question));
-
-
-CREATE OR REPLACE VIEW app.my_node_phrasings WITH (security_barrier=off)
- AS WITH q1 AS (
-        SELECT array_agg(concat(id, ':nodes')) AS pol
-        FROM app."accessPolicies"
-        WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
-            ("permissions" -> 'nodes' -> 'access')::boolean))
-        SELECT app."nodePhrasings".* FROM app."nodePhrasings" JOIN q1 ON ("c_accessPolicyTargets" && q1.pol);

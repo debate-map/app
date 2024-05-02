@@ -31,6 +31,7 @@ begin;
 	\ir Funcs/GraphTraversal.sql
 	\ir Funcs/Search.sql
 	\ir Funcs/RLSHelpers.sql
+	\ir Funcs/RLSViews.sql
 
 	\ir FKConstraints.sql
 	\ir RLSPolicies.sql

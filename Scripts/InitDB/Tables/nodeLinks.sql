@@ -26,12 +26,3 @@ CREATE INDEX node_link_access_idx ON app."nodeLinks" USING gin ("c_accessPolicyT
 -- field collation fixes (ideal would be to, database-wide, have collation default to case-sensitive, but for now we just do it for a few key fields for which "ORDER BY" clauses exist)
 ALTER TABLE app."nodeLinks" ALTER COLUMN "orderKey" SET DATA TYPE TEXT COLLATE "C";
 ALTER TABLE app."nodeLinks" ALTER COLUMN "id" SET DATA TYPE TEXT COLLATE "C";
-
-CREATE OR REPLACE VIEW app.my_node_links WITH (security_barrier=off)
-    AS WITH q1 AS (
-        SELECT array_agg(concat(id, ':nodes')) AS pol
-        FROM app."accessPolicies"
-        WHERE is_user_admin(current_setting('app.current_user_id')) OR coalesce(("permissions_userExtends" -> current_setting('app.current_user_id') -> 'nodes' -> 'access')::boolean,
-            ("permissions" -> 'nodes' -> 'access')::boolean))
-        SELECT app."nodeLinks".* FROM app."nodeLinks" JOIN q1 ON (
-            ("c_accessPolicyTargets" && q1.pol));
