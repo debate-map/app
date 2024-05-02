@@ -1,9 +1,5 @@
 -- sync:rs[rls_helpers.rs]
 
-CREATE OR REPLACE FUNCTION is_user_admin_or_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$ 
-	SELECT is_user_admin(user_id) OR is_user_creator(user_id, creator_id);
-$$ LANGUAGE sql STABLE LEAKPROOF;
-
 CREATE OR REPLACE FUNCTION is_user_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$
 	SELECT user_id = creator_id OR (user_id = '@me' AND current_setting('app.current_user_id') = creator_id);
 $$ LANGUAGE SQL STABLE LEAKPROOF;
@@ -11,7 +7,11 @@ $$ LANGUAGE SQL STABLE LEAKPROOF;
 CREATE OR REPLACE FUNCTION is_user_admin(user_id varchar) RETURNS boolean AS $$ 
 	SELECT ("permissionGroups" -> 'admin')::boolean FROM app."users"
 	WHERE id = CASE WHEN user_id = '@me' THEN current_setting('app.current_user_id') ELSE user_id END;
- $$ LANGUAGE sql STABLE LEAKPROOF;
+$$ LANGUAGE sql STABLE LEAKPROOF;
+
+CREATE OR REPLACE FUNCTION is_user_admin_or_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$ 
+	SELECT is_user_admin(user_id) OR is_user_creator(user_id, creator_id);
+$$ LANGUAGE sql STABLE LEAKPROOF;
 
 CREATE OR REPLACE FUNCTION does_policy_allow_access(user_id varchar, policy_id varchar, policy_field varchar) RETURNS boolean AS $$
 	SELECT coalesce(("permissions_userExtends" -> user_id -> policy_field -> 'access')::boolean, ("permissions" -> policy_field -> 'access')::boolean)
