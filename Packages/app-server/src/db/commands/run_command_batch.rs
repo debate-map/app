@@ -19,6 +19,7 @@ use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
+use crate::db::commands::update_node::update_node;
 use crate::db::general::permission_helpers::{assert_user_can_add_phrasing, assert_user_can_add_child};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, NodeLink};
@@ -34,6 +35,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
 use super::_shared::add_node::add_node;
 use super::add_child_node::{AddChildNodeInput, add_child_node, AddChildNodeExtras};
+use super::update_node::UpdateNodeInput;
 
 wrap_slow_macros!{
 
@@ -75,6 +77,10 @@ wrap_slow_macros!{
 
                     let result = add_child_node(&ctx, &actor, false, command_input_final, AddChildNodeExtras { avoid_recording_command_run: true }).await.map_err(to_sub_err)?;
                     command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
+                } else if let Some(command_input) = &command.updateNode {
+                    let command_input_final = command_input.clone();
+                    let result = update_node(&ctx, &actor, false, command_input_final, NoExtras::default()).await.map_err(to_sub_err)?;
+                    command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
                 } else {
                     Err(anyhow!("Command #{} had no recognized command subfield.", index)).map_err(to_sub_err)?;
                 }
@@ -99,6 +105,7 @@ pub struct RunCommandBatchInput {
 #[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct CommandEntry {
     pub addChildNode: Option<AddChildNodeInput>,
+    pub updateNode: Option<UpdateNodeInput>,
 
     // extras
     pub setParentNodeToResultOfCommandAtIndex: Option<usize>, // used by: addChildNode

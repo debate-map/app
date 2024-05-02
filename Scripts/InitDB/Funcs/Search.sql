@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 	slimit INTEGER DEFAULT 20, soffset INTEGER DEFAULT 0,
 	quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95
 ) RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
-	WITH d AS (SELECT id FROM app.nodes),
+	WITH d AS (SELECT id FROM app.my_nodes),
 		 q AS (SELECT websearch_to_tsquery('app.english_nostop'::regconfig, query) AS q),
 		 p AS (
 				SELECT rev.node AS node_id,
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 					ts_rank(rev.phrasing_tsvector, q.q) AS rank,
 					-- app.rev_phrasing_to_tsv(rev.phrasing)
 					'standard' AS type
-					FROM app."nodeRevisions" rev
+					FROM app.my_node_revisions rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
 					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.phrasing_tsvector
@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 					ts_rank(rev.attachments_tsvector, q.q) * quote_rank_factor AS rank,
 					-- app.attachments_to_tsv(rev.attachments)
 					'quote' AS type
-					FROM app."nodeRevisions" rev
+					FROM app.my_node_revisions rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
 					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.attachments_tsvector
@@ -33,7 +33,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 					ts_rank(phrasing.phrasing_tsvector, q.q) * alt_phrasing_rank_factor AS rank,
 					-- app.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
 					phrasing.type AS type
-					FROM app."nodePhrasings" AS phrasing
+					FROM app.my_node_phrasings AS phrasing
 					JOIN d ON phrasing.node = d.id
 					JOIN q ON (true)
 					WHERE q.q @@ phrasing.phrasing_tsvector
@@ -50,9 +50,9 @@ CREATE OR REPLACE FUNCTION app.global_search(
 			) AS found_text,
 			app.pick_rev_phrasing(rev.phrasing) AS node_text
 		  FROM op2
-			JOIN app."nodeRevisions" AS rev ON (op2.node_id = rev.node)
+			JOIN app.my_node_revisions AS rev ON (op2.node_id = rev.node)
 			JOIN q ON (true)
-			LEFT JOIN app."nodePhrasings" AS phrasing ON phrasing.id = op2.phrasing_id
+			LEFT JOIN app.my_node_phrasings AS phrasing ON phrasing.id = op2.phrasing_id
 			WHERE rev."replacedBy" IS NULL;
 $$ LANGUAGE SQL STABLE;
 
@@ -69,7 +69,7 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 					ts_rank(rev.phrasing_tsvector, q.q) AS rank,
 					-- app.rev_phrasing_to_tsv(rev.phrasing)
 					'standard' AS type
-					FROM app."nodeRevisions" rev
+					FROM app.my_node_revisions rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
 					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.phrasing_tsvector
@@ -79,7 +79,7 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 					ts_rank(rev.attachments_tsvector, q.q) * quote_rank_factor AS rank,
 					-- app.attachments_to_tsv(rev.attachments)
 					'quote' AS type
-					FROM app."nodeRevisions" rev
+					FROM app.my_node_revisions rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
 					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.attachments_tsvector
@@ -89,7 +89,7 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 					ts_rank(phrasing.phrasing_tsvector, q.q) * alt_phrasing_rank_factor AS rank,
 					-- app.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
 					phrasing.type AS type
-					FROM app."nodePhrasings" AS phrasing
+					FROM app.my_node_phrasings AS phrasing
 					JOIN d ON phrasing.node = d.id
 					JOIN q ON (true)
 					WHERE q.q @@ phrasing.phrasing_tsvector
@@ -106,9 +106,9 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 			) AS found_text,
 			app.pick_rev_phrasing(rev.phrasing) AS node_text
 		  FROM op2
-			JOIN app."nodeRevisions" AS rev ON (op2.node_id = rev.node)
+			JOIN app.my_node_revisions AS rev ON (op2.node_id = rev.node)
 			JOIN q ON (true)
-			LEFT JOIN app."nodePhrasings" AS phrasing ON phrasing.id = op2.phrasing_id
+			LEFT JOIN app.my_node_phrasings AS phrasing ON phrasing.id = op2.phrasing_id
 			WHERE rev."replacedBy" IS NULL;
 $$ LANGUAGE SQL STABLE;
 
@@ -122,7 +122,7 @@ $$ LANGUAGE SQL STABLE;
 			)) AS all_source_chains
 			FROM (
 				SELECT jsonb_array_elements(nr.attachments) AS all_attachments
-				FROM "nodeRevisions" AS nr
+				FROM my_node_revisions AS nr
 			) AS _
 		) AS _
 	) AS _
@@ -131,7 +131,7 @@ $$ LANGUAGE SQL STABLE;*/
 -- new version (takes ~1ms as of 2023-05-22, according to "time" column of EXPLAIN ANALYZE)
 CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
 	WITH candidates AS (SELECT unnest(ids_to_find) AS eid)
-	SELECT DISTINCT eid FROM candidates JOIN "nodeRevisions" ON (
+	SELECT DISTINCT eid FROM candidates JOIN my_node_revisions ON (
 		attachments @> concat('[{"references":{"sourceChains":[{"sources":[{"',id_field,'":"',eid,'"}]}]}}]')::jsonb
 	OR attachments @> concat('[{"quote":{"sourceChains":[{"sources":[{"',id_field,'":"',eid,'"}]}]}}]')::jsonb);
 $$ LANGUAGE SQL STABLE;

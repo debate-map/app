@@ -245,75 +245,128 @@ Notes:
 <details><summary><b>[setup-backend] Setting up base tools needed for local/remote k8s deployments</b></summary>
 
 Required:
-* 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
-	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
-* 2\) Install Tilt: https://github.com/tilt-dev/tilt (I'm currently on version 0.30.13)
-	* 2.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
-* 3\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
-	* 3.1\) On Windows, recommended install steps:
-		* 3.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
-		* 3.1.2\) Run: `choco install kubernetes-helm`
-* 3\) Install a Docker container system.
-	* 3.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
-		* 3.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
-		* 3.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
-	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)) and Kubernetes v1.25.2 (as part of Docker Desktop 4.15.0), so it's recommended to install one of those versions (preferably the newer one).
-	* 3.3\) On Windows and Mac, this means installing Docker Desktop (see step 3.2 above for recommended install link).
-	* 3.4\) On Linux, it's also recommended to install Docker Desktop (see step 3.2 above for recommended install link). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
+* 1\) Install Rust via the `rustup` toolkit.
+	* 1.1\) Install rustup (installer/updater for rust toolchains): https://www.rust-lang.org/tools/install
+	* 1.2\) Install rust by running (in repo root): `rustc --version` (rustup installs the version specified in `rust-toolchain.toml`)
+	* 1.3\) If using VSCode (or another compatible IDE), it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
+	* 1.4\) If on Linux, it's recommended to install the clang compiler-frontend and mold linker. This lets you compile the rust crates outside of docker, and for rust-analyzer to run without errors (they both try to use clang+mold due to `.cargo/config.toml`). [An alternative is to comment out the linux sections in `.cargo/config.toml`, though that means file divergence and slower compilations.]
+		* 1.4.1\) Install clang: `sudo apt install clang`
+		* 1.4.2\) Install mold: `sudo apt install mold` (if your distro doesn't include mold, refer to the [mold GitHub repo](https://github.com/rui314/mold))
+* 2\) Install Docker + Kubernetes + kubectl, by following the [setup-k8s](#setup-k8s) module.
+* 3\) Install Tilt: https://github.com/tilt-dev/tilt#install-tilt (as of ?, I'm on version 0.30.13)
+	* 3.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
+* 4\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
+	* 4.1\) On Windows, recommended install steps:
+		* 4.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
+		* 4.1.2\) Run: `choco install kubernetes-helm`
+	* 4.2\) On Linux, recommended install route (see link above for alternatives): `sudo snap install helm --classic`
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
 * 1\) Install [Lens](https://k8slens.dev), a very handy, general-purpose k8s inspection tool. 
 * 2\) Install [DBeaver](https://dbeaver.io/download), a ui tool for viewing/modifying postgresql databases.
 
-Additional tools: (frontend devs can skip)
-* 1\) Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+Additional tools: (all optional)
+* 1\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+	* Note: I (Venryx) personally no longer use this extension, due to it performing more background operations (of reading the k8s cluster state) than desired.
 	* 1.1\) Also install the [Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) component, enabling the Kubernetes extension to display the file-tree of running pods, and open their files.
-* 2\) Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
+* 2\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
 * 3\) See here for more helpful tools: https://collabnix.github.io/kubetools
-
-</details>
-
-<!----><a name="setup-psql"></a>
-<details><summary><b>[setup-psql] Setting up the psql tool</b></summary>
-
-> Note: While installation of the `psql` tool on your host machine should not strictly be necessary (since there is an instance of it that can be accessed through some postgres-related docker containers), it is best to install it for more ergonomic usage: many of the helper scripts rely on it, and having it on your host machine makes it easier to use certain features, such as execution of .sql files present only on the host machine (eg. for when running the init-db and seed-db scripts).
-
-Steps:
-* 1\) First, make a note of which major version of Postgres you need. This should be Postgres v13 (unless this step has become outdated); to confirm, you can run `npm start ssh.db`, then in that shell run `psql --version`.
-* 2\) Next, download/install the package containing the `psql` binary. This means either...
-	* 2.1\) Option 1, installing the full Postgres software (keep same major version noted above): https://www.postgresql.org/download
-	* 2.2\) Option 2, installing just the Postgres binaries needed for `psql` to operate.
-		* 2.2.1\) On Windows, this means downloading and extracting the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
-* 3\) Ensure the `psql` binary is added to your `Path` environment-variable.
 
 </details>
 
 <!----><a name="setup-k8s"></a>
 <details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
 
-Prerequisite steps: [setup-backend](#setup-backend)
+> There are multiple ways to set up a local Kubernetes cluster. This guide-module **recommends using Docker Desktop on Windows/Mac and k3d on Linux**, but other approaches should also work (though with possibly sparser documentation in this readme).
 
-> There are multiple ways to set up a local Kubernetes cluster, but this guide-module assumes you'll be using the recommended option of Docker Desktop. If for some reason you instead want to use K3d, Kind, etc., see the [setup-k8s-alt](#setup-k8s-alt) module.
+#### Options
 
-#### Setup for Docker Desktop Kubernetes **(recommended k8s system)**
+Options discussed in this module: ([X,X,X] = [linux, mac, windows], [X,X] = [linux, mac/windows])
+| Name             | Cluster recreate | Registry delay | VM overhead | Runtime perf |
+| -                | -                | -              | -           | -            |
+| Docker Desktop   | slow             | 0              | Y           | ~5           |
+| K3d              | very fast        | 0/~3m          | N/Y/Y       | 10           |
+| Kind             | fast             | 0/~3m          | N/Y/Y       | ?            |
+| Rancher Desktop  | ?                | ?              | Y           | ?            |
 
-* 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+Other notes:
+* General:
+	* The runtime perf numbers are very rough estimates based on anecdotal times observed.
+* Docker Desktop **(recommended for Windows/Mac)**
+	* CON: Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
+* K3d **(recommended for Linux)**: No other notes atm.
+* Rancher Desktop: No other notes atm.
+* Kind: No other notes atm.
 
-> To delete and recreate the cluster, use the settings panel.
+#### Base instructions
+
+* 1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
+	* 1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
+	* 1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
+* 2\) Install the docker solution you selected. (see comparison table above)
+	* 2.1\) Option 1: Docker Desktop **(recommended for Windows and Mac)**
+		* 2.1.1\) Follow: https://www.docker.com/products/docker-desktop
+		* 2.1.2\) Create your Kubernetes cluster, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+		* Note: To delete and recreate the cluster, use the settings panel.
+	* 2.2\) Option 2: K3d **(recommended for Linux)**
+		* 2.2.1\) First, install docker itself.
+			* 2.2.1.1\) If on Windows/Mac, install Docker as a prerequisite -- which on these platforms, is done through installation of Docker Desktop (though without need of creating a k8s cluster through its ui as seen in step 2.1.2): https://www.docker.com/products/docker-desktop
+			* 2.2.1.2\) If on Linux, install **docker-engine**, and configure it to rootless mode; note that **docker-engine is not the same as Docker Desktop for Linux**.
+				* Note: Docker-engine begins in normal/root mode, but can be switched to operate in "rootless mode". The scripts and instructions in this repo assume a "rootless" setup (for lower security risk and easier usage from scripts), but operating in normal/root mode should also be possible with some script tweaks (the section below assumes we're aiming for rootless mode though).
+				* 2.2.1.1\) Start by installing docker-engine the normal way (we'll switch it to "rootless mode" shortly): https://docs.docker.com/engine/install
+				* 2.2.1.2\) Open this page, as reference for changing docker-engine to rootless mode: https://docs.docker.com/engine/security/rootless
+				* Note: The remaining instructions on this level are based on the docs page above; and these summarized instructions assume you're using Ubuntu / Linux Mint. So only follow these simplified steps if not conflicting with the instructions on that page.
+				* 2.2.1.3\) Run: `apt install uidmap`
+				* 2.2.1.4\) Run: `sudo apt-get install -y dbus-user-session`
+					* 2.2.1.4.1\) If this resulted in a new version being installed, log out then back in.
+				* 2.2.1.5\) Run: `apt-get install docker-ce-rootless-extras`
+				* 2.2.1.6\) Ensure the system-wide Docker daemon is not already running, by running: `sudo systemctl disable --now docker.service docker.socket`
+				* 2.2.1.7\) Run `/usr/bin/dockerd-rootless-setuptool.sh install`. If this command succeeds, docker-engine should now be runnable in rootless mode.
+				* 2.2.1.8\) If you want docker-engine to be launched in rootless mode immediately, run: `systemctl --user start docker`
+				* 2.2.1.9\) To have docker-engine automatically launched in rootless mode at time of login, run:
+					```
+					systemctl --user enable docker
+					sudo loginctl enable-linger $(whoami)
+					```
+				* 2.2.1.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
+				* Note: These instructions are a WIP; I've not yet been able to get tilt/k3d operating successfully against the rootless version of docker. (still working on it; alternately, could try going for Kind + rootless-docker instead, but Kind's cluster creations/deletions [take ~3x as long](https://github.com/kumahq/kuma/pull/1841#pullrequestreview-639847453))
+		* 2.2.2\) Follow: https://k3d.io/#installation
+		* 2.2.3\) Create a local registry [remove `sudo` if not on Linux]: `sudo k3d registry create reg.localhost --port 5000`
+		* 2.2.4\) Create a local cluster [remove `sudo` if not on Linux]: `sudo k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
+		* 2.2.5\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
+			* 2.2.5.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
+			* 2.2.5.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
+		* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
+	* 2.3\) Option 3: Kind
+		* 2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+		* 2.3.2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
+		* 2.3.3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+		* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
+	* 2.4\) Option 4: Rancher Desktop
+		* 2.4.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation
+		* 2.4.2\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
+		* Note: To delete and recreate the cluster, use the settings panel.
+* 3\) Install kubectl.
+	* 3.1\) If you installed Docker Desktop or Rancher Desktop, then `kubectl` was already installed along with it.
+	* 3.2\) If you installed K3d or Kind, then you'll need to install `kubectl` yourself: https://kubernetes.io/docs/tasks/tools/#kubectl
+		* Note: On Linux, my personal preference is to use snap to install kubectl: `snap install kubectl --classic` (there are other options of course, as seen in link above)
+		* Note: In some cases, `kubectl` can end up using a kube config file (eg. `~/.kube/config`) that does not contain the contents used by your k8s system. In my case, it was unable to see the k8s cluster created by K3d on my Linux laptop; this may have been caused by my having installed Rancher Desktop prior to installing K3d. I fixed the problem by running `sudo k3d kubeconfig get --all`, and then manually merging the printed contents to my `~/.kube/config` file.
+	* 3.3\) Test if `kubectl` is working properly, by running: `kubectl cluster-info`
 
 #### After steps
 
-* 1\) Create an alias/copy of the k8s context you just created, renaming it to "dm-local":
-	* 1.1\) For Docker Desktop, this means:
+* 1\) Various scripts expect the debate-map k8s contexts to be called `dm-local` (or `dm-ovh` for prod cluster). To prevent errors from name mismatches, create an alias/copy of the k8s context you just created, renaming it to `dm-local`:
+	* 1.1\) For Docker Desktop and Rancher Desktop, this means:
 		* 1.1.1\) Open: `$HOME/.kube/config`
-		* 1.1.2\) Find the section with these contents:
+		* 1.1.2\) Find the section with these contents: (Rancher Desktop uses "rancher-desktop" instead, etc.)
 		```
 		- context:
 		    cluster: docker-desktop
 		    user: docker-desktop
 		  name: docker-desktop
 		```
-		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: dm-local`.
+		* 1.1.3\) Copy-paste that section just below it, changing the copy's `name: docker-desktop` to `name: dm-local`, then save.
+		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local`
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
 #### Troubleshooting
@@ -323,49 +376,35 @@ Prerequisite steps: [setup-backend](#setup-backend)
 	* 2.1\) If that is insufficient, you can either:
 		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
 		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
-* 3\) When the list of images/containers in Docker Desktop gets annoyingly long, see the [docker-trim](#docker-trim) module.
+* 3\) If the list of images/containers gets annoyingly long, see the [docker-trim](#docker-trim) module.
 
 </details>
 
-<!----><a name="setup-k8s-alt"></a>
-<details><summary><b>[setup-k8s-alt] Setting up local k8s cluster (using alternative k8s systems)</b></summary>
+<!----><a name="setup-psql"></a>
+<details><summary><b>[setup-psql] Setting up the psql tool</b></summary>
 
-Prerequisite steps: [setup-backend](#setup-backend)
+> Note: While installation of the `psql` tool on your host machine should not strictly be necessary (since there is an instance of it that can be accessed through some postgres-related docker containers), it is best to install it for more ergonomic usage: many of the helper scripts rely on it, and having it on your host machine makes it easier to use certain features, such as execution of .sql files present only on the host machine (eg. for when running the init-db and seed-db scripts).
 
-> There are multiple ways to set up a local Kubernetes cluster, with the recommened route being to use Docker Desktop, as described in the [setup-k8s](#setup-k8s) module. This module is for if you're certain you want to use an alternative like K3d or Kind.
+Steps:
+* 1\) First, make a note of which major version of Postgres you need. This should be Postgres v15 (as of 2024-04-27); to confirm a version match, you can run `npm start ssh.db`, then in that shell run `psql --version`.
+* 2\) Next, download/install the package containing the `psql` binary.
+	* 2.1\) If on Windows:
+		* 2.1.1\) Option 1: If you want to install the full Postgres software (eg. letting you run a pg server on your host OS [not needed for debate-map]), download and install from here (keep same major version noted above): https://www.postgresql.org/download
+		* 2.1.2\) Option 2: If you want to install just the Postgres binaries needed for `psql` to operate, download and extract the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
+			* 2.1.2.1\) Ensure the `psql` binary is added to your `Path` environment-variable. (I forget if this is automatic)
+	* 2.2\) If on Linux (Linux Mint, anyway):
+		* 2.2.1\) Run: `sudo apt install postgresql-client-common`
+		* 2.2.2\) Run: (based on [this Medium post](https://medium.com/@mglaving/how-to-install-postgresql-15-on-linux-mint-21-27cca7918006))
+			```
+			# add postgres repo, import the repo signing key, then update the package lists
+			sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+			wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+			sudo apt update
 
-Alternative options:
-* K3d
-* Kind
-
-Notes:
-* Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a *lot* of time, if full builds are slow. (for me, the deploy process takes ~3m on K3d, which Docker Desktop cuts out completely)
-* K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
-* Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
-* Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-
-#### Setup for K3d
-
-* 1\) Download and install from here: https://k3d.io/#installation
-* 2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
-* 3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
-* 4\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
-	* 4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
-	* 4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
-
-> To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-
-#### Setup for Kind
-
-* 1\) Download and install from here: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
-* 2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
-* 3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
-
-> To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
-
-#### After steps and troubleshooting
-
-* For this info, open the [setup-k8s](#setup-k8s) module, and read through the "After steps" and "Troubleshooting" sections.
+			# install the target version of PostgreSQL, client tools only
+			# (if you want to enable a pg server on your host OS [not needed], install "postgres-XX" instead)
+			sudo apt install postgresql-client-15 -y
+			```
 
 </details>
 
@@ -449,7 +488,7 @@ If you are doing an update of the entire postgres-operator package, here are som
 
 </details>
 
-<!----><a name="docker-trim"></a>
+<!----><a name="image-inspect"></a>
 <details><summary><b>[image-inspect] Docker image/container inspection</b></summary>
 
 Prerequisite steps: [setup-backend](#setup-backend)
@@ -544,6 +583,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.1.2\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
 		* 2.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
 		* 2.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+			* 2.1.4.1\) If you hit the error `Error: couldn't find key host in Secret default/debate-map-pguser-...`, kill the tilt-up process, then rerun it. (this will allow tilt / `Reflector.star` to generate a new annotation on the `default/debate-map-pguser-admin` resource, triggering it to reflect the now-populated secret in the `postgres` namespace)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
 		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
@@ -585,7 +625,10 @@ Note: We use Google Cloud here, but others could be used.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
 	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
-	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way:
+		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://gcr.io`
+
 
 </details>
 

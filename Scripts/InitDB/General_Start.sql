@@ -1,4 +1,4 @@
--- alter the default search-path, so that queries on non-namespaced targets are found in the correct schema (ie. in "app") 
+-- alter the default search-path, so that queries on non-namespaced targets are found in the correct schema (ie. in "app")
 ALTER DATABASE "debate-map" SET search_path TO 'app'; -- for future pg-sessions
 SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
 -- other search-path-set options
@@ -27,10 +27,22 @@ CREATE SCHEMA IF NOT EXISTS app;
 -- search/text-match config
 -- ==========
 
-CREATE TEXT search dictionary english_stem_nostop (
+-- ensure that search dictionary exists
+-- DO $$
+-- BEGIN
+-- 	IF NOT EXISTS (SELECT 1 FROM pg_ts_dict WHERE dictname = 'english_stem_nostop') THEN
+CREATE TEXT SEARCH dictionary english_stem_nostop (
 	Template = snowball,
 	Language = english
 );
-CREATE TEXT search CONFIGURATION app.english_nostop (COPY = pg_catalog.english);
-ALTER TEXT search CONFIGURATION app.english_nostop
+-- 	END IF;
+-- END $$;
+
+-- ensure that search configuration exists
+-- DO $$ BEGIN
+-- 	IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'english_nostop') THEN
+CREATE TEXT SEARCH CONFIGURATION app.english_nostop (COPY = pg_catalog.english);
+-- 	END IF;
+-- END $$;
+ALTER TEXT SEARCH CONFIGURATION app.english_nostop
 	ALTER mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH english_stem_nostop;

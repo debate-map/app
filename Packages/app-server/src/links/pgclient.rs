@@ -34,6 +34,24 @@ pub fn start_pgclient_with_restart(app_state: AppStateArc) {
     });
 }
 
+async fn check_if_db_tables_exist(client: &Client) {
+    // now we can execute a simple statement just to confirm the connection was made
+    // had been commented; LogicalReplicationStream (used to?) expects all messages with client to be replication messages, so crashes if we run this test-query
+    let rows = q(&client, "SELECT '123'").await;
+    assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");
+
+    let rows = q(client, "SELECT table_name FROM information_schema.tables WHERE table_schema = 'app'").await;
+    let found_tables: Vec<String> = rows.into_iter().map(|row| row.get("table_name").unwrap().to_string()).collect();
+    info!("Found tables: {:?}", found_tables);
+    let expected_tables = vec!["users", "maps", "nodes", "nodeRevisions"];
+    let missing_tables = expected_tables.iter().filter(|table| !found_tables.contains(&table.to_string())).collect_vec();
+    if !missing_tables.is_empty() {
+        let setup_reminder = "\n\tDid you forget to initialize and seed your local database? See: https://github.com/debate-map/app#reset-db-local";
+        error!("Missing tables in database (non-exhaustive): {:?}{}", missing_tables, setup_reminder);
+        panic!("Missing tables in database (non-exhaustive): {:?}{}", missing_tables, setup_reminder);
+    }
+}
+
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
     msgs.into_iter()
@@ -113,10 +131,7 @@ pub async fn start_streaming_changes(
     });
 
     let fut2 = tokio::spawn(async move {
-        // now we can execute a simple statement just to confirm the connection was made
-        // commented for now; LogicalReplicationStream expects all messages with client to be replication messages, so crashes if we run this test-query
-        /*let rows = q(&client, "SELECT '123'").await;
-        assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");*/
+        check_if_db_tables_exist(&client).await;
 
         //let slot_name = "slot";
         let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();

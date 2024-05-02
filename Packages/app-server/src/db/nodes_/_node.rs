@@ -95,7 +95,7 @@ pub struct NodeInput {
 	pub extras: CanOmit<JSONValue>,
 }
 
-#[derive(InputObject, Serialize, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct NodeUpdates {
 	pub accessPolicy: CanOmit<String>,
 	//pub multiPremiseArgument: CanNullOrOmit<bool>, // excluded, since updating this field has external side-effects that would be unexpected in a generic update_x command
