@@ -1,7 +1,7 @@
 import {SleepAsync, Vector2, WaitXThenRun, E, ea} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import moment from "web-vcore/nm/moment";
-import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Div, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction, chroma_maxDarken} from "web-vcore";
@@ -196,6 +196,48 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: 
 }
 
 @Observer
+export class MapPathResult extends BaseComponentPlus({} as {path: string}, {}) {
+	render() {
+		const {path: resultPath} = this.props;
+
+		const openMapID = GetOpenMapID();
+		const openMap = GetMap(openMapID);
+		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
+
+		const resultPath_nodeIDs = resultPath.split("/");
+		const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
+		const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
+		const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
+
+		const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
+		const resultPath_str = resultPath_nodeTitles.map(a=>{
+			return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
+		}).join(" -> ");
+
+		return (
+			<Button style={{
+				justifyContent: "flex-start",
+			}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
+				if (inCurrentMap) {
+					JumpToNode(openMapID!, resultPath);
+				} else {
+					if (result_map == null) return; // still loading
+					RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+						if (result_map.id == globalMapID) {
+							store.main.page = "global";
+						} else {
+							store.main.page = "debates";
+							store.main.debates.selectedMapID = result_map.id;
+						}
+					});
+				}
+			}}/>
+		);
+	}
+
+}
+
+@Observer
 export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, index: number}, {}) {
 	/* ComponentWillReceiveProps(props) {
 		const { nodeID, rootNodeID, findNode_state, findNode_node } = props;
@@ -206,56 +248,6 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			}
 		}
 	} */
-	async StartFindingPathsFromRootsToX(targetNodeY: UUID) {
-	// StartFindingPathsFromXToY = flow(function* StartFindingPathsFromXToY(rootNodeX: UUID, targetNodeY: UUID) {
-		const searchDepth = 100;
-
-		const upPathCompletions = [] as string[];
-		let upPathAttempts = [`${targetNodeY}`];
-		for (let depth = 0; depth < searchDepth; depth++) {
-			const newUpPathAttempts = [] as string[];
-			for (const upPath of upPathAttempts) {
-				const nodeID = upPath.split("/").First();
-				const node = await GetAsync(()=>GetNodeL2(nodeID));
-				// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as NodeL2;
-				if (node == null) {
-					LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
-					continue;
-				}
-
-				if (node.rootNodeForMap != null) {
-					upPathCompletions.push(upPath);
-					// continue; // commented; node may be a map-root, and still have parents
-				}
-
-				//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
-				//const parentIDs = GetNodeLinks(null, node.id).map(a=>a.parent);
-				const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
-				const parentIDs = parentLinks.map(a=>a.parent);
-				for (const parentID of parentIDs) {
-					const newUpPath = `${parentID}/${upPath}`;
-					newUpPathAttempts.push(newUpPath);
-				}
-			}
-			upPathAttempts = newUpPathAttempts;
-
-			// if (depth === 0 || upPathCompletions.length !== State(a => a.main.search.findNode_resultPaths).length) {
-			RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
-				store.main.search.findNode_resultPaths = upPathCompletions.slice();
-				store.main.search.findNode_currentSearchDepth = depth + 1;
-			});
-
-			await SleepAsync(100);
-			// yield SleepAsync(100);
-			// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
-			if (upPathAttempts.length == 0 || this.mounted === false) break;
-			// if (upPathAttempts.length == 0) this.StopSearch();
-			// if search is marked as "starting to stop", actually stop search here by breaking the loop
-			if (store.main.search.findNode_state === "inactive") break;
-		}
-
-		this.StopSearch();
-	}
 	StopSearch() {
 		RunInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
 	}
@@ -269,17 +261,30 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const node = GetNodeL2(nodeID);
 		const creator = node ? GetUser(node.creator) : null;
 
-		const openMapID = GetOpenMapID();
-		const openMap = GetMap(openMapID);
-		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
-
 		const {findNode_state} = store.main.search;
 		const {findNode_node} = store.main.search;
 		if (findNode_state === "activating" && findNode_node == nodeID && !SearchResultRow.searchInProgress) {
 			SearchResultRow.searchInProgress = true;
 			WaitXThenRun(0, ()=>{
 				RunInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
-				this.StartFindingPathsFromRootsToX(nodeID).then(()=>SearchResultRow.searchInProgress = false);
+				FindPathsFromMapRootsToX(nodeID, async(upPathAttempts, upPathCompletions, depth)=>{
+					RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
+						store.main.search.findNode_resultPaths = upPathCompletions.slice();
+						// "depth" is the layer-distance between X/origin-node and the last node whose parents have been acquired; so add 1 (since those parents are already integrated)
+						store.main.search.findNode_currentSearchDepth = depth + 1;
+					});
+
+					await SleepAsync(100);
+
+					// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
+					if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
+					// if search is marked as "starting to stop", actually stop search here by breaking the loop
+					if (store.main.search.findNode_state === "inactive") return {breakIteration: true};
+					return {breakIteration: false};
+				}).then(()=>{
+					this.StopSearch();
+					SearchResultRow.searchInProgress = false;
+				});
 			});
 		}
 		const {findNode_resultPaths} = store.main.search;
@@ -295,7 +300,9 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		return (
-			<Column>
+			<Column style={{
+				display: "flex", flexDirection: "column", gap: 4,
+			}}>
 				<Row mt={index === 0 ? 0 : 5} className="useLightText cursorSet"
 					style={E(
 						{
@@ -315,53 +322,73 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} childGroup={ChildGroup.generic}/>
 				</Row>
 				{findNode_node === nodeID &&
-					<Row>
-						{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
-						{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
-						<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
-						<Button ml={5} text="Close" onClick={()=>{
-							RunInAction("SearchResultRow.Close", ()=>{
-								store.main.search.findNode_state = "inactive";
-								store.main.search.findNode_node = null;
-								store.main.search.findNode_resultPaths = [];
-								store.main.search.findNode_currentSearchDepth = 0;
-							});
-						}}/>
+					<Row style={{
+						justifyContent: "space-between",
+					}}>
+						<Div style={
+							{display: "flex", flexDirection: "row", alignItems: "center"}
+						}>
+							{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
+							{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
+						</Div>
+						<Div style={
+							{display: "flex", flexDirection: "row", alignItems: "center"}
+						}>
+							<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
+							<Button ml={5} text="Close" onClick={()=>{
+								RunInAction("SearchResultRow.Close", ()=>{
+									store.main.search.findNode_state = "inactive";
+									store.main.search.findNode_node = null;
+									store.main.search.findNode_resultPaths = [];
+									store.main.search.findNode_currentSearchDepth = 0;
+								});
+							}}/>
+						</Div>
 					</Row>}
 				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
-					const resultPath_nodeIDs = resultPath.split("/");
-					const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
-					const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
-					const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
-
-					const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
-					const resultPath_str = resultPath_nodeTitles.map(a=>{
-						return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
-					}).join(" -> ");
-
 					return (
-						<Row key={resultPath}>
-							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
-								if (inCurrentMap) {
-									JumpToNode(openMapID!, resultPath);
-								} else {
-									if (result_map == null) return; // still loading
-									RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (result_map.id == globalMapID) {
-											store.main.page = "global";
-										} else {
-											store.main.page = "debates";
-											store.main.debates.selectedMapID = result_map.id;
-										}
-									});
-								}
-							}}/>
-						</Row>
+						<MapPathResult key={resultPath} path={resultPath}/>
 					);
 				})}
 			</Column>
 		);
 	}
+}
+
+export async function FindPathsFromMapRootsToX(targetNodeY: UUID, actionAfterEachDepthIteration: (upPathAttempts: string[], upPathCompletions: string[], depth: number)=>Promise<{breakIteration: boolean}>, searchDepth = 100) {
+	const upPathCompletions = [] as string[];
+	let upPathAttempts = [`${targetNodeY}`];
+	for (let depth = 0; depth < searchDepth; depth++) {
+		const newUpPathAttempts = [] as string[];
+		for (const upPath of upPathAttempts) {
+			const nodeID = upPath.split("/").First();
+			const node = await GetAsync(()=>GetNodeL2(nodeID));
+			// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as NodeL2;
+			if (node == null) {
+				LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
+				continue;
+			}
+
+			if (node.rootNodeForMap != null) {
+				upPathCompletions.push(upPath);
+				// continue; // commented; node may be a map-root, and still have parents
+			}
+
+			//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
+			//const parentIDs = GetNodeLinks(null, node.id).map(a=>a.parent);
+			const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
+			const parentIDs = parentLinks.map(a=>a.parent);
+			for (const parentID of parentIDs) {
+				const newUpPath = `${parentID}/${upPath}`;
+				newUpPathAttempts.push(newUpPath);
+			}
+		}
+		upPathAttempts = newUpPathAttempts;
+
+		const {breakIteration} = await actionAfterEachDepthIteration(upPathAttempts, upPathCompletions, depth);
+		if (breakIteration) break;
+	}
+	return {upPathCompletions};
 }
 
 export function JumpToNode(mapID: string, path: string) {
