@@ -196,6 +196,48 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: 
 }
 
 @Observer
+export class MapPathResult extends BaseComponentPlus({} as {path: string}, {}) {
+	render() {
+		const {path: resultPath} = this.props;
+
+		const openMapID = GetOpenMapID();
+		const openMap = GetMap(openMapID);
+		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
+
+		const resultPath_nodeIDs = resultPath.split("/");
+		const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
+		const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
+		const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
+
+		const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
+		const resultPath_str = resultPath_nodeTitles.map(a=>{
+			return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
+		}).join(" -> ");
+
+		return (
+			<Button style={{
+				justifyContent: "flex-start",
+			}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
+				if (inCurrentMap) {
+					JumpToNode(openMapID!, resultPath);
+				} else {
+					if (result_map == null) return; // still loading
+					RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+						if (result_map.id == globalMapID) {
+							store.main.page = "global";
+						} else {
+							store.main.page = "debates";
+							store.main.debates.selectedMapID = result_map.id;
+						}
+					});
+				}
+			}}/>
+		);
+	}
+
+}
+
+@Observer
 export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, index: number}, {}) {
 	/* ComponentWillReceiveProps(props) {
 		const { nodeID, rootNodeID, findNode_state, findNode_node } = props;
@@ -218,10 +260,6 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const {nodeID, index} = this.props;
 		const node = GetNodeL2(nodeID);
 		const creator = node ? GetUser(node.creator) : null;
-
-		const openMapID = GetOpenMapID();
-		const openMap = GetMap(openMapID);
-		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
 
 		const {findNode_state} = store.main.search;
 		const {findNode_node} = store.main.search;
@@ -308,34 +346,8 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 						</Div>
 					</Row>}
 				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
-					const resultPath_nodeIDs = resultPath.split("/");
-					const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
-					const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
-					const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
-
-					const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
-					const resultPath_str = resultPath_nodeTitles.map(a=>{
-						return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
-					}).join(" -> ");
-
 					return (
-						<Button style={{
-							justifyContent: "flex-start",
-						}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
-							if (inCurrentMap) {
-								JumpToNode(openMapID!, resultPath);
-							} else {
-								if (result_map == null) return; // still loading
-								RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-									if (result_map.id == globalMapID) {
-										store.main.page = "global";
-									} else {
-										store.main.page = "debates";
-										store.main.debates.selectedMapID = result_map.id;
-									}
-								});
-							}
-						}}/>
+						<MapPathResult key={resultPath} path={resultPath}/>
 					);
 				})}
 			</Column>

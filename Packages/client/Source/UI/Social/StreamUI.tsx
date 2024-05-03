@@ -13,7 +13,7 @@ import {BaseComponentPlus, UseState} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {GetOpenMapID} from "../../Store/main.js";
-import {FindPathsFromMapRootsToX, JumpToNode} from "../@Shared/NavBar/SearchPanel.js";
+import {FindPathsFromMapRootsToX, JumpToNode, MapPathResult} from "../@Shared/NavBar/SearchPanel.js";
 
 @Observer
 export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boolean}, {}) {
@@ -132,56 +132,47 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 		const map = GetMap(mapId);
 		const inCurrentMap = openMap?.id === map?.id;
 		const [findingPath, setFindingPath] = UseState(false);
+		const [paths, setPaths] = UseState<string[]>([]);
 
-		const buttonText = (isInMap, isLoading)=>{
-			if (inCurrentMap) {
-				if (findingPath) {
-					return "Finding path...";
-				}
-				return "Find in Map";
+		const buttonText = ()=>{
+			if (paths.length) return "Clear";
+
+			if (findingPath) {
+				return "Finding path...";
 			}
-			return "Go to Map";
+			return "Find";
+
 		};
 
 		return (
 			<Column ref={a=>rootRef(a?.DOM_HTML ?? null)}>
-				<Row mt={index > 0 ? 10 : 0} mb={node_final?.type == "claim" ? 30 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
+				<Row mt={index > 0 ? 10 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
 					<Column sel ml={5} mr={5} p={5} center style={{justifyContent: "center"}}>
 						<Pre>{moment(run.runTime).format("YYYY-MM-DD")}</Pre>
 						<Pre>{moment(run.runTime).format("HH:mm:ss")}</Pre>
 					</Column>
 					{messageUI!}
 					{map?.id &&
-						<Button ml="auto" text={buttonText(inCurrentMap, findingPath)} style={{flexShrink: 0}} onClick={()=>{
-							if (inCurrentMap) {
-								setFindingPath(true);
-								FindPathsFromMapRootsToX(node_final!.id, async(upPathAttempts, upPathCompletions, depth)=>{
-									// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
-									if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
-
-									// if search is marked as "starting to stop", actually stop search here by breaking the loop
-									// commented atm; this can never actually happen, since the `findingPath` is a closure-held variable (this is fine though, since there is no "stop search" button in this panel atm anyway)
-									//if (!findingPath) return {breakIteration: true};
-
-									return {breakIteration: false};
-								}).then(info=>{
-									const path = info.upPathCompletions[0];
-									if (path) {
-										JumpToNode(openMapID!, path);
-									}
-								}).finally(()=>setFindingPath(false));
-								//JumpToNode(openMapID!, resultPath);
-							} else {
-								if (map == null) return; // still loading
-								RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-									if (map.id == globalMapID) {
-										store.main.page = "global";
-									} else {
-										store.main.page = "debates";
-										store.main.debates.selectedMapID = map.id;
-									}
-								});
+						<Button ml="auto" text={buttonText()} style={{flexShrink: 0}} onClick={()=>{
+							if (paths.length) {
+								setPaths([]);
+								return;
 							}
+
+							setFindingPath(true);
+							FindPathsFromMapRootsToX(node_final!.id, async(upPathAttempts, upPathCompletions, depth)=>{
+								// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
+								if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
+
+								// if search is marked as "starting to stop", actually stop search here by breaking the loop
+								// commented atm; this can never actually happen, since the `findingPath` is a closure-held variable (this is fine though, since there is no "stop search" button in this panel atm anyway)
+								//if (!findingPath) return {breakIteration: true};
+
+								return {breakIteration: false};
+							}).then(info=>{
+								setPaths(info.upPathCompletions);
+							}).finally(()=>setFindingPath(false));
+
 						}} />}
 					<Button ml={map?.id ? 5 : "auto"} text="Details" style={{flexShrink: 0}} onClick={()=>{
 						console.log(node_final, map);
@@ -196,6 +187,19 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 							},
 						});
 					}} />
+				</Row>
+				{paths.length != 0 && <Row style={{
+					display: "flex", flexDirection: "column", gap: 4, marginTop: 4, marginBottom: 4,
+				}}>
+				{paths.map(resultPath=>{
+					return (
+						<MapPathResult key={resultPath} path={resultPath}/>
+					);
+				})}
+				</Row>}
+				<Row style={{
+					marginTop: node_final?.type === "claim" ? 30 : 0,
+				}}>
 				</Row>
 				{messageUI_row2}
 			</Column>
