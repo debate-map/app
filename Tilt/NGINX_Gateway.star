@@ -41,7 +41,10 @@ def Start_NGINXGateway(g):
 				"ngf-nginx-gateway-fabric:clusterrole",
 				"ngf-nginx-gateway-fabric:clusterrolebinding",
 				"ngf-config:nginxgateway",
-			]
+			],
+			# this PF is only really necessary on Linux, when using docker-engine (in other cases, k8s auto-creates PF for the load-balancer)
+			# but we'll keep it for now, on the condition that it doesn't cause problems on the other platforms
+			"port_forwards": '5200:80' if g["REMOTE"] else '5100',
 		},
 	])
 

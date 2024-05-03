@@ -308,7 +308,7 @@ Other notes:
 		* 2.1.1\) Follow: https://www.docker.com/products/docker-desktop
 		* 2.1.2\) Create your Kubernetes cluster, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
 		* Note: To delete and recreate the cluster, use the settings panel.
-	* 2.2\) Option 2: K3d **(recommended for Linux)**
+	* 2.2\) Option 2 or 3: K3d or Kind **(recommended for Linux)**
 		* 2.2.1\) First, install docker itself.
 			* 2.2.1.1\) If on Windows/Mac, install Docker as a prerequisite -- which on these platforms, is done through installation of Docker Desktop (though without need of creating a k8s cluster through its ui as seen in step 2.1.2): https://www.docker.com/products/docker-desktop
 			* 2.2.1.2\) If on Linux, install **docker-engine**, and configure it to rootless mode; note that **docker-engine is not the same as Docker Desktop for Linux**.
@@ -329,19 +329,36 @@ Other notes:
 					sudo loginctl enable-linger $(whoami)
 					```
 				* 2.2.1.2.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
-				* Note: These instructions are a WIP; I've not yet been able to get tilt/k3d operating successfully against the rootless version of docker. (still working on it; alternately, could try going for Kind + rootless-docker instead, but Kind's cluster creations/deletions [take ~3x as long](https://github.com/kumahq/kuma/pull/1841#pullrequestreview-639847453))
-		* 2.2.2\) Follow: https://k3d.io/#installation
-		* 2.2.3\) Create a local registry [remove `sudo` if not on Linux]: `sudo k3d registry create reg.localhost --port 5000`
-		* 2.2.4\) Create a local cluster [remove `sudo` if not on Linux]: `sudo k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
-		* 2.2.5\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
-			* 2.2.5.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
-			* 2.2.5.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
-		* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-	* 2.3\) Option 3: Kind
-		* 2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
-		* 2.3.2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
-		* 2.3.3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
-		* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
+				* 2.2.1.2.11\) If you're using an encrypted home directory, you'll need to create a loopback device/image/mount at the path `~/.local/share/docker`.
+					* 2.2.1.2.11.1\) Run: `cd ~/.Private`
+					* 2.2.1.2.11.2\) Create the image (change/customize `30M` to `XM`, where X is the desired size in gigabytes): `dd if=/dev/zero of=docker.img bs=30M count=1024`
+					* 2.2.1.2.11.3\) Format the image: `mkfs.ext4 docker.img`
+					* 2.2.1.2.11.4\) Create the mountpoint:
+						```
+						mkdir -p ~/.local/share/docker
+						sudo mount docker.img ~/.local/share/docker
+						```
+					* 2.2.1.2.11.5\) Verify the mountpoint is active, by running `df -h` (you should see an entry containing `~/.local/share/docker`), or by running `mountpoint ~/.local/share/docker; printf "$?\n"`.
+					* 2.2.1.2.11.6\) Make your user the owner of the new mountpoint folder, and give it read and write permissions:
+						```
+						sudo chown -R $USER ~/.local/share/docker
+						chmod -R u+rw ~/.local/share/docker
+						```
+					* 2.2.1.2.11.7\) Set up that mountpoint to get auto-initialized at startup, by opening `/etc/fstab` in a text editor and adding a line like this (filling in your username): `/home/YOUR_USERNAME/.Private/docker.img  ~/.local/share/docker  ext4  defaults  0  2`
+					* Note: Some of the "auto-init at startup" functionality appears to not be working atm. TODO: Correct this section so that no actions are required at startup. (Atm I think `sudo mount docker.img ~/.local/share/docker` and `systemctl --user restart docker` are needed.)
+		* 2.2.2\) Option 2: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
+			* 2.2.2.1\) Follow: https://k3d.io/#installation
+			* 2.2.2.2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
+			* 2.2.2.3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`) [this line currently hangs for me on my linux laptop]
+			* 2.2.2.4\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
+				* 2.2.2.4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
+				* 2.2.2.4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary; eg. on Linux Mint 21.3, this was not necessary)
+			* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
+		* 2.2.3\) Option 3: Kind **(recommended for Linux)**
+			* 2.2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+			* 2.2.3.2\) Run: `kind create cluster --name main-1`. The resulting image will be named `kind-main-1`.
+			* 2.2.3.3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+			* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
 	* 2.4\) Option 4: Rancher Desktop
 		* 2.4.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation
 		* 2.4.2\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
@@ -356,17 +373,17 @@ Other notes:
 #### After steps
 
 * 1\) Various scripts expect the debate-map k8s contexts to be called `dm-local` (or `dm-ovh` for prod cluster). To prevent errors from name mismatches, create an alias/copy of the k8s context you just created, renaming it to `dm-local`:
-	* 1.1\) For Docker Desktop and Rancher Desktop, this means:
+	* 1.1\) This means:
 		* 1.1.1\) Open: `$HOME/.kube/config`
-		* 1.1.2\) Find the section with these contents: (Rancher Desktop uses "rancher-desktop" instead, etc.)
+		* 1.1.2\) Find the context entry for the k8s solution you're using. For Docker Desktop, this would look like the following: (the equivalent entries for rancher-desktop, k3d, kind, etc. should be straightforward to discern)
 		```
 		- context:
 		    cluster: docker-desktop
 		    user: docker-desktop
 		  name: docker-desktop
 		```
-		* 1.1.3\) Copy-paste that section just below it, changing the copy's `name: docker-desktop` to `name: dm-local`, then save.
-		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local`
+		* 1.1.3\) Copy-paste that section just below it, changing the copy's (outer) `name: docker-desktop` to `name: dm-local`, then save.
+		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local` (you can also just modify the `current-context` field in the `~/.kube/config` file)
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
 #### Troubleshooting
@@ -377,6 +394,7 @@ Other notes:
 		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
 		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
 * 3\) If the list of images/containers gets annoyingly long, see the [docker-trim](#docker-trim) module.
+* 4\) If you had previously installed docker through one approach (eg. rancher desktop), but then want to switch to another (eg. docker engine), this can cause subtle conflicts. It is recommended to fully uninstall the previous installation before installing the new one.
 
 </details>
 
