@@ -329,23 +329,29 @@ Other notes:
 					sudo loginctl enable-linger $(whoami)
 					```
 				* 2.2.1.2.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
-				* 2.2.1.2.11\) If you're using an encrypted home directory, you'll need to create a loopback device/image/mount at the path `~/.local/share/docker`.
-					* 2.2.1.2.11.1\) Run: `cd ~/.Private`
-					* 2.2.1.2.11.2\) Create the image (change/customize `30M` to `XM`, where X is the desired size in gigabytes): `dd if=/dev/zero of=docker.img bs=30M count=1024`
-					* 2.2.1.2.11.3\) Format the image: `mkfs.ext4 docker.img`
-					* 2.2.1.2.11.4\) Create the mountpoint:
+				* 2.2.1.2.11\) If you're using an `ecryptfs` encrypted home directory (eg. as set during Linux Mint install), the regular `~/.local/share/docker` path will not work as the docker root/data dir (the `overlay2` file-system that docker tries to use apparently cannot work on top of an `ecryptfs` file-system, resulting in the cryptic `invalid argument` error on trying to perform docker commands). To fix this, you'll need to tell docker to use a different folder.
+					* 2.2.1.2.11.1\) Create an empty folder somewhere, as the root/data dir for (rootless mode) docker. We'll refer to this as `/NEW_DOCKER_ROOT` from here on, but you can choose whatever path you want (so long as it is **outside of your home folder**). Example command: `sudo mkdir -p /NEW_DOCKER_ROOT`
+					* 2.2.1.2.11.2\) Change folder's owner to your user: `sudo chown -R $USER /NEW_DOCKER_ROOT`
+					* 2.2.1.2.11.3\) Change folder's permissions to allow read and write for your user: `chmod -R u+rw /NEW_DOCKER_ROOT`
+					* 2.2.1.2.11.4\) Create/modify the `~/.config/docker/daemon.json` config file, to have the `data-root` field set to the new data directory you just created. Example contents for the file (can contain other fields/customizations):
 						```
-						mkdir -p ~/.local/share/docker
-						sudo mount docker.img ~/.local/share/docker
+						{
+							"data-root": "/NEW_DOCKER_ROOT"
+						}
+
 						```
-					* 2.2.1.2.11.5\) Verify the mountpoint is active, by running `df -h` (you should see an entry containing `~/.local/share/docker`), or by running `mountpoint ~/.local/share/docker; printf "$?\n"`.
-					* 2.2.1.2.11.6\) Make your user the owner of the new mountpoint folder, and give it read and write permissions:
+					* 2.2.1.2.11.5\) To have docker operate with this new data directory, either restart your computer, or run: `systemctl --user daemon-reload && systemctl --user restart docker`
+				* 2.2.1.2.12\) If you encounter the issue of the user-level `docker` service (added by the rootless-docker install script) inexplicably just failing to be launched at time of user login (ie. a status of `inactive (dead)` after startup, but no errors or other debug information), you can try using the workaround described below. (I needed to use this on my Linux Mint laptop; while unconfirmed, I suspect it ultimately had to do with my having `ecryptfs` encryption enabled for my home directory.)
+					* 2.2.1.2.12.1\) Create a file at `~/.config/autostart/docker-fix.desktop`, with the following contents:
 						```
-						sudo chown -R $USER ~/.local/share/docker
-						chmod -R u+rw ~/.local/share/docker
+						[Desktop Entry]
+						Type=Application
+						Name=Docker Fix
+						Exec=systemctl --user start docker
+						Hidden=false
+						NoDisplay=false
+						X-GNOME-Autostart-enabled=true
 						```
-					* 2.2.1.2.11.7\) Set up that mountpoint to get auto-initialized at startup, by opening `/etc/fstab` in a text editor and adding a line like this (filling in your username): `/home/YOUR_USERNAME/.Private/docker.img  ~/.local/share/docker  ext4  defaults  0  2`
-					* Note: Some of the "auto-init at startup" functionality appears to not be working atm. TODO: Correct this section so that no actions are required at startup. (Atm I think `sudo mount docker.img ~/.local/share/docker` and `systemctl --user restart docker` are needed.)
 		* 2.2.2\) Option 2: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
 			* 2.2.2.1\) Follow: https://k3d.io/#installation
 			* 2.2.2.2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
