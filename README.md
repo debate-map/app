@@ -366,7 +366,7 @@ Other notes:
 						```
 					* The docker service should now be able to auto-start when the computer starts. (the above is admittedly a workaround, but it's been working fine for me so far)
 					</details>
-		* 2.3.2\) Option 2: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
+		* 2.3.2\) Option 3: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
 			* 2.3.2.1\) Follow: https://k3d.io/#installation
 			* 2.3.2.2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
 			* 2.3.2.3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`) [this line currently hangs for me on my linux laptop]
@@ -374,7 +374,7 @@ Other notes:
 				* 2.3.2.4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
 				* 2.3.2.4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary; eg. on Linux Mint 21.3, this was not necessary)
 			* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-		* 2.3.3\) Option 3: Kind **(recommended for Linux)**
+		* 2.3.3\) Option 4: Kind **(recommended for Linux)**
 			* 2.3.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
 			* 2.3.3.2\) Run: `kind create cluster --name main-1`. The resulting image will be named `kind-main-1`.
 			* 2.3.3.3\) Your cluster will most likely fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
@@ -599,7 +599,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 * 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s dm-local"`
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s dm-local db:postgres"`)
-* 2\) Run: `npm start "db.initDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@InitDB.sql` script)
+* 2\) Run: `npm start "db.initDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@CreateDB.sql` and `./Scripts/InitDB/@InitDB.sql` scripts)
 * 3\) Run: `npm start "db.seedDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
 	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript dm-local"`.
 
@@ -623,7 +623,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
 			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
-* 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
+* 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the graphql playground page at `localhost:5100/app-server/gql-playground`).
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
