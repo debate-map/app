@@ -275,7 +275,7 @@ Additional tools: (all optional)
 </details>
 
 <!----><a name="setup-k8s"></a>
-<details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
+<details><summary><b>[setup-k8s] Setting up local k8s cluster</b></summary>
 
 > There are multiple ways to set up a local Kubernetes cluster. This guide-module **recommends using "Docker Desktop" on Windows/Mac and "docker engine" + "kind" on Linux**, but other approaches should also work (though with possibly sparser documentation in this readme).
 
@@ -285,13 +285,13 @@ Options discussed in this module: ([X,X,X] = [linux, mac, windows], [X,X] = [lin
 | Name             | Cluster recreate | Registry delay | VM overhead | Runtime perf |
 | -                | -                | -              | -           | -            |
 | Docker Desktop   | slow             | 0              | Y           | ~5           |
-| K3d              | very fast        | 0/~3m          | N/Y/Y       | 10           |
-| Kind             | fast             | 0/~3m          | N/Y/Y       | ?            |
 | Rancher Desktop  | ?                | ?              | Y           | ?            |
+| K3d              | very fast        | 0/~3m          | N/Y/Y       | 10           |
+| Kind             | fast             | 0/~3m          | N/Y/Y       | 10?          |
 
 Other notes:
 * General:
-	* The runtime perf numbers are very rough estimates based on anecdotal times observed.
+	* The runtime perf numbers are (currently) just very rough estimates based on anecdotal times observed.
 * Docker Desktop **(recommended for Windows/Mac)**
 	* CON: Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
 * Rancher Desktop: No other notes atm.
@@ -398,7 +398,7 @@ Other notes:
 		    user: docker-desktop
 		  name: docker-desktop
 		```
-		* 1.1.3\) Copy-paste that section just below it, changing the copy's (outer) `name: docker-desktop` to `name: dm-local`, then save.
+		* 1.1.3\) Make a new copy of that section (pasted just below it), changing the copy's `name: docker-desktop` (the outer one, if that key is seen twice) to `name: dm-local`, then save.
 		* 1.1.4\) [opt] To switch to this new context immediately (not necessary): `kubectl config use-context dm-local` (you can also just modify the `current-context` field in the `~/.kube/config` file)
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
