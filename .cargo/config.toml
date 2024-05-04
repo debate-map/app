@@ -22,25 +22,27 @@ protocol = "sparse"
 #incremental = true
 
 # linker: mold
+# 2024-05-04: Commented; using mold yields runtime errors, from the rust binaries somehow requiring GLIBC_2.38.
+# ...I tried but failed to track down the cause of this requirement (eg. it's not the glibc used during build); have to disable for now.
 # ==========
 
-# for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
-[target.x86_64-unknown-linux-gnu]
-linker = "clang"
-rustflags = [
-	#"-Awarnings",
-	"-C", "link-arg=-fuse-ld=mold"]
+# # for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
+# [target.x86_64-unknown-linux-gnu]
+# linker = "clang"
+# rustflags = [
+# 	#"-Awarnings",
+# 	"-C", "link-arg=-fuse-ld=mold"]
 
-# for musl-based linux builds (eg. when trying to deploy to an alpine image)
-[target.x86_64-unknown-linux-musl]
-linker = "clang"
-rustflags = [
-	#"-Awarnings",
-	"-C", "link-arg=-fuse-ld=mold"]
-#rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
-# from: https://stackoverflow.com/a/70378019
-# this variant doesn't work fsr; get error: "= note: clang: error: unsupported option '--ld-path=/usr/local/bin/mold'"
-#rustflags = ["-Awarnings", "-C", "link-arg=--ld-path=/usr/local/bin/mold"]
+# # for musl-based linux builds (eg. when trying to deploy to an alpine image)
+# [target.x86_64-unknown-linux-musl]
+# linker = "clang"
+# rustflags = [
+# 	#"-Awarnings",
+# 	"-C", "link-arg=-fuse-ld=mold"]
+# #rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
+# # from: https://stackoverflow.com/a/70378019
+# # this variant doesn't work fsr; get error: "= note: clang: error: unsupported option '--ld-path=/usr/local/bin/mold'"
+# #rustflags = ["-Awarnings", "-C", "link-arg=--ld-path=/usr/local/bin/mold"]
 
 # linker: lld
 # ==========
@@ -56,6 +58,7 @@ rustflags = [
 	#"-Awarnings",
 	"-C", "link-arg=-fuse-ld=lld"]
 
+# as of 2024-05-04, on my Linux Mint laptop, the lld linker was no faster than default/gcc/ld (actually a couple seconds slower these times)
 # [target.x86_64-unknown-linux-gnu]
 # #rustflags = ["-Awarnings", "-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]
 # linker = "/usr/bin/clang"

@@ -363,7 +363,7 @@ Other notes:
 		* 2.2.3\) Option 3: Kind **(recommended for Linux)**
 			* 2.2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
 			* 2.2.3.2\) Run: `kind create cluster --name main-1`. The resulting image will be named `kind-main-1`.
-			* 2.2.3.3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+			* 2.2.3.3\) Your cluster will most likely fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
 			* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
 	* 2.4\) Option 4: Rancher Desktop
 		* 2.4.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation

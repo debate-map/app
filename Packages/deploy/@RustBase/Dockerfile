@@ -6,46 +6,48 @@
 	# use the instrumentisto mirror of rust-nightly, so we can pin to a specific build (avoiding a rebuild of the whole build-chain every 24hrs, when the regular rust-nightly image gets re-pushed)
 	# NOTE: sync with version in rust-toolchain.toml (and entry in Tiltfile [edit: this part seems outdated?])
 	FROM instrumentisto/rust:nightly-bullseye-2024-03-05
-
-	# commented; these args aren't used in this dockerfile anyway, so leave them out, to allow complete skipping of this dockerfile (execution can be fast anyway when most steps cached, but this way keeps the logs leaner)
-	#ARG ENVIRONMENT
-	#ARG debug_vs_release
-	#ARG debug_vs_release_flag
 # ----------
-
-# initial arg processing
-#ENV ENVIRONMENT=$ENVIRONMENT
-#RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release"
 
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1
 
-# install mold linker [works:181s]
+# NOTE: The install steps for alternative linkers below (mold, lld) will often get commented without being removed.
+# Main reason: Compatibility between the linkers and distro versions/images change over time, so they cannot always be used together.
+# (for additional notes on the linkers, see `.cargo/config.toml` and `Docs/CompilationSpeed.md`)
+
+# install mold linker [2022-04-18: works, 181s]
 # RUN apt-get update \
 # 	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
 # 	&& git clone https://github.com/rui314/mold.git \
 # 	&& cd mold \
-# 	&& git checkout v1.0.1 \
-# 	&& make -j$(nproc) CXX=clang++ \
-# 	&& make install
+# 	&& git checkout v2.31.0 \
+# 	&& ./install-build-deps.sh \
+# 	&& cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=c++ -B build \
+# 	&& cmake --build build -j$(nproc) \
+# 	&& cmake --build build --target install
 
-# install mold linker, from debian's v12 "sid/unstable" repository (mold is not in debian [10/11]'s repository atm) [works:72s]
-RUN apt-get update && \
-	# install some things needed by mold (at mold run-time)
-	#apt-get -y install build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config && \
-	apt-get -y install clang && \
-	# install mold
-	apt-get -y --no-install-recommends install software-properties-common && \
-	#apt-get -y install software-properties-common && \
-	add-apt-repository "deb http://httpredir.debian.org/debian sid main" && \
-	apt-get update && \
-	apt-get -t sid install -y --no-install-recommends mold
-	#apt-get -t sid install -y mold
-# also install various other commands (eg. for inspecting folder-structure during build)
-RUN apt-get install -y tree
+# install mold linker, from debian's v12 "sid/unstable" repository (mold is not in debian [10/11]'s repository atm) [2022-04-18: works, 72s]
+# RUN apt-get update && \
+# 	# install some things needed by mold (at mold run-time)
+# 	#apt-get -y install build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config && \
+# 	apt-get -y install clang && \
+# 	# install mold
+# 	apt-get -y --no-install-recommends install software-properties-common && \
+# 	#apt-get -y install software-properties-common && \
+# 	add-apt-repository "deb http://httpredir.debian.org/debian sid main" && \
+# 	apt-get update && \
+# 	apt-get -t sid install -y --no-install-recommends mold
+# 	#apt-get -t sid install -y mold
 
 # ensure mold is installed
-RUN mold --version
+# RUN mold --version
+
+# install ldd linker
+# RUN apt-get update \
+# 	&& apt-get install -y lld clang
+
+# also install various other commands (eg. for inspecting folder-structure during build)
+RUN apt-get install -y tree
 
 # install the cranelift compiler # commented, since had issues on MA's machine (since ARM)
 # RUN mkdir /cg_clif && \
@@ -66,7 +68,7 @@ ENV CARGO_PROFILE_DEV_DEBUG=1
 # rust-base may end up with an old version of the cargo components cached (see next section); to break this cache, we can toggle the number in the next line
 RUN echo "Cache-breaker (0 or 1): 0"
 
-# depending on build variables, we may need to collect a few more files before compiling; do this ahead of time for those scenarios, so its cached in the RustBase image
+# depending on build variables, we may need to collect a few more files before compiling; do this ahead of time for those scenarios, so it's cached in the RustBase image
 RUN USER=root cargo new --bin cargo-build-prepper
 WORKDIR /dm_repo/cargo-build-prepper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
