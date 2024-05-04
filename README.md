@@ -277,7 +277,7 @@ Additional tools: (all optional)
 <!----><a name="setup-k8s"></a>
 <details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
 
-> There are multiple ways to set up a local Kubernetes cluster. This guide-module **recommends using Docker Desktop on Windows/Mac and k3d on Linux**, but other approaches should also work (though with possibly sparser documentation in this readme).
+> There are multiple ways to set up a local Kubernetes cluster. This guide-module **recommends using "Docker Desktop" on Windows/Mac and "docker engine" + "kind" on Linux**, but other approaches should also work (though with possibly sparser documentation in this readme).
 
 #### Options
 
@@ -294,9 +294,9 @@ Other notes:
 	* The runtime perf numbers are very rough estimates based on anecdotal times observed.
 * Docker Desktop **(recommended for Windows/Mac)**
 	* CON: Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-* K3d **(recommended for Linux)**: No other notes atm.
 * Rancher Desktop: No other notes atm.
-* Kind: No other notes atm.
+* K3d: No other notes atm.
+* Kind **(recommended for Linux)**: No other notes atm.
 
 #### Base instructions
 
@@ -308,41 +308,53 @@ Other notes:
 		* 2.1.1\) Follow: https://www.docker.com/products/docker-desktop
 		* 2.1.2\) Create your Kubernetes cluster, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
 		* Note: To delete and recreate the cluster, use the settings panel.
-	* 2.2\) Option 2 or 3: K3d or Kind **(recommended for Linux)**
-		* 2.2.1\) First, install docker itself.
-			* 2.2.1.1\) If on Windows/Mac, install Docker as a prerequisite -- which on these platforms, is done through installation of Docker Desktop (though without need of creating a k8s cluster through its ui as seen in step 2.1.2): https://www.docker.com/products/docker-desktop
-			* 2.2.1.2\) If on Linux, install **docker-engine**, and configure it to rootless mode; note that **docker-engine is not the same as Docker Desktop for Linux**.
+	* 2.2\) Option 2: Rancher Desktop
+		* 2.2.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation
+		* 2.2.2\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
+		* Note: To delete and recreate the cluster, use the settings panel.
+	* 2.3\) Option 3 or 4: K3d or Kind **(recommended for Linux)**
+		* 2.3.1\) First, install docker itself. (aka "docker engine")
+			* 2.3.1.1\) If on Windows/Mac, install Docker as a prerequisite -- which on these platforms, is done through installation of Docker Desktop (though without need of creating a k8s cluster through its ui as seen in step 2.1.2): https://www.docker.com/products/docker-desktop
+			* 2.3.1.2\) If on Linux, install **docker-engine**, and configure it to rootless mode; note that **docker-engine is not the same as Docker Desktop for Linux**.
 				* Note: Docker-engine begins in normal/root mode, but can be switched to operate in "rootless mode". The scripts and instructions in this repo assume a "rootless" setup (for lower security risk and easier usage from scripts), but operating in normal/root mode should also be possible with some script tweaks (the section below assumes we're aiming for rootless mode though).
-				* 2.2.1.2.1\) Start by installing docker-engine the normal way (we'll switch it to "rootless mode" shortly): https://docs.docker.com/engine/install
-				* 2.2.1.2.2\) Open this page, as reference for changing docker-engine to rootless mode: https://docs.docker.com/engine/security/rootless
-				* Note: The remaining instructions on this level are based on the docs page above; and these summarized instructions assume you're using Ubuntu / Linux Mint. So only follow these simplified steps if not conflicting with the instructions on that page.
-				* 2.2.1.2.3\) Run: `apt install uidmap`
-				* 2.2.1.2.4\) Run: `sudo apt-get install -y dbus-user-session`
-					* 2.2.1.2.4.1\) If this resulted in a new version being installed, log out then back in.
-				* 2.2.1.2.5\) Run: `apt-get install docker-ce-rootless-extras`
-				* 2.2.1.2.6\) Ensure the system-wide Docker daemon is not already running, by running: `sudo systemctl disable --now docker.service docker.socket`
-				* 2.2.1.2.7\) Run `/usr/bin/dockerd-rootless-setuptool.sh install`. If this command succeeds, docker-engine should now be runnable in rootless mode.
-				* 2.2.1.2.8\) If you want docker-engine to be launched in rootless mode immediately, run: `systemctl --user start docker`
-				* 2.2.1.2.9\) To have docker-engine automatically launched in rootless mode at time of login, run:
-					```
-					systemctl --user enable docker
-					sudo loginctl enable-linger $(whoami)
-					```
-				* 2.2.1.2.10\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
-				* 2.2.1.2.11\) If you're using an `ecryptfs` encrypted home directory (eg. as set during Linux Mint install), the regular `~/.local/share/docker` path will not work as the docker root/data dir (the `overlay2` file-system that docker tries to use apparently cannot work on top of an `ecryptfs` file-system, resulting in the cryptic `invalid argument` error on trying to perform docker commands). To fix this, you'll need to tell docker to use a different folder.
-					* 2.2.1.2.11.1\) Create an empty folder somewhere, as the root/data dir for (rootless mode) docker. We'll refer to this as `/NEW_DOCKER_ROOT` from here on, but you can choose whatever path you want (so long as it is **outside of your home folder**). Example command: `sudo mkdir -p /NEW_DOCKER_ROOT`
-					* 2.2.1.2.11.2\) Change folder's owner to your user: `sudo chown -R $USER /NEW_DOCKER_ROOT`
-					* 2.2.1.2.11.3\) Change folder's permissions to allow read and write for your user: `chmod -R u+rw /NEW_DOCKER_ROOT`
-					* 2.2.1.2.11.4\) Create/modify the `~/.config/docker/daemon.json` config file, to have the `data-root` field set to the new data directory you just created. Example contents for the file (can contain other fields/customizations):
+				* 2.3.1.2.1\) Start by installing docker-engine the normal way (we'll switch it to "rootless mode" shortly): https://docs.docker.com/engine/install
+				* 2.3.1.2.2\) Switch docker-engine to rootless mode: https://docs.docker.com/engine/security/rootless
+					<details><summary><b>2.3.1.2.2.X) Steps for switching to rootless mode (extracted from page above)</b></summary>
+
+					* Note: The instructions on this level are based on the docs page above; and these summarized instructions assume you're using Ubuntu / Linux Mint. So only follow these simplified steps if not conflicting with the instructions on that page.
+					* 1\) Run: `apt install uidmap`
+					* 2\) Run: `sudo apt-get install -y dbus-user-session`
+						* 2.1\) If this resulted in a new version being installed, log out then back in.
+					* 3\) Run: `apt-get install docker-ce-rootless-extras`
+					* 4\) Ensure the system-wide Docker daemon is not already running, by running: `sudo systemctl disable --now docker.service docker.socket`
+					* 5\) Run `/usr/bin/dockerd-rootless-setuptool.sh install`. If this command succeeds, docker-engine should now be runnable in rootless mode.
+					* 6\) If you want docker-engine to be launched in rootless mode immediately, run: `systemctl --user start docker`
+					* 7\) To have docker-engine automatically launched in rootless mode at time of login, run:
+						```
+						systemctl --user enable docker
+						sudo loginctl enable-linger $(whoami)
+						```
+					* 8\) Have the `docker` client/cli-tool default to operating against the rootless daemon (my interpretation of this step anyway), by running: `docker context use rootless`
+					</details>
+				* 2.3.1.2.3\) If you're using an `ecryptfs` encrypted home directory (eg. as set during Linux Mint install), the regular `~/.local/share/docker` path will not work as the docker root/data dir (the `overlay2` file-system that docker tries to use apparently cannot work on top of an `ecryptfs` file-system, resulting in the cryptic `invalid argument` error on trying to perform docker commands). To fix this, you'll need to tell docker to use a different folder.
+					<details><summary><b>2.3.1.2.3.X) Steps for changing docker's root data folder</b></summary>
+
+					* 1\) Create an empty folder somewhere, as the root/data dir for (rootless mode) docker. We'll refer to this as `/NEW_DOCKER_ROOT` from here on, but you can choose whatever path you want (so long as it is **outside of your home folder**). Example command: `sudo mkdir -p /NEW_DOCKER_ROOT`
+					* 2\) Change folder's owner to your user: `sudo chown -R $USER /NEW_DOCKER_ROOT`
+					* 3\) Change folder's permissions to allow read and write for your user: `chmod -R u+rw /NEW_DOCKER_ROOT`
+					* 4\) Create/modify the `~/.config/docker/daemon.json` config file, to have the `data-root` field set to the new data directory you just created. Example contents for the file (can contain other fields/customizations):
 						```
 						{
 							"data-root": "/NEW_DOCKER_ROOT"
 						}
 
 						```
-					* 2.2.1.2.11.5\) To have docker operate with this new data directory, either restart your computer, or run: `systemctl --user daemon-reload && systemctl --user restart docker`
-				* 2.2.1.2.12\) If you encounter the issue of the user-level `docker` service (added by the rootless-docker install script) inexplicably just failing to be launched at time of user login (ie. a status of `inactive (dead)` after startup, but no errors or other debug information), you can try using the workaround described below. (I needed to use this on my Linux Mint laptop; while unconfirmed, I suspect it ultimately had to do with my having `ecryptfs` encryption enabled for my home directory.)
-					* 2.2.1.2.12.1\) Create a file at `~/.config/autostart/docker-fix.desktop`, with the following contents:
+					* 5\) To have docker operate with this new data directory, either restart your computer, or run: `systemctl --user daemon-reload && systemctl --user restart docker`
+					</details>
+				* 2.3.1.2.4\) If you encounter the issue of the user-level `docker` service (added by the rootless-docker install script) inexplicably just failing to be launched at time of user login (ie. a status of `inactive (dead)` after startup, but no errors or other debug information), you can try using the workaround described below. (I needed to use this on my Linux Mint laptop; while unconfirmed, I suspect it ultimately had to do with my having `ecryptfs` encryption enabled for my home directory.)
+					<details><summary><b>2.3.1.2.4.X) Steps for fixing user-level docker service not starting</b></summary>
+
+					* 1\) Create a file at `~/.config/autostart/docker-fix.desktop`, with the following contents:
 						```
 						[Desktop Entry]
 						Type=Application
@@ -352,23 +364,21 @@ Other notes:
 						NoDisplay=false
 						X-GNOME-Autostart-enabled=true
 						```
-		* 2.2.2\) Option 2: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
-			* 2.2.2.1\) Follow: https://k3d.io/#installation
-			* 2.2.2.2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
-			* 2.2.2.3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`) [this line currently hangs for me on my linux laptop]
-			* 2.2.2.4\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
-				* 2.2.2.4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
-				* 2.2.2.4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary; eg. on Linux Mint 21.3, this was not necessary)
+					* The docker service should now be able to auto-start when the computer starts. (the above is admittedly a workaround, but it's been working fine for me so far)
+					</details>
+		* 2.3.2\) Option 2: K3d (would be the recommended for Linux, except I haven't been able to complete setup when docker is run in rootless mode + the user's home directory uses ecryptfs; so for now, Kind is recommended since I've confirmed it to work)
+			* 2.3.2.1\) Follow: https://k3d.io/#installation
+			* 2.3.2.2\) Create a local registry: `k3d registry create reg.localhost --port 5000`
+			* 2.3.2.3\) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`) [this line currently hangs for me on my linux laptop]
+			* 2.3.2.4\) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
+				* 2.3.2.4.1\) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
+				* 2.3.2.4.2\) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary; eg. on Linux Mint 21.3, this was not necessary)
 			* Note: To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-		* 2.2.3\) Option 3: Kind **(recommended for Linux)**
-			* 2.2.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
-			* 2.2.3.2\) Run: `kind create cluster --name main-1`. The resulting image will be named `kind-main-1`.
-			* 2.2.3.3\) Your cluster will most likely fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+		* 2.3.3\) Option 3: Kind **(recommended for Linux)**
+			* 2.3.3.1\) Follow: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+			* 2.3.3.2\) Run: `kind create cluster --name main-1`. The resulting image will be named `kind-main-1`.
+			* 2.3.3.3\) Your cluster will most likely fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
 			* Note: To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
-	* 2.4\) Option 4: Rancher Desktop
-		* 2.4.1\) Follow: https://docs.rancherdesktop.io/getting-started/installation
-		* 2.4.2\) Create your Kubernetes cluster in Rancher Desktop; this is done automatically during the first launch of Rancher Desktop.
-		* Note: To delete and recreate the cluster, use the settings panel.
 * 3\) Install kubectl.
 	* 3.1\) If you installed Docker Desktop or Rancher Desktop, then `kubectl` was already installed along with it.
 	* 3.2\) If you installed K3d or Kind, then you'll need to install `kubectl` yourself: https://kubernetes.io/docs/tasks/tools/#kubectl
