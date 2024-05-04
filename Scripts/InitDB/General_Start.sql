@@ -27,22 +27,11 @@ CREATE SCHEMA IF NOT EXISTS app;
 -- search/text-match config
 -- ==========
 
--- ensure that search dictionary exists
--- DO $$
--- BEGIN
--- 	IF NOT EXISTS (SELECT 1 FROM pg_ts_dict WHERE dictname = 'english_stem_nostop') THEN
 CREATE TEXT SEARCH dictionary english_stem_nostop (
 	Template = snowball,
 	Language = english
 );
--- 	END IF;
--- END $$;
 
--- ensure that search configuration exists
--- DO $$ BEGIN
--- 	IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'english_nostop') THEN
 CREATE TEXT SEARCH CONFIGURATION app.english_nostop (COPY = pg_catalog.english);
--- 	END IF;
--- END $$;
 ALTER TEXT SEARCH CONFIGURATION app.english_nostop
 	ALTER mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH english_stem_nostop;

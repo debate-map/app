@@ -43,11 +43,10 @@ ENV IN_DOCKER=1
 # RUN mold --version
 
 # install ldd linker
-# RUN apt-get update \
-# 	&& apt-get install -y lld clang
+# RUN apt-get update && apt-get install -y lld clang
 
 # also install various other commands (eg. for inspecting folder-structure during build)
-RUN apt-get install -y tree
+RUN apt-get update && apt-get install -y tree
 
 # install the cranelift compiler # commented, since had issues on MA's machine (since ARM)
 # RUN mkdir /cg_clif && \
