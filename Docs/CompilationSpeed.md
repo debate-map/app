@@ -58,7 +58,7 @@ Timings (string-change, docker-desktop, release, rustc): ["Finished release [opt
 
 Timings (string-change, docker-engine, release, rustc): ["Finished release [optimized] target(s) in XXX"]
 * 2024-05-03, SW2: 1m43s, 1m43s
-* 2024-05-04, SW2 [gcc/ld linker]: 1m47s, 1m47s, 1m50s
+* 2024-05-04[-05], SW2 [gcc/ld linker]: 1m47s, 1m47s, 1m50s, 1m49s
 * 2024-05-04, SW2 [ldd linker]: 1m53s, 1m53s, 1m51s
 
 Timings (string-change, docker-desktop, release, cranelift-msvc): ["Finished release [optimized] target(s) in XXX"]

@@ -257,9 +257,10 @@ function GetPortForwardCommandsStr(context) {
 	return `concurrently --kill-others --names db,lb "${forDB}" "${forLoadBalancer}"`;
 }
 
+const extraTiltArgs = commandArgs.join(" ");
 function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
-	let command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context dm-ovh --port ${port}`;
-	if (tiltfileArgsStr) command += ` -- ${tiltfileArgsStr}`;
+	let command = `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port}`;
+	if (tiltfileArgsStr) command += ` -- --env prod ${tiltfileArgsStr} ${extraTiltArgs}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = process.platform === "win32"
 		? spawn("cmd", ["/c", command])
@@ -302,13 +303,11 @@ Object.assign(scripts, {
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
 		}),*/
 
-		tiltUp_local:              `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt up   -f ./Tilt/Main.star --context dm-local`,
-		tiltDown_local:            `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt down -f ./Tilt/Main.star --context dm-local`,
-		tiltUp_docker:             `${PrepDockerCmd()} ${SetTileEnvCmd(false, "docker-desktop")}    tilt up   -f ./Tilt/Main.star --context docker-desktop`,
-		tiltUp_k3d:                `${PrepDockerCmd()} ${SetTileEnvCmd(false, "k3d-main-1")}        tilt up   -f ./Tilt/Main.star --context k3d-main-1`,
-		tiltUp_kind:               `${PrepDockerCmd()} ${SetTileEnvCmd(false, "kind-main-1")}       tilt up   -f ./Tilt/Main.star --context kind-main-1`,
-		tiltUp_ovh:                `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
-		tiltDown_ovh:              `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt down -f ./Tilt/Main.star --context dm-ovh`,
+		tiltUp_local:         `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_local_release: `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev  --compileWithRelease ${extraTiltArgs}`,
+		tiltDown_local:       `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
 		tiltUp_ovh_webServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
 		tiltUp_ovh_appServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
@@ -454,12 +453,11 @@ Object.assign(scripts, {
 	},
 });
 scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@JSBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
-function SetTileEnvCmd(prod, context) {
+function SetTileEnvCmd() {
 	return SetEnvVarsCmd({
 		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
-		// todo: probably make-so these are passed as Tiltfile-args (see config.parse() in Main.star) rather than environment-variables
-		ENVIRONMENT: prod ? "prod" : "dev",
-		CONTEXT: context,
+		//ENVIRONMENT: prod ? "prod" : "dev", // commented; now passed as tilt config (eg. " --env=prod")
+		//CONTEXT: context, // commented; tilt script now reads context using k8s_context() func
 	});
 }
 

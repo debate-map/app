@@ -12,8 +12,8 @@ Setup -> initial publishing of dependency:
 * 3\) In the dep's cloned repo, run: `yalc publish` (or `yalc push`)
 
 Setup -> initial connection of dependency:
-* 1\) Run the following command (in the folder specified in note below): `yalc add --pure DEP_NAME`
-	* NOTE: Run it in `Packages/web-vcore` IF the given dependency is listed under `dependencies` of [Packages/web-vcore/package.json](https://github.com/debate-map/app/tree/main/Packages/web-vcore/package.json) ; else run it in the repo root.
+* 1\) Run the following command (in the folder specified in note below): `yalc add --pure DEP_NAME` (the `--pure` flag keeps `package.json` from being modified, ie. only copies the dep to the `.yalc` folder)
+	* NOTE: Run it in `Packages/web-vcore` IF the given dependency is listed under `dependencies` of [Packages/web-vcore/package.json](https://github.com/debate-map/app/tree/main/Packages/web-vcore/package.json); else run it in the repo root.
 * 2\) If webpack had been running, restart it at this point. (so it can notice the yalc entry for this dep, and therefore enable watching of `node_modules/DEP_NAME`, even without version changes [which is webpack's default heuristic])
 
 To make local changes to a dependency (already connected through the setup steps above) and see it show up in debate-map:

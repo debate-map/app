@@ -613,11 +613,10 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 * 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
 * 2\) Launch the backend pods necessary for the behavior you want to test:
 	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
-		* 2.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
-		* 2.1.2\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
-		* 2.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 2.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
-			* 2.1.4.1\) If you hit the error `Error: couldn't find key host in Secret default/debate-map-pguser-...`, kill the tilt-up process, then rerun it. (this will allow tilt / `Reflector.star` to generate a new annotation on the `default/debate-map-pguser-admin` resource, triggering it to reflect the now-populated secret in the `postgres` namespace)
+		* 2.1.1\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
+		* 2.1.2\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+			* 2.1.3.1\) If you hit the error `Error: couldn't find key host in Secret default/debate-map-pguser-...`, kill the tilt-up process, then rerun it. (this will allow tilt / `Reflector.star` to generate a new annotation on the `default/debate-map-pguser-admin` resource, triggering it to reflect the now-populated secret in the `postgres` namespace)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
 		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
