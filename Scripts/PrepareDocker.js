@@ -5,8 +5,8 @@ PrepareDockerIgnoreFiles();
 
 function PrepareYarnLockFile() {
 	const lockText = fs.readFileSync("./yarn.lock");
-	if (lockText.includes("version: 0.0.0-use.local")) {
-		console.log(`Not updating yarn-lock-for-docker.lock, due to package/dependency symlinks being used (eg. due to use of yalc/zalc).`);
+	if (lockText.includes("@workspace:.yalc")) {
+		console.log(`Not updating yarn-lock-for-docker.lock, due to package/dependency symlinks being used (eg. due to use of yalc/zalc). See "Docs/LocalDependencyChanges.md" for more info.`);
 		return;
 	}
 	fs.writeFileSync("./Others/yarn-lock-for-docker.lock", lockText);

@@ -39,10 +39,20 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # ==========
 
 config.define_string_list("to-run", args=True) # args=True means we take the unnamed list of args at the end of the command as this config-entry's value
+config.define_string("env")
+config.define_bool("remote")
 config.define_bool("compileWithCranelift")
 config.define_bool("compileWithRelease")
 cfg = config.parse()
 config.set_enabled_resources(cfg.get("to-run", []))
+
+print("context:", k8s_context())
+
+# Regarding the question: What is the difference between "context", "env/environment", "remote", and "compileWithRelease"?
+# * Context: The kubernetes context to deploy to (eg. "dm-local", "dm-ovh", "docker-desktop", etc.)
+# * Remote: Whether the k8s context being deployed to is local (ie. on this machine) or remote.
+# * Env: Mainly controls some runtime behaviors/optimizations (eg. various loggings); but has other effects too (eg. postgres backup bucket).
+# * CompileWithRelease: Whether to compile the rust code in release mode. [not always synced with "env", eg. if benchmarking release builds]
 
 # generate globals
 # ==========
@@ -53,16 +63,16 @@ dotenv(fn="../.env")
 #print("Env vars after loading from .env file:", os.environ)
 launchArgs = sys.argv
 print("Tilt launch args:", launchArgs)
+CONTEXT = k8s_context()
+
+REMOTE = cfg.get("remote", CONTEXT not in recognizedLocalContexts)
+print("Context:", CONTEXT, "Remote:", REMOTE)
 
 # Why "ENVIRONMENT" rather than "ENV"? Because an env-var with name "ENV" cannot be read using `os.getenv` on some platforms (was true for a dev on mac).
-ENV = os.getenv("ENVIRONMENT")
+ENV = cfg.get("env", os.getenv("ENVIRONMENT"))
 DEV = ENV == "dev"
 PROD = ENV == "prod"
 print("Env:", ENV)
-
-CONTEXT = os.getenv("CONTEXT")
-REMOTE = CONTEXT not in recognizedLocalContexts
-print("Context:", CONTEXT, "Remote:", REMOTE)
 
 pulumiOutput = decode_json(str(read_file("../PulumiOutput_Public.json")))
 registryURL = pulumiOutput["registryURL"]
@@ -100,7 +110,7 @@ g = {
 if ENV not in ("dev", "prod"):
 	fail("Invalid ENVIRONMENT env-var value: " + ENV + ' (must be "dev" or "prod")')
 
-if (CONTEXT not in recognizedLocalContexts) and (CONTEXT not in recognizedRemoteContexts):
+if CONTEXT not in recognizedContexts:
 	contextNames_quoted = '"' + '", "'.join(recognizedContexts) + '"'
 	fail("Invalid CONTEXT env-var value: " + ENV + " (must be one of " + contextNames_quoted + ")")
 
