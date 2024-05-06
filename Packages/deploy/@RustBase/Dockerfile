@@ -15,7 +15,8 @@ ENV IN_DOCKER=1
 # Main reason: Compatibility between the linkers and distro versions/images change over time, so they cannot always be used together.
 # (for additional notes on the linkers, see `.cargo/config.toml` and `Docs/CompilationSpeed.md`)
 
-# install mold linker [2022-04-18: works, 181s]
+# install mold linker
+# [2024-05-06: works, though *can* freeze-up docker-desktop / get crazy slow [15+mins!]] [on my desktop; on laptop, step done by ~5m point -- still quite slow!]
 # RUN apt-get update \
 # 	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
 # 	&& git clone https://github.com/rui314/mold.git \
@@ -27,6 +28,7 @@ ENV IN_DOCKER=1
 # 	&& cmake --build build --target install
 
 # install mold linker, from debian's v12 "sid/unstable" repository (mold is not in debian [10/11]'s repository atm) [2022-04-18: works, 72s]
+# [2024-05-06: fails; debian "sid" apparently pulls in glibc v2.38; earlier I thought the build-from-source failed with same error, but I think it was just the caching bug mentioned at start of CompilationSpeed.md]
 # RUN apt-get update && \
 # 	# install some things needed by mold (at mold run-time)
 # 	#apt-get -y install build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config && \
@@ -42,7 +44,7 @@ ENV IN_DOCKER=1
 # ensure mold is installed
 # RUN mold --version
 
-# install ldd linker
+# install lld linker
 # RUN apt-get update && apt-get install -y lld clang
 
 # also install various other commands (eg. for inspecting folder-structure during build)

@@ -263,6 +263,7 @@ Required:
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
 * 1\) Install [Lens](https://k8slens.dev), a very handy, general-purpose k8s inspection tool. 
+	* Note: As of 2024-05-06, installing Lens from the Snap store is not recommended, due to a homepage error that causes very slow startup. [Installing it using apt](https://docs.k8slens.dev/getting-started/install-lens/#install-lens-desktop-from-the-apt-repository) does not seem to have this issue.
 * 2\) Install [DBeaver](https://dbeaver.io/download), a ui tool for viewing/modifying postgresql databases.
 
 Additional tools: (all optional)

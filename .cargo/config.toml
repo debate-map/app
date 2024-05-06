@@ -33,6 +33,8 @@ protocol = "sparse"
 
 [profile.release]
 codegen-backend = "cranelift"
+# Note: As of 2024-05-06, lto=[thin/fat] causes compile errors in all three linkers (ld/lld/mold)
+#lto = "thin"
 incremental = true
 #opt-level = 3 # commented; its lvl3 here by default
 
@@ -40,23 +42,30 @@ incremental = true
 codegen-backend = "llvm"
 opt-level = 3
 
-# linker: mold
-# 2024-05-04: Commented; using mold yields runtime errors, from the rust binaries somehow requiring GLIBC_2.38.
-# ...I tried but failed to track down the cause of this requirement (eg. it's not the glibc used during build); have to disable for now.
+# Note: As of 2024-05-06, -Zthreads=0 appears to actually make compilations take longer (10s->14s); so disabling for now.
+
+# linker: ld (default)
 # ==========
 
-# # for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
+# [target.x86_64-unknown-linux-gnu]
+# rustflags = [
+# 	"-Awarnings", "-Zthreads=0"]
+
+# linker: mold
+# ==========
+
+# for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
 # [target.x86_64-unknown-linux-gnu]
 # linker = "clang"
 # rustflags = [
-# 	#"-Awarnings",
+# 	#"-Awarnings", "-Zthreads=0",
 # 	"-C", "link-arg=-fuse-ld=mold"]
 
 # # for musl-based linux builds (eg. when trying to deploy to an alpine image)
 # [target.x86_64-unknown-linux-musl]
 # linker = "clang"
 # rustflags = [
-# 	#"-Awarnings",
+# 	#"-Awarnings", "-Zthreads=0",
 # 	"-C", "link-arg=-fuse-ld=mold"]
 # #rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
 # # from: https://stackoverflow.com/a/70378019
@@ -69,17 +78,18 @@ opt-level = 3
 [target.x86_64-pc-windows-msvc]
 #linker = "rust-lld.exe"
 rustflags = [
-	#"-Awarnings",
+	#"-Awarnings", "-Zthreads=0",
 	"-C", "link-arg=-fuse-ld=lld"]
 
 [target.x86_64-pc-windows-gnu]
 rustflags = [
-	#"-Awarnings",
+	#"-Awarnings", "-Zthreads=0",
 	"-C", "link-arg=-fuse-ld=lld"]
 
-# as of 2024-05-04, on my Linux Mint laptop, the lld linker was no faster than default/gcc/ld (actually a couple seconds slower these times)
 # [target.x86_64-unknown-linux-gnu]
 # #rustflags = ["-Awarnings", "-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]
 # linker = "/usr/bin/clang"
-# rustflags = ["-Awarnings", "-Clink-arg=-fuse-ld=lld"]
+# rustflags = [
+# 	#"-Awarnings", "-Zthreads=0",
+# 	"-Clink-arg=-fuse-ld=lld"]
 # #rustflags = ["-Awarnings", "-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]
