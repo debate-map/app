@@ -4,5 +4,9 @@
 # NOTE: Keep this in sync with version of "instrumentisto/rust" in "@RustBase/Dockerfile".
 channel = "nightly-2024-03-05"
 
-#components = ["rustfmt", "rust-std", "clippy"]
+components = [
+	#"rustfmt", "rust-std", "clippy",
+	"rustc-codegen-cranelift-preview",
+]
+
 #targets = ["wasm32-unknown-unknown", "x86_64-unknown-linux-gnu"]

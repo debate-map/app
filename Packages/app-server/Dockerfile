@@ -90,13 +90,9 @@ COPY --from=cargo-build /dm_repo/Packages/app-server/kgetOutput_buildTime/ ./kge
 # other files needed
 COPY .env .
 
-# check binary size
-RUN ls -lh app-server-binary
-
 # regular running
 # ==========
-
-CMD echo Starting Rust program...; \
+CMD echo Starting Rust program... [size: $(ls -lh app-server-binary | awk '{print $5}')]; \
 	RUST_BACKTRACE=full ./app-server-binary; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456789

@@ -7,19 +7,38 @@
 # general
 # ==========
 
+[unstable]
+codegen-backend = true
+
 [registries.crates-io]
 protocol = "sparse"
 
 # profile customization
 # ==========
 
-[profile.release]
+#[profile.release]
 # customize opt-level; default: 3 (see: https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html#optimize-for-speed)
 # (regarding [incrBuildTime,fileSize] when 1/2/3, as of 2024-03-26: @1:[~3m58s,45.1mb] @2+incr:[~3m01s,47.1mb] @2:[~4m47s,46.7mb] @3:[~4m55s,47.7mb])
 #opt-level = 1
 # have release builds use incremental compilation
 # (regarding [incrBuildTime,fileSize] when on/off, as of 2024-03-26: @whenOff:[~4m55s,47.7mb] @whenOn:[~3m10s,48.0mb])
 #incremental = true
+
+# [profile.dev]
+# codegen-backend = "cranelift"
+
+# [profile.dev.package."*"]
+# codegen-backend = "llvm"
+# opt-level = 3
+
+[profile.release]
+codegen-backend = "cranelift"
+incremental = true
+#opt-level = 3 # commented; its lvl3 here by default
+
+[profile.release.package."*"]
+codegen-backend = "llvm"
+opt-level = 3
 
 # linker: mold
 # 2024-05-04: Commented; using mold yields runtime errors, from the rust binaries somehow requiring GLIBC_2.38.

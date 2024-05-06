@@ -57,8 +57,10 @@ RUN apt-get update && apt-get install -y tree
 
 WORKDIR /dm_repo
 
-# this makes-so cargo-build and such uses mold as its linker
+# copy some general cargo configuration files (those which are fine to include even for the cargo-build-prepper stage)
+COPY rust-toolchain.toml rust-toolchain.toml
 COPY .cargo/config.toml .cargo/config.toml
+
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
 #ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
 # this sets the debugging-info granularity to "per line", rather than the default "2" which is more detailed; this speeds up builds a bit
