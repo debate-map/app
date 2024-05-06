@@ -45,3 +45,5 @@ def Start_Reflector(g):
 		# only update this each time the "tilt up" command is started, not each iteration (switch back to using "timeOfThisTiltfileUpdate" if situation still problematic for new devs)
 		"TILT_PLACEHOLDER:currentTime": g["timeOfTiltUpCommand"],
 	}))
+
+	# the individual resources that get reflected are named/initialized (using `k8s_resource`) in the other, context-specific .star files

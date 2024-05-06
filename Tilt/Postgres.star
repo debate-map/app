@@ -60,13 +60,9 @@ def Start_Postgres(g):
 	# now package up the postgres objects into the Tilt "database" section
 	# ----------
 
-	# todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
-	# List of pods that I've confirmed are fine to kill/restart:
-	# * debate-map-instance1-XXX (the pod for the database itself)
-
 	pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
 	pgo_upgrades_crdName = "pgupgrades.postgres-operator.crunchydata.com"
-	NEXT_k8s_resource(g, new_name='pgo_crd-definition', labels=["database_DO-NOT-RESTART-THESE"],
+	NEXT_k8s_resource(g, new_name='DO_NOT_RESET_pgo-crd', labels=["database"],
 		objects=[
 			#"postgres-operator:Namespace:default",
 			pgo_crdName, # the CRD definition?
@@ -80,34 +76,45 @@ def Start_Postgres(g):
 	)
 
 	# Wait until the CRDs are ready.
-	#local_resource('pgo_crd-definition_ready', cmd='kubectl wait --for=condition=Established crd ' + pgo_crdName, resource_deps=GetLastResourceNamesBatch(g), labels=["database_DO-NOT-RESTART-THESE"])
-	local_resource('pgo_crd-definition_ready', labels=["database_DO-NOT-RESTART-THESE"],
-		cmd="tilt wait --for=condition=Ready uiresource/pgo_crd-definition",
+	#local_resource('pgo_crd-definition_ready', cmd='kubectl wait --for=condition=Established crd ' + pgo_crdName, resource_deps=GetLastResourceNamesBatch(g), labels=["database"])
+	local_resource('pgo-crd-ready', labels=["database"],
+		cmd="tilt wait --for=condition=Ready uiresource/DO_NOT_RESET_pgo-crd",
 		resource_deps=GetLastResourceNamesBatch(g),
 	)
-	AddResourceNamesBatch_IfValid(g, ["pgo_crd-definition_ready"])
+	AddResourceNamesBatch_IfValid(g, ["pgo-crd-ready"])
 
 	# NEXT_k8s_resource(g, new_name='pgo_crd-instance',
 	# 	objects=[
 	# 		"debate-map:postgrescluster", # the CRD instance?
 	# 	],
-	# 	labels=["database_DO-NOT-RESTART-THESE"],
+	# 	labels=["database"],
 	# )
-	NEXT_k8s_resource(g, 'pgo', labels=["database_DO-NOT-RESTART-THESE"],
-		objects=[
-			#"debate-map:postgrescluster", # the CRD instance?
-			#"postgres-operator:clusterrole",
-			#"postgres-operator:clusterrolebinding",
-			"pgo:serviceaccount",
-			"pgo:clusterrole",
-			"pgo:clusterrolebinding",
-			"debate-map-pguser-admin:secret",
-			#"pgo-gcs-creds:secret",
-			"debate-map-pgbackrest-secret:secret",
-			"debate-map:postgrescluster",
-		],
-	)
-	NEXT_k8s_resource(g, 'pgo-upgrade', labels=["database_DO-NOT-RESTART-THESE"],
+	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": 'pgo-early', "labels": ["database"],
+			"objects": [
+				"pgo:serviceaccount",
+				"pgo:clusterrole",
+				"pgo:clusterrolebinding",
+			],
+		},
+		{
+			"new_name": 'pgo-secrets', "labels": ["database"],
+			"objects": [
+				#"pgo-gcs-creds:secret",
+				"debate-map-pgbackrest-secret:secret",
+				"debate-map-pguser-admin:secret", # the reflected copy in "default" namespace
+			],
+		},
+		{
+			"new_name": 'DO_NOT_RESET_pgo-cluster', "labels": ["database"],
+			"objects": [
+				"debate-map:postgrescluster",
+			],
+		},
+		{"workload": "pgo", "labels": ["database"]},
+	])
+	NEXT_k8s_resource(g, 'pgo-upgrade', labels=["database"],
 		objects=[
 			"pgo-upgrade:serviceaccount",
 			"pgo-upgrade:clusterrole",
@@ -115,7 +122,7 @@ def Start_Postgres(g):
 		],
 	)
 	# this is in separate group, so pod_readiness="ignore" only applies to it
-	NEXT_k8s_resource(g, new_name='pgo_late', labels=["database_DO-NOT-RESTART-THESE"],
+	NEXT_k8s_resource(g, new_name='pgo_late', labels=["database"],
 		#objects=["pgo-gcs-creds:secret"],
 		objects=["empty1"],
 		pod_readiness='ignore',
