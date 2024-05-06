@@ -29,10 +29,10 @@ Descriptions of shortened terms/phrases:
 | str(noIncr)   | docker-engine   | r:llvm3+clif0 | default | 2024-05-05      | 78mb      | SW2: 32s, 31s |
 | str(incr)     | docker-engine   | d:llvm0       | default | 2024-05-05      | 254mb     | SW2: 19s, 20s, 20s |
 | str(incr)     | docker-engine   | d:clif0       | default | 2024-05-05      | 219mb     | SW2: 12s, 12s |
-| str(incr)     | docker-engine   | r:llvm3+clif3 | default | 2024-05-06      | 100mb     | SW1: 24s, 22s, 21s |
+| str(incr)     | docker-desktop  | r:llvm3+clif3 | default | 2024-05-06      | 100mb     | SW1: 24s, 22s, 21s |
 | str(incr)     | docker-engine   | r:llvm3+clif3 | default | 2024-05-05      | 100mb     | SW2: 14s, 13s, 13s, 13s |
 | str(incr)     | docker-engine   | r:llvm3+clif3 | lld     | 2024-05-06      | 106-125mb | SW2: 10s, 10s, 10s |
-| str(incr)     | docker-engine   | r:llvm3+clif3 | mold    | 2024-05-06      | 125mb     | SW1: 19s, 18s, 19s |
+| str(incr)     | docker-desktop  | r:llvm3+clif3 | mold    | 2024-05-06      | 125mb     | SW1: 19s, 18s, 19s |
 | str(incr)     | docker-engine   | r:llvm3+clif3 | mold    | 2024-05-06      | 125mb     | SW2: 10s, 10s, 10s |
 
 <details><summary><b>Archived timings (outdated, config now irrelevant, etc.)</b></summary>
