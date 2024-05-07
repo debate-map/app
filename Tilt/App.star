@@ -34,7 +34,7 @@ def Start_App(g):
 	)
 
 	def CopyFromPath(packageName):
-		# branches: release+llvm -> release, release+clif -> release_clif, debug+clif -> dev_clif, debug+llvm -> debug
+		# we have to hard-code these branches, since rust outputs "dev" profile into the "debug" folder fsr (also simplifies underscore handling)
 		if g["compileWithCranelift"]:
 			if g["compileWithRelease"]: return "/dm_repo/target/release_clif/" + packageName
 			else:                       return "/dm_repo/target/dev_clif/" + packageName
