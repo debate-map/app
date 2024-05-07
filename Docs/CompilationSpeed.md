@@ -31,8 +31,8 @@ Descriptions of shortened terms/phrases:
 | str(incr)     | r:llvm3+clif3 | lld     | 2024-05-06        | 106-125mb | sw2(de): 10s, 10s, 10s |
 | str(incr)     | r:llvm3+clif3 | mold    | 2024-05-06        | 125mb     | sw1(dd): 19s, 18s, 19s <br> sw2(de): 10s, 10s, 10s |
 | str(incr)     | d:llvm0       | default | 2024-05-05 [->07] | 254mb     | sw1(dd): 38s, 40s, 40s <br> sw2(de): 19s, 20s, 20s |
-| str(incr)     | d:llvm0+clif0 | default | 2024-05-07        | 208mb     | sw1(dd): 28s, 29s, 27s, 29s |
-| str(incr)     | d:llvm3+clif0 | default | 2024-05-07        | 207mb     | sw1(dd): 21s, 20s, 21s, 21s |
+| str(incr)     | d:llvm0+clif0 | default | 2024-05-07        | 208mb     | sw1(dd): 28s, 29s, 27s, 29s <br> sw2(de): 16s, 16s, 17s |
+| str(incr)     | d:llvm3+clif0 | default | 2024-05-07        | 207mb     | sw1(dd): 21s, 20s, 21s, 21s <br> sw2(de): 12s, 13s, 12s |
 | str(incr)     | d:clif0       | default | 2024-05-05 [->07] | 219mb     | sw1(dd): 21s, 23s, 21s, 22s <br> sw2(de): 12s, 12s ([err](## "Note that this row's build config errors at runtime atm: trap at Instance [...] core_arch::x86::sha::_mm_sha1rnds4_epu32 [...] llvm.x86.sha1rnds4")) |
 
 <details><summary><b>Archived timings (outdated, config now irrelevant, etc.)</b></summary>
