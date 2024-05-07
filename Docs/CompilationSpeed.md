@@ -8,6 +8,7 @@ Notes:
 Descriptions of shortened terms/phrases:
 * Developer machines:
 	* sw1\) OS: Windows 10, CPU: Ryzen 7 1700X, RAM: 32gb (Stephen Wicklund's desktop)
+		* Note: There is more fluctuation in background-processing on this desktop compared to my laptop ("sw2"); so for more stable comparisons between build configs, use the "sw2" timings instead.
 	* sw2\) OS: Linux Mint, CPU: AMD Ryzen 7 PRO 7840U, RAM: 64gb (Stephen Wicklund's laptop)
 * Build contexts: host = host OS (no docker), dd = Docker Desktop, rd = Rancher Desktop, de = docker engine
 * The compile-times listed are always the number printed by cargo itself. (ie. the XX [floored] in `"Finished dev [...] target(s) in XX.??s"`)
