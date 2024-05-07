@@ -13,13 +13,13 @@
 	ARG ENVIRONMENT
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
-	ARG cargo_path
+	ARG debug_vs_release_profile
 	ARG copy_from_path
 # ----------
 
 # initial arg processing
 ENV ENVIRONMENT=$ENVIRONMENT
-RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
+RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release"
 
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo
 	--mount=type=cache,target=/dm_repo/target \
 #	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
 #	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
-	cargo build --timings ${debug_vs_release_flag} && \
+	cargo build --profile ${debug_vs_release_profile} --timings ${debug_vs_release_flag} && \
 	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
 	mv ${copy_from_path} /dm_repo/Packages/web-server/web-server-binary
 

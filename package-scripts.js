@@ -309,11 +309,12 @@ Object.assign(scripts, {
 		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`, // tilt-port +1, so can coexist with tilt dev-instance
 		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
-		tiltUp_ovh_webServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
-		tiltUp_ovh_appServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_appServer_quicker:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift")), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_appServer_quickest: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift --compileWithRelease=False")), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_monitorBackend:     Dynamic(()=>RunTiltUp_ForSpecificPod("dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
+		tiltUp_ovh_webServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
+		tiltUp_ovh_appServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
+		//tiltUp_ovh_appServer_quicker:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift")), // tilt-port +(10+2), as targeted tilt-up #2
+		//tiltUp_ovh_appServer_quickest: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift --compileWithRelease=False")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_appServer_optimized:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift=False")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_monitorBackend:       Dynamic(()=>RunTiltUp_ForSpecificPod("dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
 
 		// Using tilt to deploy is convenient, but does have some negatives -- biggest one being that pressing "Trigger update" delete the pod, builds, then deploy the pod, leaving a gap/downtime.
 		// So provide a way to do a "traditional" `kubectl apply` for the main debate-map pods, which avoids that pod downtime.

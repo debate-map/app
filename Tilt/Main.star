@@ -85,7 +85,7 @@ if os.getenv("TIME_OF_TILT_UP_COMMAND") == None:
 	os.putenv("TIME_OF_TILT_UP_COMMAND", timeOfThisTiltfileUpdate)
 timeOfTiltUpCommand = os.getenv("TIME_OF_TILT_UP_COMMAND")
 
-compileWithCranelift = cfg.get("compileWithCranelift", False)
+compileWithCranelift = cfg.get("compileWithCranelift", True)
 compileWithRelease = cfg.get("compileWithRelease", PROD) # default to compiling: PROD -> release, DEV (or others) -> debug
 
 g = {

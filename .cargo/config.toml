@@ -24,23 +24,28 @@ protocol = "sparse"
 # (regarding [incrBuildTime,fileSize] when on/off, as of 2024-03-26: @whenOff:[~4m55s,47.7mb] @whenOn:[~3m10s,48.0mb])
 #incremental = true
 
-[profile.dev]
+# use custom profiles for Cranelift backend (as used in Dockerfiles), so that if devs try to build on their host OS, no errors are hit
+# (cranelift is currently only distributed through rustup on platforms linux_x86_64, linux_aarch64, and macos_x86_64)
+
+[profile.dev_clif]
+inherits = "dev"
 codegen-backend = "cranelift"
 
 # Why using LLVM for deps in dev builds? Because Cranelift has a bug atm, erroring on the code of certain dependencies. (trap at Instance [...] core_arch::x86::sha::_mm_sha1rnds4_epu32 [...] llvm.x86.sha1rnds4)
 # Why using opt-level 3? Because having the dependencies compiled with opt-level 3 actually makes the incremental Cranelift compiles of the app's own code complete faster fsr. (2024-05-07, sw1: 20s vs 27s)
-[profile.dev.package."*"]
+[profile.dev_clif.package."*"]
 codegen-backend = "llvm"
 opt-level = 3
 
-[profile.release]
+[profile.release_clif]
+inherits = "release"
 codegen-backend = "cranelift"
 incremental = true
 opt-level = 3 # already the default, but we'll be explicit
 # Note: As of 2024-05-06, lto=[thin/fat] causes compile errors in all three linkers (ld/lld/mold)
 #lto = "thin"
 
-[profile.release.package."*"]
+[profile.release_clif.package."*"]
 codegen-backend = "llvm"
 opt-level = 3
 
