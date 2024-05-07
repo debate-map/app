@@ -21,9 +21,6 @@
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
 
-# copy this package
-COPY Packages/app-server/ /dm_repo/Packages/app-server/
-
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 RUN mkdir Packages/monitor-backend/src/
@@ -31,6 +28,9 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml
 RUN mkdir Packages/web-server/src/
 RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/web-server/src/main.rs
+
+# copy this package
+COPY Packages/app-server/ /dm_repo/Packages/app-server/
 
 # initial arg processing
 WORKDIR "/dm_repo"

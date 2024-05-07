@@ -59,8 +59,11 @@ RUN apt-get update && apt-get install -y tree
 
 WORKDIR /dm_repo
 
-# copy some general cargo configuration files (those which are fine to include even for the cargo-build-prepper stage)
+# copy rust-toolchain.toml, and install the version of cargo specified
 COPY rust-toolchain.toml rust-toolchain.toml
+RUN USER=root rustup show
+
+# copy the cargo config file, which sets the compilation profile and linker configs
 COPY .cargo/config.toml .cargo/config.toml
 
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)

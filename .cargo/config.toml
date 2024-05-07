@@ -24,19 +24,21 @@ protocol = "sparse"
 # (regarding [incrBuildTime,fileSize] when on/off, as of 2024-03-26: @whenOff:[~4m55s,47.7mb] @whenOn:[~3m10s,48.0mb])
 #incremental = true
 
-# [profile.dev]
-# codegen-backend = "cranelift"
+[profile.dev]
+codegen-backend = "cranelift"
 
-# [profile.dev.package."*"]
-# codegen-backend = "llvm"
-# opt-level = 3
+# Why are we using LLVM for deps in dev builds?
+# Reason: Currently these is a bug in Cranelift which makes it error on the code of certain dependencies. (something relating to SHA)
+[profile.dev.package."*"]
+codegen-backend = "llvm"
+#opt-level = 3
 
 [profile.release]
 codegen-backend = "cranelift"
+incremental = true
+opt-level = 3 # already the default, but we'll be explicit
 # Note: As of 2024-05-06, lto=[thin/fat] causes compile errors in all three linkers (ld/lld/mold)
 #lto = "thin"
-incremental = true
-#opt-level = 3 # commented; its lvl3 here by default
 
 [profile.release.package."*"]
 codegen-backend = "llvm"
