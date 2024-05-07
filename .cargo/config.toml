@@ -27,11 +27,11 @@ protocol = "sparse"
 [profile.dev]
 codegen-backend = "cranelift"
 
-# Why are we using LLVM for deps in dev builds?
-# Reason: Currently these is a bug in Cranelift which makes it error on the code of certain dependencies. (something relating to SHA)
+# Why using LLVM for deps in dev builds? Because Cranelift has a bug atm, erroring on the code of certain dependencies. (trap at Instance [...] core_arch::x86::sha::_mm_sha1rnds4_epu32 [...] llvm.x86.sha1rnds4)
+# Why using opt-level 3? Because having the dependencies compiled with opt-level 3 actually makes the incremental Cranelift compiles of the app's own code complete faster fsr. (2024-05-07, sw1: 20s vs 27s)
 [profile.dev.package."*"]
 codegen-backend = "llvm"
-#opt-level = 3
+opt-level = 3
 
 [profile.release]
 codegen-backend = "cranelift"
