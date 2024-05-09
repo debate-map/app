@@ -14,6 +14,7 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
                 FilterOp::EqualsX(_val) => FilterOp::EqualsX(JSONValue::Null),
                 FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
                 FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
+                FilterOp::ContainsAnyOfX(vals) => FilterOp::ContainsAnyOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
             };
             op_with_vals_stripped
         }).collect_vec();
@@ -21,6 +22,9 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     filter_shape
 }
 
+/// A "live query key" is the "signature" of a live-query group or instance.
+/// When used for a group, it represents the shape of the filter used in the group's instances. (eg. `{table:"maps",filter:{id:{equalTo:null}}}`)
+/// When used for an instance, it represents the specific filter used in the instance. (eg. `{table:"maps",filter:{id:{equalTo:"SOME_MAP_ID_HERE"}}}`)
 #[derive(Clone)]
 pub struct LQKey {
     pub table_name: String,

@@ -30,6 +30,7 @@ use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}}};
 
 /// Use this struct to collect multiple queries and execute them in one go as a "batched query".
+/// The main use-case for this is to increase the performance of the live-query system, by allowing the server to obtain the "initial results" for multiple live-queries with the same "form" within one SQL query.
 /// It can also be used as a convenience wrapper around executing a single query; but for most standalone queries, `get_entries_in_collection[_basic]` will be more appropriate.
 //#[derive(Default)]
 pub struct LQBatch {

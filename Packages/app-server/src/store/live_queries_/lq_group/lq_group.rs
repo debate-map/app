@@ -79,6 +79,10 @@ pub enum LQGroup_OutMsg {
     LQInstanceIsInitialized(LQKey, Arc<LQInstance>, bool)
 }
 
+// sync docs with LQGroupImpl
+/// A "live query group" is essentially a set of live-queries that all have the same "generic signature" (ie. table + filter operations with value slots), but which have different values assigned to each slot.
+/// The `LQGroup` struct is the "public interface" for the lq-group. Its methods are mostly async, with each "sending a message" to the "inner" `LQGroupImpl` struct, which queues up a set of calls and then processes them as a batch.
+/// When the batched processing in the `LQGroupImpl` completes, it sends a message back to the "waiting" `LQGroup`s, which then are able to have their async methods return.
 pub struct LQGroup {
     inner: Mutex<LQGroupImpl>,
 

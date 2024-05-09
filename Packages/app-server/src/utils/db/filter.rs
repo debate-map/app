@@ -16,6 +16,8 @@ pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputT
 
 wrap_slow_macros!{
 
+/// Structure specifying a set of filters used for rows in a table.
+/// This struct may contain the actual values that are being filtered for, OR it may just contain the "shape" of a set of filters. (as checked by ensure_shape_only)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueryFilter {
     pub field_filters: IndexMap<String, FieldFilter>,
@@ -55,7 +57,11 @@ impl QueryFilter {
                         let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"contains\" requires an array value!"))?;
                         FilterOp::ContainsAllOfX(vals.to_vec())
                     },
-                    _ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, in, contains."#),
+                    "containsAny" => {
+                        let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"containsAny\" requires an array value!"))?;
+                        FilterOp::ContainsAnyOfX(vals.to_vec())
+                    },
+                    _ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, in, contains, containsAny."#),
                 };
                 field_filter.filter_ops.push(op);
             }
@@ -76,6 +82,7 @@ impl QueryFilter {
                     FilterOp::EqualsX(val) => ensure!(val.is_null()),
                     FilterOp::IsWithinX(vals) => for val in vals { ensure!(val.is_null()); },
                     FilterOp::ContainsAllOfX(vals) => for val in vals { ensure!(val.is_null()); },
+                    FilterOp::ContainsAnyOfX(vals) => for val in vals { ensure!(val.is_null()); },
                 };
             }
         }
@@ -147,11 +154,14 @@ pub enum FilterOp {
     EqualsX(JSONValue),
     IsWithinX(Vec<JSONValue>),
     ContainsAllOfX(Vec<JSONValue>),
+    ContainsAnyOfX(Vec<JSONValue>),
 }
 
 }
 
 impl FilterOp {
+    /// The job of this function is just to provide the SQL-fragment for the value being compared against.
+    /// The SQL for the "comparison operator" is provided in the "match" within the `get_sql_for_application` method below.
     pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {
         Ok(match self {
             FilterOp::EqualsX(val) => {
@@ -161,6 +171,7 @@ impl FilterOp {
             },
             FilterOp::IsWithinX(vals) => json_vals_to_sql_array_fragment(&vals)?,
             FilterOp::ContainsAllOfX(vals) => json_vals_to_sql_array_fragment(&vals)?,
+            FilterOp::ContainsAnyOfX(vals) => json_vals_to_sql_array_fragment(&vals)?,
         })
     }
 
@@ -194,6 +205,11 @@ impl FilterOp {
                 bracket_plus_val_in_filter_op,
             ]),
             //"contains_jsonb" => SF::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
+            FilterOp::ContainsAnyOfX(_) => SF::merge(vec![
+                bracket_plus_val_in_db,
+                SF::lit(" && "),
+                bracket_plus_val_in_filter_op,
+            ]),
         }
     }
 }
@@ -224,6 +240,14 @@ pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<boo
                             return Ok(false);
                         }
                     }
+                },
+                FilterOp::ContainsAnyOfX(vals) => {
+                    for val in vals {
+                        if field_value.as_array().with_context(|| "Field value was not an array!")?.contains(&val) {
+                            return Ok(true);
+                        }
+                    }
+                    return Ok(false);
                 },
             }
         }

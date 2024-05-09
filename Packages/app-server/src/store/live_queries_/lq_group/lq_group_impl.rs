@@ -47,7 +47,7 @@ use rust_shared::uuid::Uuid;
 
 use crate::links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND;
 use crate::store::live_queries_::lq_group::lq_group::LQGroup_OutMsg;
-use crate::store::live_queries_::lq_key::LQKey;
+use crate::store::live_queries_::lq_key::{filter_shape_from_filter, LQKey};
 use crate::store::storage::AppStateArc;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::pg_stream_parsing::{LDChange};
@@ -59,21 +59,6 @@ use super::super::lq_instance::{LQInstance, LQEntryWatcher};
 use super::lq_batch::lq_batch::LQBatch;
 use super::lq_group::LQGroup_InMsg;
 
-pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
-    let mut filter_shape = filter.clone();
-    for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
-        let field_filter_mut = filter_shape.field_filters.get_mut(field_name).unwrap();
-        field_filter_mut.filter_ops = field_filter.filter_ops.clone().iter().map(|op| {
-            let op_with_vals_stripped = match op {
-                FilterOp::EqualsX(_val) => FilterOp::EqualsX(JSONValue::Null),
-                FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
-                FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
-            };
-            op_with_vals_stripped
-        }).collect_vec();
-    }
-    filter_shape
-}
 pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
     let filter_shape = filter_shape_from_filter(filter);
     json!({
@@ -120,6 +105,10 @@ struct LQIAwaitingPopulationInfo {
     prior_lqis_in_batch: usize,
 }
 
+// sync docs with LQGroup
+/// A "live query group" is essentially a set of live-queries that all have the same "generic signature" (ie. table + filter operations with value slots), but which have different values assigned to each slot.
+/// The `LQGroup` struct is the "public interface" for the lq-group. Its methods are mostly async, with each "sending a message" to the "inner" `LQGroupImpl` struct, which queues up a set of calls and then processes them as a batch.
+/// When the batched processing in the `LQGroupImpl` completes, it sends a message back to the "waiting" `LQGroup`s, which then are able to have their async methods return.
 pub(super) struct LQGroupImpl {
     // shape
     lq_key: LQKey,
