@@ -25,6 +25,9 @@ begin;
 	\ir Tables/timelineSteps.sql
 	\ir Tables/userHiddens.sql
 	\ir Tables/users.sql
+	\ir Tables/subscriptions.sql
+	\ir Tables/notifications.sql
+
 	--\ir Tables/visibilityDirectives.sql
 
 	\ir Funcs/General.sql
