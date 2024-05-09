@@ -16,12 +16,10 @@ import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./Panels/DetailsPanel.js";
-import {DiscussionPanel} from "./Panels/DiscussionPanel.js";
 import {HistoryPanel} from "./Panels/HistoryPanel.js";
 import {OthersPanel} from "./Panels/OthersPanel.js";
 import {PhrasingsPanel} from "./Panels/PhrasingsPanel.js";
 import {RatingsPanel} from "./Panels/RatingsPanel.js";
-import {SocialPanel} from "./Panels/SocialPanel.js";
 import {TagsPanel} from "./Panels/TagsPanel.js";
 
 //export const nodeBottomPanel_minWidth = 550;
@@ -148,8 +146,6 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 							RunInAction("NodeBox_onClickTerm", ()=>nodeView.openTermIDs = termIDs);
 						}}/>)}
 				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, map, node, path}}/>)}
-				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
-				{renderPanel("social", show=><SocialPanel {...{show}}/>)}
 				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("details", show=><DetailsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("history", show=><HistoryPanel {...{show, map, node, path}}/>)}

@@ -7,10 +7,8 @@ import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions.js
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./DetailBoxes/Panels/DetailsPanel.js";
-import {DiscussionPanel} from "./DetailBoxes/Panels/DiscussionPanel.js";
 import {OthersPanel} from "./DetailBoxes/Panels/OthersPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
-import {SocialPanel} from "./DetailBoxes/Panels/SocialPanel.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {NodeBox} from "./NodeBox.js";
 
@@ -70,8 +68,6 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 					})}
 					{/*<PhrasingsPanel show={true} node={node} path={path}/>*/}
 					<DefinitionsPanel show={true} map={map} node={node} path={path}/>
-					<DiscussionPanel show={true}/>
-					<SocialPanel show={true}/>
 					<TagsPanel show={true} map={map} node={nodeL3} path={path}/>
 					<DetailsPanel show={true} map={map} node={nodeL3} path={path}/>
 					<OthersPanel show={true} map={map} node={nodeL3} path={path}/>
