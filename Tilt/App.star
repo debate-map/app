@@ -48,7 +48,6 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("monitor-backend"),
@@ -60,7 +59,6 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("web-server"),
@@ -72,7 +70,6 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("app-server"),

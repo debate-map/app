@@ -259,7 +259,7 @@ function GetPortForwardCommandsStr(context) {
 
 const extraTiltArgs = commandArgs.join(" ");
 function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
-	let command = `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port}`;
+	let command = `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port} -- --env prod`;
 	if (tiltfileArgsStr) command += ` -- --env prod ${tiltfileArgsStr} ${extraTiltArgs}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = process.platform === "win32"

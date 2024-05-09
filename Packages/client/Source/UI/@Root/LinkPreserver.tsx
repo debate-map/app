@@ -1,4 +1,5 @@
 import {BaseComponent} from "react-vextensions";
+import {Observer} from "web-vcore";
 import {gql, useSubscription} from "web-vcore/nm/@apollo/client";
 
 export const LINK_PRESERVER_SUBSCRIPTION = gql`
@@ -11,6 +12,7 @@ subscription($input: LinkPreserverInput!) {
 `;
 type LinkPreserverResult = {alive: boolean, pageRefreshRequested: boolean};
 
+@Observer
 export class LinkPreserver extends BaseComponent<{}, {}> {
 	render() {
 		let {} = this.props;
