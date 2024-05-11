@@ -56,6 +56,7 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	const args = [] as CG_Argument[];
 	if (claim.argument) args.push({argument: claim.argument} as CG_Argument);
 	if (claim.arguments) args.push(...claim.arguments.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
+	if (claim.counter_claim) args.push({argument: claim.counter_claim} as CG_Argument);
 	for (const [i, argument] of args.entries()) {
 		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument.argument), claimResource, ChildGroup.freeform));
 	}
