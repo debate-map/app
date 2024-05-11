@@ -19,6 +19,7 @@ use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
+use crate::db::commands::add_subscription::{self, add_subscription, AddSubscriptionInput};
 use crate::db::general::permission_helpers::{assert_user_can_add_phrasing, assert_user_can_add_child};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, NodeLink};
@@ -26,6 +27,7 @@ use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
 use crate::db::nodes_::_node::{NodeInput};
+use crate::db::user_hiddens::get_user_hidden;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -89,6 +91,15 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
     let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
     increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+
+    let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
+    if user_hiddens.notificationPolicy == "S" {
+        add_subscription(ctx, actor, false, 
+            AddSubscriptionInput { 
+                node: node_id.clone(), 
+                eventType: "addChildNode".to_owned() 
+            }, Default::default()).await?;
+    }
     
     let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,

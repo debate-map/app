@@ -49,6 +49,10 @@ export class UserHidden {
 	@Field({type: "string"}, {opt: true})
 	backgroundCustom_position?: string|n;
 
+	@DB((t, n)=>t.string(n))
+	@Field({type: "string"})
+	notificationPolicy: string;
+
 	// others
 	// ==========
 
@@ -64,6 +68,7 @@ export class UserHidden {
 	//@Field({$ref: "UserHidden_Extras"})
 	@Field({type: "object"})
 	extras = new UserHidden_Extras();
+
 }
 
 @MGLClass({}, {additionalProperties: true})

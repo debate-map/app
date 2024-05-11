@@ -9,6 +9,7 @@ CREATE TABLE app."userHiddens" (
     "backgroundCustom_position" text,
     "addToStream" boolean NOT NULL,
     "lastAccessPolicy" character varying(255),
+    "notificationPolicy" character varying(1) DEFAULT 'S' NOT NULL,
     "extras" jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 ALTER TABLE ONLY app."userHiddens"

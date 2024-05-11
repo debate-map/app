@@ -320,9 +320,16 @@ const events = [
 @Observer
 class UserProfileUI_Notifications extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		const {user} = this.props;
+		const {user, userHidden} = this.props;
 
 		return <>
+			<Row mt={10} mb={5} style={{fontSize: 15, fontWeight: "bold"}}>General Settings</Row>
+			<Row>
+				<CheckBox mr={5} value={userHidden?.notificationPolicy === "S"} enabled onChange={val=>{
+					RunCommand_UpdateUserHidden({id: user.id, updates: {notificationPolicy: val ? "S" : "N"}});
+				}}/>
+				<TextPlus info="Automatically recieve notifications for nodes you create/add revisions to">Auto-subscrbibe to notifications</TextPlus>
+			</Row>
 		</>;
 	}
 }

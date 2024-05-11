@@ -147,6 +147,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 				backgroundCustom_position: val.get("backgroundCustom_position").map(|a| a.as_string()).unwrap_or(None),
 				addToStream: true,
 				lastAccessPolicy: None,
+				notificationPolicy: val.try_get("notificationPolicy")?.try_as_string()?,
 				extras: json!({}),
 			};
 			subresult.insert(old_id.o(), entry);

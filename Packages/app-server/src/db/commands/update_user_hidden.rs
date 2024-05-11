@@ -56,6 +56,7 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_roo
 		backgroundCustom_url: update_field_nullable(updates.backgroundCustom_url, old_data.backgroundCustom_url),
 		backgroundCustom_position: update_field_nullable(updates.backgroundCustom_position, old_data.backgroundCustom_position),
 		addToStream: update_field(updates.addToStream, old_data.addToStream),
+		notificationPolicy: update_field(updates.notificationPolicy, old_data.notificationPolicy),
 		extras: update_field_of_extras(updates.extras, old_data.extras, user_hidden_extras_locked_subfields())?,
 		..old_data
 	};
