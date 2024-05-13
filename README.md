@@ -611,7 +611,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s):
+	* 1.1\) `npm start client.tsc_noWatch && npm start client.build.prodQuick` (can skip tsc part if client's tsc is already running)
+	* 1.2\) `npm start monitorClient.tsc_noWatch && npm start monitorClient.build.prodQuick` (can skip tsc part if monitor-client's tsc is already running)
 * 2\) Launch the backend pods necessary for the behavior you want to test:
 	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
 		* 2.1.1\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
@@ -853,7 +855,9 @@ New steps:
 
 Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
-* 1\) If changes were made to the `client` or `monitor-client` web/frontend codebases (or you've never run these build commands before), run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s):
+	* 1.1\) `npm start client.tsc_noWatch && npm start client.build.prodQuick` (can skip tsc part if client's tsc is already running)
+	* 1.2\) `npm start monitorClient.tsc_noWatch && npm start monitorClient.build.prodQuick` (can skip tsc part if monitor-client's tsc is already running)
 * 2\) Run: `npm start backend.tiltUp_ovh`
 * 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 * 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5200`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)

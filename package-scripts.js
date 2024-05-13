@@ -16,7 +16,8 @@ Object.assign(scripts, {
 
 Object.assign(scripts, {
 	client: {
-		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc:         `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc_noWatch: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build`,
 		dev: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("dev"),
@@ -68,7 +69,8 @@ Object.assign(scripts, {
 });
 Object.assign(scripts, {
 	monitorClient: {
-		tsc: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc:         `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc_noWatch: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build`,
 		dev: {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
