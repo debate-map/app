@@ -560,6 +560,15 @@ Object.assign(scripts, {
 			console.log("Connecting psql to database:", database);
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"}, pager);
 		}),
+		local_secrets: Dynamic(()=>{
+			// we only care about local context data here, so no need to pass context to GetK8sPGUserAdminSecretData
+			const secret = GetK8sPGUserAdminSecretData("dm-local");
+			console.log("--- Local Secrets ---");
+			console.log("PORT:", 5120);
+			console.log("DATABASE:", "debate-map");
+			console.log("USER:", "admin");
+			console.log("PASSWORD:", secret.GetField("password").toString());
+		}),
 
 		// db init/seed commands (using psql to run standard .sql files)
 		buildSeedDBScript: GetBuildSeedDBScriptCommand(),

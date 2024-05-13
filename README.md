@@ -804,6 +804,12 @@ Approach 2: (by using external psql with port-forwarding; requires that PostgreS
 * 2\) Run: `npm start "db.psql_k8s [dm-local/dm-ovh]"`
 * 3\) The shell should now have you logged in as the `admin` user.
 
+Approach 3: (by using dbeaver)
+* 1\) Set up a port-forward from `localhost:[5120/5220]` to your k8s database pod. (see: [port-forwarding](#port-forwarding))
+* 2\) Retrieve the data from "debate-map-pguser-admin" for the "dm-local" context by running `npm start db.local_secrets`
+* 3\) Enter the data printed in the console to make a new dbeaver connection.
+
+
 </details>
 
 <!----><a name="k8s-view-pg-config"></a>
