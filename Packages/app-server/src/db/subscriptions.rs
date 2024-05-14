@@ -30,19 +30,16 @@ pub struct Subscription {
     pub id: ID,
     pub user: String,
     pub node: String,
-    pub eventType: String,
+    pub addChildNode: bool,
+    pub deleteNode: bool,
+    pub addNodeLink: bool,
+    pub deleteNodeLink: bool,
+    pub addNodeRevision: bool,
+    pub setNodeRating: bool,
 }
 impl From<Row> for Subscription {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
-
-#[derive(InputObject, Clone, Serialize, Deserialize)]
-pub struct SubscriptionInput {
-    pub user: String,
-    pub node: String,
-    pub eventType: String,
-}
-
 
 #[derive(Clone)] pub struct GQLSet_Subscription { pub nodes: Vec<Subscription> }
 #[Object] impl GQLSet_Subscription { async fn nodes(&self) -> &Vec<Subscription> { &self.nodes } }

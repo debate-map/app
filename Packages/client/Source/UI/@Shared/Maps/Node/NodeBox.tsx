@@ -452,6 +452,20 @@ export class NodeBox extends BaseComponentPlus(
 								{/* fixes click-gap */}
 								{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 							</NodeUI_LeftBox>}
+							{notificationPanelShow &&
+							<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
+								ref={c=>this.leftPanel = c}
+								usePortal={usePortalForDetailBoxes} nodeUI={this}
+								onPanelButtonHover={panel=>{
+									// ignore unhovers
+									if (panel) this.SetState({lastHoveredPanel: panel});
+								}}
+								onPanelButtonClick={panel=>onPanelButtonClick(panel, "left-panel")}
+								onHoverChange={hovered=>this.SetState({leftPanelHovered: hovered})}
+							>
+								{/* fixes click-gap */}
+								{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+							</NodeUI_LeftBox>}
 							{/* fixes click-gap */}
 							{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
 						</>}
