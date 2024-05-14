@@ -345,7 +345,6 @@ export const GetNodeTitleFromPhrasingAndForm = CreateAccessor((phrasing: NodePhr
 		if (form) {
 			if (form == ClaimForm.negation) return [phrasing.text_negation, "text_negation", "text_negation", missingTitleStrings[1]];
 			if (form == ClaimForm.question) {
-				//return phrasing.text_question || missingTitleStrings[2];
 				// for now at least, allow fallback to the base title
 				if (phrasing.text_question != null && phrasing.text_question.trim().length) return [phrasing.text_question, "text_question", "text_question", missingTitleStrings[2]];
 				return [phrasing.text_base, "text_question", "text_base", missingTitleStrings[2]];
