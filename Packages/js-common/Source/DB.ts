@@ -59,5 +59,8 @@ export * from "./DB/users/$user.js";
 export * from "./DB/users/@User.js";
 export * from "./DB/userHiddens.js";
 export * from "./DB/userHiddens/@UserHidden.js";
+export * from "./DB/subscriptions/@Subscription.js";
+export * from "./DB/subscription.js";
+export * from "./DB/subscriptions/@AddSubscription.js";
 /*export * from "./DB/visibilityDirectives.js";
 export * from "./DB/visibilityDirectives/@VisibilityDirective.js";*/

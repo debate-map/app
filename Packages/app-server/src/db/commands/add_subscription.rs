@@ -1,7 +1,7 @@
 use std::ops::Sub;
 use rust_shared::{async_graphql::{InputObject, Object, SimpleObject, ID}, serde_json::json, utils::{db::uuid::new_uuid_v4_as_b64, general_::extensions::ToOwnedV}, GQLError};
 use serde::{Deserialize, Serialize};
-use crate::{db::{commands::_command::{command_boilerplate, insert_db_entry_by_id_for_struct}, general::permission_helpers::assert_user_can_add_child, nodes::get_node, subscriptions::{self, Subscription}, users::User}, utils::db::accessors::get_db_entry};
+use crate::{db::{commands::_command::{command_boilerplate, insert_db_entry_by_id_for_struct, upsert_db_entry_by_id_for_struct}, general::permission_helpers::assert_user_can_add_child, nodes::get_node, subscriptions::{self, Subscription}, users::User}, utils::db::accessors::get_db_entry};
 use rust_shared::{async_graphql,serde_json};
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::anyhow::{anyhow, Error, Context};
@@ -117,7 +117,6 @@ pub async fn add_or_update_subscription(ctx: &AccessorContext<'_>, actor: &User,
     }))).await;
 
     if let Ok(mut subscription) = existing_subscription {
-
         subscription.addChildNode = addChildNode.unwrap_or(subscription.addChildNode);
         subscription.addNodeLink = addNodeLink.unwrap_or(subscription.addNodeLink);
         subscription.deleteNode = deleteNode.unwrap_or(subscription.deleteNode);
@@ -125,7 +124,7 @@ pub async fn add_or_update_subscription(ctx: &AccessorContext<'_>, actor: &User,
         subscription.addNodeRevision = addNodeRevision.unwrap_or(subscription.addNodeRevision);
         subscription.setNodeRating = setNodeRating.unwrap_or(subscription.setNodeRating);
 
-        insert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
     
         Ok(AddSubscriptionResult {
             id: subscription.id.to_string(),

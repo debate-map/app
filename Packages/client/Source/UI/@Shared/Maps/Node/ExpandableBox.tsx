@@ -1,4 +1,4 @@
-import {Button, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
@@ -19,11 +19,14 @@ type Props = {
 	text, onTextHolderClick?, textHolderStyle?,
 	beforeChildren?, afterChildren?,
 	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?, isExpandButtonForNodeChildren: boolean,
+	showNotificationButton?: boolean,
+	notificationLevel: "none" | "all" | "some",
+	onToggleNotifications?: ()=>void;
 };
 
 @Observer
 export class ExpandableBox extends BaseComponent<Props, {}> {
-	static defaultProps = {outlineThickness: 1, roundedTopLeftCorner: true};
+	static defaultProps = {outlineThickness: 1, roundedTopLeftCorner: true, showNotificationButton: false, notificationLevel: "none"};
 	static ValidateProps(props: Props) {
 		const {backgroundFillPercent} = props;
 		Assert(backgroundFillPercent >= 0 && backgroundFillPercent <= 100, "Background fill-percent must be between 0 and 100.");
@@ -37,7 +40,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, roundedTopLeftCorner, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, textHolderStyle, beforeChildren, afterChildren,
-			expanded, toggleExpanded, expandButtonStyle, isExpandButtonForNodeChildren, ...rest} = this.props;
+			expanded, toggleExpanded, expandButtonStyle, isExpandButtonForNodeChildren, showNotificationButton, onToggleNotifications, notificationLevel, ...rest} = this.props;
 		this.parent = parent; // probably temp; used to access NodeBox comp's props, from MapUI.FindNodeBox
 		//const forNodeBox = parent instanceof NodeBox;
 
@@ -59,10 +62,12 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					<div ref={c=>this.textHolder = c} onClick={onTextHolderClick} style={ES(
 						{
 							position: "relative", width: "calc(100% - 17px)", padding,
+							paddingRight: showNotificationButton ? 20 : undefined,
 							// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 						},
 						textHolderStyle,
 					)}>
+
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: `${backgroundFillPercent}%`, borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner, tr: false, br: false, bl: true}),
@@ -79,6 +84,45 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							}}/>}
 						{text}
 						{/* children */}
+						{showNotificationButton &&
+						<Div style={css({
+							height: "100%",
+							position: "absolute", right: 0, bottom: 0, top: 0,
+							display: "flex", justifyContent: "center", alignItems: "flex-end",
+							":hover": {
+								padding:3,
+							},
+						})}>
+							<button onClick={e=>{
+								e.stopPropagation();
+								e.preventDefault();
+								if (onToggleNotifications) {
+									onToggleNotifications();
+								}
+							}} style={css({
+								background: "none",
+								padding:2,
+								border: "none",
+								cursor: "pointer",
+							})}>
+								{notificationLevel === "none" &&
+								<svg width="10px" height="10px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M14 21H10M8.63306 3.03371C9.61959 2.3649 10.791 2 12 2C13.5913 2 15.1174 2.63214 16.2426 3.75736C17.3679 4.88258 18 6.4087 18 8C18 10.1008 18.2702 11.7512 18.6484 13.0324M6.25867 6.25723C6.08866 6.81726 6 7.40406 6 8C6 11.0902 5.22047 13.206 4.34966 14.6054C3.61513 15.7859 3.24786 16.3761 3.26132 16.5408C3.27624 16.7231 3.31486 16.7926 3.46178 16.9016C3.59446 17 4.19259 17 5.38885 17H17M21 21L3 3" stroke="#D7D9DA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
+	}
+								{notificationLevel === "some" &&
+									<svg width="10px" height="10px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z" stroke="#D7D9DA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+									</svg>
+								}
+
+								{notificationLevel === "all" &&
+									<svg width="10px" height="10px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z" stroke="#D7D9DA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+									</svg>
+								}
+							</button>
+						</Div>}
 					</div>
 					<Button ref={c=>this.expandButton = c}
 						text={<>

@@ -25,7 +25,7 @@ pub async fn get_subscriptions(ctx: &AccessorContext<'_>, id: &str) -> Result<Su
 
 wrap_slow_macros!{
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize,Debug)]
 pub struct Subscription {
     pub id: ID,
     pub user: String,

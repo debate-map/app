@@ -16,6 +16,7 @@ import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {NodePhrasing} from "./DB/nodePhrasings/@NodePhrasing.js";
 import {GlobalData} from "./DB/globalData/@GlobalData.js";
 import {Timeline, TimelineStep} from "./DB.js";
+import {Subscription} from "./DB/subscriptions/@Subscription.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface UT_DBShape extends GraphDBShape {}
@@ -58,6 +59,8 @@ export class GraphDBShape {
 	timelineSteps = DefineCollection(TimelineStep);
 	users = DefineCollection(User);
 	userHiddens = DefineCollection(UserHidden);
+
+	subscriptions = DefineCollection(Subscription);
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//visibilityDirectives = DefineCollection(VisibilityDirective);
 }

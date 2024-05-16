@@ -30,7 +30,7 @@ ADD COLUMN "deleteNode" boolean NOT NULL DEFAULT FALSE,
 ADD COLUMN "addNodeLink" boolean NOT NULL DEFAULT FALSE,
 ADD COLUMN "deleteNodeLink" boolean NOT NULL DEFAULT FALSE,
 ADD COLUMN "addNodeRevision" boolean NOT NULL DEFAULT FALSE,
-ADD COLUMN "deleteNodeRevision" boolean NOT NULL DEFAULT FALSE;
+ADD COLUMN "setNodeRating" boolean NOT NULL DEFAULT FALSE;
 
 ALTER TABLE app.subscriptions
 DROP COLUMN "eventType";

@@ -7,7 +7,7 @@ CREATE TABLE app.subscriptions (
     "addNodeLink" boolean NOT NULL DEFAULT FALSE,
     "deleteNodeLink" boolean NOT NULL DEFAULT FALSE,
     "addNodeRevision" boolean NOT NULL DEFAULT FALSE,
-    "deleteNodeRevision" boolean NOT NULL DEFAULT FALSE,
+    "setNodeRating" boolean NOT NULL DEFAULT FALSE,
     CONSTRAINT pk_user_node PRIMARY KEY ("user", "node")
 );
 
