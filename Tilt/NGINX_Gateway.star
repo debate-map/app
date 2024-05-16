@@ -27,6 +27,16 @@ def Start_NGINXGateway(g):
 		],
 	)
 	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": "ngf-early", "labels": ["gateway"],
+			"objects": [
+				"ngf-nginx-gateway-fabric:serviceaccount",
+				"ngf-nginx-gateway-fabric:clusterrole",
+				"ngf-nginx-gateway-fabric:clusterrolebinding",
+			],
+		},
+	])
+	NEXT_k8s_resource_batch(g, [
 		# we unfortunately can't group these atm; they are added at end of code in helm_remote.star
 		#{"workload": "nginx-gateway-fabric-crds-install", "labels": ["gateway"]},
 		#{"workload": "nginx-gateway-fabric-crds-ready", "labels": ["gateway"]},
@@ -37,9 +47,6 @@ def Start_NGINXGateway(g):
 				# commented; had two matches (with same exact id string!) on linux/rancher-desktop (2024-04-27)
 				#"nginxgateways.gateway.nginx.org:customresourcedefinition",
 				"nginx:gatewayclass",
-				"ngf-nginx-gateway-fabric:serviceaccount",
-				"ngf-nginx-gateway-fabric:clusterrole",
-				"ngf-nginx-gateway-fabric:clusterrolebinding",
 				"ngf-config:nginxgateway",
 			],
 			# This port-forward is only really necessary on Linux, when using docker-engine. (in other cases, k8s auto-creates PF for the load-balancer -- when accessing on the same machine anyway)
