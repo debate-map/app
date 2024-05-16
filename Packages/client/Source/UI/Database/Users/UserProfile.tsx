@@ -328,7 +328,7 @@ class UserProfileUI_Notifications extends BaseComponent<UserProfileUI_SharedProp
 				<CheckBox mr={5} value={userHidden?.notificationPolicy === "S"} enabled onChange={val=>{
 					RunCommand_UpdateUserHidden({id: user.id, updates: {notificationPolicy: val ? "S" : "N"}});
 				}}/>
-				<TextPlus info="Automatically recieve notifications for nodes you create/add revisions to">Auto-subscrbibe to notifications</TextPlus>
+				<TextPlus info="Automatically receive notifications for nodes you create/add revisions to.">Auto-subscrbibe to notifications</TextPlus>
 			</Row>
 		</>;
 	}

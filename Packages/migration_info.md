@@ -11,7 +11,7 @@ CREATE TABLE app.subscriptions (
 ALTER TABLE ONLY app.subscriptions
     ADD CONSTRAINT v1_draft_subscriptions_pkey PRIMARY KEY (id);
     
-   CREATE TABLE app.notifications (
+CREATE TABLE app.notifications (
     "id" text NOT NULL,
     "user" text NOT NULL,
     "commandRun" text NOT NULL,
@@ -36,5 +36,9 @@ ALTER TABLE app.subscriptions
 DROP COLUMN "eventType";
 
 ALTER TABLE app.subscriptions
-ADD CONSTRAINT pk_user_node PRIMARY KEY ("user", "node");
+    ADD CONSTRAINT pk_user_node UNIQUE ("user", "node");
+ALTER TABLE app.subscriptions
+    DROP CONSTRAINT pk_user_node;
+ALTER TABLE app.subscriptions
+    ADD CONSTRAINT unique_node_user UNIQUE ("node", "user");
 ```
