@@ -56,6 +56,7 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	const args = [] as CG_Argument[];
 	if (claim.argument) args.push({argument: claim.argument} as CG_Argument);
 	if (claim.arguments) args.push(...claim.arguments.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
+	if (claim.counter_claim) args.push({argument: claim.counter_claim} as CG_Argument);
 	for (const [i, argument] of args.entries()) {
 		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument.argument), claimResource, ChildGroup.freeform));
 	}
@@ -108,16 +109,12 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		displayDetails: undefined,
 		attachments: CG_Node.GetAttachments(data),
 		node: node.id,
-		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
-			id: GenerateUUID(),
-			type: NodePhrasingType.standard,
-			createdAt: Date.now(),
-			creator: systemUserID,
-			node: node.id,
+		phrasing: {
 			...(narrativeTitle != null
 				? {text_base: mainTitle, text_narrative: narrativeTitle}
 				: {text_base: mainTitle}),
-		})),
+			terms: [],
+		},
 	});
 	return new IR_NodeAndRevision({
 		pathInData: path_indexes,

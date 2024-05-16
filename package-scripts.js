@@ -16,7 +16,8 @@ Object.assign(scripts, {
 
 Object.assign(scripts, {
 	client: {
-		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc:         `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc_noWatch: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build`,
 		dev: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("dev"),
@@ -68,7 +69,8 @@ Object.assign(scripts, {
 });
 Object.assign(scripts, {
 	monitorClient: {
-		tsc: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc:         `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc_noWatch: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build`,
 		dev: {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
@@ -557,6 +559,15 @@ Object.assign(scripts, {
 			const pager = commandArgs.find(a=>a.startsWith("pager:"))?.slice("pager:".length) ?? (process.platform == "win32" ? null : "less");
 			console.log("Connecting psql to database:", database);
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"}, pager);
+		}),
+		local_secrets: Dynamic(()=>{
+			// we only care about local context data here, so no need to pass context to GetK8sPGUserAdminSecretData
+			const secret = GetK8sPGUserAdminSecretData("dm-local");
+			console.log("--- Local Secrets ---");
+			console.log("PORT:", 5120);
+			console.log("DATABASE:", "debate-map");
+			console.log("USER:", "admin");
+			console.log("PASSWORD:", secret.GetField("password").toString());
 		}),
 
 		// db init/seed commands (using psql to run standard .sql files)

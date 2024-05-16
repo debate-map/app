@@ -611,7 +611,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s):
+	* 1.1\) `npm start client.tsc_noWatch && npm start client.build.prodQuick` (can skip tsc part if client's tsc is already running)
+	* 1.2\) `npm start monitorClient.tsc_noWatch && npm start monitorClient.build.prodQuick` (can skip tsc part if monitor-client's tsc is already running)
 * 2\) Launch the backend pods necessary for the behavior you want to test:
 	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
 		* 2.1.1\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
@@ -802,6 +804,12 @@ Approach 2: (by using external psql with port-forwarding; requires that PostgreS
 * 2\) Run: `npm start "db.psql_k8s [dm-local/dm-ovh]"`
 * 3\) The shell should now have you logged in as the `admin` user.
 
+Approach 3: (by using dbeaver)
+* 1\) Set up a port-forward from `localhost:[5120/5220]` to your k8s database pod. (see: [port-forwarding](#port-forwarding))
+* 2\) Retrieve the data from "debate-map-pguser-admin" for the "dm-local" context by running `npm start db.local_secrets`
+* 3\) Enter the data printed in the console to make a new dbeaver connection.
+
+
 </details>
 
 <!----><a name="k8s-view-pg-config"></a>
@@ -853,7 +861,9 @@ New steps:
 
 Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
-* 1\) If changes were made to the `client` or `monitor-client` web/frontend codebases (or you've never run these build commands before), run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s):
+	* 1.1\) `npm start client.tsc_noWatch && npm start client.build.prodQuick` (can skip tsc part if client's tsc is already running)
+	* 1.2\) `npm start monitorClient.tsc_noWatch && npm start monitorClient.build.prodQuick` (can skip tsc part if monitor-client's tsc is already running)
 * 2\) Run: `npm start backend.tiltUp_ovh`
 * 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 * 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5200`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)

@@ -138,18 +138,16 @@ class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 		const showNarrativeForm = ShouldShowNarrativeFormForEditing(childLayout, node.current.phrasing);
 		return (
 			<>
-				{node.type == NodeType.claim && <>
-					<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-						<Pre>Title (negation): </Pre>
-						<TitleInput {...OmitRef(this.props)} titleKey="text_negation"/>
-					</RowLR>
-					<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-						<Pre>Title (question): </Pre>
-						{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
-							value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
-						<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
-					</RowLR>
-				</>}
+				{(node.type == NodeType.claim || (node.current.phrasing.text_negation ?? "").trim().length > 0) &&
+				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+					<Pre>Title (negation): </Pre>
+					<TitleInput {...OmitRef(this.props)} titleKey="text_negation"/>
+				</RowLR>}
+				{(node.type == NodeType.claim || (node.current.phrasing.text_question ?? "").trim().length > 0) &&
+				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+					<Pre>Title (question): </Pre>
+					<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
+				</RowLR>}
 				{showNarrativeForm &&
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Title (narrative): </Pre>

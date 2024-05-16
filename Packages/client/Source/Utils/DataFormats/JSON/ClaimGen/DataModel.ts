@@ -115,6 +115,9 @@ export class CG_Claim extends CG_Node {
 
 	// v3 (tool extending claim-gen)
 	arguments?: (string | CG_Argument)[];
+
+	// v4
+	counter_claim?: string;
 }
 export class CG_Argument extends CG_Node {
 	argument: string;

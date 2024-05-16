@@ -41,29 +41,15 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 			usePortal, nodeUI,
 			onHoverChange,
 		} = this.props;
-		/*const nodeView = GetNodeView(map?.id, path);
-		const openPanel = local_nodeView?.openPanel || nodeView?.openPanel;*/
 		const nodeView = local_nodeView ?? GetNodeView(map?.id, path);
 		const openPanel = nodeView?.openPanel;
 
 		const form = GetNodeForm(node, path);
 		const parentNode = GetParentNodeL3(path);
 
-		const nodeReversed = form == ClaimForm.negation;
-		const nodeTypeInfo = NodeType_Info.for[node.type];
-
 		const ratingTypes = GetRatingTypesForNode(node);
 
 		if (usePortal) {
-			/*UseEffect(()=>{
-				const timer = new Timer(1000 / 60, ()=>{
-					if (uiRoot == null || nodeUI.root?.DOM == null) return;
-					const nodeUIRect = nodeUI.root.DOM.getBoundingClientRect();
-					uiRoot.style.left = `${nodeUIRect.left - 110}px`;
-					uiRoot.style.top = `${nodeUIRect.top}px`;
-				}).Start();
-				return ()=>timer.Stop();
-			});*/
 			UseEffect(()=>{
 				let stop = false;
 				requestAnimationFrame(update);
@@ -124,15 +110,10 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 				<div style={{
 					position: "relative", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					background: backgroundColor.alpha(0.95).css(),
-					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 				}}>
 					{ratingTypes.map((ratingInfo, index)=>{
 						const ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, node, parentNode, path);
-						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-
 						let percentStr = "...";
-						/*const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
-						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);*/
 						const ratingSummary = GetRatingSummary(node.id, ratingInfo.type);
 						if (ratingSummary.average != null) {
 							percentStr = `${ratingSummary.average.RoundTo(1)}%`;
@@ -150,7 +131,6 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
-										{/* ratingSet ? ratingSet.VKeys().length /*- 1*#/ : 0 */}
 										{(ratingSummary?.countsByRange ?? []).Sum()}
 									</sup>
 								</Span>
@@ -168,17 +148,13 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 				<div style={{
 					position: "relative", marginTop: 1, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					background: backgroundColor.alpha(0.95).css(),
-					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 				}}>
 					<div style={{
 						position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5,
 						background: backgroundColor.alpha(0.7).css(),
-						//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 					}}/>
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>}
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>}
-					{/* <PanelButton {...{ onPanelButtonHover, onPanelButtonClick, map, path, openPanel }} panel="discussion" text="Discussion"/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="social" text="Social"/> */}
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="details"
 						text={`Details${IsUserCreatorOrMod(MeID(), node) ? " (edit)" : ""}`}/>
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>}
