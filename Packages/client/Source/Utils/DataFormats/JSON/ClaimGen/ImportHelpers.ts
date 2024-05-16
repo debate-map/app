@@ -109,16 +109,12 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		displayDetails: undefined,
 		attachments: CG_Node.GetAttachments(data),
 		node: node.id,
-		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
-			id: GenerateUUID(),
-			type: NodePhrasingType.standard,
-			createdAt: Date.now(),
-			creator: systemUserID,
-			node: node.id,
+		phrasing: {
 			...(narrativeTitle != null
 				? {text_base: mainTitle, text_narrative: narrativeTitle}
 				: {text_base: mainTitle}),
-		})),
+			terms: [],
+		},
 	});
 	return new IR_NodeAndRevision({
 		pathInData: path_indexes,
