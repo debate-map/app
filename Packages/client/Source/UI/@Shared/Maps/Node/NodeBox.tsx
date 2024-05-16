@@ -335,8 +335,6 @@ export class NodeBox extends BaseComponentPlus(
 			return "none";
 		};
 
-		const getSvg = ("");
-
 		const activeNotification: "all" | "some" | "none" = getSubscriptionLevel(subscriptions[0]);
 
 		const renderInner = (dragInfo?: DragInfo)=>{
