@@ -20,32 +20,6 @@ grafana:
         type: grafana-pyroscope-datasource
         uid: pyroscope-main
         url: http://pyroscope.monitoring.svc.cluster.local:4040/
-  # define dashboards
-  # dashboards:
-  #   default:
-      #pyroscope-cpu:
-      #  json: [including it inline, with yaml multiline string [ie. using |], works; trying other approaches]
-      # pyroscope-cpu0: {file: dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu1: {file: ./dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu2: {file: ../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu3: {file: ../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu4: {file: ../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu5: {file: ../../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu6: {file: ../../../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu7: {file: ../../../../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu8: {file: ../../../../../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      # pyroscope-cpu9: {file: ../../../../../../../../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.json}
-      #pyroscope-cpu0: {file: dashboards/pyroscope-cpu.json}
-
-  # dashboards:
-  #   enabled: true
-  #   label: grafana_dashboard
-  #   folder: /tmp/dashboards
-  #   provider: 
-  #     foldersFromFilesStructure: true
-  #   # ?this allows for grafana dashboards to be auto-discovered, from configmaps with the annotation "k8s-sidecar-target-directory" set
-  #   # annotations: 
-  #   #   k8s-sidecar-target-directory: "/tmp/dashboards/kubernetes"
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -58,8 +32,11 @@ grafana:
         editable: true
         options:
           path: /var/lib/grafana/dashboards/default
-  # dashboardsConfigMaps:
-  #   pyroscope-cpu: grafana-dashboard-pyroscope-cpu
+  # define the actual dashboards
+  # dashboards:
+  #   default:
+  #     pyroscope-cpu:
+  #      json: [using yaml multiline string here works, but is ugly; instead, we merge in extra yaml values files; see Monitoring.star]
 
 prometheus:
   enabled: true

@@ -33,23 +33,11 @@ def Start_Monitoring(g):
 		{"workload": "pyroscope-agent", "labels": ["monitoring"]},
 	])
 
-	# grafana dashboards (only configmaps for it, so can add prior to grafana being added)
+	# grafana dashboards
 	# ==========
 
-	# k8s_yaml("../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.yaml")
-	# NEXT_k8s_resource_batch(g, [
-	# 	{
-	# 		"new_name": "grafana-dashboards", "labels": "monitoring",
-	# 		"objects": [
-	# 			"grafana-dashboard-pyroscope-cpu"
-	# 		]
-	# 	}
-	# ])
-	lokiStackValueSets = []
-	# lokiStackValueSets["grafana.dashboards.pyroscope-cpu"] = {
-	# 	"json": read_file("../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.yaml")
-	# }
-	#lokiStackValueSets.append("grafana.dashboards.pyroscope-cpu=" = str(read_file("../Packages/deploy/LokiStack/dashboards/pyroscope-cpu.yaml")))
+	lokiStackExtraValueFiles = []
+	lokiStackExtraValueFiles.append("../Packages/deploy/LokiStack/dashboards/pyroscope.yaml")
 
 	# netdata
 	# ==========
@@ -92,9 +80,7 @@ def Start_Monitoring(g):
 		version='2.10.2', # helm-chart version may differ from vector version
 		namespace='monitoring',
 		# create_namespace=True,
-		# set=[],
-		values=["../Packages/deploy/LokiStack/values.yaml", "../Packages/deploy/LokiStack/dashboards/pyroscope-cpu-as-helm-values.yaml"],
-		set=lokiStackValueSets,
+		values=["../Packages/deploy/LokiStack/values.yaml"] + lokiStackExtraValueFiles,
 	)
 	NEXT_k8s_resource_batch(g, [
 		{"labels": ["monitoring"], "new_name": 'loki-stack-early', "objects": [
