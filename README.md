@@ -129,19 +129,23 @@ Local:
 * `localhost:5100`: local (k8s), web-server (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5100/app-server`: local (k8s), app-server (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5100/monitor`: local (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5100/grafana`: remote (k8s), grafana ui (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5101`: local (webpack), webpack [in place of web-server] (`client.dev` must be running)
 * `localhost:5120`: local (k8s), postgres instance (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5131`: local (webpack), monitor-client (webpack web-server) (`monitorClient.dev` must be running)
 * `localhost:5140`: local (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5141`: local (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5150`: local (k8s), pyroscope (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
 * `localhost:5200`: remote (k8s), web-server (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5200/app-server`: remote (k8s), app-server (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5200/monitor`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5200/grafana`: remote (k8s), grafana ui (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5220`: remote (k8s), postgres instance (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:5240`: remote (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
-* `localhost:5241`: remote (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5240`: remote (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5241`: remote (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5250`: remote (k8s), pyroscope (`backend.[forward/tiltUp]_ovh` must be running)
 
 Remote (public):
 * `debatemap.app`: remote (k8s), web-server

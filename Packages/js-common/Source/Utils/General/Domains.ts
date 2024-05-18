@@ -6,9 +6,10 @@ import {Assert} from "web-vcore/nm/js-vextensions.js";
 const domainConstants = {
 	prodDomain: "debatemap.app",
 	recognizedWebServerHosts: [
-		"localhost:5100", "localhost:5101", // web-server, local-k8s and local-webpack
-		"localhost:5130", "localhost:5131", // monitor, local-k8s and local-webpack
-		"localhost:5200", // all of the load-balancer-exposed services, on the remote-k8s
+		"localhost:5100", "localhost:5200", // load-balancer service (exposes web-server, plus other services, eg. /grafana)
+		"localhost:5101", // local webpack (alternative to web-server pod, when doing local development)
+		"localhost:5131", // monitor, local webpack (alternative to frontend-serving from `/monitor`, when doing local development)
+		"localhost:5150", "localhost:5250", // pyroscope
 		// direct to server
 		"9m2x1z.nodes.c1.or1.k8s.ovh.us",
 		"debatemap.societylibrary.org",
@@ -22,7 +23,7 @@ const domainConstants = {
 	onServerAndProd: false,
 };
 
-export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana";
+export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana" | "pyroscope";
 export type GetServerURL_Options = {
 	claimedClientURL: string|n,
 	restrictToRecognizedHosts: boolean,
@@ -61,12 +62,20 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 		}
 	}
 
+	const backendIsRemote = !opts.forceLocalhost && (
+		claimedClientURL_trusted?.searchParams.get("db") == "prod"
+		|| serverURL.hostname == domainConstants.prodDomain
+	);
+
 	// section 2: set subdomain/port
 	// ==========
 
 	// for simply deciding between localhost:5100 and localhost:5101, we don't need the claimed-client-url to be "trusted"
 	if (serverPod == "web-server" && claimedClientURL?.port == "5101") {
 		serverURL.port = "5101";
+	} else if (serverPod == "pyroscope") {
+		serverURL.hostname = "localhost";
+		serverURL.port = backendIsRemote ? "5250" : "5150";
 	}
 
 	// section 3: set path

@@ -29,9 +29,11 @@ impl DomainsConstants {
             prod_domain: "debatemap.app",
             //prod_domain: "debates.app", // temp
             recognized_web_server_hosts: &[
-                "localhost:5100", "localhost:5101", // web-server, local-k8s and local-webpack
-                "localhost:5130", "localhost:5131", // monitor, local-k8s and local-webpack
-                "localhost:5200", // all of the load-balancer-exposed services, on the remote-k8s
+                "localhost:5100", "localhost:5200", // load-balancer service (exposes web-server, plus other services, eg. /grafana)
+                "localhost:5101", // local webpack (alternative to web-server pod, when doing local development)
+                "localhost:5130", // monitor (serves both frontend and backend requests)
+                "localhost:5131", // monitor, local webpack (alternative to monitor pod's frontend-serving, when doing local development)
+                "localhost:5150", "localhost:5250", // pyroscope
                 // direct to server
                 "9m2x1z.nodes.c1.or1.k8s.ovh.us",
                 "debatemap.societylibrary.org",
@@ -52,6 +54,7 @@ pub enum ServerPod {
     AppServer,
     Monitor,
     Grafana,
+    Pyroscope,
 }
 
 pub struct GetServerURL_Options {
@@ -90,6 +93,11 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_O
 			server_url = Url::parse(&format!("https://{}", prod_domain))?;
         }
     }
+
+    let backend_is_remote = !opts.force_localhost && (
+        claimed_client_url_trusted.map(|a| a.query_pairs().any(|b| b.0 == "db" && b.1 == "prod")).unwrap_or(false)
+        || server_url.host_str() == Some(prod_domain)
+    );
     
     // section 2: set subdomain/port
     // ==========
@@ -100,6 +108,10 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_O
             if claimed_client_url.map(|a| a.port()) == Some(Some(5101)) {
                 server_url.set_port(Some(5101)).unwrap();
             }
+        },
+        ServerPod::Pyroscope => {
+            server_url.set_host(Some("localhost")).unwrap(); // pyroscope only accessible using port-forwards atm
+            server_url.set_port(Some(if backend_is_remote { 5250 } else { 5150 })).unwrap();
         },
         _ => {},
     }
@@ -120,6 +132,7 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_O
         ServerPod::Grafana => {
             subpath_final = format!("/grafana{}", subpath_final);
         },
+        ServerPod::Pyroscope => {},
     }
     server_url.set_path(&subpath_final);
 

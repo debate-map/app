@@ -55,7 +55,8 @@ mod router;
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    let _sentry_guard = set_up_globals();
+    let (_sentry_guard, agent) = set_up_globals();
+    let agent_running = agent.start().unwrap();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     let app_state = AppState::new_in_arc();
@@ -68,4 +69,7 @@ async fn main() {
 
     // start router; this handles all "external web requests"
     start_router(app_state).await;
+
+    let agent_ready = agent_running.stop().unwrap();
+    agent_ready.shutdown();
 }

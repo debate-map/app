@@ -11,6 +11,7 @@ export type URLParam = {name: string, value: string};
 export class MainState {
 	constructor() { makeObservable(this); }
 
+	@O sideBarExpanded = true;
 	@O page = "home";
 	@O urlExtraStr: string|n;
 	@O @ignore urlOtherFlags: URLParam[] = [];
