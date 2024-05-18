@@ -21,6 +21,10 @@ def Start_GatewayRoutes(g):
 		"route-app-server:httproute",
 		"route-monitor:httproute",
 		"route-grafana:httproute",
+		# at some point, we want routes for pyroscope, etc.; delayed till http-routes can have auth barriers (for now, using port-forwards); see:
+		# 1) https://github.com/kubernetes-sigs/gateway-api/issues/1494
+		# 2) https://github.com/nginxinc/nginx-gateway-fabric/blob/ee4319c931f55611ed2aa290251f720908e8f11a/docs/proposals/nginx-extensions.md#authentication
+		#"route-pyroscope:httproute",
 	]
 	if g["REMOTE"]:
 		route_resources.append("redirect-to-https:httproute")

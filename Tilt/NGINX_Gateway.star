@@ -25,6 +25,7 @@ def Start_NGINXGateway(g):
 			#"service.type=LoadBalancer",
 			#"service.externalIPs={15.204.30.179}",
 		],
+		crd_resource_labels=["gateway"],
 	)
 	NEXT_k8s_resource_batch(g, [
 		{
@@ -37,9 +38,6 @@ def Start_NGINXGateway(g):
 		},
 	])
 	NEXT_k8s_resource_batch(g, [
-		# we unfortunately can't group these atm; they are added at end of code in helm_remote.star
-		#{"workload": "nginx-gateway-fabric-crds-install", "labels": ["gateway"]},
-		#{"workload": "nginx-gateway-fabric-crds-ready", "labels": ["gateway"]},
 		{
 			"workload": "ngf-nginx-gateway-fabric", "new_name": "ngf", "labels": ["gateway"],
 			#"new_name": "ngf", "labels": ["gateway"],

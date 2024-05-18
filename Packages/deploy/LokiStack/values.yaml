@@ -12,6 +12,14 @@ grafana:
       #domain: localhost:5100
       root_url: "%(protocol)s://%(domain)s/grafana"
       serve_from_sub_path: true
+  datasources:
+    GeneralDataSources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Pyroscope
+        type: grafana-pyroscope-datasource
+        uid: pyroscope-main
+        url: http://pyroscope.monitoring.svc.cluster.local:4040/
 
 prometheus:
   enabled: true

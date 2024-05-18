@@ -15,6 +15,24 @@ def Start_Monitoring(g):
 	# moved to Main.star, so can happen before usage in Traefic_Gateway.star (->routes.yaml)
 	#CreateNamespace(g, k8s_yaml, "monitoring")
 
+	# pyroscope
+	# ==========
+
+	helm_remote('pyroscope',
+		repo_url='https://grafana.github.io/helm-charts',
+		#version='0.0.1',
+		namespace='monitoring',
+		#values=["../Packages/deploy/Pyroscope/values.yaml"],
+		crd_resource_labels=["monitoring"],
+	)
+	NEXT_k8s_resource_batch(g, [
+		{
+			"workload": "pyroscope", "labels": ["monitoring"],
+			"port_forwards": '5250:4040' if g["REMOTE"] else '5150:4040',
+		},
+		{"workload": "pyroscope-agent", "labels": ["monitoring"]},
+	], [])
+
 	# netdata
 	# ==========
 
@@ -72,15 +90,18 @@ def Start_Monitoring(g):
 		{"labels": ["monitoring"], "workload": 'loki-stack'},
 	]);
 	NEXT_k8s_resource_batch(g, [
-		{"labels": ["monitoring"], "workload": 'loki-stack-grafana', "port_forwards": '3200:3000' if g["REMOTE"] else '3000', "objects": [
-			"loki-stack-grafana:serviceaccount",
-			"loki-stack-grafana:secret",
-			"loki-stack-grafana:role",
-			"loki-stack-grafana:rolebinding",
-			"loki-stack-grafana:configmap",
-			"loki-stack-grafana-clusterrolebinding:clusterrolebinding",
-			"loki-stack-grafana-clusterrole:clusterrole",
-		]},
+		{
+			"labels": ["monitoring"], "workload": 'loki-stack-grafana', "objects": [
+				"loki-stack-grafana:serviceaccount",
+				"loki-stack-grafana:secret",
+				"loki-stack-grafana:role",
+				"loki-stack-grafana:rolebinding",
+				"loki-stack-grafana:configmap",
+				"loki-stack-grafana-clusterrolebinding:clusterrolebinding",
+				"loki-stack-grafana-clusterrole:clusterrole",
+			]
+			#"port_forwards": '3200:3000' if g["REMOTE"] else '3000', 
+		},
 		{"labels": ["monitoring"], "workload": 'loki-stack-kube-state-metrics', "objects": [
 			"loki-stack-kube-state-metrics:clusterrole",
 			"loki-stack-kube-state-metrics:clusterrolebinding",

@@ -14,8 +14,11 @@ def NEXT_k8s_resource(g, workload = '', **args):
 		entry
 	])
 	return results[0]
-def NEXT_k8s_resource_batch(g, entries = []):
+# resource_deps_override is mostly used for testing, eg. to temporarily avoid deps so testing resource's deployment process is faster
+def NEXT_k8s_resource_batch(g, entries = [], resource_deps_override = None):
 	resource_deps = GetLastResourceNamesBatch(g)
+	if resource_deps_override != None:
+		resource_deps = resource_deps_override
 	batch_resourceNames = []
 
 	results = []

@@ -25,6 +25,7 @@ import {NetDataUI} from "./NetData";
 import {PixieUI} from "./Pixie";
 import {PrometheusUI} from "./Prometheus";
 import {TestingUI} from "./Testing";
+import {PyroscopeUI} from "./Pyroscope.js";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -116,6 +117,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "grafana" && <GrafanaUI/>}
 						{page == "prometheus" && <PrometheusUI/>}
 						{page == "alert-manager" && <AlertManagerUI/>}
+						{page == "pyroscope" && <PyroscopeUI/>}
 						{page == "pixie" && <PixieUI/>}
 					</main>
 				</ErrorBoundary>
