@@ -24,8 +24,15 @@ impl StackTraceLine {
     }
 }
 
-#[allow(non_upper_case_globals)]
+// this error-handling layer is probably not necessary (the unwraps should all be safe); but using it for now
 pub fn simplify_backtrace_str(source: String, remove_spammy_trace_lines: bool) -> String {
+    try_simplify_backtrace_str(&source, remove_spammy_trace_lines).unwrap_or(
+        format!("[tried but failed to simplify backtrace; stacktrace left unchanged below]\n{}", source)
+    )
+}
+
+#[allow(non_upper_case_globals)]
+pub fn try_simplify_backtrace_str(source: &str, remove_spammy_trace_lines: bool) -> Result<String, Error> {
     let lines_raw = source.split("\n");
 
     // regexes for general categorization
@@ -71,13 +78,13 @@ pub fn simplify_backtrace_str(source: String, remove_spammy_trace_lines: bool) -
                     None
                 } else {
                     // if we can't find a code-path line after this func-name line, indent this line anyway, right here
-                    let func_line_str = old_lines.get(i).unwrap().get_str();
+                    let func_line_str = old_lines.get(i)?.get_str();
                     let new_line = StackTraceLine::CodePathPlusFuncName(" ".repeat(indent_for_column_2) + func_line_str);
                     Some((i, new_line))
                 }
             },
             StackTraceLine::CodePath(_) => {
-                let path_line_str = old_lines.get(i).unwrap().get_str();
+                let path_line_str = old_lines.get(i)?.get_str();
                 let func_line_str = match &old_lines.get(i - 1) { Some(StackTraceLine::FuncName(str)) => Some(str), _ => None };
 
                 if remove_spammy_trace_lines {
@@ -114,5 +121,5 @@ pub fn simplify_backtrace_str(source: String, remove_spammy_trace_lines: bool) -
     }).map(|a| a.1).collect_vec();
 
     let result = new_lines.iter().map(|a| a.get_str()).collect_vec().join("\n");
-    result
+    Ok(result)
 }

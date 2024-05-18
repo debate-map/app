@@ -26,6 +26,13 @@ dyn-clone = "1.0.4"
 oauth2 = "4.4.2"
 dotenv = "0.15.0"
 lexicon_fractional_index = "0.0.3"
+pyroscope = "0.5.7"
+pyroscope_pprofrs = "0.2.7"
+
+# temp-fix for https://github.com/tikv/pprof-rs/issues/232
+#pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}
+#pprof = {git = "https://github.com/Erigara/pprof-rs", rev = "5f624c20fdd36f3396b78b954edbc7fc8b85773c"}
+#pprof = {git = "https://github.com/Venryx/pprof-rs-from-erigara", rev = "da8ebcdab50cfdb7a85f03d9362f93b7b7f06cbd"}
 
 # needed for async-graphql examples-base, for now
 slab = "0.4.2"

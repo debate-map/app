@@ -36,3 +36,8 @@ resolver = "2"
 #tokio-postgres = {git = "https://github.com/petrosagg/rust-postgres.git", branch = "copy-both", features = ["with-serde_json-1", "array-impls"]}
 #tokio-postgres = {git = "https://github.com/Venryx/rust-postgres.git", branch = "copy-both", features = ["with-serde_json-1", "array-impls"]}
 tokio-postgres = {git = "https://github.com/MaterializeInc/rust-postgres.git", rev = "7bdd17b5acf4d7dbc53b08a9038793ab7e49da6c", features = ["with-serde_json-1", "array-impls"]}
+
+# temp-fix for https://github.com/tikv/pprof-rs/issues/232
+#pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}
+#pprof = {git = "https://github.com/Erigara/pprof-rs", rev = "5f624c20fdd36f3396b78b954edbc7fc8b85773c"}
+pprof = {git = "https://github.com/Venryx/pprof-rs-from-erigara", rev = "da8ebcdab50cfdb7a85f03d9362f93b7b7f06cbd"}

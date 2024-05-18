@@ -33,14 +33,14 @@ def Start_App(g):
 		},
 	)
 
-	def CopyFromPath(packageName):
+	def CopyFromPath(packageName, usedCranelift = g["compileWithCranelift"], usedRelease = g["compileWithRelease"]):
 		# we have to hard-code these branches, since rust outputs "dev" profile into the "debug" folder fsr (also simplifies underscore handling)
-		if g["compileWithCranelift"]:
-			if g["compileWithRelease"]: return "/dm_repo/target/release_clif/" + packageName
-			else:                       return "/dm_repo/target/dev_clif/" + packageName
+		if usedCranelift:
+			if usedRelease: return "/dm_repo/target/release_clif/" + packageName
+			else:           return "/dm_repo/target/dev_clif/" + packageName
 		else:
-			if g["compileWithRelease"]: return "/dm_repo/target/release/" + packageName
-			else:                       return "/dm_repo/target/debug/" + packageName
+			if usedRelease: return "/dm_repo/target/release/" + packageName
+			else:           return "/dm_repo/target/debug/" + packageName
 
 	imageURL_monitorBackend = g["registryURL"] + '/dm-monitor-backend-' + ENV
 	docker_build(imageURL_monitorBackend, '..', dockerfile='../Packages/monitor-backend/Dockerfile',
