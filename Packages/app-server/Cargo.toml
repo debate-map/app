@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+# dependencies specific to linux
+[target.'cfg(unix)'.dependencies]
+pyroscope = "0.5.7"
+pyroscope_pprofrs = "0.2.7"
+
 [dependencies]
 #log = "0.4.16"
 tracing = "0.1" # todo: remove this (since part of rust_shared now)
@@ -26,8 +31,6 @@ dyn-clone = "1.0.4"
 oauth2 = "4.4.2"
 dotenv = "0.15.0"
 lexicon_fractional_index = "0.0.3"
-pyroscope = "0.5.7"
-pyroscope_pprofrs = "0.2.7"
 
 # temp-fix for https://github.com/tikv/pprof-rs/issues/232
 #pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}

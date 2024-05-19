@@ -1,7 +1,10 @@
-use std::{alloc::System, panic, backtrace::Backtrace};
+#[cfg(unix)]
+use {
+    pyroscope::{pyroscope::PyroscopeAgentReady, PyroscopeAgent},
+    pyroscope_pprofrs::{pprof_backend, PprofConfig}
+};
 
-use pyroscope::{pyroscope::PyroscopeAgentReady, PyroscopeAgent};
-use pyroscope_pprofrs::{pprof_backend, PprofConfig};
+use std::{alloc::System, panic, backtrace::Backtrace};
 use rust_shared::{domains::{get_env, is_prod}, flume, links::app_server_to_monitor_backend::Message_ASToMB, once_cell::sync::OnceCell, sentry::{self, ClientInitGuard}, tokio, utils::{errors_::backtrace_simplifier::{simplify_backtrace_str}, mtx::mtx::{MtxData, MtxDataWithExtraInfo, MtxGlobalMsg, MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER}, type_aliases::{FReceiver, FSender}}};
 use tracing::{info, error};
 use dotenv::dotenv;
@@ -11,7 +14,7 @@ use crate::{utils::general::{mem_alloc::Trallocator, logging::set_up_logging, da
 #[global_allocator]
 pub static GLOBAL: Trallocator<System> = Trallocator::new(System);
 
-pub fn set_up_globals() -> (Option<ClientInitGuard>, PyroscopeAgent<PyroscopeAgentReady>) {
+pub fn set_up_globals() -> Option<ClientInitGuard> {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
         // do a simple println! first, to confirm our handler started running
@@ -33,16 +36,22 @@ pub fn set_up_globals() -> (Option<ClientInitGuard>, PyroscopeAgent<PyroscopeAge
     set_up_logging();
     set_up_mtx_handler();
 
+    GLOBAL.reset();
+    info!("Memory used: {} bytes", GLOBAL.get());
+
+    sentry_guard
+}
+
+#[cfg(unix)]
+pub fn set_up_globals_linux() -> PyroscopeAgent<PyroscopeAgentReady> {
     // configure pprof (profiling backend) + pyroscope
     let pprof_config = PprofConfig::new().sample_rate(100);
     let backend_impl = pprof_backend(pprof_config);
     let agent = PyroscopeAgent::builder("http://pyroscope.monitoring.svc.cluster.local:4040/", "app-server").backend(backend_impl).build().unwrap();
-
-    GLOBAL.reset();
-    info!("Memory used: {} bytes", GLOBAL.get());
-
-    (sentry_guard, agent)
+    agent
 }
+#[cfg(not(unix))]
+pub fn set_up_globals_linux() -> Option<bool> { None }
 
 fn set_up_sentry() -> Option<ClientInitGuard> {
     if is_prod() {
