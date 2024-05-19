@@ -3,15 +3,15 @@ import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON
 import {MaybeCloneAndRetargetNodeTag, NodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@NodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeLink} from "../DB.js";
+import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeLink, CheckLinkIsValid, ClaimForm, Polarity} from "../DB.js";
 import {GetAccessPolicy, GetFinalAccessPolicyForNewEntry, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
 import {GetNodeLinks} from "../DB/nodeLinks.js";
-import {ClaimForm, NodeL1, NodeL3, Polarity} from "../DB/nodes/@Node.js";
+import {NodeL1, NodeL3} from "../DB/nodes/@Node.js";
 import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNodeTag} from "./AddNodeTag.js";
 import {LinkNode} from "./LinkNode.js";
-import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode} from "../DB/nodes.js";
+import {GetNode} from "../DB/nodes.js";
 import {NodeType_Info} from "../DB/nodes/@NodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 
@@ -186,7 +186,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 								newLink.parent = transferData.addNodeCommand!.returnData.nodeID;
 
 								// if we're changing the node's type, check for child-links it has that are invalid (eg. wrong child-group), and try to change them to be valid
-								if (newNode.type != node.type && CheckLinkIsValid(newNode.type, newLink.group, newLink.c_childType!) != null) {
+								if (newNode.type != node.type && CheckLinkIsValid(newNode.type, newLink.c_childType!, newLink.group, newLink.polarity) != null) {
 									const firstValidGroupForChildType = [...NodeType_Info.for[newNode.type].childGroup_childTypes.entries()].filter(a=>a[1].includes(newLink.c_childType!));
 									Assert(firstValidGroupForChildType != null, `Cannot clone node while both changing type and keeping children, because there are children whose type (${newLink.c_childType}) cannot be placed into any of the new node's child-groups.`);
 									newLink.group = firstValidGroupForChildType[0][0];

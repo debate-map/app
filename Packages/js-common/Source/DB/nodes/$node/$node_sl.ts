@@ -1,11 +1,12 @@
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeChildrenL3, GetParentNode} from "../../nodes.js";
 import {Map} from "../../maps/@Map.js";
-import {ClaimForm, NodeL2} from "../@Node.js";
+import {NodeL2} from "../@Node.js";
 import {ChildLayout, GetChildLayout_Final} from "../@NodeRevision.js";
-import {ChildGroup, NodeType} from "../@NodeType.js";
+import {NodeType} from "../@NodeType.js";
 import {GetNodeDisplayText, GetToolbarItemsToShow} from "../$node.js";
 import {NodePhrasing_Embedded, TitleKey_values} from "../../nodePhrasings/@NodePhrasing.js";
+import {ChildGroup, ClaimForm} from "../../nodeLinks/@NodeLink.js";
 
 // The node-related functions in this file are specific to use-cases of the society-library (or at least, that is their primary reason for existing).
 // They are separated into their own file, to keep the main $node.ts file tidier. (since some of the sl-specific customizations have fairly nuanced logic/decisions)

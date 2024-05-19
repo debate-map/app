@@ -4,8 +4,9 @@ import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
-import {ClaimForm, NodeL1, NodeL2} from "../../DB/nodes/@Node.js";
+import {NodeL1, NodeL2} from "../../DB/nodes/@Node.js";
 import {ArgumentType} from "../../DB/nodes/@NodeRevision.js";
+import {ClaimForm} from "../../DB/nodeLinks/@NodeLink.js";
 
 // sync:rs
 export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, premises: NodeL1[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
@@ -91,8 +92,12 @@ export function RatingListAfterRemovesAndAdds(baseList: NodeRating[], ratingsToR
 
 // sync:rs[loosely]
 export const GetArgumentImpactPseudoRatings = CreateAccessor((
-	argument: NodeL1, premises: NodeL1[], userIDs?: string[]|n,
-	useAverageForMissing = false, ratingsBeingRemoved?: string[], ratingsBeingAdded?: NodeRating[],
+	argument: NodeL1,
+	premises: NodeL1[],
+	userIDs?: string[]|n,
+	useAverageForMissing = false,
+	ratingsBeingRemoved?: string[],
+	ratingsBeingAdded?: NodeRating[],
 ): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;

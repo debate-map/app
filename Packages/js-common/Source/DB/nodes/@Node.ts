@@ -5,20 +5,11 @@ import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {APAction, APTable} from "../accessPolicies/@PermissionSet.js";
-import {NodeLink} from "../nodeLinks/@NodeLink.js";
+import {NodeLink, Polarity} from "../nodeLinks/@NodeLink.js";
 import {IsUserCreator, IsUserCreatorOrMod} from "../users/$user.js";
 import {User} from "../users/@User.js";
 import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
 import {NodeType} from "./@NodeType.js";
-
-export enum ClaimForm {
-	base = "base",
-	negation = "negation",
-	question = "question",
-	//narrative = "narrative", // commented, because the narrative-form is never displayed in the debate-map tree itself atm (instead used for, eg. the papers app)
-}
-//export type ClaimForm = typeof ClaimForm_values[number];
-AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});
 
 //export const NodeL1_id = UUID_regex;
 //export const NodeL1_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
@@ -163,19 +154,3 @@ export interface NodeL3 extends NodeL2 {
 	//parentLinkToGrandParent: ChildEntry;
 }
 export type NodeL3_Argument = NodeL3 & Required<Pick<NodeL3, "argumentType" | "multiPremiseArgument">>;
-
-/*export enum Polarity {
-	Supporting = 10,
-	Opposing = 20,
-}
-AddSchema("Polarity", {enum: GetValues(Polarity)});*/
-/*export const Polarity_values = ["supporting", "opposing"] as const;
-export type Polarity = typeof Polarity_values[number];
-AddSchema("Polarity", {oneOf: Polarity_values});*/
-
-export enum Polarity {
-	supporting = "supporting",
-	opposing = "opposing",
-}
-//export type Polarity = typeof Polarity_values[number];
-AddSchema("Polarity", {enum: GetValues(Polarity)});

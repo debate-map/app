@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me} from "dm_common";
+import {ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, ClaimForm, NodeL3, Polarity, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me, GetValidNewChildConfigsUnderParent, GetDisplayTextForNewChildConfig} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
@@ -22,7 +22,7 @@ import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
 import {MI_Paste_Old} from "./NodeUI_Menu/MI_Paste_Old.js";
 import {MI_CloneSubtree} from "./NodeUI_Menu/MI_CloneSubtree.js";
-import {SLMode_SFI} from "../../../@SL/SL.js";
+import {SLMode, SLMode_SFI} from "../../../@SL/SL.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -35,30 +35,21 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?:
 	}
 }
 
-type Props = {map?: Map, node: NodeL3, path: string, inList?: boolean, childGroup: ChildGroup};
+type Props = {map?: Map, node: NodeL3, path: string};
 export type MI_SharedProps = Props & {mapID: string|n, copiedNode: NodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
 export class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		const {map, node, path, inList, childGroup} = this.props;
-
-		const parent = GetParentNodeL3(path);
-
-		const copiedNode = GetCopiedNode();
-		const copiedNodePath = GetCopiedNodePath();
-
-		CheckUserCanDeleteNode(MeID(), node); // for mobx watching
+		const {map, node, path} = this.props;
+		const mapID = map ? map.id : null;
 		const user = Me();
 		const userID = MeID();
-		//const permissions = GetUserPermissionGroups(userID);
-		// nodeChildren: GetNodeChildrenL3(node, path),
-		const nodeChildren = GetNodeChildrenL3(node.id, path);
+		const copiedNode = GetCopiedNode();
+		const copiedNodePath = GetCopiedNodePath();
 		const copiedNode_asCut = store.main.maps.copiedNodePath_asCut;
-
-		const mapID = map ? map.id : null;
-		const forChildHolderBox = childGroup != ChildGroup.generic;
+		CheckUserCanDeleteNode(MeID(), node); // for mobx watching
 
 		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
@@ -67,56 +58,73 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 		const childLayout_forStructuredHeaders = "right";
 		const headerStyle = ES(liveSkin.Style_VMenuItem(), {opacity: 1});
 
-		const GetAddChildItems = (node2: NodeL3, path2: string, childGroup2: ChildGroup)=>{
-			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, user);
-			if (validChildTypes.length == 0) return null;
+		// add/paste child menu-items
+		// ==========
 
-			//if (!CanContributeToNode(userID, node.id)) return null;
-			if (inList) return null;
+		const validAddChildConfigs = map != null ? GetValidNewChildConfigsUnderParent(node.id, user) : [];
+		const addChildConfigsToShow = validAddChildConfigs.filter(config=>{
+			// if config is for a claim with a polarity: this is technically valid, but only show it when in sl-mode (since this is not the standard/desired way to structure arguments in debate-map)
+			if (config.childType == NodeType.claim && !config.addWrapperArg && config.polarity != null && !SLMode) return false;
+			// if config is for a claim, in a wrapper-arg (which has a polarity): this is technically valid, but don't show it, because it's functionality equivalent to the config for a new argument
+			if (config.childType == NodeType.claim && config.addWrapperArg && config.polarity != null) return false;
+			return true;
+		});
+		const addChildConfigsToShow_uis = addChildConfigsToShow.map((c, i)=>{
+			const childTypeInfo = NodeType_Info.for[c.childType];
+			//let displayName = GetNodeTypeDisplayName(childType, node, form);
+			//const displayName = GetNodeTypeDisplayName(c.childType, node, ClaimForm.base, c.polarity);
+			const displayName = GetDisplayTextForNewChildConfig(node, c, false, {});
+			return (
+				<VMenuItem key={i} text={`New ${displayName}`} style={liveSkin.Style_VMenuItem()}
+					onClick={e=>{
+						if (e.button != 0) return;
+						if (userID == null) return ShowSignInPopup();
+						ShowAddChildDialog(path, c, userID, mapID);
+					}}/>
+			);
+		});
 
-			return <>
-				{validChildTypes.map(childType=>{
-					const childTypeInfo = NodeType_Info.for[childType];
-					//let displayName = GetNodeTypeDisplayName(childType, node, form);
-					const polarities = childType == NodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
-					return polarities.map(polarity=>{
-						const displayName = GetNodeTypeDisplayName(childType, node2, ClaimForm.base, polarity);
-						return (
-							<VMenuItem key={`${childType}_${polarity}`} text={`New ${displayName}`} style={liveSkin.Style_VMenuItem()}
-								onClick={e=>{
-									if (e.button != 0) return;
-									if (userID == null) return ShowSignInPopup();
-									ShowAddChildDialog(path2, childType, polarity, userID, childGroup2, mapID);
-								}}/>
-						);
-					});
-				})}
-				{/*<VMenuItem text={`Paste (advanced)`} enabled={false} style={headerStyle}>
-					<VMenuItem text={`As link, directly`} style={styles.vMenuItem}/>
-					<VMenuItem text={`As link, in new argument`} style={styles.vMenuItem}/>
-					<VMenuItem text={`As clone, in new argument`} style={styles.vMenuItem}/>
-				</VMenuItem>*/}
-			</>;
-		};
-		const addChildItems_structured_generic = childGroup.IsOneOf("generic") && GetAddChildItems(node, path, ChildGroup.generic);
-		const addChildItems_structured_truth = childGroup.IsOneOf("generic", "truth") && GetAddChildItems(node, path, ChildGroup.truth);
-		const addChildItems_structured_relevance =
-			(childGroup.IsOneOf("generic", "relevance") && GetAddChildItems(node, path, ChildGroup.relevance));
-			//|| (childGroup == "generic" && isPremiseOfSinglePremiseArg && GetAddChildItems(outerNode!, outerPath!, ChildGroup.relevance));
-		const addChildItems_freeform = childGroup.IsOneOf("generic", "freeform") && GetAddChildItems(node, path, ChildGroup.freeform);
+		const validPasteChildConfigs = map != null ? GetValidNewChildConfigsUnderParent(node.id, user).filter(a=>a.childType == copiedNode?.type) : [];
+		const pasteChildConfigsToShow = validPasteChildConfigs.filter(config=>{
+			// if config is for a claim with a polarity: this is technically valid, but only show it when in sl-mode (since this is not the standard/desired way to structure arguments in debate-map)
+			if (config.childType == NodeType.claim && !config.addWrapperArg && config.polarity != null && !SLMode) return false;
+			return true;
+		});
+		const pasteChildConfigsToShow_uis = pasteChildConfigsToShow.map((c, i)=>{
+			return (
+				<MI_Paste_Old key={i} {...sharedProps} node={node} path={path} config={c}/>
+			);
+		});
+
+		const getAddChildMenuItemsForGroup = (childGroup: ChildGroup)=>addChildConfigsToShow_uis.filter((ui, i)=>addChildConfigsToShow[i].childGroup == childGroup);
+		const getPasteChildMenuItemsForGroup = (childGroup: ChildGroup)=>pasteChildConfigsToShow_uis.filter((ui, i)=>{
+			if (SLMode_SFI && childGroup != ChildGroup.freeform) return false; // in sl-mode-sfi, only allow "paste as freeform" options
+			return pasteChildConfigsToShow[i].childGroup == childGroup;
+		});
+		const addChildItems_structured_generic = getAddChildMenuItemsForGroup(ChildGroup.generic);
+		const addChildItems_structured_truth = getAddChildMenuItemsForGroup(ChildGroup.truth);
+		const addChildItems_structured_relevance = getAddChildMenuItemsForGroup(ChildGroup.relevance);
+		const addChildItems_freeform = getAddChildMenuItemsForGroup(ChildGroup.freeform);
+		const pasteChildItems_structured_generic = getPasteChildMenuItemsForGroup(ChildGroup.generic);
+		const pasteChildItems_structured_truth = getPasteChildMenuItemsForGroup(ChildGroup.truth);
+		const pasteChildItems_structured_relevance = getPasteChildMenuItemsForGroup(ChildGroup.relevance);
+		const pasteChildItems_freeform = getPasteChildMenuItemsForGroup(ChildGroup.freeform);
+
+		// jsx render tree
+		// ==========
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		return (
 			<>
-				{addChildItems_structured_generic && !SLMode_SFI &&
+				{addChildItems_structured_generic.length > 0 && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_generic}</VMenuItem>}
-				{addChildItems_structured_truth && !SLMode_SFI &&
+				{addChildItems_structured_truth.length > 0 && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child (re. truth)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_truth}</VMenuItem>}
-				{addChildItems_structured_relevance && !SLMode_SFI &&
+				{addChildItems_structured_relevance.length > 0 && !SLMode_SFI &&
 					<VMenuItem text={`Add structured child (re. relevance)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_relevance}</VMenuItem>}
-				{addChildItems_freeform &&
+				{addChildItems_freeform.length > 0 &&
 					<VMenuItem text={`Add freeform child`} enabled={false} style={headerStyle}>{addChildItems_freeform}</VMenuItem>}
-				{!inList && !forChildHolderBox &&
+				{map != null &&
 					<VMenuItem text={<span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(for moving node elsewhere)</span></span> as any}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
 						style={liveSkin.Style_VMenuItem()}
@@ -133,7 +141,7 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}*/
 							ACTCopyNode(pathToCut, true);
 						}}/>}
-				{!forChildHolderBox && !SLMode_SFI &&
+				{!SLMode_SFI &&
 					<VMenuItem text={<span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(for linking to 2nd location)</span></span> as any} style={liveSkin.Style_VMenuItem()}
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=>{
@@ -151,14 +159,15 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>}
 				{copiedNode &&
 					<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
-						{addChildItems_structured_generic && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.generic}/>}
-						{addChildItems_structured_truth && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.truth}/>}
-						{addChildItems_structured_relevance && !SLMode_SFI && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.relevance}/>}
-						{addChildItems_freeform && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.freeform}/>}
+						{pasteChildItems_structured_generic}
+						{pasteChildItems_structured_truth}
+						{pasteChildItems_structured_relevance}
+						{pasteChildItems_freeform.length > 0 &&
+							<VMenuItem text={`Freeform...`} enabled={false} style={headerStyle}>{pasteChildItems_freeform}</VMenuItem>}
 					</VMenuItem>}
 				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
-				{!SLMode_SFI && <MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>}
-				{map && !forChildHolderBox && !SLMode_SFI &&
+				{!SLMode_SFI && <MI_CloneNode {...sharedProps} node={node} path={path}/>}
+				{map && !SLMode_SFI &&
 					<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
 							if (e.button != 0) return;
@@ -171,7 +180,7 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path2), Date.now()));
 							}
 						}}/>}
-				{inList &&
+				{map == null && // todo: probably replace this (in search results) with the "Find" button approach (as seen on Stream panel)
 					<VMenuItem text="Find in maps" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
 							RunInAction("NodeUIMenu.FindInCurrentMap", ()=>{

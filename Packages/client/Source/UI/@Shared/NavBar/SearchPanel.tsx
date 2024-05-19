@@ -319,7 +319,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} childGroup={ChildGroup.generic}/>
+					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}}/>
 				</Row>
 				{findNode_node === nodeID &&
 					<Row style={{

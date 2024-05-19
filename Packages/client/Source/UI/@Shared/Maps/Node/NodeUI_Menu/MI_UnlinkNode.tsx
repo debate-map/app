@@ -10,11 +10,10 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
-		const {map, mapID, node, path, childGroup, inList} = this.props;
+		const {map, mapID, node, path} = this.props;
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
-		if (inList) return null;
-		const componentBox = childGroup != ChildGroup.generic;
-		if (componentBox) return null;
+		const childGroup = node.link?.group;
+		if (map == null || childGroup == null) return null;
 		const parent = GetParentNodeL3(path);
 		if (parent == null) return null;
 		const nodeText = GetNodeDisplayText(node, path, map);

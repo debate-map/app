@@ -38,13 +38,10 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,30%,35%)");
 	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
 	//else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
-	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,7%,45%)");
-	else if (node.type == NodeType.argument) {
-		//if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,20%,25%)");
+	else if (node.type == NodeType.claim || node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,18%,32%)");
-		//else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,35%,25%)");
 		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,27%,32%)");
-		else result = Chroma_Safe("hsl(210,10%,24%)");
+		else result = node.type == NodeType.claim ? result = Chroma_Safe("hsl(210,7%,45%)") : Chroma_Safe("hsl(210,10%,24%)");
 	} else {
 		Assert(false);
 	}
@@ -68,8 +65,8 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 		result = GetNodeBackgroundColorFromRawColor(result);
 	}*/
 	if (type == "connector") {
-		// special case for claim nodes (color is too light; connector-lines actually have to be darkened)
-		if (node.type == NodeType.claim) {
+		// special case for no-polarity claim nodes (color is too light; connector-lines actually have to be darkened)
+		if (node.type == NodeType.claim && node.displayPolarity == null) {
 			//result = Chroma_Safe("hsla(210,7%,40%,1)");
 			//result = result.darken(.3);
 		} else {

@@ -2,8 +2,7 @@ import {Assert, IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {DMCommon_InServer} from "../Utils/General/General.js";
 import {OrderKey} from "../Utils/General/OrderKey.js";
-import {NodeLink} from "./nodeLinks/@NodeLink.js";
-import {ChildGroup} from "./nodes/@NodeType.js";
+import {ChildGroup, NodeLink} from "./nodeLinks/@NodeLink.js";
 
 export const GetNodeLink = CreateAccessor((id: string)=>{
 	if (id == null || IsNaN(id)) return null;

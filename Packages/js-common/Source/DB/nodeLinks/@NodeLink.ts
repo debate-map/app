@@ -1,8 +1,44 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {CE, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
-import {ChildGroup} from "../../DB.js";
 import {NodeType} from "../nodes/@NodeType.js";
-import {ClaimForm, Polarity} from "../nodes/@Node.js";
+
+export enum ChildGroup {
+	generic = "generic",
+	truth = "truth",
+	relevance = "relevance",
+	// testing
+	neutrality = "neutrality",
+	freeform = "freeform",
+}
+AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
+
+export const childGroupsWithPolarity_required = [ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality];
+export const childGroupsWithPolarity_requiredOrOptional = [ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality, ChildGroup.freeform];
+
+export enum ClaimForm {
+	base = "base",
+	negation = "negation",
+	question = "question",
+	//narrative = "narrative", // commented, because the narrative-form is never displayed in the debate-map tree itself atm (instead used for, eg. the papers app)
+}
+//export type ClaimForm = typeof ClaimForm_values[number];
+AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});
+
+/*export enum Polarity {
+	Supporting = 10,
+	Opposing = 20,
+}
+AddSchema("Polarity", {enum: GetValues(Polarity)});*/
+/*export const Polarity_values = ["supporting", "opposing"] as const;
+export type Polarity = typeof Polarity_values[number];
+AddSchema("Polarity", {oneOf: Polarity_values});*/
+
+export enum Polarity {
+	supporting = "supporting",
+	opposing = "opposing",
+}
+//export type Polarity = typeof Polarity_values[number];
+AddSchema("Polarity", {enum: GetValues(Polarity)});
 
 @MGLClass({table: "nodeLinks"})
 export class NodeLink {

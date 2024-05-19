@@ -3,8 +3,9 @@ import {CreateAccessor, BailUnless, BIN, BU} from "web-vcore/nm/mobx-graphlink.j
 import {NodeType} from "../nodes/@NodeType.js";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
-import {Polarity, NodeL3, NodeL3_Argument} from "../nodes/@Node.js";
+import {NodeL3, NodeL3_Argument} from "../nodes/@Node.js";
 import {ArgumentType} from "../nodes/@NodeRevision.js";
+import {Polarity} from "../nodeLinks/@NodeLink.js";
 
 export const RS_CalculateTruthScore = CreateAccessor((claimID: string, calculationPath: string[] = []): number=>{
 	const claim = GetNodeL2(claimID);

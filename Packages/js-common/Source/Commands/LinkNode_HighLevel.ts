@@ -1,20 +1,21 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
+import {ChildGroup, ClaimForm, NodeLink, Polarity} from "../DB/nodeLinks/@NodeLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetHighestLexoRankUnderParent, GetNodeLinks} from "../DB/nodeLinks.js";
-import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckLinkIsValid} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
-import {ClaimForm, NodeL1, Polarity} from "../DB/nodes/@Node.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
-import {ChildGroup, NodeType} from "../DB/nodes/@NodeType.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
 import {OrderKey} from "../Utils/General/OrderKey.js";
+import {CheckLinkIsValid} from "../DB/nodeLinks/NodeLinkValidity.js";
 
 // todo: eventually retire this Command, once TransferNodes has been developed enough to cover all this one's use-cases
 
@@ -59,12 +60,12 @@ const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
 	}
 	return null;
 }*/
-export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parent_childGroup: ChildGroup, transferNode_type: NodeType, transferNode_childGroup?: ChildGroup) {
+export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parentToTransferNode_childGroup: ChildGroup, transferNode_type: NodeType, transferNodeToItsChild_childGroup?: ChildGroup) {
 	/*const transferNodeIsValidAlready = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, transferNode_type) == null;
 	const wrapperArgWouldBeValidInParent = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, NodeType.argument) == null;*/
-	const transferNodeIsValidAlready = CheckLinkIsValid(parent_type, parent_childGroup, transferNode_type) == null;
-	const wrapperArgWouldBeValidInParent = CheckLinkIsValid(parent_type, parent_childGroup, NodeType.argument) == null;
-	const transferNodeCanBePlacedInWrapperArg = transferNode_type == NodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
+	const transferNodeIsValidAlready = CheckLinkIsValid(parent_type, transferNode_type, parentToTransferNode_childGroup, null) == null;
+	const wrapperArgWouldBeValidInParent = CheckLinkIsValid(parent_type, NodeType.argument, parentToTransferNode_childGroup, null) == null;
+	const transferNodeCanBePlacedInWrapperArg = transferNode_type == NodeType.claim && (transferNodeToItsChild_childGroup == null || transferNodeToItsChild_childGroup == ChildGroup.generic);
 	return !transferNodeIsValidAlready && wrapperArgWouldBeValidInParent && transferNodeCanBePlacedInWrapperArg;
 }
 
@@ -135,8 +136,10 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		const wrapperArgNeeded = IsWrapperArgNeededForTransfer(this.newParent_data.type, childGroup, this.node_data.type);
 		if (wrapperArgNeeded) {
-			AssertV(childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
-				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`);
+			AssertV(
+				childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
+				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`,
+			);
 
 			//const createWrapperArg = canCreateWrapperArg && createWrapperArg;
 			// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
@@ -170,16 +173,22 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		}));
 
 		if (unlinkFromOldParent && oldParent) {
-			this.IntegrateSubcommand(()=>this.sub_unlinkFromOldParent, null,
+			this.IntegrateSubcommand(
+				()=>this.sub_unlinkFromOldParent,
+				null,
 				()=>new UnlinkNode({mapID, parentID: oldParentID!, childID: nodeID}),
-				a=>a.allowOrphaning = true); // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
+				a=>a.allowOrphaning = true,
+			); // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 
 			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
 			const children = GetNodeLinks(oldParentID);
 			if (oldParent.type == NodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
-				this.IntegrateSubcommand(()=>this.sub_deleteOldParent, null,
+				this.IntegrateSubcommand(
+					()=>this.sub_deleteOldParent,
+					null,
 					()=>new DeleteNode({mapID, nodeID: oldParentID!}),
-					a=>a.childrenToIgnore = [nodeID]); // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
+					a=>a.childrenToIgnore = [nodeID],
+				); // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 			}
 		}
 	}

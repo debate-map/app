@@ -5,11 +5,12 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
 import {GetNodeLinks} from "../DB/nodeLinks.js";
 import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
-import {CheckLinkIsValid, GetNode} from "../DB/nodes.js";
+import {GetNode} from "../DB/nodes.js";
 import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {TransferNodes} from "./TransferNodes.js";
+import {CheckLinkIsValid} from "../DB/nodeLinks/NodeLinkValidity.js";
 
 /*declare global {
 	interface Object {
@@ -58,7 +59,7 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 
 		// confirm that the parent-child combination is valid
 		//const forNewLink_error = ForNewLink_GetError(link.parent); // can't use this atm, since not "pure" enough
-		const forLink_error = CheckLinkIsValid(this.parent_oldData.type, link.group, this.child_oldData.type);
+		const forLink_error = CheckLinkIsValid(this.parent_oldData.type, this.child_oldData.type, link.group, link.polarity);
 		AssertV(forLink_error == null, forLink_error);
 
 		link.id = this.GenerateUUID_Once("link.id");

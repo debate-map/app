@@ -11,9 +11,8 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
-		const {map, mapID, node, path, childGroup} = this.props;
-		const componentBox = childGroup != ChildGroup.generic;
-		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
+		const {map, mapID, node, path} = this.props;
+		if (!IsUserCreatorOrMod(MeID(), node)) return null;
 		const nodeText = GetNodeDisplayText(node, path, map);
 
 		//const command = new DeleteNode(E({mapID, nodeID: node.id}));

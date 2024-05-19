@@ -1,16 +1,9 @@
-import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {Assert, AssertWarn, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, NodeL1, NodeL3, Polarity} from "./@Node.js";
-
-export enum ChildGroup {
-	generic = "generic",
-	truth = "truth",
-	relevance = "relevance",
-	// testing
-	neutrality = "neutrality",
-	freeform = "freeform",
-}
-AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
+import {NodeL1, NodeL3} from "./@Node.js";
+import {SLMode_ForJSCommon} from "./$node/$node_sl.js";
+import {ChildGroup, ClaimForm, Polarity, childGroupsWithPolarity_required} from "../nodeLinks/@NodeLink.js";
+import {NewChildConfig} from "../nodeLinks/NodeLinkValidity.js";
 
 export enum NodeType {
 	category = "category",
@@ -56,7 +49,7 @@ export class NodeType_Info {
 		}),
 		[NodeType.claim]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.truth, [NodeType.argument]],
+				[ChildGroup.truth, [NodeType.argument, NodeType.claim]], // note: if child is "claim", link should have polarity (filling role of single-premise argument, but with no relevance-args possible; used in SL maps)
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			//minWidth: 350, maxWidth: 600,
@@ -97,16 +90,51 @@ export class NodeType_Info {
 	return NodeType_Info.for[type];
 }*/
 
-export function GetNodeTypeDisplayName(type: NodeType, parentNode: NodeL1, parentNodeForm: ClaimForm, polarity: Polarity) {
-	if (type == NodeType.category) return "category";
-	if (type == NodeType.package) return "package";
-	if (type == NodeType.multiChoiceQuestion) return "multi-choice question";
-	if (type == NodeType.claim) {
-		if (parentNode && parentNode.type == NodeType.category) { return "claim / binary question"; }
-		return "claim";
+/*export function GetDisplayTextForNewChildConfig(parentNode: NodeL1, parentNodeForm: ClaimForm, c: NewChildConfig) {
+	return [
+		// basic type
+		c.childType == NodeType.category && "category",
+		c.childType == NodeType.package && "package",
+		c.childType == NodeType.multiChoiceQuestion && "multi-choice question",
+		c.childType == NodeType.claim && (()=>{
+			if (c.polarity != null && !c.addWrapperArg) {
+				//AssertWarn(SLMode_ForJSCommon, "Polarity for a link with a claim child, should only happen when in sl-mode.");
+				return c.polarity == Polarity.supporting ? "supporting claim" : "opposing claim";
+			}
+			if (parentNode && parentNode.type == NodeType.category) return "claim / binary question";
+			return "claim";
+		})(),
+		c.childType == NodeType.argument && (()=>{
+			return c.polarity == Polarity.supporting ? "supporting argument" : "opposing argument";
+		})(),
+		// extras
+		c.addWrapperArg && "(in wrapper arg)",
+		parentNode.type == NodeType.argument && c.childGroup == ChildGroup.generic && c.polarity == null && "(premise)",
+	].filter(a=>a).join(" ");
+}*/
+export function GetDisplayTextForNewChildConfig(parentNode: NodeL1, c: NewChildConfig, forPaste: boolean, details: {/*omitGroup?: boolean,*/ copiedNode_asCut?: boolean}) {
+	const polarityStr = c.polarity == Polarity.supporting ? "pro" : "con";
+	// showing the child-group in parentheses is not-helpful-enough/too-distracting for certain groups, when adding/pasting 
+	const omitGroup = forPaste
+		? c.childGroup == ChildGroup.generic
+		: c.childGroup.IsOneOf(ChildGroup.generic, ChildGroup.freeform);
+
+	let parenthesesStr_inner = [
+		parentNode.type == NodeType.argument && c.childGroup == ChildGroup.generic && c.polarity == null && "premise",
+		c.polarity != null && c.childGroup != ChildGroup.freeform && polarityStr,
+		!omitGroup && c.childGroup,
+	].filter(a=>a).join(" ");
+	if (c.polarity != null && c.childGroup == ChildGroup.freeform) {
+		parenthesesStr_inner += (parenthesesStr_inner.length ? ", " : "") + polarityStr;
 	}
-	if (type == NodeType.argument) {
-		return polarity == Polarity.supporting ? "supporting argument" : "opposing argument";
-	}
-	Assert(false, "Invalid node type.");
+	const parenthesesStr_outer = parenthesesStr_inner.length > 0 ? `(${parenthesesStr_inner})` : "";
+
+	return [
+		//!forPaste && "New", // the "new" is added by the caller atm (since some callers don't want it)
+		//forPaste && `Paste (${details.copiedNode_asCut ? "move" : "link"}) ${c.addWrapperArg ? "in new" : "as"}`,
+		forPaste && `${details.copiedNode_asCut ? "Move" : "Link"} here ${c.addWrapperArg ? "in new" : "as"}`,
+		c.addWrapperArg && `argument`,
+		!c.addWrapperArg && (c.childType == NodeType.multiChoiceQuestion ? "multi-choice question" : c.childType),
+		parenthesesStr_outer,
+	].filter(a=>a).join(" ");
 }

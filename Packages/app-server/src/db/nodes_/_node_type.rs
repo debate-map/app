@@ -52,7 +52,7 @@ pub static BASE_NODE_TYPE_INFO: Lazy<HashMap<NodeType, NodeType_Info>> = Lazy::n
         }),
         (NodeType::claim, NodeType_Info {
             childGroup_childTypes: HashMap::from([
-                (ChildGroup::truth, vec![NodeType::argument]),
+                (ChildGroup::truth, vec![NodeType::argument, NodeType::claim]), // note: if child is "claim", link should have polarity (filling role of single-premise argument, but with no relevance-args possible; used in SL maps)
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
             ]),
         }),

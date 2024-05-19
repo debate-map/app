@@ -5,7 +5,7 @@ import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
-import {NodeL3, Polarity, ClaimForm, NodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map, ChildGroup} from "dm_common";
+import {NodeL3, Polarity, ClaimForm, NodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map, ChildGroup, NewChildConfig} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
@@ -108,8 +108,9 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					if (MeID() == null) return ShowSignInPopup();
 					const userID = MeID.NN();
 
+					let newChild_parentPath = path;
+					let newChildPolarity = polarity;
 					if (contributeInfo_polarity.hostNodeID == node.id) {
-						let newChildPolarity = polarity;
 						//GetFinalPolarity(polarity, parent.link.form);
 						// if display polarity is different then base polarity, we need to reverse the new-child polarity
 						/*if (node.link.polarity && node.displayPolarity != node.link.polarity) {
@@ -119,14 +120,14 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						if (node.link?.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, NodeType.argument, newChildPolarity, userID, group, map.id);
 					} else {
-						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, NodeType.argument, newChildPolarity, userID, group, map.id);
+						newChild_parentPath = contributeInfo_polarity.hostNodeID;
 					}
+					const newChildConfig = new NewChildConfig({childType: NodeType.argument, childGroup: group, polarity: newChildPolarity, addWrapperArg: false});
+					ShowAddChildDialog(newChild_parentPath, newChildConfig, userID, map.id);
 				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, group, map.id, node.id, node.link?.form, path, polarity])}/>
 		);
 	}

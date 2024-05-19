@@ -3,8 +3,8 @@ import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} fro
 import {Map} from "../maps/@Map.js";
 import {NodeL3} from "./@Node.js";
 import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";
-import {ChildGroup, NodeType_Info} from "./@NodeType.js";
-import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment} from "../../DB.js";
+import {NodeType_Info} from "./@NodeType.js";
+import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment, ChildGroup} from "../../DB.js";
 import {ChildOrdering} from "../nodeRatings.js";
 import {MarkerForNonScalarField, PickOnly} from "../../Utils/General/General.js";
 

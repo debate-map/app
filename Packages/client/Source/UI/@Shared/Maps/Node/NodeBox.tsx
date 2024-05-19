@@ -475,7 +475,7 @@ export class NodeBox extends BaseComponentPlus(
 							{toolbarAndTitleElements}
 							{subPanelShow &&
 							<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
-							<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
+							<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes}/>
 						</>}
 						toggleExpanded={toggleExpanded}
 						expandButtonStyle={E(toolbar_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}

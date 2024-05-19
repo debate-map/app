@@ -6,12 +6,12 @@ import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, GetNode} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2, ShouldRatingTypeBeReversed} from "./nodes/$node.js";
-import {ClaimForm, NodeL2, NodeL3, RatingSummary} from "./nodes/@Node.js";
-import {ChildGroup, NodeType} from "./nodes/@NodeType.js";
+import {NodeL2, NodeL3, RatingSummary} from "./nodes/@Node.js";
+import {NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
-import {Map, NodeRevision} from "../DB.js";
+import {ChildGroup, Map, NodeRevision} from "../DB.js";
 
 export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
 	const node = GetNode(nodeID);

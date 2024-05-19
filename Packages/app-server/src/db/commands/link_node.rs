@@ -21,6 +21,7 @@ use crate::db::commands::delete_node_link::{self, delete_node_link, DeleteNodeLi
 use crate::db::general::permission_helpers::assert_user_can_add_child;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, ClaimForm, ChildGroup, Polarity, get_node_links, get_first_link_under_parent, get_highest_order_key_under_parent};
+use crate::db::node_links_::node_link_validity::assert_link_is_valid;
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
@@ -36,7 +37,6 @@ use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
 use super::_shared::add_node::add_node;
 use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
-use super::add_node_link::assert_link_is_valid;
 
 wrap_slow_macros!{
 
@@ -142,6 +142,11 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 		},
 	};
 
+	let polarity = match node_data.r#type {
+		NodeType::argument => Some(newPolarity.unwrap_or(Polarity::supporting)),
+		NodeType::claim => newPolarity, // note: this case *should* only be happening for clients that are in "sl mode" (since debate-map standard doesn't want these claim->claim truth links)
+		_ => None,
+	};
 	add_node_link(ctx, actor, false, AddNodeLinkInput {
 		//mapID,
 		link: NodeLinkInput {
@@ -149,7 +154,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 			child: Some(nodeID.o()),
 			group: if wrapper_arg_needed { ChildGroup:: generic } else { childGroup },
 			form: newForm,
-			polarity: if node_data.r#type == NodeType::argument { Some(newPolarity.unwrap_or(Polarity::supporting)) } else { None },
+			polarity,
 			orderKey: if wrapper_arg_needed { OrderKey::mid() } else { order_key_for_outer_node },
 			seriesAnchor: None,
 			seriesEnd: None,
@@ -177,8 +182,8 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 }
 
 pub fn is_wrapper_arg_needed_for_transfer(parent_type: NodeType, parent_child_group: ChildGroup, transfer_node_type: NodeType, transfer_node_child_group: Option<ChildGroup>) -> bool {
-	let transfer_node_is_valid_already = assert_link_is_valid(parent_type, parent_child_group, transfer_node_type).is_ok();
-	let wrapper_arg_would_be_valid_in_parent = assert_link_is_valid(parent_type, parent_child_group, NodeType::argument).is_ok();
+	let transfer_node_is_valid_already = assert_link_is_valid(parent_type, transfer_node_type, parent_child_group, None).is_ok();
+	let wrapper_arg_would_be_valid_in_parent = assert_link_is_valid(parent_type, NodeType::argument, parent_child_group, None).is_ok();
 	let transfer_node_can_be_placed_in_wrapper_arg = transfer_node_type == NodeType::claim && (transfer_node_child_group.is_none() || transfer_node_child_group == Some(ChildGroup::generic));
 	!transfer_node_is_valid_already && wrapper_arg_would_be_valid_in_parent && transfer_node_can_be_placed_in_wrapper_arg
 }

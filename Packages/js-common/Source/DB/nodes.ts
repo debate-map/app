@@ -1,18 +1,13 @@
-import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, BailError, CreateAccessor, GetDoc, MapWithBailHandling, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetAccessPolicy, NodeL3} from "../DB.js";
-import {globalRootNodeID} from "../DB_Constants.js";
-import {DoesPolicyAllowX} from "./@Shared/TablePermissions.js";
-import {APAction, APTable} from "./accessPolicies/@PermissionSet.js";
+import {Assert, CE, emptyArray_forLoading, IsString} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor, GetDoc, MapWithBailHandling, SplitStringBySlash_Cached, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeLinks} from "./nodeLinks.js";
-import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3} from "./nodes/$node.js";
-import {NodeL1, NodeL2, Polarity} from "./nodes/@Node.js";
-import {ChildGroup, NodeType, NodeType_Info} from "./nodes/@NodeType.js";
+import {NodeL1, NodeL2} from "./nodes/@Node.js";
+import {NodeType} from "./nodes/@NodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@NodeTag.js";
-import {CanGetBasicPermissions, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
-import {PermissionGroupSet, User} from "./users/@User.js";
+import {CanGetBasicPermissions, IsUserCreatorOrMod} from "./users/$user.js";
+import {ChildGroup, Polarity} from "./nodeLinks/@NodeLink.js";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);
@@ -236,67 +231,6 @@ export function GetChildGroup(childType: NodeType, parentType: NodeType|n) {
 	}
 	return ChildGroup.generic;
 }
-
-/** Does basic checking of validity of parent<>child linkage. See `CheckValidityOfNewLink` for a more thorough validation. */
-// sync: rs[assert_link_is_valid]
-export const CheckLinkIsValid = CreateAccessor((parentType: NodeType, childGroup: ChildGroup, childType: NodeType)=>{
-	// redundant check, improving error-message clarity for certain issues
-	if (!NodeType_Info.for[parentType].childGroup_childTypes.has(childGroup)) {
-		return `Where parent's type is ${NodeType[parentType]}, no "${ChildGroup[childGroup]}" child-group exists.`;
-	}
-
-	const validChildTypes = NodeType_Info.for[parentType].childGroup_childTypes.get(childGroup) ?? [];
-	if (!validChildTypes.includes(childType)) {
-		// redundant checks, improving error-message clarity for certain issues
-		if (parentType == NodeType.argument && childGroup == ChildGroup.generic && childType != NodeType.claim) {
-			return `Where parent is an argument, and child-group is generic, a claim child is expected (instead it's a ${NodeType[childType]}).`;
-		}
-		if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != NodeType.argument) {
-			return `Where child-group is ${childGroup}, an argument child is expected (instead it's a ${NodeType[childType]}).`;
-		}
-
-		// give generic message
-		return `The child's type (${NodeType[childType]}) is not valid here. (parent type: ${NodeType[parentType]}, child group: ${ChildGroup[childGroup]})`;
-	}
-});
-/**
- * Extension of `CheckValidityOfLink`, with additional checking based on knowledge of specific nodes being linked, user's permissions, etc.
- * For example:
- * * Blocks if node is being linked as child of itself.
- * * Blocks if adding child to global-root, without user being an admin.
- * */
-// sync: rs[assert_new_link_is_valid]
-export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, actor: User|n)=>{
-	const permissions = GetUserPermissionGroups(actor?.id);
-	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
-
-	const parent = GetNode(parentID);
-	if (parent == null) return "Parent data not found.";
-	//if (!) { return "Parent node's permission policy does not grant you the ability to add children."; }
-	const guessedCanAddChild = actor
-		? NodeL1.canAddChild(parent, actor) // if can add child
-		: DoesPolicyAllowX(null, parent.accessPolicy, APTable.nodes, APAction.addChild); // or probably can
-	if (!guessedCanAddChild) { return "Parent node's permission policy does not grant you the ability to add children."; }
-
-	// const parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a => a.ToInt());
-	// if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parent.id == globalRootNodeID && !HasAdminPermissions(permissions)) return "Only admins can add children to the global-root.";
-	// if in global map, parent is l2, and user is not a mod (and not node creator), don't accept new children
-	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
-	if (parent.id == newChild.id) return "Cannot link node as its own child.";
-
-	const parentChildLinks = GetNodeLinks(parentID, null, newChildGroup); // query it with "childID" null, so it's cached once for all such calls
-	const isAlreadyChild = parentChildLinks.Any(a=>a.child == newChild.id);
-
-	// if new-holder-type is not specified, consider "any" and so don't check
-	/*if (newChildGroup !== undefined) {
-		const currentChildGroup = GetChildGroup(newChild.type, parent.type);
-		if (isAlreadyChild && currentChildGroup == newChildGroup) return "Node is already a child of the parent."; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
-	}*/
-	if (isAlreadyChild) return "Node is already a child of the parent.";
-
-	return CheckLinkIsValid(parent.type, newChildGroup, newChild.type);
-});
 
 // sync:rs[assert_user_can_delete_node]
 export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{

@@ -36,7 +36,6 @@ use super::super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gq
 use super::super::_shared::add_node::add_node;
 use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
-use super::super::add_node_link::assert_link_is_valid;
 
 pub struct TransferResult_Shim {
     pub new_argument_wrapper_id: String,

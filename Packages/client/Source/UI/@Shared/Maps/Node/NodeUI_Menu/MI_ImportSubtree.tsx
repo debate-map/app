@@ -34,7 +34,9 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportResource> {
 	//lastController: BoxController;
 	render() {
-		const {map, node, path, childGroup} = this.props;
+		const {map, node, path} = this.props;
+		const childGroup = node.link?.group;
+		if (map == null || childGroup == null) return null;
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasAdminPermissions(MeID())) return null;
 

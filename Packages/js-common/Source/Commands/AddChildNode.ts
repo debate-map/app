@@ -6,7 +6,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, TransferNodes} from "../Commands.js";
 import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {GetNode} from "../DB/nodes.js";
-import {NodeL1, Polarity} from "../DB/nodes/@Node.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {AddNode} from "./AddNode.js";

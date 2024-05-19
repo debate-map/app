@@ -5,17 +5,17 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry} from "dm_common";
+import {NodeType, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry, NewChildConfig, GetDisplayTextForNewChildConfig} from "dm_common";
 import {BailError, CatchBail, GetAsync, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
-	constructor(public payload: {parentPath: string, childType: NodeType, title: string, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n}) {}
+	constructor(public payload: {parentPath: string, config: NewChildConfig, title: string, userID: string, mapID: string|n}) {}
 
 	Prepare() {
-		const {parentPath, childType, title, childPolarity, userID, group, mapID} = this.payload;
+		const {parentPath, config, title, userID, mapID} = this.payload;
 
 		this.mapID = mapID;
 		this.node_parentPath = parentPath;
@@ -38,20 +38,20 @@ export class AddChildHelper {
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			accessPolicy: GetFinalAccessPolicyForNewEntry(null, this.map?.nodeAccessPolicy, "nodes").id,
 			//parents: {[this.Node_ParentID]: {_: true}},
-			type: childType,
+			type: config.childType,
 		});
 		this.node_revision = new NodeRevision();
 		this.node_link = E(
 			{
-				group,
+				group: config.childGroup,
 				orderKey: orderKeyForOuterNode,
+				polarity: config.polarity,
 			},
 			//childType == NodeType.claim && {form: parentNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base},
-			childType == NodeType.claim && parentNode.type == NodeType.category && !slModeOrLayout && {form: ClaimForm.question},
-			childType == NodeType.argument && {polarity: childPolarity},
+			config.childType == NodeType.claim && parentNode.type == NodeType.category && !slModeOrLayout && {form: ClaimForm.question},
 		) as NodeLink;
 
-		if (childType == NodeType.argument) {
+		if (config.childType == NodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new NodeL1({
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
@@ -66,7 +66,7 @@ export class AddChildHelper {
 			});
 		} else {
 			let usedTitleKey = "text_base";
-			if (childType == NodeType.claim && this.node_link.form) {
+			if (config.childType == NodeType.claim && this.node_link.form) {
 				usedTitleKey = `text_${ClaimForm[this.node_link.form].replace(/^./, ch=>ch.toLowerCase())}`;
 			}
 			this.node_revision.phrasing[usedTitleKey] = title;
@@ -134,16 +134,16 @@ enum AddChildDialogTab {
 	Argument,
 	Claim,
 }
-export async function ShowAddChildDialog(parentPath: string, childType: NodeType, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n) {
-	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, group, mapID});
+export async function ShowAddChildDialog(parentPath: string, config: NewChildConfig, userID: string, mapID: string|n) {
+	const helper = new AddChildHelper({parentPath, config, title: "", userID, mapID});
 	const prep = await GetAsync(()=>{
 		helper.Prepare();
 		const parentNode = GetNodeL3(parentPath);
 		if (parentNode == null) return {canceled: true}; // musta been deleted while prepping
 		const parentForm = GetNodeForm(parentNode);
-		const displayName = GetNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
+		const displayText = GetDisplayTextForNewChildConfig(parentNode, config, false, {});
 		//const map = GetMap(mapID); // "not in observer" -- humbug; technically true, but map-data must be loaded already, for this func to be called
-		return {parentNode, displayName};
+		return {parentNode, displayName: displayText};
 	});
 	if (prep.canceled) return;
 
@@ -179,14 +179,14 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 			if (accessPolicy == null) return null; // if access-policy was somehow deleted while dialog was open[ing], just render empty ui
 			//Object.defineProperty(helper.node, "policy", {configurable: true, set: val=>{ debugger; }});
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, accessPolicy);
-			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);
+			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, config.polarity);
 
 			const advanced = store.main.maps.addChildDialog.advanced;
 			return (
 				<Column ref={c=>root = c} style={{width: 600}}>
-					{childType == NodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
+					{config.childType == NodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 					<Row center mb={5}>
-						{childType == NodeType.argument && advanced &&
+						{config.childType == NodeType.argument && advanced &&
 						<>
 							<Text>Data:</Text>
 							<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab, "ui")} style={{display: "inline-block"}}
@@ -217,7 +217,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 					</>}
 					{tab == AddChildDialogTab.Claim &&
 					<>
-						{childType == NodeType.argument &&
+						{config.childType == NodeType.argument &&
 						<>
 							{!advanced &&
 							<Column>
@@ -244,8 +244,8 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 									Change();
 								}}/>}
 						</>}
-						{childType != NodeType.argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == NodeType.claim ? "5px 0 0 0" : 0}} map={map} parent={prep.parentNode}
+						{config.childType != NodeType.argument &&
+						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: config.childType == NodeType.claim ? "5px 0 0 0" : 0}} map={map} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {

@@ -35,7 +35,6 @@ use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gql_place
 use super::_shared::add_node::add_node;
 use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
-use super::add_node_link::assert_link_is_valid;
 use super::transfer_nodes_::transfer_using_clone::TransferResult_Clone;
 use super::transfer_nodes_::transfer_using_shim::TransferResult_Shim;
 use super::transfer_nodes_::{transfer_using_clone::transfer_using_clone, transfer_using_shim::transfer_using_shim};

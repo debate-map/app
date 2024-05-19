@@ -22,6 +22,7 @@ export * from "./DB/maps/$map.js";
 export * from "./DB/maps/@Map.js";
 export * from "./DB/nodeLinks.js";
 export * from "./DB/nodeLinks/@NodeLink.js";
+export * from "./DB/nodeLinks/NodeLinkValidity.js";
 export * from "./DB/nodePhrasings.js";
 export * from "./DB/nodePhrasings/@NodePhrasing.js";
 export * from "./DB/nodeRatings.js";

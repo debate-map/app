@@ -1,27 +1,24 @@
-import {emptyArray, Lerp, Range, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, UseEffect, UseState} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ChildGroup, GetAccessPolicy, GetDisplayTextForNewChildConfig, GetFinalAccessPolicyForNewEntry, GetNodeForm, GetNodeL3, GetRatings, GetRatingTypeInfo, GetUserFollows_List, MeID, NewChildConfig, NodeL3, NodeRating, NodeRatingType, ShouldRatingTypeBeReversed, TransformRatingForContext} from "dm_common";
+import React, {createRef, useMemo} from "react";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
-import {NoID, observer_mgl, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Chroma, Chroma_Safe, ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, RunInAction_Set, uplotDefaults} from "web-vcore";
-import {NodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, NodeType, Polarity, GetUserFollows_List, GetRatingSummary, GetFinalAccessPolicyForNewEntry} from "dm_common";
-import {MarkHandled} from "Utils/UI/General.js";
-import React, {createRef, useMemo} from "react";
-import {UPlot} from "web-vcore/nm/react-uplot.js";
-import uPlot from "web-vcore/nm/uplot.js";
-import useResizeObserver from "use-resize-observer";
-import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
-import chroma from "web-vcore/nm/chroma-js.js";
-import {GetNodeColor} from "Store/db_ext/nodes.js";
-import {observer} from "web-vcore/nm/mobx-react";
-import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
 import {SLMode} from "UI/@SL/SL.js";
+import useResizeObserver from "use-resize-observer";
+import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
+import {MarkHandled} from "Utils/UI/General.js";
+import {Chroma, ES, GetPageRect, GetViewportRect, InfoButton, Observer, RunInAction_Set, uplotDefaults} from "web-vcore";
+import {Lerp, Range, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
+import {observer_mgl, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {UPlot} from "web-vcore/nm/react-uplot.js";
+import {Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, UseEffect, UseState} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
+import uPlot from "web-vcore/nm/uplot.js";
+import {liveSkin} from "../../../../../../Utils/Styles/SkinManager.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
-import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../../NodeLayoutConstants.js";
-import {liveSkin} from "../../../../../../Utils/Styles/SkinManager.js";
+import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH} from "../../NodeLayoutConstants.js";
 
 type RatingsPanel_Props = {
 	node: NodeL3, path: string, ratingType: NodeRatingType,
@@ -74,7 +71,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const parentNode = GetNodeL3(SlicePath(path, 1));
 
 		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
-		const nodeTypeDisplayName = GetNodeTypeDisplayName(node.type, node, form, node.displayPolarity);
+		const nodeTypeDisplayName = GetDisplayTextForNewChildConfig(node, new NewChildConfig({childGroup: ChildGroup.generic, childType: node.type, polarity: node.displayPolarity, addWrapperArg: false}), false, {});
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		//const {labels, values} = ratingTypeInfo;

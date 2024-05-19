@@ -101,6 +101,9 @@ pub mod nodes_ {
     pub mod _node;
     pub mod _node_type;
 }
+pub mod node_links_ {
+    pub mod node_link_validity;
+}
 pub mod node_ratings_ {
     pub mod _node_rating_type;
 }

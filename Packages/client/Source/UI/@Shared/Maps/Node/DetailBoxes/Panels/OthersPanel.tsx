@@ -128,6 +128,22 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						}}/>
 					</Row>
 				</>}
+				{node.type == NodeType.claim && node.displayPolarity != null && node.link != null && <>
+					<Row mt={10} style={{fontWeight: "bold"}}>Polarized claim:</Row>
+					<Row mt={5}>
+						<Button text="Reverse polarized-claim polarity" enabled={creatorOrMod} onLeftClick={()=>{
+							ShowMessageBox({
+								title: "Reverse polarized-claim polarity?", cancelButton: true,
+								message: `Reverse polarity of polarized-claim "${GetNodeDisplayText(node, null, map)}"?`,
+								onOK: ()=>{
+									const link = node.link!;
+									Assert(link.polarity, "Attempting to reverse polarity of the link to a polarized-claim node, but the link's polarity is null!");
+									RunCommand_UpdateNodeLink({id: link.id, updates: {polarity: ReversePolarity(link.polarity)}});
+								},
+							});
+						}}/>
+					</Row>
+				</>}
 				{/*node.type == NodeType.claim && convertToTypes.length > 0 &&
 					<Row center>
 						<Pre>Convert to: </Pre>

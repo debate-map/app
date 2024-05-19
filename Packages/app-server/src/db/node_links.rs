@@ -1,4 +1,5 @@
 use rust_shared::anyhow::{Error, anyhow, ensure};
+use rust_shared::once_cell::sync::Lazy;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json, should_be_unreachable, to_anyhow, GQLError};
@@ -70,6 +71,9 @@ pub enum ChildGroup {
     #[graphql(name = "neutrality")] neutrality,
     #[graphql(name = "freeform")] freeform,
 }
+
+pub static CHILD_GROUPS_WITH_POLARITY_REQUIRED: Lazy<Vec<ChildGroup>> = Lazy::new(|| vec![ChildGroup::truth, ChildGroup::relevance, ChildGroup::neutrality]);
+pub static CHILD_GROUPS_WITH_POLARITY_REQUIRED_OR_OPTIONAL: Lazy<Vec<ChildGroup>> = Lazy::new(|| vec![ChildGroup::truth, ChildGroup::relevance, ChildGroup::neutrality, ChildGroup::freeform]);
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ClaimForm {

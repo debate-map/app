@@ -13,8 +13,8 @@ import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/Transfer
 @Observer
 export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 	render() {
-		const {map, node, path, childGroup, inList} = this.props;
-		if (inList) return null;
+		const {map, node, path} = this.props;
+		if (map == null) return null;
 		//const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		// we "initiate a clone" for the "outer" argument node, if there's a box combining an argument and claim (this is how the dialog expects such a case)

@@ -26,6 +26,7 @@ use crate::db::commands::link_node::{link_node, LinkNodeInput};
 use crate::db::commands::transfer_nodes::{NodeInfoForTransfer, TransferResult, NodeTagCloneType};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, ClaimForm, ChildGroup, Polarity, get_node_links, get_first_link_under_parent, get_highest_order_key_under_parent, NodeLink};
+use crate::db::node_links_::node_link_validity::assert_link_is_valid;
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput, get_node_revision};
 use crate::db::node_tags::{NodeTag, get_node_tags, NodeTagInput, TagComp_CloneHistory};
@@ -41,7 +42,6 @@ use super::super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gq
 use super::super::_shared::add_node::add_node;
 use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
-use super::super::add_node_link::assert_link_is_valid;
 use super::transfer_using_shim::TransferResult_Shim;
 
 pub struct TransferResult_Clone {
@@ -130,7 +130,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
                 parent: Some(new_node_id.clone()),
                 child: Some(link.child.clone()),
                 // if we're changing the node's type, check for child-links it has that are invalid (eg. wrong child-group), and try to change them to be valid
-                group: if new_node.r#type != node.r#type && assert_link_is_valid(new_node.r#type, link.group, link.c_childType).is_ok() {
+                group: if new_node.r#type != node.r#type && assert_link_is_valid(new_node.r#type, link.c_childType, link.group, link.polarity).is_ok() {
                     let first_valid_group_for_child_type = get_node_type_info(new_node.r#type).childGroup_childTypes.iter().find(|a| a.1.contains(&link.c_childType));
                     match first_valid_group_for_child_type {
                         None => bail!("Cannot clone node while both changing type and keeping children, because there are children whose type ({:?}) cannot be placed into any of the new node's child-groups.", link.c_childType),

@@ -1,4 +1,4 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "web-vcore/nm/js-vextensions.js";
 import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "web-vcore/nm/mobx-graphlink.js";
 import Moment from "web-vcore/nm/moment";
 import {GetMedia} from "../media.js";
@@ -6,16 +6,16 @@ import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {Map} from "../maps/@Map.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
-import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
-import {ClaimForm, NodeL1, NodeL2, NodeL3, Polarity} from "./@Node.js";
+import {GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
+import {NodeL1, NodeL2, NodeL3} from "./@Node.js";
 import {ChildLayout, GetChildLayout_Final, NodeRevision} from "./@NodeRevision.js";
-import {ChildGroup, NodeType} from "./@NodeType.js";
+import {NodeType} from "./@NodeType.js";
 import {PermissionGroupSet, User} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@NodeTag.js";
 import {SourceType, Source} from "../@Shared/Attachments/@SourceChain.js";
 import {GetNodeLinks} from "../nodeLinks.js";
-import {NodeLink} from "../nodeLinks/@NodeLink.js";
+import {ChildGroup, ClaimForm, NodeLink, Polarity} from "../nodeLinks/@NodeLink.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
@@ -107,14 +107,21 @@ export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
 /** If returns `Polarity.supporting`, then `node` supports the display form of its parent and shows as green; if returns `Polarity.opposing`, it opposes that displayed form and shows as red. */
-export const GetDisplayPolarityAtPath = CreateAccessor((node: NodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
-	Assert(node.type == NodeType.argument, "Only argument nodes have polarity.");
+export const GetDisplayPolarityAtPath = CreateAccessor((node: NodeL2, path: string, tagsToIgnore?: string[]): Polarity|null=>{
+	//Assert(node.type == NodeType.argument, "Only argument nodes have polarity.");
+	const resultIfDataMissing = node.type == NodeType.argument ? Polarity.supporting : null;
+
 	const parent = GetParentNodeL2(path);
-	if (!parent) return Polarity.supporting; // can be null, if for NodeUI_ForBots
+	if (!parent) return resultIfDataMissing; // can be null, eg. for NodeUI_ForBots
 
 	const link = GetLinkUnderParent(node.id, parent, true, tagsToIgnore);
-	if (link == null) return Polarity.supporting; // can be null, if path is invalid (eg. copied-node path)
-	Assert(link.polarity != null, `The link for the argument #${node.id} (from parent #${parent.id}) must specify the polarity.`);
+	if (link == null) return resultIfDataMissing; // can be null, if path is invalid (eg. copied-node path)
+	if (link.polarity != null) {
+		AssertWarn(node.type.IsOneOf(NodeType.argument, NodeType.claim), `The link for the node #${node.id} (from parent #${parent.id}) must not specify the polarity. (node is not an argument or claim)`);
+	} else {
+		AssertWarn(node.type != NodeType.argument, `The link for the argument #${node.id} (from parent #${parent.id}) must specify the polarity.`);
+		return resultIfDataMissing;
+	}
 
 	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetDisplayPolarity(link.polarity, parentForm);
@@ -210,8 +217,7 @@ export const GetNodeL3 = CreateAccessor((path: string | n, tagsToIgnore?: string
 	const node = GetNodeL2(nodeID);
 	if (node == null) return null;
 
-	// if any of the data in a NodeL3 is not loaded yet, just bail (we want it to be all or nothing)
-	const displayPolarity = node.type == NodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
+	const displayPolarity = GetDisplayPolarityAtPath(node, path, tagsToIgnore);
 
 	/*const isSubnode = IsNodeSubnode(node);
 	if (!isSubnode) {*/
@@ -485,26 +491,6 @@ export const GetNodeDisplayTextFromAttachment = CreateAccessor((node: NodeL2, ra
 		return text;
 	}
 });
-
-export function GetValidChildTypes(nodeType: NodeType, path: string, group: ChildGroup) {
-	const nodeTypes = GetValues(NodeType);
-	const validChildTypes = nodeTypes.filter(type=>CheckLinkIsValid(nodeType, group, type) == null);
-	return validChildTypes;
-}
-export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, actor: User|n) {
-	const nodeTypes = GetValues(NodeType);
-	const validChildTypes = nodeTypes.filter(type=>CheckNewLinkIsValid(parent.id, childGroup, {type} as any, actor) == null);
-
-	// if in relevance or truth group, claims cannot be direct children (must be within argument)
-	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {
-		validChildTypes = validChildTypes.Exclude(NodeType.claim);
-	} else {
-		// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
-		validChildTypes = validChildTypes.Exclude(NodeType.argument);
-	}*/
-
-	return validChildTypes;
-}
 
 export const IsPremiseOfArgument = CreateAccessor((node: NodeL1, parent: NodeL1|n)=>{
 	if (parent == null) return false;

@@ -13,7 +13,9 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: "up" | "down"}, {}, ImportResource> {
 	//lastController: BoxController;
 	render() {
-		const {direction, map, node, path, childGroup} = this.props;
+		const {direction, map, node, path} = this.props;
+		const childGroup = node.link?.group;
+		if (map == null || childGroup == null) return null;
 
 		const orderingParentID = GetParentNodeID(path);
 		if (orderingParentID == null) return null;

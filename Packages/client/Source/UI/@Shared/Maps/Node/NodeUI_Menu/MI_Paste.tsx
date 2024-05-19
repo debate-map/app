@@ -14,9 +14,10 @@ import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/Transfer
 @Observer
 export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 	render() {
-		const {map, node, path, childGroup, copiedNode, copiedNodePath, copiedNode_asCut, inList} = this.props;
+		const {map, node, path, copiedNode, copiedNodePath, copiedNode_asCut} = this.props;
 		if (copiedNode == null || copiedNodePath == null) return null;
-		if (inList) return null;
+		const childGroup = node.link?.group;
+		if (map == null || childGroup == null) return null;
 
 		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
