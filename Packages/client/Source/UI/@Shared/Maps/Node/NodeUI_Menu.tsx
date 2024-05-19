@@ -162,7 +162,9 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 						{pasteChildItems_structured_generic}
 						{pasteChildItems_structured_truth}
 						{pasteChildItems_structured_relevance}
-						{pasteChildItems_freeform.length > 0 &&
+						{pasteChildItems_freeform.length > 0 && SLMode_SFI && // in sl-mode-sfi, there are *only* freeform paste options atm; so don't group them under a "Freeform" parent
+							pasteChildItems_freeform}
+						{pasteChildItems_freeform.length > 0 && !SLMode_SFI &&
 							<VMenuItem text={`Freeform...`} enabled={false} style={headerStyle}>{pasteChildItems_freeform}</VMenuItem>}
 					</VMenuItem>}
 				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
