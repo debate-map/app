@@ -227,57 +227,61 @@ class ImportSubtreeUI extends BaseComponent<
 									</>}
 								</Row>
 							</Row>
-							<TextArea value={sourceText} style={{flex: 1}} onChange={newSourceText=>{
-								const newState = {sourceText: newSourceText} as ExtractState<ImportSubtreeUI>;
+							<TextArea value={sourceText}
+								style={{
+									flex: 1, whiteSpace: "pre", // disabling word-wrap is important for performance, for large imports
+								}}
+								onChange={newSourceText=>{
+									const newState = {sourceText: newSourceText} as ExtractState<ImportSubtreeUI>;
 
-								if (uiState.sourceType == DataExchangeFormat.json_dm) {
-									let subtreeData_new: FS_NodeL3|n = null;
-									try {
-										subtreeData_new = FromJSON(newSourceText) as FS_NodeL3;
-										newState.forJSONDM_subtreeData = subtreeData_new;
-										newState.sourceText_parseError = null;
-									} catch (err) {
-										newState.forJSONDM_subtreeData = null;
-										newState.sourceText_parseError = err;
-									}
-									this.SetState(newState);
-								} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
-									let subtreeData_new: CG_Debate|n = null;
-									try {
-										const rawData = FromJSON(newSourceText);
-										if ("questions" in rawData) {
-											subtreeData_new = rawData as CG_Debate;
-										} else if ("positions" in rawData) {
-											subtreeData_new = {
-												questions: [rawData],
-											} as CG_Debate;
-										}
-										newState.forJSONCG_subtreeData = subtreeData_new;
-										newState.sourceText_parseError = null;
-									} catch (err) {
-										newState.forJSONCG_subtreeData = null;
-										newState.sourceText_parseError = err;
-									}
-									this.SetState(newState);
-								} else if (uiState.sourceType == DataExchangeFormat.csv_sl) {
-									const collectedRows = [] as RowMap<any>[];
-									parseString(newSourceText, {headers: true})
-										.on("data", (row: RowMap<any>)=>{
-											collectedRows.push(row);
-										})
-										.on("error", err=>{
-											newState.forCSVSL_subtreeData = null;
-											newState.sourceText_parseError = `${err}`;
-											this.SetState(newState);
-										})
-										.on("end", (rowCount: number)=>{
-											const subtreeData_new = collectedRows.map(row=>CSV_SL_Row.FromRawRow(row));
-											newState.forCSVSL_subtreeData = subtreeData_new;
+									if (uiState.sourceType == DataExchangeFormat.json_dm) {
+										let subtreeData_new: FS_NodeL3|n = null;
+										try {
+											subtreeData_new = FromJSON(newSourceText) as FS_NodeL3;
+											newState.forJSONDM_subtreeData = subtreeData_new;
 											newState.sourceText_parseError = null;
-											this.SetState(newState);
-										});
-								}
-							}}/>
+										} catch (err) {
+											newState.forJSONDM_subtreeData = null;
+											newState.sourceText_parseError = err;
+										}
+										this.SetState(newState);
+									} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
+										let subtreeData_new: CG_Debate|n = null;
+										try {
+											const rawData = FromJSON(newSourceText);
+											if ("questions" in rawData) {
+												subtreeData_new = rawData as CG_Debate;
+											} else if ("positions" in rawData) {
+												subtreeData_new = {
+													questions: [rawData],
+												} as CG_Debate;
+											}
+											newState.forJSONCG_subtreeData = subtreeData_new;
+											newState.sourceText_parseError = null;
+										} catch (err) {
+											newState.forJSONCG_subtreeData = null;
+											newState.sourceText_parseError = err;
+										}
+										this.SetState(newState);
+									} else if (uiState.sourceType == DataExchangeFormat.csv_sl) {
+										const collectedRows = [] as RowMap<any>[];
+										parseString(newSourceText, {headers: true})
+											.on("data", (row: RowMap<any>)=>{
+												collectedRows.push(row);
+											})
+											.on("error", err=>{
+												newState.forCSVSL_subtreeData = null;
+												newState.sourceText_parseError = `${err}`;
+												this.SetState(newState);
+											})
+											.on("end", (rowCount: number)=>{
+												const subtreeData_new = collectedRows.map(row=>CSV_SL_Row.FromRawRow(row));
+												newState.forCSVSL_subtreeData = subtreeData_new;
+												newState.sourceText_parseError = null;
+												this.SetState(newState);
+											});
+									}
+								}}/>
 						</>}
 						{leftTab == ImportSubtreeUI_LeftTab.options &&
 						<>
