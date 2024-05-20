@@ -12,6 +12,7 @@ use rust_shared::utils::general_::extensions::ToOwnedV;
 use tracing::error;
 
 use crate::db::general::sign_in_::jwt_utils::{get_user_jwt_data_from_gql_ctx, try_get_user_jwt_data_from_gql_ctx};
+use crate::db::users::get_user;
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::type_aliases::DBPool;
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_base}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
@@ -44,12 +45,20 @@ impl<'a> AccessorContext<'a> {
     }
 
     // low-level constructors
-    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: Option<&'a async_graphql::Context<'a>>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool, isolation_level: IsolationLevel) -> Result<AccessorContext<'a>, Error> {
+    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: Option<&'a async_graphql::Context<'a>>, db_pool: &DBPool, user: Option<UserJWTData>, mut bypass_rls: bool, isolation_level: IsolationLevel) -> Result<AccessorContext<'a>, Error> {
         let tx = start_read_transaction(anchor, db_pool, isolation_level).await?;
-        tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
+        let user_id = &user.map(|a| a.id).unwrap_or("<none>".o());
+        tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[user_id]).await?;
         /*let user_is_admin = TODO;
         tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
         let new_self = Self { gql_ctx, tx, only_validate: false, rls_enabled: AtomicBool::new(false) }; // rls not enabled quite yet; we'll do that in a moment
+
+        // if user is admin, set bypass_rls to true
+        let user_admin = get_user(&new_self, user_id).await?.permissionGroups.admin;
+        if user_admin {
+            bypass_rls = true;
+            new_self.rls_enabled.store(true, Ordering::SeqCst);
+        }
 
         // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
         if !bypass_rls {

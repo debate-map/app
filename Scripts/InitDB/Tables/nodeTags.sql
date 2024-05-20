@@ -13,3 +13,6 @@ CREATE TABLE app."nodeTags" (
 );
 ALTER TABLE ONLY app."nodeTags" ADD CONSTRAINT "v1_draft_nodeTags_pkey" PRIMARY KEY (id);
 -- ALTER TABLE app."nodeTags" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+
+-- add gin index on "nodes" field
+CREATE INDEX node_tags_nodes_idx ON app."nodeTags" USING gin (nodes);
