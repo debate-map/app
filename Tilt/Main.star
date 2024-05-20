@@ -88,6 +88,9 @@ timeOfTiltUpCommand = os.getenv("TIME_OF_TILT_UP_COMMAND")
 compileWithCranelift = cfg.get("compileWithCranelift", True)
 compileWithRelease = cfg.get("compileWithRelease", PROD) # default to compiling: PROD -> release, DEV (or others) -> debug
 
+# temp
+#compileWithCranelift = False
+
 g = {
 	"appliedResourceNames_batches": [],
 	"ENV": ENV,
