@@ -5,12 +5,12 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		WITH RECURSIVE children(id, depth, is_cycle, nodes_path, order_key, link_id) AS (
 			-- anchor/initial member
 			SELECT p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
-			FROM app."nodeLinks" AS p
+			FROM app."my_node_links" AS p
 			WHERE p.parent=root AND 1 <= max_depth
 			-- recursive member
 			UNION
 				SELECT c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
-				FROM app."nodeLinks" AS c, children
+				FROM app."my_node_links" AS c, children
 				WHERE c.parent = children.id AND NOT is_cycle AND children.depth+1 <= max_depth
 		)
 		SELECT min(id) as id, link_id, min(depth) as depth
@@ -27,12 +27,12 @@ RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		WITH RECURSIVE parents(id, depth, is_cycle, nodes_path) AS (
 			-- anchor/initial member
 			SELECT p.parent, 1, false, ARRAY[p.child]
-			FROM app."nodeLinks" AS p
+			FROM app."my_node_links" AS p
 			WHERE p.child=root AND 1 <= max_depth
 			-- recursive member
 			UNION
 				SELECT c.parent, parents.depth+1, c.parent = ANY(parents.nodes_path), nodes_path || c.child
-				FROM app."nodeLinks" AS c, parents
+				FROM app."my_node_links" AS c, parents
 				WHERE c.child = parents.id AND NOT is_cycle AND parents.depth+1 <= max_depth
 		)
 		SELECT id, min(depth) as depth
@@ -51,12 +51,12 @@ BEGIN
 	WITH RECURSIVE parents(link, parent, child, depth, is_cycle, nodes_path, links_path) AS (
 		-- anchor/initial member
 		SELECT p.id, p.parent, p.child, 0, false, ARRAY[p.child], ARRAY[p.id]
-		FROM app."nodeLinks" AS p
+		FROM app."my_node_links" AS p
 		WHERE p.child=dest
 		-- recursive member
 		UNION
 			SELECT c.id, c.parent, c.child, parents.depth+1, c.parent = ANY(nodes_path), nodes_path || c.child, links_path || c.id
-			FROM app."nodeLinks" AS c, parents
+			FROM app."my_node_links" AS c, parents
 			WHERE c.child = parents.parent AND NOT is_cycle
 	)
 	SELECT parents.nodes_path, parents.links_path INTO STRICT node_ids, link_ids
@@ -78,12 +78,12 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 			WITH RECURSIVE children(parent_id, child_id, depth, is_cycle, nodes_path, order_key, link_id) AS (
 				-- anchor/initial member
 				SELECT p.parent, p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
-				FROM app."nodeLinks" AS p
+				FROM app."my_node_links" AS p
 				WHERE p.parent=root AND 1 <= max_depth
 				-- recursive member
 				UNION
 					SELECT c.parent, c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
-					FROM app."nodeLinks" AS c, children
+					FROM app."my_node_links" AS c, children
 					WHERE c.parent = children.child_id AND NOT is_cycle AND children.depth+1 <= max_depth
 			)
 			SELECT DISTINCT ON (link_id) parent_id, child_id, depth, order_key, link_id

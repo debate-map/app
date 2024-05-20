@@ -24,22 +24,22 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
     
     //let node_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT nodes.* from "nodes" nodes JOIN descendants2($1, $2) USING (id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     // use this variant of the query to preserve the ordering received from the descendants function
-    let node_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT nodes.* from descendants($1, $2) as d JOIN nodes USING (id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
+    let node_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT nodes.* from descendants($1, $2) as d JOIN my_nodes USING (id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let link_rows: Vec<Row> = {
         if max_depth > 0 {
             //let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
             //ctx.tx.query_raw(r#"SELECT links.* from "nodeLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
             //ctx.tx.query_raw(r#"SELECT links.* from "nodeLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
-            ctx.tx.query_raw(r#"SELECT links.* from descendants($1, $2) as d JOIN "nodeLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
+            ctx.tx.query_raw(r#"SELECT links.* from descendants($1, $2) as d JOIN "my_node_links" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
         } else {
             vec![]
         }
     };
-    let phrasing_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT phrasings.* from "nodePhrasings" phrasings JOIN descendants($1, $2) AS d ON (phrasings.node = d.id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
+    let phrasing_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT phrasings.* from "my_node_phrasings" phrasings JOIN descendants($1, $2) AS d ON (phrasings.node = d.id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let tag_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT DISTINCT tags.* from "nodeTags" tags JOIN descendants($1, $2) AS d ON (tags.nodes @> array[d.id])"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let revision_rows: Vec<Row> = ctx.tx.query_raw(r#"
-        SELECT revisions.* from "nodeRevisions" revisions JOIN (
-            SELECT nodes.* from "nodes" nodes JOIN descendants($1, $2) USING (id)
+        SELECT revisions.* from "my_node_revisions" revisions JOIN (
+            SELECT nodes.* from "my_nodes" nodes JOIN descendants($1, $2) USING (id)
         ) AS d ON (revisions.id = d."c_currentRevision")
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let term_rows: Vec<Row> = ctx.tx.query_raw(r#"
@@ -47,8 +47,8 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
             SELECT DISTINCT
                 temp.terms_extracted->'id' "id"
             FROM (
-                SELECT revisions.* from "nodeRevisions" revisions JOIN (
-                    SELECT nodes.* from "nodes" nodes JOIN descendants($1, $2) USING (id)
+                SELECT revisions.* from "my_node_revisions" revisions JOIN (
+                    SELECT nodes.* from "my_nodes" nodes JOIN descendants($1, $2) USING (id)
                 ) AS d ON (revisions.id = d."c_currentRevision")
             ) latest_revs,
             LATERAL (SELECT jsonb_array_elements(latest_revs.phrasing->'terms') terms_extracted) temp
@@ -59,8 +59,8 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
             SELECT DISTINCT
                 temp.attachments_extracted->'media'->'id' "id"
             FROM (
-                SELECT revisions.* from "nodeRevisions" revisions JOIN (
-                    SELECT nodes.* from "nodes" nodes JOIN descendants($1, $2) USING (id)
+                SELECT revisions.* from "my_node_revisions" revisions JOIN (
+                    SELECT nodes.* from "my_nodes" nodes JOIN descendants($1, $2) USING (id)
                 ) AS d ON (revisions.id = d."c_currentRevision")
             ) latest_revs,
             LATERAL (SELECT jsonb_array_elements(latest_revs.attachments) attachments_extracted) temp
