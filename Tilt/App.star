@@ -33,6 +33,7 @@ def Start_App(g):
 		},
 	)
 
+	rustProfile = ("release" if g["compileWithRelease"] else "dev") + ("_clif" if g["compileWithCranelift"] else "")
 	def CopyFromPath(packageName, usedCranelift = g["compileWithCranelift"], usedRelease = g["compileWithRelease"]):
 		# we have to hard-code these branches, since rust outputs "dev" profile into the "debug" folder fsr (also simplifies underscore handling)
 		if usedCranelift:
@@ -48,7 +49,7 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
+			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("monitor-backend"),
 		},
@@ -59,7 +60,7 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
+			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("web-server"),
 		},
@@ -70,7 +71,7 @@ def Start_App(g):
 			"RUST_BASE_URL": imageURL_rustBase,
 			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
-			"debug_vs_release_profile": "release_clif" if g["compileWithRelease"] else "dev_clif",
+			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("app-server"),
 		},
