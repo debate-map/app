@@ -85,7 +85,10 @@ if os.getenv("TIME_OF_TILT_UP_COMMAND") == None:
 	os.putenv("TIME_OF_TILT_UP_COMMAND", timeOfThisTiltfileUpdate)
 timeOfTiltUpCommand = os.getenv("TIME_OF_TILT_UP_COMMAND")
 
-compileWithCranelift = cfg.get("compileWithCranelift", True)
+#compileWithCranelift = cfg.get("compileWithCranelift", True)
+# temp; have cranelift default to off for now, since cranelift currently conflicts with pyroscope, and pyroscope is more important atm
+compileWithCranelift = cfg.get("compileWithCranelift", False)
+
 compileWithRelease = cfg.get("compileWithRelease", PROD) # default to compiling: PROD -> release, DEV (or others) -> debug
 
 g = {
