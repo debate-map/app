@@ -41,3 +41,6 @@ tokio-postgres = {git = "https://github.com/MaterializeInc/rust-postgres.git", r
 #pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}
 #pprof = {git = "https://github.com/Erigara/pprof-rs", rev = "5f624c20fdd36f3396b78b954edbc7fc8b85773c"}
 pprof = {git = "https://github.com/Venryx/pprof-rs-from-erigara", rev = "da8ebcdab50cfdb7a85f03d9362f93b7b7f06cbd"}
+
+# temp-fix for seg-fault (when cranelift+pyroscope are used, and lots of activity is occuring, eg. large map import)
+pyroscope = {git = "https://github.com/Venryx/pyroscope-rs", rev = "d9692080901a4f22c53de9f20314738fde5f3879"}
