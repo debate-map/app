@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-ve
 import {Row, Column} from "web-vcore/nm/react-vcomponents.js";
 import Moment from "web-vcore/nm/moment";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {Link, PageContainer, Observer, ES} from "web-vcore";
+import {Link, PageContainer, Observer, ES, AddNotificationMessage} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {GetUsers, GetUser, User} from "dm_common";
@@ -46,7 +46,7 @@ const columns: ColumnData[] = [{
 @Observer
 export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let users = GetUsers();
+		const users = GetUsers();
 		// const userExtraInfoMap = GetUserExtraInfoMap();
 		const selectedUser = GetSelectedUser();
 
@@ -55,75 +55,18 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 			return <UserProfileUI user={selectedUser}/>;
 		}
 
-		users = users.filter(a=>a);
-		/* users = users.OrderBy((a) => (userExtraInfoMap[a.id] ? userExtraInfoMap[a.id].joinDate : Number.MAX_SAFE_INTEGER));
-		users = users.OrderByDescending((a) => (userExtraInfoMap[a.id] ? (userExtraInfoMap[a.id].edits | 0) : Number.MIN_SAFE_INTEGER)); */
-		users = users.OrderBy(a=>ToNumber(GetUser(a.id)?.joinDate, Number.MAX_SAFE_INTEGER));
-		users = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
-		const [sortedAndFilteredUsers, setSortedAndFilteredUsers] = useState(users);
-
 		const onTableChange = (tableData:TableData)=>{
 			setTableData({
 				columnSort: tableData.columnSort,
 				columnSortDirection: tableData.columnSortDirection,
 				filters: [...tableData.filters],
 			});
-			let output: User[] = users;
-
-			if (tableData.columnSort) {
-				switch (tableData.columnSort) {
-					case "displayName": {
-						output = users.OrderBy(a=>a.displayName);
-						break;
-					}
-					case "joined": {
-						output = users.OrderBy(a=>ToNumber(GetUser(a.id)?.joinDate, Number.MAX_SAFE_INTEGER));
-						break;
-					}
-					case "edits": {
-						output = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
-						break;
-					}
-					case "lastEdit": {
-						output = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.lastEditAt, 0));
-						break;
-					}
-					case "permissions": {
-						output = users.OrderBy(a=>{
-							let nrOfPermissions = 0;
-							if (a.permissionGroups.basic) nrOfPermissions++;
-							if (a.permissionGroups.verified) nrOfPermissions++;
-							if (a.permissionGroups.mod) nrOfPermissions++;
-							if (a.permissionGroups.admin) nrOfPermissions++;
-							return nrOfPermissions;
-						});
-						break;
-					}
-					default: {
-						console.warn(`Unknown columnSort: ${tableData.columnSort}`);
-						break;
-					}
-				}
-			}
-			if (tableData.columnSortDirection == "desc") {
-				output = output.reverse();
-			}
-
-			for (const filter of tableData.filters) {
-				output = output.filter(a=>{
-					if (filter.key == "displayName") return a.displayName.toLowerCase().includes(filter.value.toLowerCase());
-					if (filter.key == "joined") return Moment(a.joinDate).format("YYYY-MM-DD").includes(filter.value);
-					if (filter.key == "edits") return (a.edits || 0).toString().includes(filter.value);
-					if (filter.key == "lastEdit" && a.lastEditAt) return Moment(a.lastEditAt).format("YYYY-MM-DD").includes(filter.value);
-					if (filter.key == "permissions") return ["basic", "verified", "mod", "admin"].filter(b=>(a.permissionGroups || {})[b]).join(", ").toLowerCase().includes(filter.value.toLowerCase());
-					console.error("Unknown filter key:", filter.key);
-				});
-			}
-
-			setSortedAndFilteredUsers([...output]);
 		};
-
 		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
+
+		const sortedAndFilteredUsers = useMemo(()=>{
+			return sortAndFilterUsers(users, tableData);
+		}, [users, tableData]);
 
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
@@ -133,12 +76,76 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 				})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{sortedAndFilteredUsers.map((user, index)=>{
-						return <UserRow key={user.id} index={index} last={index == users.length - 1} user={user}/>;
+						return <UserRow key={user.id} index={index} last={index == sortedAndFilteredUsers.length - 1} user={user}/>;
 					})}
 				</ScrollView>
 			</PageContainer>
 		);
 	}
+}
+
+function sortAndFilterUsers(users: User[], tableData: TableData) {
+	let output: User[] = users.slice();
+
+	// start with the "default sorting"
+	/*output = output.OrderBy((a) => (userExtraInfoMap[a.id] ? userExtraInfoMap[a.id].joinDate : Number.MAX_SAFE_INTEGER));
+	output = output.OrderByDescending((a) => (userExtraInfoMap[a.id] ? (userExtraInfoMap[a.id].edits | 0) : Number.MIN_SAFE_INTEGER));*/
+	output = output.OrderBy(a=>ToNumber(GetUser(a.id)?.joinDate, Number.MAX_SAFE_INTEGER));
+	output = output.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
+
+	// then apply user's custom sorting
+	if (tableData.columnSort) {
+		switch (tableData.columnSort) {
+			case "displayName": {
+				output = output.OrderBy(a=>a.displayName);
+				break;
+			}
+			case "joined": {
+				output = output.OrderBy(a=>ToNumber(GetUser(a.id)?.joinDate, Number.MAX_SAFE_INTEGER));
+				break;
+			}
+			case "edits": {
+				output = output.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
+				break;
+			}
+			case "lastEdit": {
+				output = output.OrderByDescending(a=>ToNumber(GetUser(a.id)?.lastEditAt, 0));
+				break;
+			}
+			case "permissions": {
+				output = output.OrderBy(a=>{
+					let nrOfPermissions = 0;
+					if (a.permissionGroups.basic) nrOfPermissions++;
+					if (a.permissionGroups.verified) nrOfPermissions++;
+					if (a.permissionGroups.mod) nrOfPermissions++;
+					if (a.permissionGroups.admin) nrOfPermissions++;
+					return nrOfPermissions;
+				});
+				break;
+			}
+			default: {
+				console.warn(`Unknown columnSort: ${tableData.columnSort}`);
+				break;
+			}
+		}
+	}
+	if (tableData.columnSortDirection == "desc") {
+		output = output.reverse();
+	}
+
+	// then apply user's custom filtering
+	for (const filter of tableData.filters) {
+		output = output.filter(a=>{
+			if (filter.key == "displayName") return a.displayName.toLowerCase().includes(filter.value.toLowerCase());
+			if (filter.key == "joined") return Moment(a.joinDate).format("YYYY-MM-DD").includes(filter.value);
+			if (filter.key == "edits") return (a.edits || 0).toString().includes(filter.value);
+			if (filter.key == "lastEdit" && a.lastEditAt) return Moment(a.lastEditAt).format("YYYY-MM-DD").includes(filter.value);
+			if (filter.key == "permissions") return ["basic", "verified", "mod", "admin"].filter(b=>(a.permissionGroups || {})[b]).join(", ").toLowerCase().includes(filter.value.toLowerCase());
+			console.error("Unknown filter key:", filter.key);
+		});
+	}
+
+	return output;
 }
 
 @Observer

@@ -100,38 +100,6 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 		};
 		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
 
-		const filterMaps = (maps: Map[], tableData: TableData)=>{
-			let output = maps;
-			if (tableData.columnSort) {
-				switch (tableData.columnSort) {
-					case "name": output = output.OrderBy(a=>a.name); break;
-					case "edits": output = output.OrderByDescending(a=>ToNumber(a.edits, 0)); break;
-					case "lastEdit": output = output.OrderByDescending(a=>ToNumber(a.editedAt, 0)); break;
-					case "creator": output = output.OrderBy(a=>a.creator); break;
-					default:
-						console.warn("Unknown column key:", tableData.columnSort);
-						break;
-				}
-
-				if (tableData.columnSortDirection == "desc") {
-					output = output.reverse();
-				}
-			}
-
-			for (const filter of tableData.filters) {
-				const filteringOn = key=>filter.key == "global" || filter.key == key;
-				output = output.filter(a=>{
-					if (filteringOn("name") && a.name.toLowerCase().includes(filter.value.toLowerCase())) return true;
-					if (filteringOn("edits") && (a.edits || 0).toString().includes(filter.value)) return true;
-					if (filteringOn("lastEdit") && Moment(a.editedAt).format("YYYY-MM-DD").includes(filter.value)) return true;
-					if (filteringOn("creator") && GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value)) return true;
-					return false;
-				});
-			}
-
-			return output;
-		};
-
 		const maps_featured = maps.filter(a=>a.featured);
 		let listType = uiState.listType;
 		// if in sl-mode, some modes may not have any featured maps; in those cases, set/lock list-type to "all" so user doesn't see an empty list (since default list-type is "featured")
@@ -198,4 +166,36 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 			</>
 		);
 	}
+}
+
+function filterMaps(maps: Map[], tableData: TableData) {
+	let output = maps.slice();
+	if (tableData.columnSort) {
+		switch (tableData.columnSort) {
+			case "name": output = output.OrderBy(a=>a.name); break;
+			case "edits": output = output.OrderByDescending(a=>ToNumber(a.edits, 0)); break;
+			case "lastEdit": output = output.OrderByDescending(a=>ToNumber(a.editedAt, 0)); break;
+			case "creator": output = output.OrderBy(a=>a.creator); break;
+			default:
+				console.warn("Unknown column key:", tableData.columnSort);
+				break;
+		}
+
+		if (tableData.columnSortDirection == "desc") {
+			output = output.reverse();
+		}
+	}
+
+	for (const filter of tableData.filters) {
+		const filteringOn = key=>filter.key == "global" || filter.key == key;
+		output = output.filter(a=>{
+			if (filteringOn("name") && a.name.toLowerCase().includes(filter.value.toLowerCase())) return true;
+			if (filteringOn("edits") && (a.edits || 0).toString().includes(filter.value)) return true;
+			if (filteringOn("lastEdit") && Moment(a.editedAt).format("YYYY-MM-DD").includes(filter.value)) return true;
+			if (filteringOn("creator") && GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value)) return true;
+			return false;
+		});
+	}
+
+	return output;
 }
