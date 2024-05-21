@@ -1,6 +1,7 @@
 use std::fmt::{Formatter, Display};
 
 use futures_util::Stream;
+use futures_util::StreamExt;
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject, Subscription, async_stream};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
@@ -51,49 +52,62 @@ wrap_slow_macros!{
 #[derive(Default)] pub struct SubscriptionShard_RunCommandBatch;
 #[Subscription] impl SubscriptionShard_RunCommandBatch {
     async fn run_command_batch<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: RunCommandBatchInput) -> impl Stream<Item = Result<RunCommandBatchResult, SubError>> + 'a {
-        let base_stream = async_stream::stream! {
+        async_stream::stream! {
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_write_advanced(&mut anchor, gql_ctx, false, Some(false)).await.map_err(to_sub_err)?;
             let actor = get_user_info_from_gql_ctx(gql_ctx, &ctx).await.map_err(to_sub_err)?;
 
-            let RunCommandBatchInput { commands } = input.clone();
-    
-            let mut command_results: Vec<JSONValue> = Vec::new();
-            for (index, command) in commands.iter().enumerate() {
-                if let Some(command_input) = &command.addChildNode {
-                    let mut command_input_final = command_input.clone();
+            let mut last_subcommand_results: Vec<JSONValue> = Vec::new();
+            {
+                let mut stream = Box::pin(run_command_batch(&ctx, &actor, true, input.clone(), NoExtras::default()).await);
+                while let Some(batch_result_so_far) = stream.next().await {
+                    let batch_result_so_far = batch_result_so_far?;
+                    last_subcommand_results = batch_result_so_far.results.clone();
+                    yield Ok(batch_result_so_far);
+                }
+            }
+            
+            ctx.tx.commit().await.map_err(to_sub_err)?;
+            tracing::info!("Command-batch execution completed. @CommandCount:{}", input.commands.len());
+            yield Ok(RunCommandBatchResult { results: last_subcommand_results, committed: true });
+        }
+    }
+}
 
-                    // allow add-child-node commands to set some of their fields based on the results of prior commands in the batch (eg. for importing a tree of nodes)
-                    if let Some(parent_source_index) = command.setParentNodeToResultOfCommandAtIndex {
-                        let earlier_command = commands.get(parent_source_index).ok_or_else(|| anyhow!("Command #{} referred to a command index that doesn't exist.", index)).map_err(to_sub_err)?;
-                        let earlier_command_result = command_results.get(parent_source_index as usize).ok_or_else(|| anyhow!("Command #{} referred to a command-result index that doesn't yet exist.", index)).map_err(to_sub_err)?;
-                        if earlier_command.addChildNode.is_some() {
-                            let earlier_command_result_node_id = earlier_command_result.get("nodeID").and_then(|a| a.as_str()).ok_or_else(|| anyhow!("Add-child-node command's result (index #{}) lacks a nodeID field!", index)).map_err(to_sub_err)?;
-                            command_input_final.parentID = earlier_command_result_node_id.to_owned();
-                        } else {
-                            Err(anyhow!("Command #{} referred to a command index that doesn't have a recognized subfield.", index)).map_err(to_sub_err)?;
-                        }
+pub async fn run_command_batch<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User, _is_root: bool, input: RunCommandBatchInput, _extras: NoExtras) -> impl Stream<Item = Result<RunCommandBatchResult, SubError>> + 'a {
+    async_stream::stream! {
+        let RunCommandBatchInput { commands } = input;
+        
+        let mut command_results: Vec<JSONValue> = Vec::new();
+        for (index, command) in commands.iter().enumerate() {
+            if let Some(command_input) = &command.addChildNode {
+                let mut command_input_final = command_input.clone();
+
+                // allow add-child-node commands to set some of their fields based on the results of prior commands in the batch (eg. for importing a tree of nodes)
+                if let Some(parent_source_index) = command.setParentNodeToResultOfCommandAtIndex {
+                    let earlier_command = commands.get(parent_source_index).ok_or_else(|| anyhow!("Command #{} referred to a command index that doesn't exist.", index)).map_err(to_sub_err)?;
+                    let earlier_command_result = command_results.get(parent_source_index as usize).ok_or_else(|| anyhow!("Command #{} referred to a command-result index that doesn't yet exist.", index)).map_err(to_sub_err)?;
+                    if earlier_command.addChildNode.is_some() {
+                        let earlier_command_result_node_id = earlier_command_result.get("nodeID").and_then(|a| a.as_str()).ok_or_else(|| anyhow!("Add-child-node command's result (index #{}) lacks a nodeID field!", index)).map_err(to_sub_err)?;
+                        command_input_final.parentID = earlier_command_result_node_id.to_owned();
+                    } else {
+                        Err(anyhow!("Command #{} referred to a command index that doesn't have a recognized subfield.", index)).map_err(to_sub_err)?;
                     }
-
-                    let result = add_child_node(&ctx, &actor, false, command_input_final, AddChildNodeExtras { avoid_recording_command_run: true }).await.map_err(to_sub_err)?;
-                    command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
-                } else if let Some(command_input) = &command.updateNode {
-                    let command_input_final = command_input.clone();
-                    let result = update_node(&ctx, &actor, false, command_input_final, NoExtras::default()).await.map_err(to_sub_err)?;
-                    command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
-                } else {
-                    Err(anyhow!("Command #{} had no recognized command subfield.", index)).map_err(to_sub_err)?;
                 }
 
-                // after each command completion, send the results obtained so far to the client
-                yield Ok(RunCommandBatchResult { results: command_results.clone(), committed: false });
+                let result = add_child_node(&ctx, &actor, false, command_input_final, AddChildNodeExtras { avoid_recording_command_run: true }).await.map_err(to_sub_err)?;
+                command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
+            } else if let Some(command_input) = &command.updateNode {
+                let command_input_final = command_input.clone();
+                let result = update_node(&ctx, &actor, false, command_input_final, NoExtras::default()).await.map_err(to_sub_err)?;
+                command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
+            } else {
+                Err(anyhow!("Command #{} had no recognized command subfield.", index)).map_err(to_sub_err)?;
             }
 
-            ctx.tx.commit().await.map_err(to_sub_err)?;
-            tracing::info!("Command-batch execution completed. @CommandCount:{}", commands.len());
-            yield Ok(RunCommandBatchResult { results: command_results, committed: true });
-        };
-        base_stream
+            // after each command completion, send the results obtained so far to the client
+            yield Ok(RunCommandBatchResult { results: command_results.clone(), committed: false });
+        }
     }
 }
 

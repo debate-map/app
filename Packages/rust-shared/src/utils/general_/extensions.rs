@@ -1,4 +1,4 @@
-use std::{ops::{Residual, Try}, fmt};
+use std::{fmt, num::TryFromIntError, ops::{Residual, Try}};
 
 use crate::utils::errors_::backtrace_simplifier::simplify_backtrace_str;
 
@@ -92,4 +92,26 @@ pub fn indent_all_lines(from_str: &str, indent_amount: usize) -> String {
         "\t".repeat(indent_amount) + line
     }).collect();
     lines_indented.join("\n")
+}
+
+// trait that lets one do myVec.len_u32() to get a u32 (with panic if the length is too big)
+pub trait VecLenU32 {
+    fn len_u32(&self) -> u32;
+    fn len_u64(&self) -> u64;
+    fn try_len_u32(&self) -> Result<u32, TryFromIntError>;
+}
+impl<T> VecLenU32 for Vec<T> {
+    fn len_u32(&self) -> u32 {
+        self.len().try_into().expect("Vec length is too big to convert to u32")
+    }
+    // atm this is safe, since usize cannot be larger than u64 (rust doesn't support 128bit+ architectures atm)
+    fn len_u64(&self) -> u64 {
+        let len = self.len();
+        len as u64
+    }
+    
+    fn try_len_u32(&self) -> Result<u32, TryFromIntError> {
+        //self.len().try_into().map_err(anyhow!("Vec length is too big to convert to u32"))
+        self.len().try_into()
+    }
 }

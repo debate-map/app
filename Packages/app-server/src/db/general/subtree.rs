@@ -10,8 +10,9 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
+use rust_shared::utils::general_::extensions::VecLenU32;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{serde, GQLError};
+use rust_shared::{serde, to_sub_err, GQLError, SubError};
 use std::collections::HashSet;
 use std::path::Path;
 use std::rc::Rc;
@@ -19,7 +20,10 @@ use std::sync::Arc;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::db::_general::GenericMutation_Result;
+use crate::db::commands::_command::NoExtras;
 use crate::db::commands::clone_subtree::clone_subtree;
+use crate::db::commands::run_command_batch::{run_command_batch, CommandEntry, RunCommandBatchInput};
+use crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx;
 use crate::db::medias::Media;
 use crate::db::node_links::NodeLink;
 use crate::db::node_phrasings::NodePhrasing;
@@ -173,6 +177,53 @@ impl QueryShard_General_Subtree {
         let result = clone_subtree(gql_ctx, payload).await?;
         Ok(result)
     }
+}
+
+// subscriptions
+// ==========
+
+#[derive(Default)] pub struct SubscriptionShard_RunCommandBatch;
+#[Subscription] impl SubscriptionShard_RunCommandBatch {
+    async fn delete_subtree<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: DeleteSubtreeInput) -> impl Stream<Item = Result<DeleteSubtreeResult, SubError>> + 'a {
+        async_stream::stream! {
+            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+            let ctx = AccessorContext::new_write_advanced(&mut anchor, gql_ctx, false, Some(false)).await.map_err(to_sub_err)?;
+            let actor = get_user_info_from_gql_ctx(gql_ctx, &ctx).await.map_err(to_sub_err)?;
+
+            let subcommands: Vec<CommandEntry> = vec![];
+            // todo
+            let subcommand_count = subcommands.len_u32();
+
+            let mut last_subcommand_results: Vec<JSONValue> = Vec::new();
+            {
+                let batch_input = RunCommandBatchInput { commands: subcommands };
+                let mut stream = Box::pin(run_command_batch(&ctx, &actor, false, batch_input, NoExtras::default()).await);
+                while let Some(batch_result_so_far) = stream.next().await {
+                    let batch_result_so_far = batch_result_so_far?;
+                    last_subcommand_results = batch_result_so_far.results.clone();
+                    let subtree_delete_result_so_far = DeleteSubtreeResult { subcommandCount: subcommand_count, subcommandResults: last_subcommand_results.clone(), committed: false };
+                    yield Ok(subtree_delete_result_so_far);
+                }
+            }
+            
+            ctx.tx.commit().await.map_err(to_sub_err)?;
+            tracing::info!("Command-batch execution completed. @CommandCount:{}", subcommand_count);
+            yield Ok(DeleteSubtreeResult { subcommandCount: subcommand_count, subcommandResults: last_subcommand_results, committed: true });
+        }
+    }
+}
+
+#[derive(InputObject, Deserialize, Serialize, Clone)]
+pub struct DeleteSubtreeInput {
+    pub mapID: Option<String>,
+    pub rootNodeID: String,
+}
+
+#[derive(SimpleObject, Debug, Serialize)]
+pub struct DeleteSubtreeResult {
+    pub subcommandCount: u32,
+    pub subcommandResults: Vec<JSONValue>,
+    pub committed: bool,
 }
 
 }
