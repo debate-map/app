@@ -53,7 +53,8 @@ impl<'a> AccessorContext<'a> {
         tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
         let new_self = Self { gql_ctx, tx, only_validate: false, rls_enabled: AtomicBool::new(false) }; // rls not enabled quite yet; we'll do that in a moment
 
-        // if user is admin, set bypass_rls to true
+        // if user is admin, set bypass_rls to true (an optimization, to remove the need for having the RLS rules involved at all)
+        // todo: maybe change `bypass_rls` to an enum named `rls_apply`, with values "Bypass", "BypassIfAdmin", and "Apply"
         let user_admin = get_user(&new_self, user_id).await?.permissionGroups.admin;
         if user_admin {
             bypass_rls = true;
