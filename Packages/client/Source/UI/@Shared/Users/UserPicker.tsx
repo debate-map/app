@@ -1,11 +1,29 @@
 import {GetUser, GetUsers} from "dm_common";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, ButtonProps, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
+
+/** Basic implementation of a button to be used as the child of the UserPicker wrapper component. (many components/use-cases will instead supply their own button with more customized styling) */
+@Observer
+export class UserPicker_Button extends BaseComponent<{enabled?: boolean, userID: string|n, idTrimLength?: number, extraText?: string, style?} & ButtonProps, {}> {
+	render() {
+		const {enabled, userID, idTrimLength, extraText, style, ...rest} = this.props;
+		const user = GetUser(userID);
+		const userDisplayName = user?.displayName;
+		return (
+			<Button {...rest} enabled={enabled} text={[
+				user == null && "(click to select user)",
+				user && userDisplayName,
+				user && idTrimLength == null && ` (id: ${user.id})`,
+				user && idTrimLength != null && ` [${user.id.slice(0, idTrimLength)}]`,
+			].filter(a=>a).join("") + (extraText ?? "")} style={style}/>
+		);
+	}
+}
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {

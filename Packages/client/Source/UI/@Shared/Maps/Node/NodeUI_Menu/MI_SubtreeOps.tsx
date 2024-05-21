@@ -15,6 +15,7 @@ import {SubtreeOpsUI_Export_Left, SubtreeOpsUI_Export_Right} from "./Dialogs/Sub
 import {SubtreeOpsUI_SetAccessPolicy_Left, SubtreeOpsUI_SetAccessPolicy_Right} from "./Dialogs/SubtreeOpsUI_SetAccessPolicy.js";
 import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server} from "./Dialogs/SubtreeOpsHelpers.js";
 import {SubtreeIncludeKeys, SubtreeOperation} from "./Dialogs/SubtreeOpsStructs.js";
+import {SubtreeOpsUI_Delete_Left, SubtreeOpsUI_Delete_Right} from "./Dialogs/SubtreeOpsUI_Delete.js";
 
 @Observer
 export class MI_SubtreeOps extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -23,7 +24,7 @@ export class MI_SubtreeOps extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasModPermissions(MeID())) return null; // for now, require mod permissions (since no quotas or other restrictions are in place)
 		return (
-			<VMenuItem text="Subtree operations (eg. export)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
+			<VMenuItem text="Export subtree (+other ops)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 				if (e.button != 0) return;
 				let ui: ExportSubtreeUI|n;
 				const controller = ShowMessageBox({
@@ -74,6 +75,7 @@ class ExportSubtreeUI extends BaseComponent<{controller: BoxController} & MI_Sha
 						<Row mt={20} style={{fontWeight: "bold"}}>Operation options</Row>
 						{dialogState.operation == SubtreeOperation.export && <SubtreeOpsUI_Export_Left {...sharedProps}/>}
 						{dialogState.operation == SubtreeOperation.setAccessPolicy && <SubtreeOpsUI_SetAccessPolicy_Left {...sharedProps}/>}
+						{dialogState.operation == SubtreeOperation.delete && <SubtreeOpsUI_Delete_Left {...sharedProps}/>}
 					</Column>
 					{/*<Column style={{width: 500, padding: "0 5px"}}>
 						<Row>
@@ -89,6 +91,7 @@ class ExportSubtreeUI extends BaseComponent<{controller: BoxController} & MI_Sha
 					<Column style={{width: 500}}>
 						{dialogState.operation == SubtreeOperation.export && <SubtreeOpsUI_Export_Right {...sharedProps}/>}
 						{dialogState.operation == SubtreeOperation.setAccessPolicy && <SubtreeOpsUI_SetAccessPolicy_Right {...sharedProps}/>}
+						{dialogState.operation == SubtreeOperation.delete && <SubtreeOpsUI_Delete_Right {...sharedProps}/>}
 					</Column>
 				</Row>
 				<Row mt={5}>

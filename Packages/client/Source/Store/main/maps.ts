@@ -175,6 +175,8 @@ export class SubtreeOperationsDialogState {
 	//@O @ignore setPolicy_oldParentCounts = [] as number[];
 	@O @ignore setPolicy_oldAccessPolicies = [] as string[];
 	@O @ignore setPolicy_newPolicyID: string|n;
+
+	// delete
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor({ctx: 1}, function(nodeID: string) {

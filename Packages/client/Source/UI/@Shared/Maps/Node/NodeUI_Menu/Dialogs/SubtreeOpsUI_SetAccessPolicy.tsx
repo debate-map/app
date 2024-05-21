@@ -76,6 +76,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 		].Distinct();
 		const accessPoliciesInSubtree_matches = accessPoliciesInSubtree.ToMap(policyID=>policyID, policyID=>subtreeData?.nodes?.filter(a=>a.accessPolicy == policyID).length ?? 0);
 
+		const Header = (p: {children: React.ReactNode})=><Row mt={20} style={{fontSize: 16, fontWeight: "bold"}}>{p.children}</Row>;
 		return (
 			<Column style={{flex: 1}}>
 				<Row>
@@ -128,7 +129,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 					</Column>
 				</Column>
 
-				<Row mt={20} style={{fontWeight: "bold"}}>Modifications</Row>
+				<Header>Modifications</Header>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Text>New access-policy:</Text>
 					<PolicyPicker containerStyle={{flex: null}} value={setPolicy_newPolicyID} onChange={val=>RunInAction_Set(this, ()=>dialogState.setPolicy_newPolicyID = val)}>
@@ -136,7 +137,7 @@ export class SubtreeOpsUI_SetAccessPolicy_Right extends BaseComponent<{} & MI_Sh
 					</PolicyPicker>
 				</RowLR>
 
-				<Row mt={20} style={{fontWeight: "bold"}}>Execution</Row>
+				<Header>Execution</Header>
 				<Row mt={5} p={3} style={{textAlign: "center", background: "rgba(255,255,0,.3)", color: "red", borderRadius: 25, border: "1px solid rgba(0,0,0,.3)"}}>
 					<div>
 						Warning: Once started, the batch operation cannot be stopped. It also cannot be undone. (short of a full database restore)

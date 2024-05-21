@@ -4,6 +4,7 @@ import {ClassKeys} from "web-vcore/nm/mobx-graphlink.js";
 export enum SubtreeOperation {
 	export = "export",
 	setAccessPolicy = "setAccessPolicy",
+	delete = "delete",
 }
 
 export class SubtreeIncludeKeys {

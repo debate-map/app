@@ -211,3 +211,34 @@ export async function RunCommand_TransferNodes(inputFields: {mapID?: string|n, n
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");
 export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
 export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);
+
+export function RunCommand_DeleteSubtree(inputFields: {mapID?: string|n, rootNodeID: string}, onProgress?: (subcommandsCompleted: number, subcommandsTotal: number)=>void) {
+	const fetchResult_subscription = apolloClient.subscribe<{deleteSubtree: DeleteSubtreeResult}>({
+		query: gql`
+			subscription($input: DeleteSubtreeInput!) {
+				deleteSubtree(input: $input) { subcommandCount subcommandResults committed }
+			}
+		`,
+		variables: {input: inputFields},
+	});
+	type DeleteSubtreeResult = {subcommandCount: number, subcommandResults: Object[], committed: boolean};
+	return new Promise<DeleteSubtreeResult>((resolve, reject)=>{
+		const subscription = fetchResult_subscription.subscribe(data=>{
+			if ((data.errors?.length ?? 0) > 0) {
+				subscription.unsubscribe(); // unsubscribe if error occurs
+				return void reject(new Error(`Error during DeleteSubtree: ${JSON.stringify(data.errors)}`));
+			}
+			if (data.data == null) {
+				subscription.unsubscribe(); // unsubscribe if error occurs
+				return void reject(new Error(`No data returned from DeleteSubtree.`));
+			}
+
+			const latestResult = data.data.deleteSubtree;
+			onProgress?.(latestResult.subcommandResults.length, latestResult.subcommandCount);
+			if (latestResult.committed) {
+				subscription.unsubscribe(); // unsubscribe if done
+				resolve(latestResult);
+			}
+		});
+	});
+}
