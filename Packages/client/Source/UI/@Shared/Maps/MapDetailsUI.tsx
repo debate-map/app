@@ -105,7 +105,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 						`.AsMultiline(0)}>Items:</TextPlus>
 						{(()=>{
 							const setToolbarItemEnabled = (item_panel: string, new_enabled: boolean)=>{
-								const items_order: ToolbarItem[] = [{panel: "truth"}, {panel: "relevance"}, {panel: "tags"}, {panel: "phrasings"}];
+								const items_order: ToolbarItem[] = [{panel: "prefix"}, {panel: "truth"}, {panel: "relevance"}, {panel: "tags"}, {panel: "phrasings"}];
 
 								let new_items: ToolbarItem[] = newData.extras.toolbarItems ?? [];
 								// first, remove any entries for the given panel (ensuring no duplicates)

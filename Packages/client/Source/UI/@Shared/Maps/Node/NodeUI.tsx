@@ -13,7 +13,7 @@ import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
 import {BailError, BailInfo} from "mobx-graphlink";
-import {Assert, ea, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
+import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
@@ -92,8 +92,10 @@ export class NodeUI extends BaseComponentPlus(
 
 		if (DEV_DYN) performance.mark("NodeUI_1");
 
-		const GetNodeChildren = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
-		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true) : ea);
+		// we use CatchBail here, to ensure that the NodeUI is able to render even if the children data hasn't loaded yet (avoids "jitter" of map layout, eg. node-a's child gets updated causing node-a to disappear then come back)
+		// (and the use of "ea", ie. a constant empty-array, is so that downstream code/components can recognize the children-array as "still being loaded")
+		const GetNodeChildren = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3.CatchBail(ea, node2.id, path2) : ea);
+		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced.CatchBail(ea, node2.id, path2, map.id, true, undefined, true) : ea);
 
 		//const nodeChildren = GetNodeChildren(node, path);
 		const useForcedExpand = UseForcedExpandForPath(path, forLayoutHelper);
@@ -257,7 +259,7 @@ export class NodeUI extends BaseComponentPlus(
 					{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) && !store.main.timelines.hideEditingControls &&
 						<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 					{!boxExpanded &&
-						<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length}/>}
+						<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length} childrenLoading={IsSpecialEmptyArray(nodeChildrenToShow)}/>}
 				</Column>
 				{boxExpanded && nodeChildHolder_truth}
 				{boxExpanded && nodeChildHolder_relevance}

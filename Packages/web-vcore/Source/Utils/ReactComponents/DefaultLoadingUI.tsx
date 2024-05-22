@@ -20,6 +20,17 @@ export class DefaultLoadingUI extends BaseComponent<{
 			return false;
 		}).ToMapObj(a=>a[0], a=>a[1]);
 		//console.log(`Comp:${comp.constructor.name} @CompProps:`, compProps_neededPropsOnly);
+
+		/*if (globalThis.DEV) {
+			const confirmedGoodLoadingUIComps = [
+				"NodeBox",
+			];
+			if (!confirmedGoodLoadingUIComps.includes(comp.constructor.name)) {
+				console.log("Got loading-ui for comp that's not yet confirmed to work well with it:", comp.constructor.name);
+				//debugger;
+			}
+		}*/
+
 		const {css} = cssHelper(this);
 		return (
 			<div {...compProps_neededPropsOnly} style={css({

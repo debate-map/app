@@ -6,10 +6,10 @@ import {RatingPreviewType} from "Store/main/maps.js";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {ES, HSLA, InfoButton, Observer} from "web-vcore";
+import {DefaultLoadingUI, ES, HSLA, InfoButton, Observer} from "web-vcore";
 import {Color} from "web-vcore/nm/chroma-js.js";
-import {E} from "web-vcore/nm/js-vextensions";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {E, ea} from "web-vcore/nm/js-vextensions";
+import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
@@ -27,6 +27,12 @@ export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
 @Observer
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
+	/*loadingUI = (info: BailInfo)=>{
+		if (this.props.node.id == "3Td4YWzQRGqxCEtDpA3EbQ") {
+			console.log(info.bailMessage, info.comp);
+		}
+		return <DefaultLoadingUI comp={info.comp} bailMessage={info.bailMessage} style={{display: "none"}}/>;
+	};*/
 	render() {
 		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, nodeUI_width_final, leftPanelShow} = this.props;
 		const parentPath = SlicePath(path, 1);
@@ -38,7 +44,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const {key, css} = cssHelper(this);
 
 		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
-		const tags = GetNodeTags(node.id);
+		const tags = GetNodeTags.CatchBail(ea, node.id);
 		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;

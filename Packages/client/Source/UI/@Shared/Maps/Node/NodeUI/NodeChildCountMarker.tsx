@@ -11,10 +11,10 @@ import {SLMode} from "UI/@SL/SL.js";
 import {NodeChangesMarker} from "./NodeChangesMarker.js";
 
 @Observer
-export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {map: Map, path: string, childCount: number, textOutline?: string}, {}) {
+export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {map: Map, path: string, childCount: number, childrenLoading: boolean, textOutline?: string}, {}) {
 	render() {
-		const {map, path, childCount, textOutline} = this.props;
-		if (childCount == 0) return null;
+		const {map, path, childCount, childrenLoading, textOutline} = this.props;
+		if (childCount == 0 && !childrenLoading) return null;
 
 		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes.CatchBail(emptyArray, map.id, sinceTime, path); // catch bail, to lazy-load path-changes
@@ -47,7 +47,7 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 						},
 					)}
 				>
-					{SLMode ? "+" : ""}{childCount}
+					{childrenLoading ? "..." : `${SLMode ? "+" : ""}${childCount}`}
 				</div>
 				{showChangesMarker &&
 					<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
