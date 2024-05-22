@@ -23,8 +23,8 @@ export class LinkPreserver extends BaseComponent<{}, {}> {
 
 		const {data, loading} = useSubscription(LINK_PRESERVER_SUBSCRIPTION, {
 			variables: {input: {updateInterval}},
-			onSubscriptionData: info=>{
-				const {alive, pageRefreshRequested} = info.subscriptionData.data.linkPreserver as LinkPreserverResult;
+			onData: info=>{
+				const {alive, pageRefreshRequested} = info.data.data.linkPreserver as LinkPreserverResult;
 				if (pageRefreshRequested) {
 					console.log("Refreshing page due to server request.");
 					window.location.reload();

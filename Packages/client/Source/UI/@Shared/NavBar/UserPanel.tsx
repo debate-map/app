@@ -2,7 +2,7 @@ import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Div, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ES, GetCurrentURL, InfoButton, Link, Observer} from "web-vcore";
+import {AddNotificationMessage, ES, GetCurrentURL, InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
@@ -10,6 +10,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 import {OnUserJWTChanged} from "Utils/AutoRuns/UserInfoCheck";
+import {SignInButton} from "./UserPanel/SignInButton.js";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -71,28 +72,22 @@ export function ShowSignInPopup() {
 }
 
 @SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {username: string}> {
-	static initialState = {username: "Dev1"};
+export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {dev_username: string}> {
+	static initialState = {dev_username: "Dev1"};
 	render() {
 		const {style, onSignIn} = this.props;
-		const {username} = this.state;
+		const {dev_username} = this.state;
+
+		const onJWTReceived = (jwt: string)=>{
+			// store jwt in local-storage
+			localStorage.setItem("debate-map-user-jwt", jwt);
+			OnUserJWTChanged();
+			onSignIn?.();
+		};
+
 		return (
 			<Column style={ES(style)}>
-				{/*<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>*/}
-				<div ref={c=>{
-					if (!c) return;
-					if (g.google == null) {
-						WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
-						return;
-					}
-					EnsureGoogleIDAPIReady();
-
-					const options: GsiButtonConfiguration = {};
-					//g.google.accounts.id.renderButton(c, options);
-					g.google.accounts.id.renderButton(c, options, async()=>{
-						await DoSignInFlow("google");
-					});
-				}}/>
+				<SignInButton provider="google" onJWTReceived={onJWTReceived}/>
 				{/*<SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/>*/}
@@ -108,10 +103,8 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {u
 					</Row>
 					<Row>
 						<Text>Username:</Text>
-						<TextInput ml={5} style={{flex: 1}} value={username} onChange={val=>this.SetState({username: val})}/>
-						<Button ml={5} text="Sign in" onClick={async()=>{
-							await DoSignInFlow("dev", username);
-						}}/>
+						<TextInput ml={5} style={{flex: 1}} value={dev_username} onChange={val=>this.SetState({dev_username: val})}/>
+						<SignInButton provider="dev" preferredUsername={dev_username} onJWTReceived={onJWTReceived}/>
 					</Row>
 				</Column>}
 			</Column>
@@ -119,92 +112,41 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {u
 	}
 }
 
-async function DoSignInFlow(provider: "google" | "dev", username?: string) {
-	const monthInSecs = 2629800;
-	//const monthInSecs = GetCurrentURL().GetQueryVar("test1")?.ToInt() ?? 2629800;
-	const fetchResult_subscription = apolloClient.subscribe({
-		query: gql`
-			subscription($input: SignInStartInput!) {
-				signInStart(input: $input) {
-					instructions
-					authLink
-					resultJWT
-				}
-			}
-		`,
-		variables: {input: {provider, jwtDuration: monthInSecs, preferredUsername: username}},
-	});
-	let popupOpened = false;
-	const resultJWT = await new Promise<string>(resolve=>{
-		const subscription = fetchResult_subscription.subscribe(data=>{
-			if (data.data.signInStart.authLink && !popupOpened) {
-				popupOpened = true;
-				OpenSignInPopup(data.data.signInStart.authLink);
-			}
+export type SignInProvider = "google" | "dev";
 
-			if (data.data.signInStart.resultJWT) {
-				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-				resolve(data.data.signInStart.resultJWT);
-			}
-		});
-	});
-
-	// store jwt in local-storage
-	localStorage.setItem("debate-map-user-jwt", resultJWT);
-	OnUserJWTChanged();
-}
-
-function OpenSignInPopup(url: string) {
+export function OpenSignInPopup(url: string, provider: SignInProvider) {
 	const name = "sign_in_popup";
 
-	//const specs = "width=500,height=500";
-	//var width = 500, height = 370;
-	var width = 470, height = 580;
-	var w = window.outerWidth - width, h = window.outerHeight - height;
+	let size: {width: number, height: number};
+	if (provider == "google") size = {width: 470, height: 580};
+	else return; // "dev" sign-in doesn't use popups
+
+	var w = window.outerWidth - size.width, h = window.outerHeight - size.height;
 	var left = Math.round(window.screenX + (w / 2));
 	var top = Math.round(window.screenY + (h / 2.5));
-	const specs = `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0`;
+	const specs = `width=${size.width},height=${size.height},left=${left},top=${top},toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0`;
 
-	window.open(url, name, specs);
+	const popupWindow = window.open(url, name, specs);
+	if (WasPopupWindowBlocked(popupWindow)) {
+		// commented; popup-blockers (on firefox anyway) block these new-tab attempts as well
+		//window.open(url, "_blank");
+
+		AddNotificationMessage(`
+			Popup for sign-in was blocked; please allow popups for this site, or manually open the sign-in link in a new tab.
+			
+			Sign-in link: ${url}
+		`);
+	}
 }
 
-// from: https://developers.google.com/identity/gsi/web/reference/js-reference
-type GsiButtonConfiguration = {
-	type?: string; // The button type: icon, or standard button.
-	theme?: string; // The button theme. For example, white or blue.
-	size?: string; // The button size. For example, samll or large.
-	text?: string; // The button text. For example, "Sign in with Google" or "Sign up with Google".
-	shape?: string; // The button shape. For example, rectangular or circular.
-	logo_alignment?: string; // The Google logo alignment: left or center.
-	width?: number; // The button width, in pixels.
-	locale?: string; // If set, then the button language is rendered.
-}
-export const googleClientID = process.env.CLIENT_ID; // supplied by ./Scripts/Config.js
-export function EnsureGoogleIDAPIReady() {
-	/*if (g.google == null) {
-		console.error("Cannot initialize Google ID api, because its script has not been loaded.");
-		return;
+function WasPopupWindowBlocked(popupWindow: Window|null) {
+	if (popupWindow == null) return true;
+	if (popupWindow.closed) return true;
+	// maybe needed for safari (not yet checked, but suggested by: https://stackoverflow.com/questions/2914#comment137165479_27725432)
+	/*try {
+		popupWindow.focus();
+	} catch (e) {
+		return true;
 	}*/
-
-	if (g.google.accounts.id._initCalled) return;
-	/*const googleClientID_randomPart = googleClientID?.replace(".apps.googleusercontent.com", "");
-	console.log("GClientID:", `${googleClientID_randomPart?.slice(0, 2)}...${googleClientID_randomPart?.slice(-2)}`);*/
-	g.google.accounts.id.initialize({
-		client_id: googleClientID,
-		callback: googleID_handleCredentialResponse,
-	});
-	g.google.accounts.id._initCalled = true;
+	return false;
 }
-export type GoogleID_CredentialResponse = {clientId: string, credential: string, select_by: "string"};
-export const googleID_handleCredentialResponse = async(response: GoogleID_CredentialResponse)=>{
-	console.log("Data:", response);
-	await fetch(GetAppServerURL("/auth/google/callback"), {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			idToken: response.credential,
-		}),
-	});
-};

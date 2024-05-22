@@ -36,8 +36,8 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 		const [logEntries, setLogEntries] = useState([] as MigrationLogEntry[]);
 		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
-			onSubscriptionData: info=>{
-				const newEntry = info.subscriptionData.data.migrateLogEntries as MigrationLogEntry;
+			onData: info=>{
+				const newEntry = info.data.data.migrateLogEntries as MigrationLogEntry;
 				setLogEntries(logEntries.concat(newEntry));
 			},
 		});

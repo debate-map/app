@@ -28,8 +28,8 @@ export const TestingUI = observer(()=>{
 	const [logEntries, setLogEntries] = useState([] as TestingLogEntry[]);
 	const {data, loading} = useSubscription(TESTING_LOG_ENTRIES_SUBSCRIPTION, {
 		variables: {adminKey},
-		onSubscriptionData: info=>{
-			const newEntry = info.subscriptionData.data.testingLogEntries as TestingLogEntry;
+		onData: info=>{
+			const newEntry = info.data.data.testingLogEntries as TestingLogEntry;
 			setLogEntries(logEntries.concat(newEntry));
 		},
 	});
