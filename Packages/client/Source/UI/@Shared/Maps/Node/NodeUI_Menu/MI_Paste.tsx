@@ -16,8 +16,8 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 	render() {
 		const {map, node, path, copiedNode, copiedNodePath, copiedNode_asCut} = this.props;
 		if (copiedNode == null || copiedNodePath == null) return null;
+		if (map == null) return null;
 		const childGroup = node.link?.group;
-		if (map == null || childGroup == null) return null;
 
 		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 

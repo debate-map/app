@@ -9,9 +9,11 @@ export class TransferNodesUIState {
 	destinationChildGroup: ChildGroup;
 }
 
-export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, transferNodePath: string, newParent: NodeL3, outerChildGroup: ChildGroup, transferType: TransferType) {
+export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, transferNodePath: string, newParent: NodeL3, outerChildGroup: ChildGroup|n, transferType: TransferType) {
 	const oldParentID = GetParentNodeID(transferNodePath);
 	if (oldParentID == null || transferNode.link == null) return [null, null] as const; // parentless not supported yet
+
+	const outerChildGroupOrDefault = outerChildGroup ?? ChildGroup.generic;
 
 	const payload_initial: TransferNodesPayload = {
 		nodes: [
@@ -25,7 +27,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, tr
 
 				newParentID: newParent.id,
 				newAccessPolicyID: map?.nodeAccessPolicy,
-				childGroup: outerChildGroup,
+				childGroup: outerChildGroupOrDefault,
 				claimForm: transferNode.link.form,
 				argumentPolarity: transferNode.link.polarity,
 			},
@@ -56,7 +58,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, tr
 		}
 	}*/
 
-	const uiState_initial: TransferNodesUIState = {destinationParent: newParent, destinationChildGroup: outerChildGroup};
+	const uiState_initial: TransferNodesUIState = {destinationParent: newParent, destinationChildGroup: outerChildGroupOrDefault};
 
 	// if only 1 transfer atm, and it's a claim, and destination doesn't accept a bare claim as a structured child, then add extra transfer of type "shim" (for if user wants node ending up in a structured child-group)
 	if (payload_initial.nodes.length == 1 && transferNode.type == NodeType.claim) {

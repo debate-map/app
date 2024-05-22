@@ -27,8 +27,7 @@ export class CloneSubtreeUIState {
 export class MI_CloneSubtree extends BaseComponent<MI_SharedProps, {}> {
 	render() {
 		const {map, node, path} = this.props;
-		const childGroup = node.link?.group;
-		if (map == null || childGroup == null) return null;
+		if (map == null) return null;
 		if (!HasAdminPermissions(MeID())) return null;
 		//const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 

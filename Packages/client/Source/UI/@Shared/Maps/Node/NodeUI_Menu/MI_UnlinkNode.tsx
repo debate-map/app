@@ -12,8 +12,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
 		const {map, mapID, node, path} = this.props;
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
-		const childGroup = node.link?.group;
-		if (map == null || childGroup == null) return null;
+		if (map == null) return null;
 		const parent = GetParentNodeL3(path);
 		if (parent == null) return null;
 		const nodeText = GetNodeDisplayText(node, path, map);

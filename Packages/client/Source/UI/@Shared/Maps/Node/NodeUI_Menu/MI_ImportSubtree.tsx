@@ -35,10 +35,10 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 	//lastController: BoxController;
 	render() {
 		const {map, node, path} = this.props;
-		const childGroup = node.link?.group;
-		if (map == null || childGroup == null) return null;
+		if (map == null) return null;
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasAdminPermissions(MeID())) return null;
+		const childGroup = node.link?.group;
 
 		const uiState = store.main.maps.importSubtreeDialog;
 		const selectedIRs_nodeAndRev = [...uiState.selectedImportResources].filter(a=>a instanceof IR_NodeAndRevision) as IR_NodeAndRevision[];
@@ -83,7 +83,7 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 						});
 						command.RunOnServer();
 					} else {*/
-					res.link.group = childGroup;
+					res.link.group = childGroup ?? ChildGroup.generic;
 					await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: AsNodeL1Input(res.node), revision: res.revision, link: res.link});
 				}}/>}
 			</>
