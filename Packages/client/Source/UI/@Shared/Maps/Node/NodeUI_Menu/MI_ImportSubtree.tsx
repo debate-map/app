@@ -299,10 +299,10 @@ class ImportSubtreeUI extends BaseComponent<
 					</Column>}
 					<Column style={{width: 800, padding: "0 5px"}}>
 						<Row>
-							<Select displayType="button bar" options={GetEntries(ImportSubtreeUI_RightTab, "ui")} value={rightTab} onChange={val=>this.SetState({rightTab: val})}/>
-							<CheckBox ml={5} text="Show left panel" value={showLeftPanel} onChange={val=>this.SetState({showLeftPanel: val})}/>
+							{/*<Select displayType="button bar" options={GetEntries(ImportSubtreeUI_RightTab, "ui")} value={rightTab} onChange={val=>this.SetState({rightTab: val})}/>*/}
+							<CheckBox /*ml={5}*/ text="Show left panel" value={showLeftPanel} onChange={val=>this.SetState({showLeftPanel: val})}/>
 							<Row ml="auto">
-								<CheckBox text="Extract resources" value={process} onChange={val=>this.SetState({process: val})}/>
+								<CheckBox text={[`Extract resources`, resources.length > 0 && `(${resources.length})`].filter(a=>a).join(" ")} value={process} onChange={val=>this.SetState({process: val})}/>
 								<CheckBox ml={5} text={`Import selected (${importProgressStr})`} enabled={!serverImportInProgress} value={this.nodeCreationTimer.Enabled} onChange={val=>{
 									this.SetTimerEnabled(val);
 									this.SetState({selectedIRs_nodeAndRev_atImportStart: selectedIRs_nodeAndRev.length});

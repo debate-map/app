@@ -1,9 +1,9 @@
 import {IR_NodeAndRevision, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
-import {ArgumentType, Attachment, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodeLink, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, OrderKey, systemUserID} from "dm_common";
+import {ArgumentType, Attachment, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodeLink, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, OrderKey, Polarity, systemUserID} from "dm_common";
 import {Assert, IsString} from "js-vextensions";
 import {AddNotificationMessage} from "web-vcore";
-import {CG_Argument, CG_Category, CG_Claim, CG_Debate, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
+import {CG_Argument, CG_Category, CG_Claim, CG_Debate, CG_Evidence, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
 
 export class ImportContext {
 	mapID: string;
@@ -56,13 +56,27 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	const args = [] as CG_Argument[];
 	if (claim.argument) args.push({argument: claim.argument} as CG_Argument);
 	if (claim.arguments) args.push(...claim.arguments.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
-	if (claim.counter_claim) args.push({argument: claim.counter_claim} as CG_Argument);
+	if (claim.examples) args.push(...claim.examples);
+	const counterClaimStrings = [...(claim.counter_claims ?? []), ...(claim.counter_claim ? [claim.counter_claim] : [])];
+	args.push(...counterClaimStrings.map(str=>({argument: str} as CG_Argument)));
 	for (const [i, argument] of args.entries()) {
-		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument.argument), claimResource, ChildGroup.freeform));
+		result.push(...GetResourcesInArgument_CG(context, argument, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(argument)), claimResource));
 	}
 
 	return result;
 });
+export const GetResourcesInArgument_CG = CreateAccessor((context: ImportContext, argument: CG_Argument, path_indexes: number[], path_titles: string[], parentResource: ImportResource)=>{
+	const result = [] as ImportResource[];
+	const argumentResource = NewNodeResource(context, argument, NodeType.claim, path_indexes, path_titles, parentResource, ChildGroup.freeform);
+	result.push(argumentResource);
+
+	for (const [i, evidence] of (argument.evidence ?? []).entries()) {
+		result.push(NewNodeResource(context, evidence, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(evidence)), argumentResource, ChildGroup.truth));
+	}
+
+	return result;
+});
+
 let hasWarned_id = false;
 export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node, nodeType: NodeType, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n, childGroup = ChildGroup.generic, claimForm?: ClaimForm)=>{
 	if (data.id != null && !hasWarned_id) {
@@ -95,6 +109,10 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		orderKey: orderKey.toString(),
 		form: claimForm,
 	});
+	if (CG_Evidence.is(data)) {
+		const evidence = data as CG_Evidence;
+		link.polarity = evidence.stance == "supports" ? Polarity.supporting : Polarity.opposing;
+	}
 
 	const mainTitle = CG_Node.GetTitle_Main(data);
 	const narrativeTitle = CG_Node.GetTitle_Narrative(data);

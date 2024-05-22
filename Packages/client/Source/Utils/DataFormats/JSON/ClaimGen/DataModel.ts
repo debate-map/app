@@ -1,4 +1,4 @@
-import {Attachment, AttachmentType, QuoteAttachment, Source, SourceChain, SourceType} from "dm_common";
+import {Attachment, AttachmentType, DescriptionAttachment, QuoteAttachment, Source, SourceChain, SourceType} from "dm_common";
 import {IsString} from "js-vextensions";
 
 export type CG_RefURLOrQuoteOld = string | CG_QuoteOld;
@@ -25,7 +25,7 @@ export abstract class CG_Node {
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
 	static GetTitle_Main(node: CG_Node): string {
 		const d = node as any;
-		const result_raw = d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ?? d.argument;
+		const result_raw = d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ?? d.argument ?? d.original_example ?? d.quote;
 		const result = (result_raw ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 		return result.length ? result : null;
 	}
@@ -75,6 +75,29 @@ export abstract class CG_Node {
 			}));
 		}
 
+		if (CG_Evidence.is(node)) {
+			const evidence = node as CG_Evidence;
+			if (evidence.url) {
+				result.push(new Attachment({
+					quote: new QuoteAttachment({
+						content: evidence.quote,
+						sourceChains: evidence.url != null ? [
+							new SourceChain([
+								new Source({type: SourceType.webpage, link: evidence.url}),
+							]),
+						] : [],
+					}),
+				}));
+			}
+			if (evidence.reasoning) {
+				result.push(new Attachment({
+					description: new DescriptionAttachment({
+						text: evidence.reasoning,
+					}),
+				}));
+			}
+		}
+
 		return result;
 	}
 }
@@ -110,15 +133,34 @@ export class CG_Claim extends CG_Node {
 	similarity?: boolean;
 	edited?: boolean;*/
 
-	// v2 (tool extending claim-gen)
-	//arguments?: string[];
-
 	// v3 (tool extending claim-gen)
 	arguments?: (string | CG_Argument)[];
 
 	// v4
 	counter_claim?: string;
+
+	// v5
+	examples?: CG_Argument[];
+	counter_claims?: string[];
 }
+
+// the distinction between "argument" and "example" is a bit unclear to me in the claimgen model; merging them atm
 export class CG_Argument extends CG_Node {
-	argument: string;
+	// when in "arguments" collection
+	argument?: string;
+
+	// when in "examples" collection
+	original_example?: string;
+	evidence?: CG_Evidence[];
+}
+
+export class CG_Evidence extends CG_Node {
+	quote: string;
+	url: string;
+	stance: "supports" | "refutes";
+	reasoning: string;
+
+	static is(node: CG_Node) {
+		return (node as any).stance != null;
+	}
 }
