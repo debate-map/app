@@ -25,7 +25,7 @@ export abstract class CG_Node {
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
 	static GetTitle_Main(node: CG_Node): string {
 		const d = node as any;
-		const result_raw = d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ?? d.argument ?? d.original_example ?? d.quote;
+		const result_raw = d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ?? d.argument ?? d.original_example ?? (d.quote ? `"${d.quote}"` : null);
 		const result = (result_raw ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 		return result.length ? result : null;
 	}
