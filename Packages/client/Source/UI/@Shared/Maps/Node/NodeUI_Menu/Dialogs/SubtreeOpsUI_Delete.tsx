@@ -47,7 +47,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 		const {retrievalActive, serverOpInProgress, serverOp_commandsCompleted} = this.state;
 		const dialogState = store.main.maps.subtreeOperationsDialog;
 		const includeKeys_minimal = new SubtreeIncludeKeys({
-			nodes: ["id", "accessPolicy", "creator"],
+			nodes: ["id", "accessPolicy", "creator", "createdAt"],
 			nodeLinks: ["parent", "child"],
 			nodeRevisions: [],
 			nodePhrasings: [],
@@ -65,6 +65,9 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 
 		const creatorsOfNodesToDelete = nodesRetrieved_toDelete.map(a=>a.creator).Distinct();
 		const creatorsOfNodesToDelete_matches = creatorsOfNodesToDelete.ToMap(creatorID=>creatorID, creatorID=>nodesRetrieved_toDelete.filter(a=>a.creator == creatorID).length ?? 0);
+
+		const datesOfNodesToDelete = nodesRetrieved_toDelete.map(a=>new Date(a.createdAt).toLocaleString("sv").split(" ")[0]).Distinct();
+		const datesOfNodesToDelete_matches = datesOfNodesToDelete.ToMap(dateStr=>dateStr, dateStr=>nodesRetrieved_toDelete.filter(a=>new Date(a.createdAt).toLocaleString("sv").split(" ")[0] == dateStr).length ?? 0);
 
 		const Header = (p: {children: React.ReactNode})=><Row mt={20} style={{fontSize: 16, fontWeight: "bold"}}>{p.children}</Row>;
 		return (
@@ -117,6 +120,20 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 							</Row>;
 						})}
 					</Column>
+				</Column>
+				<Column mt={5}>
+					<Text>Creation dates of nodes to delete:</Text>
+					<Row style={{flexWrap: "wrap", gap: 5}}>
+						{datesOfNodesToDelete.OrderByDescending(dateStr=>datesOfNodesToDelete_matches.get(dateStr)).map(dateStr=>{
+							return (
+								<Button key={dateStr} enabled={true} text={`${dateStr} (${datesOfNodesToDelete_matches.get(dateStr)})`} style={E(
+									{padding: "3px 10px", pointerEvents: "none"},
+									//{background: Button_styles.root.backgroundColor},
+									{background: "rgba(30,100,30,.5)"},
+								)}/>
+							);
+						})}
+					</Row>
 				</Column>
 
 				<Header>Execution</Header>

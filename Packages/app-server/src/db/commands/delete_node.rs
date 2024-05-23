@@ -34,13 +34,13 @@ wrap_slow_macros!{
 }
 
 
-#[derive(InputObject, Serialize, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct DeleteNodeInput {
 	pub mapID: Option<String>,
 	pub nodeID: String,
 }
 
-#[derive(SimpleObject, Debug)]
+#[derive(SimpleObject, Debug, Serialize)]
 pub struct DeleteNodeResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }

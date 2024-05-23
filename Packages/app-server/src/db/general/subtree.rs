@@ -2,9 +2,11 @@ use jsonschema::JSONSchema;
 use jsonschema::output::BasicOutput;
 use lazy_static::lazy_static;
 use rust_shared::anyhow::{anyhow, Context, Error};
-use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
+use rust_shared::async_graphql::{self, async_stream, scalar, EmptySubscription, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
+use rust_shared::indexmap::{IndexMap, IndexSet};
+use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
@@ -22,6 +24,8 @@ use std::{time::Duration, pin::Pin, task::Poll};
 use crate::db::_general::GenericMutation_Result;
 use crate::db::commands::_command::NoExtras;
 use crate::db::commands::clone_subtree::clone_subtree;
+use crate::db::commands::delete_node::DeleteNodeInput;
+use crate::db::commands::delete_node_link::DeleteNodeLinkInput;
 use crate::db::commands::run_command_batch::{run_command_batch, CommandEntry, RunCommandBatchInput};
 use crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx;
 use crate::db::medias::Media;
@@ -31,6 +35,7 @@ use crate::db::node_revisions::NodeRevision;
 use crate::db::node_tags::NodeTag;
 use crate::db::nodes_::_node::Node;
 use crate::db::terms::Term;
+use crate::db::users::User;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::sql_fragment::SQLFragment;
@@ -166,6 +171,15 @@ impl QueryShard_General_Subtree {
         let descendants: Vec<Descendant> = rows.into_iter().map(|a| a.into()).collect();
         Ok(descendants)
     }
+
+    async fn get_prepared_data_for_deleting_subtree(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteSubtreeInput) -> Result<PreparedDataForDeletingSubtree, GQLError> {
+        let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+        
+        let actor = get_user_info_from_gql_ctx(gql_ctx, &ctx).await?;
+        let (_subcommands, prepared_data) = get_prepared_data_for_deleting_subtree(&ctx, &actor, input, NoExtras::default()).await?;
+        Ok(prepared_data)
+    }
 }
 
 // mutations
@@ -182,16 +196,15 @@ impl QueryShard_General_Subtree {
 // subscriptions
 // ==========
 
-#[derive(Default)] pub struct SubscriptionShard_RunCommandBatch;
-#[Subscription] impl SubscriptionShard_RunCommandBatch {
+#[derive(Default)] pub struct SubscriptionShard_DeleteSubtree;
+#[Subscription] impl SubscriptionShard_DeleteSubtree {
     async fn delete_subtree<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: DeleteSubtreeInput) -> impl Stream<Item = Result<DeleteSubtreeResult, SubError>> + 'a {
         async_stream::stream! {
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_write_advanced(&mut anchor, gql_ctx, false, Some(false)).await.map_err(to_sub_err)?;
             let actor = get_user_info_from_gql_ctx(gql_ctx, &ctx).await.map_err(to_sub_err)?;
 
-            let subcommands: Vec<CommandEntry> = vec![];
-            // todo
+            let (subcommands, _prepared_data) = get_prepared_data_for_deleting_subtree(&ctx, &actor, input.clone(), NoExtras::default()).await.map_err(to_sub_err)?;
             let subcommand_count = subcommands.len_u32();
 
             let mut last_subcommand_results: Vec<JSONValue> = Vec::new();
@@ -201,29 +214,121 @@ impl QueryShard_General_Subtree {
                 while let Some(batch_result_so_far) = stream.next().await {
                     let batch_result_so_far = batch_result_so_far?;
                     last_subcommand_results = batch_result_so_far.results.clone();
-                    let subtree_delete_result_so_far = DeleteSubtreeResult { subcommandCount: subcommand_count, subcommandResults: last_subcommand_results.clone(), committed: false };
+                    let subtree_delete_result_so_far = DeleteSubtreeResult { subcommand_count: subcommand_count, subcommand_results: last_subcommand_results.clone(), committed: false };
                     yield Ok(subtree_delete_result_so_far);
                 }
             }
             
             ctx.tx.commit().await.map_err(to_sub_err)?;
             tracing::info!("Command-batch execution completed. @CommandCount:{}", subcommand_count);
-            yield Ok(DeleteSubtreeResult { subcommandCount: subcommand_count, subcommandResults: last_subcommand_results, committed: true });
+            yield Ok(DeleteSubtreeResult { subcommand_count: subcommand_count, subcommand_results: last_subcommand_results, committed: true });
         }
     }
 }
 
+#[derive(SimpleObject)]
+struct PreparedDataForDeletingSubtree {
+    // commented; including this in the result structure requires SimpleObject on CommandEntry, *and all downstream input structs*
+    //subcommands: Vec<CommandEntry>,
+    nodes_to_unlink_ids: Vec<String>,
+    nodes_to_delete_ids: Vec<String>,
+    nodes_to_delete_access_policies: Vec<String>,
+    nodes_to_delete_creator_ids: Vec<String>,
+    nodes_to_delete_creation_times: Vec<i64>,
+}
+
 #[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct DeleteSubtreeInput {
-    pub mapID: Option<String>,
-    pub rootNodeID: String,
+    pub map_id: Option<String>,
+    pub root_node_id: String,
+    pub max_depth: u32,
 }
 
 #[derive(SimpleObject, Debug, Serialize)]
 pub struct DeleteSubtreeResult {
-    pub subcommandCount: u32,
-    pub subcommandResults: Vec<JSONValue>,
+    pub subcommand_count: u32,
+    pub subcommand_results: Vec<JSONValue>,
     pub committed: bool,
 }
 
+}
+
+async fn get_prepared_data_for_deleting_subtree(ctx: &AccessorContext<'_>, _actor: &User, input: DeleteSubtreeInput, _extras: NoExtras) -> Result<(Vec<CommandEntry>, PreparedDataForDeletingSubtree), Error> {
+    let DeleteSubtreeInput { map_id: _mapID, root_node_id: rootNodeID, max_depth: maxDepth } = input;
+    
+    let mut subcommands = Vec::<CommandEntry>::new();
+    let mut nodes_to_unlink_ids = IndexSet::<String>::new();
+    let mut links_to_unlink = IndexSet::<String>::new();
+    let mut nodes_to_delete_ids = IndexSet::<String>::new();
+    let mut nodes_to_delete_access_policies = IndexSet::<String>::new();
+    let mut nodes_to_delete_creator_ids = IndexSet::<String>::new();
+    let mut nodes_to_delete_creation_times = IndexSet::<i64>::new();
+
+    // version which uses a join
+    let mut rows: Vec<Row> = ctx.tx.query_raw(r#"
+        SELECT
+            d.id, d.link_id, d.distance, n."accessPolicy",
+            n.creator, n."createdAt",
+            l.id, l.parent
+        FROM
+            descendants2($1, $2) d
+            JOIN nodes n ON (d.id = n.id)
+            JOIN "nodeLinks" l ON (d.id = l.child)
+    "#, params(&[&rootNodeID, &maxDepth])).await?.try_collect().await?;
+    // reverse the results, so we get the deepest nodes first
+    rows.reverse();
+
+    let rows_by_node_id: IndexMap<String, Vec<Row>> = rows.into_iter().group_by(|row| row.get(0)).into_iter().map(|(k, g)| (k, g.collect_vec())).collect();
+
+    for (node_id, rows) in rows_by_node_id {
+        let row_count = rows.len();
+        // each row represents a node-link for which the node is the child
+        for row in rows {
+            //let node_id: String = row.get(0);
+            //let link_id: Option<String> = row.get(1);
+            //let distance: i32 = row.get(2);
+            let access_policy: String = row.get(3);
+            let creator_id: String = row.get(4);
+            let creation_time: i64 = row.get(5);
+            let link_id: String = row.get(6);
+            //let parent_id: Option<String> = row.get(7);
+
+            if row_count > 1 {
+                nodes_to_unlink_ids.insert(node_id.to_string());
+                links_to_unlink.insert(link_id);
+            } else {
+                nodes_to_delete_ids.insert(node_id.to_string());
+                nodes_to_delete_access_policies.insert(access_policy);
+                nodes_to_delete_creator_ids.insert(creator_id);
+                nodes_to_delete_creation_times.insert(creation_time);
+            }
+        }
+    }
+
+    for link_id in links_to_unlink.iter() {
+        let command = CommandEntry {
+            deleteNodeLink: Some(DeleteNodeLinkInput { mapID: None, id: link_id.clone() }),
+            ..Default::default()
+        };
+        subcommands.push(command);
+    }
+
+    for node_id in nodes_to_delete_ids.iter() {
+        let command = CommandEntry {
+            deleteNode: Some(DeleteNodeInput { mapID: None, nodeID: node_id.clone() }),
+            ..Default::default()
+        };
+        subcommands.push(command);
+    }
+
+    Ok((
+        subcommands,
+        PreparedDataForDeletingSubtree {
+            nodes_to_unlink_ids: nodes_to_unlink_ids.into_iter().collect(),
+            nodes_to_delete_ids: nodes_to_delete_ids.into_iter().collect(),
+            nodes_to_delete_access_policies: nodes_to_delete_access_policies.into_iter().collect(),
+            nodes_to_delete_creator_ids: nodes_to_delete_creator_ids.into_iter().collect(),
+            nodes_to_delete_creation_times: nodes_to_delete_creation_times.into_iter().collect(),
+        }
+    ))
 }
