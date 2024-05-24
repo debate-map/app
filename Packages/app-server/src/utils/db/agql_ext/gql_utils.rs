@@ -19,7 +19,7 @@ pub fn get_root_fields_in_doc(doc: ExecutableDocument) -> Vec<String> {
 //wrap_slow_macros!{
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct IndexMapAGQL<K: std::hash::Hash + Eq, V>(IndexMap<K, V>);
+pub struct IndexMapAGQL<K: std::hash::Hash + Eq, V>(pub IndexMap<K, V>);
 
 // makes-so you can call functions on IndexMapAGQL as though it were an IndexMap (ie. without having to do .0)
 impl<K: std::hash::Hash + Eq, V> std::ops::Deref for IndexMapAGQL<K, V> {

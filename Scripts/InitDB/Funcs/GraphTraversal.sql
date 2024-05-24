@@ -69,6 +69,9 @@ BEGIN
 	RETURN QUERY SELECT t.node_id, t.link_id FROM unnest(node_ids || source, ARRAY[null]::text[] || link_ids, seq) AS t(node_id, link_id, depth) ORDER by t.depth DESC;
 END $$;
 
+-- specialized functions (ie. ones that would be "ideal to consolidate" into the above functions, if not for the language limitations of SQL [expressiveness, interpretability constraints of the optimizer, etc.])
+-- ==========
+
 -- variant of descendants that tries to order the results in a way that mimics the render-order in debate-map (ie. traverse down at each step doing: stable-sort by link-id, then stable-sort by order-key)
 CREATE OR REPLACE FUNCTION app.descendants2(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
@@ -92,4 +95,24 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		)
 	)
 	SELECT child_id as id, link_id, depth FROM sub ORDER BY sub.depth, sub.parent_id, sub.order_key, sub.link_id
+$$;
+
+-- variant of descendants that tracks a "single_parent_ancestry" boolean for each path through the node tree
+-- if any path traverses through a node with multiple parents (ie. a child of multiple node-links), then that node/row (and all rows found through/under it) will have single_parent_ancestry set to false
+CREATE OR REPLACE FUNCTION app.descendants_with_ancestry_attributes(root text, max_depth INTEGER DEFAULT 5, traverse_past_multi_parent_nodes BOOL DEFAULT TRUE)
+RETURNS TABLE(id text, link_id text, distance INTEGER, single_parent_ancestry BOOL) LANGUAGE SQL STABLE AS $$
+	WITH RECURSIVE children(id, depth, is_cycle, nodes_path, order_key, link_id, single_parent_ancestry) AS (
+		-- anchor/initial member
+		SELECT root, 0, false, ARRAY[root], null COLLATE "C", null COLLATE "C", (SELECT count(*) FROM app."nodeLinks" WHERE child=root) <= 1
+		-- recursive member
+		UNION
+			SELECT l.child, children.depth+1, l.child = ANY(children.nodes_path), nodes_path || l.parent, l."orderKey", l.id, children.single_parent_ancestry AND (SELECT count(*) FROM app."nodeLinks" WHERE child=l.child) <= 1
+			FROM app."nodeLinks" AS l, children
+			WHERE l.parent = children.id AND NOT children.is_cycle AND children.depth+1 <= max_depth AND (traverse_past_multi_parent_nodes OR children.single_parent_ancestry)
+	)
+	-- [Is this grouping+ordering+selecting at the end even needed? Why not just return the raw results of the recursive query above?]
+	SELECT min(id) as id, link_id, min(depth) as depth, bool_and(single_parent_ancestry) as single_parent_ancestry
+	FROM children
+	GROUP BY (link_id)
+	ORDER BY min(depth), min(order_key), link_id
 $$;

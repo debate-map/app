@@ -7,6 +7,12 @@
 
 ## Main series
 
+### Pushed on 2024-05-23
+
+* 1\) Added a `deleteSubtree` graphql endpoint (plus `getPreparedDataForDeletingSubtree` endpoint), and a sql function to back it.
+	* DB response:
+		* 1\) Execute the sql for the function `descendants_with_ancestry_attributes`, seen in `GraphTraversal.sql`.
+
 ### Pushed on 2024-02-20
 
 * 1\) Removed the `Source.claimMinerId` field.

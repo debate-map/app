@@ -6,6 +6,7 @@ import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {AccessPolicy, GetAccessPolicy, NodeL1} from "dm_common";
 import {E} from "js-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {gql, useQuery} from "@apollo/client";
 import {MI_SharedProps} from "../../NodeUI_Menu.js";
 import {useSubtreeRetrievalQueryOrAccessors} from "../MI_SubtreeOps.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";
@@ -40,40 +41,51 @@ export class SubtreeOpsUI_Delete_Left extends BaseComponentPlus(
 }
 
 @Observer
-export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps, {retrievalActive: boolean, serverOpInProgress: boolean, serverOp_commandsCompleted: number}> {
+export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps, {retrievalActive: boolean, serverOpInProgress: boolean, serverOp_commandsCompleted: number, serverOp_commandsTotal: number}> {
 	static initialState = {serverImport_commandsCompleted: 0};
 	render() {
 		const {mapID, node: rootNode, path: rootNodePath} = this.props;
-		const {retrievalActive, serverOpInProgress, serverOp_commandsCompleted} = this.state;
+		const {retrievalActive, serverOpInProgress, serverOp_commandsCompleted, serverOp_commandsTotal} = this.state;
 		const dialogState = store.main.maps.subtreeOperationsDialog;
-		const includeKeys_minimal = new SubtreeIncludeKeys({
-			nodes: ["id", "accessPolicy", "creator", "createdAt"],
-			nodeLinks: ["parent", "child"],
-			nodeRevisions: [],
-			nodePhrasings: [],
-			terms: [],
-			medias: [],
+
+		// todo: if this fails authentication, use query-fetching approach seen in Admin.tsx for db-backups
+		const {data, loading, refetch} = useQuery(gql`
+			query($input: DeleteSubtreeInput!) {
+				getPreparedDataForDeletingSubtree(input: $input) {
+					subcommandCount
+					nodesToUnlinkIds
+					nodesToDeleteIds
+					nodesToDeleteAccessPolicies
+					nodesToDeleteCreatorIds
+					nodesToDeleteCreationTimes
+				}
+			}
+		`, {
+			variables: {input: {mapId: mapID, rootNodeId: rootNode.id, maxDepth: dialogState.maxExportDepth}},
+			skip: !retrievalActive,
+			// not sure if these are needed
+			fetchPolicy: "no-cache",
+			nextFetchPolicy: "no-cache",
 		});
+		const prep_raw = data?.getPreparedDataForDeletingSubtree as {
+			subcommandCount: number;
+			nodesToUnlinkIds: string[],
+			nodesToDeleteIds: string[],
+			nodesToDeleteAccessPolicies: {[key: string]: number},
+			nodesToDeleteCreatorIds: {[key: string]: number},
+			nodesToDeleteCreationTimes: number[],
+		};
+		const prep = prep_raw ?? {subcommandCount: 0, nodesToUnlinkIds: [], nodesToDeleteIds: [], nodesToDeleteAccessPolicies: {}, nodesToDeleteCreatorIds: {}, nodesToDeleteCreationTimes: []};
+		const nodesToAffect = prep.nodesToUnlinkIds.length + prep.nodesToDeleteIds.length;
 
-		const {subtreeData} = useSubtreeRetrievalQueryOrAccessors(rootNode, rootNodePath, includeKeys_minimal, dialogState.retrievalMethod, dialogState.maxExportDepth, retrievalActive);
-		const nodesRetrieved_orig = subtreeData?.nodes ?? [];
-		const nodesRetrieved_toDelete: NodeL1[] = nodesRetrieved_orig; // todo
-		const nodesRetrieved_toUnlink: NodeL1[] = []; // todo
-
-		const accessPoliciesOfNodesToDelete = nodesRetrieved_toDelete.map(a=>a.accessPolicy).Distinct();
-		const accessPoliciesOfNodesToDelete_matches = accessPoliciesOfNodesToDelete.ToMap(policyID=>policyID, policyID=>nodesRetrieved_toDelete.filter(a=>a.accessPolicy == policyID).length ?? 0);
-
-		const creatorsOfNodesToDelete = nodesRetrieved_toDelete.map(a=>a.creator).Distinct();
-		const creatorsOfNodesToDelete_matches = creatorsOfNodesToDelete.ToMap(creatorID=>creatorID, creatorID=>nodesRetrieved_toDelete.filter(a=>a.creator == creatorID).length ?? 0);
-
-		const datesOfNodesToDelete = nodesRetrieved_toDelete.map(a=>new Date(a.createdAt).toLocaleString("sv").split(" ")[0]).Distinct();
-		const datesOfNodesToDelete_matches = datesOfNodesToDelete.ToMap(dateStr=>dateStr, dateStr=>nodesRetrieved_toDelete.filter(a=>new Date(a.createdAt).toLocaleString("sv").split(" ")[0] == dateStr).length ?? 0);
+		const datesOfNodesToDelete = prep.nodesToDeleteCreationTimes.map(a=>new Date(a).toLocaleString("sv").split(" ")[0]).Distinct();
+		const datesOfNodesToDelete_matches = datesOfNodesToDelete.ToMap(dateStr=>dateStr, dateStr=>prep.nodesToDeleteCreationTimes.filter(a=>new Date(a).toLocaleString("sv").split(" ")[0] == dateStr).length ?? 0);
 
 		const Header = (p: {children: React.ReactNode})=><Row mt={20} style={{fontSize: 16, fontWeight: "bold"}}>{p.children}</Row>;
 		return (
 			<Column style={{flex: 1}}>
 				<Row>
-					<CheckBox enabled={!serverOpInProgress} text={`Start retrieval${nodesRetrieved_orig.length > 0 ? ` (nodes in subtree: ${nodesRetrieved_orig.length})` : ""}`}
+					<CheckBox enabled={!serverOpInProgress} text={`Start retrieval${nodesToAffect > 0 ? ` (nodes to affect: ${nodesToAffect})` : ""}`}
 						value={retrievalActive} onChange={val=>this.SetState({retrievalActive: val})}/>
 					<Row ml="auto"></Row>
 				</Row>
@@ -84,15 +96,15 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 
 				<Header>Preview</Header>
 				<Row>
-					<Text style={{fontWeight: "bold"}}>Nodes to delete: {nodesRetrieved_toDelete.length}</Text>
+					<Text style={{fontWeight: "bold"}}>Nodes to delete: {prep.nodesToDeleteIds.length}</Text>
 				</Row>
 				<Row>
-					<Text style={{fontWeight: "bold"}}>Nodes to unlink: {nodesRetrieved_toUnlink.length}</Text>
+					<Text style={{fontWeight: "bold"}}>Nodes to unlink: {prep.nodesToUnlinkIds.length}</Text>
 				</Row>
 				<Column mt={5}>
 					<Text>Access-policies of nodes to delete:</Text>
 					<Column>
-						{accessPoliciesOfNodesToDelete.OrderByDescending(id=>accessPoliciesOfNodesToDelete_matches.get(id)).map(policyID=>{
+						{Object.entries(prep.nodesToDeleteAccessPolicies).OrderByDescending(([policyID, count])=>count).map(([policyID, count])=>{
 							//return <div key={policyID} style={E(filterEntry_styleBase)}>{policyID} [{accessPoliciesInSubtree_matches.get(policyID)}]</div>;
 							return <Row key={policyID} mt={5}>
 								<PolicyPicker_Button policyID={policyID} idTrimLength={3} enabled={true} style={E(
@@ -100,7 +112,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 									//{background: Button_styles.root.backgroundColor},
 									{background: "rgba(30,100,30,.5)"},
 								)}/>
-								<Text ml={5} style={{minWidth: 100, justifyContent: "center", fontSize: 13}}>({accessPoliciesOfNodesToDelete_matches.get(policyID)} matches)</Text>
+								<Text ml={5} style={{minWidth: 100, justifyContent: "center", fontSize: 13}}>({count} matches)</Text>
 							</Row>;
 						})}
 					</Column>
@@ -108,7 +120,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 				<Column mt={5}>
 					<Text>Creators of nodes to delete:</Text>
 					<Column>
-						{creatorsOfNodesToDelete.OrderByDescending(id=>creatorsOfNodesToDelete_matches.get(id)).map(userID=>{
+						{Object.entries(prep.nodesToDeleteCreatorIds).OrderByDescending(([userID, count])=>count).map(([userID, count])=>{
 							//return <div key={policyID} style={E(filterEntry_styleBase)}>{policyID} [{accessPoliciesInSubtree_matches.get(policyID)}]</div>;
 							return <Row key={userID} mt={5}>
 								<UserPicker_Button userID={userID} idTrimLength={3} enabled={true} style={E(
@@ -116,7 +128,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 									//{background: Button_styles.root.backgroundColor},
 									{background: "rgba(30,100,30,.5)"},
 								)}/>
-								<Text ml={5} style={{minWidth: 100, justifyContent: "center", fontSize: 13}}>({creatorsOfNodesToDelete_matches.get(userID)} matches)</Text>
+								<Text ml={5} style={{minWidth: 100, justifyContent: "center", fontSize: 13}}>({count} matches)</Text>
 							</Row>;
 						})}
 					</Column>
@@ -148,17 +160,17 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 					</div>
 				</Row>
 				<Row mt={5}>
-					<Button enabled={nodesRetrieved_toDelete.length > 0 && !serverOpInProgress} style={{flex: 1}}
-						text={`Start batch deletion of node subtree (affecting ${nodesRetrieved_toDelete.length}+${nodesRetrieved_toUnlink.length} nodes)`}
+					<Button enabled={nodesToAffect > 0 && !serverOpInProgress} style={{flex: 1}}
+						text={`Start batch deletion of node subtree (affecting ${prep.nodesToDeleteIds.length}+${prep.nodesToUnlinkIds.length} nodes)`}
 						onClick={()=>{
 							ShowMessageBox({
-								title: `Start batch operation on ${nodesRetrieved_toDelete.length}+${nodesRetrieved_toUnlink.length} nodes?`, cancelButton: true,
+								title: `Start batch operation on ${prep.nodesToDeleteIds.length}+${prep.nodesToUnlinkIds.length} nodes?`, cancelButton: true,
 								message: `If the node subtree is large, this could take a long time. You can view the progress in the progress label below the start button.`,
 								onOK: async()=>{
-									this.SetState({serverOpInProgress: true, serverOp_commandsCompleted: 0});
+									this.SetState({serverOpInProgress: true, serverOp_commandsCompleted: 0, serverOp_commandsTotal: 0});
 									try {
-										const result = await RunCommand_DeleteSubtree({mapID, rootNodeID: rootNode.id}, (subcommandsCompleted, subcommandsTotal)=>{
-											this.SetState({serverOp_commandsCompleted: subcommandsCompleted});
+										const result = await RunCommand_DeleteSubtree({mapId: mapID, rootNodeId: rootNode.id, maxDepth: dialogState.maxExportDepth}, (subcommandsCompleted, subcommandsTotal)=>{
+											this.SetState({serverOp_commandsCompleted: subcommandsCompleted, serverOp_commandsTotal: subcommandsTotal});
 										});
 										ShowMessageBox({
 											title: "Subtree deletion operation succeeded",
@@ -172,7 +184,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 									}
 									this.SetState({
 										retrievalActive: false, // also reset retrieval-active to false (so that UI doesn't show the stale retrieval results anymore)
-										serverOpInProgress: false, serverOp_commandsCompleted: 0,
+										serverOpInProgress: false, serverOp_commandsCompleted: 0, serverOp_commandsTotal: 0,
 									});
 								},
 							});
@@ -180,7 +192,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 				</Row>
 				{serverOpInProgress &&
 				<Row>
-					Progress: {serverOp_commandsCompleted}/{nodesRetrieved_toDelete.length + nodesRetrieved_toUnlink.length}
+					Progress: {serverOp_commandsCompleted}/{serverOp_commandsTotal}
 				</Row>}
 			</Column>
 		);

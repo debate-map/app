@@ -98,7 +98,7 @@ use crate::db::commands::update_user_hidden::MutationShard_UpdateUserHidden;
 use crate::db::general::backups::QueryShard_General_Backups;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::sign_in::SubscriptionShard_SignIn;
-use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
+use crate::db::general::subtree::{MutationShard_General_Subtree, QueryShard_General_Subtree, SubscriptionShared_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::db::general::trusted_operators::QueryShard_General_TrustedOperators;
 use crate::db::timeline_steps::{SubscriptionShard_TimelineStep, QueryShard_TimelineStep};
@@ -171,7 +171,7 @@ pub struct MutationRoot(
 
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
-    SubscriptionShard_CloneMapSpecial, SubscriptionShard_General, SubscriptionShard_SignIn,
+    SubscriptionShard_CloneMapSpecial, SubscriptionShard_General, SubscriptionShared_General_Subtree, SubscriptionShard_SignIn,
     // table-specific
     SubscriptionShard_User, SubscriptionShard_UserHidden,
     SubscriptionShard_GlobalData,

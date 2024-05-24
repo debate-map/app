@@ -212,7 +212,7 @@ export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node
 export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
 export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);
 
-export function RunCommand_DeleteSubtree(inputFields: {mapID?: string|n, rootNodeID: string}, onProgress?: (subcommandsCompleted: number, subcommandsTotal: number)=>void) {
+export function RunCommand_DeleteSubtree(inputFields: {mapId?: string|n, rootNodeId: string, maxDepth?: number|n}, onProgress?: (subcommandsCompleted: number, subcommandsTotal: number)=>void) {
 	const fetchResult_subscription = apolloClient.subscribe<{deleteSubtree: DeleteSubtreeResult}>({
 		query: gql`
 			subscription($input: DeleteSubtreeInput!) {
