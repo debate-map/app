@@ -2,11 +2,12 @@ import {RootState, store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {HasAdminPermissions, Me, MeID} from "dm_common";
+import {GetUser, HasAdminPermissions, Me, MeID} from "dm_common";
 import React, {useCallback} from "react";
 import {Link, NavBarPanelButton, NotificationsUI, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {gql, useSubscription} from "web-vcore/nm/@apollo/client";
 import {DebugPanel} from "./NavBar/DebugPanel.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
 import {ReputationPanel} from "./NavBar/ReputationPanel.js";
@@ -21,6 +22,26 @@ export const navBarHeight = 45;
 export class NavBar extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main;
+
+		const notifications: any[] = [];
+
+		const USER_NOTIFICATIONS_SUBSCRIPTION = gql`
+subscription($user: String!) {
+	notificationsUser(user: $user) {
+		nodes {
+			id, user, commandRun, readTime
+		}
+	}
+}
+`;
+
+		const {data, loading} = useSubscription(USER_NOTIFICATIONS_SUBSCRIPTION, {
+			variables: {user: MeID()},
+			onSubscriptionData: data=>{
+				console.log("Got notifications:", data.subscriptionData.data.notificationsUser.nodes);
+			},
+		});
+
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
@@ -66,7 +87,7 @@ export class NavBar extends BaseComponent<{}, {}> {
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton text="Notifications"panel="notifications" corner="top-right"/>
+						<NotificationNavBarPanelButton unreadNotifications={3}/>
 
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
@@ -77,11 +98,49 @@ export class NavBar extends BaseComponent<{}, {}> {
 					}}>
 						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
 						{uiState.topRightOpenPanel == "guide" && <GuidePanel/>}
-						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel/>}
+						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel notifications={notifications}/>}
 						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>
 			</nav>
+		);
+	}
+}
+
+@Observer
+export class NotificationNavBarPanelButton extends BaseComponentPlus({} as {unreadNotifications: number}, {}, {}) {
+	render() {
+		const {unreadNotifications} = this.props;
+
+		return (
+			<div style={{
+				position: "relative",
+			}}>
+				<NavBarPanelButton panel="notifications" corner="top-right">
+					<svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+					</svg>
+
+				</NavBarPanelButton>
+				{unreadNotifications > 0 &&
+					<div style={{
+						position: "absolute",
+						right: 0, top:0, transform: "translate(-200%, 200%)",
+						width: 6, height: 6,
+						borderRadius: "50%", background: "rgba(255,0,0,1)",
+						display: "flex", justifyContent: "center", alignItems: "center",
+						fontSize: 8, fontWeight: "bold",
+						color: "rgba(255,255,255,1)",
+					}}>
+					</div>
+				}
+			</div>
 		);
 	}
 }

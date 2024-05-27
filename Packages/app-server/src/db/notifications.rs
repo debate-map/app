@@ -58,6 +58,13 @@ impl GQLSet<Notification> for GQLSet_Notification {
     async fn notifications<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Notification, SubError>> + 'a {
         handle_generic_gql_collection_subscription::<Notification, GQLSet_Notification>(ctx, "notifications", filter).await
     }
+
+    async fn notifications_user<'a>(&self, ctx: &'a Context<'_>, user: String) -> impl Stream<Item = Result<GQLSet_Notification, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<Notification, GQLSet_Notification>(ctx, "notifications", Some(json!({
+            "user": {"equalTo": user}
+        }))).await
+    }
+
     async fn notification<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Notification>, SubError>> + 'a {
         handle_generic_gql_doc_subscription::<Notification>(ctx, "notifications", id).await
     }

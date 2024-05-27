@@ -1,6 +1,6 @@
 import {E} from "js-vextensions";
 import {runInAction} from "mobx";
-import React, {useCallback} from "react";
+import React, {Children, useCallback} from "react";
 import {BaseComponentPlus, cssHelper} from "react-vextensions";
 import {manager} from "../../Manager.js";
 import {Link} from "../ReactComponents/Link.js";
@@ -10,11 +10,11 @@ import {Observer, RunInAction} from "../Store/MobX.js";
 
 @Observer
 export class NavBarButton extends BaseComponentPlus(
-	{} as {page?: string|n, subpage?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void},
+	{} as {page?: string|n, subpage?: string, text?: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void},
 	{hovered: false},
 ) {
 	render() {
-		let {page, subpage, text, active, style, onClick} = this.props;
+		let {page, subpage, text, active, style, onClick, children} = this.props;
 		// let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
 		// let {_radiumStyleState} = this.state as any;
 		const {hovered} = this.state;
@@ -64,13 +64,16 @@ export class NavBarButton extends BaseComponentPlus(
 				onMouseLeave={useCallback(()=>this.SetState({hovered: false}), [])}
 				style={css(
 					{
-						position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+						height: "100%",
+						display: "flex", alignItems: "center", justifyContent: "center",
+						position: "relative", cursor: "pointer",
 						lineHeight: largeVersion ? "45px" : "25px", color: "rgba(255,255,255,1)", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: 0.9,
 					},
 					style,
 				)}
 			>
 				{text}
+				{children}
 				{hoverOrActive &&
 					<div style={css({position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: "rgba(100,255,100,1)"})}/>}
 			</Link>
@@ -89,16 +92,18 @@ export class NavBarPageButton extends BaseComponentPlus({} as {page?: string, su
 }
 
 @Observer
-export class NavBarPanelButton extends BaseComponentPlus({} as {text: string, panel: string, hasPage?: boolean, corner: "top-left" | "top-right", style?}, {}, {active: false}) {
+export class NavBarPanelButton extends BaseComponentPlus({} as {text?: string, panel: string, hasPage?: boolean, corner: "top-left" | "top-right", style?}, {}, {active: false}) {
 	render() {
-		const {text, panel, hasPage, corner, style} = this.props;
+		const {text, panel, hasPage, corner, style, children} = this.props;
 		const {topLeftOpenPanel, topRightOpenPanel} = manager.store.main;
 		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
 
 		this.Stash({active});
 		const {css} = cssHelper(this);
 		return (
-			<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={this.OnClick} style={css(style)}/>
+			<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={this.OnClick} style={css(style)}>
+				{children}
+			</NavBarButton>
 		);
 	}
 	OnClick = (e: MouseEvent)=>{

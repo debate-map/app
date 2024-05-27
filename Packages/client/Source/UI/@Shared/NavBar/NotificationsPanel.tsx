@@ -1,15 +1,11 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {Column} from "react-vcomponents";
 
-export class NotificationsPanel extends BaseComponent<{}, {}> {
+export class NotificationsPanel extends BaseComponentPlus({} as {notifications: any[]}, {}, {}) {
 	render() {
 
-		const notifications = [
-			{text: "Test notification 1", time: Date.now()},
-			{text: "Test notification 2", time: Date.now()},
-			{text: "Test notification 3", time: Date.now()},
-		];
+		const {notifications} = this.props;
 
 		return (
 			<Column style={{
