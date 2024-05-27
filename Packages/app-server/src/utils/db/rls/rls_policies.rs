@@ -1,7 +1,7 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::{bail, anyhow}, anyhow::Error};
 use tracing::info;
 
-use crate::{db::{_shared::access_policy_target::AccessPolicyTarget, access_policies::get_access_policy, access_policies_::{_access_policy::AccessPolicy, _permission_set::{APAction, APTable}}, command_runs::CommandRun, feedback_proposals::Proposal, global_data::GlobalData, map_node_edits::MapNodeEdit, maps::Map, medias::Media, node_links::NodeLink, node_phrasings::NodePhrasing, node_ratings::NodeRating, node_revisions::NodeRevision, node_tags::NodeTag, nodes_::_node::Node, shares::Share, subscriptions::Subscription, terms::Term, timeline_steps::TimelineStep, timelines::Timeline, user_hiddens::UserHidden, users::User}, links::db_live_cache::get_access_policy_cached};
+use crate::{db::{_shared::access_policy_target::AccessPolicyTarget, access_policies::get_access_policy, access_policies_::{_access_policy::AccessPolicy, _permission_set::{APAction, APTable}}, command_runs::CommandRun, feedback_proposals::Proposal, global_data::GlobalData, map_node_edits::MapNodeEdit, maps::Map, medias::Media, node_links::NodeLink, node_phrasings::NodePhrasing, node_ratings::NodeRating, node_revisions::NodeRevision, node_tags::NodeTag, nodes_::_node::Node, notifications::Notification, shares::Share, subscriptions::Subscription, terms::Term, timeline_steps::TimelineStep, timelines::Timeline, user_hiddens::UserHidden, users::User}, links::db_live_cache::get_access_policy_cached};
 
 use super::rls_helpers::{is_user_creator, does_policy_allow_access, do_policies_allow_access, is_user_admin, is_user_admin_or_creator};
 
@@ -122,6 +122,11 @@ impl UsesRLS for CommandRun {
     }
 }
 impl UsesRLS for Subscription {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.user)
+    }
+}
+impl UsesRLS for Notification {
     fn can_access_cached(&self, user_id: Option<&str>) -> bool {
         is_user_admin_or_creator(user_id, &self.user)
     }

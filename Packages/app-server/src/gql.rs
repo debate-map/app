@@ -57,6 +57,7 @@ use crate::db::commands::add_node_link::MutationShard_AddNodeLink;
 use crate::db::commands::add_node_phrasing::MutationShard_AddNodePhrasing;
 use crate::db::commands::add_node_revision::MutationShard_AddNodeRevision;
 use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
+use crate::db::commands::add_notification::MutationShard_AddNotification;
 use crate::db::commands::add_share::MutationShard_AddShare;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::add_timeline::MutationShard_AddTimeline;
@@ -102,6 +103,7 @@ use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::db::general::trusted_operators::QueryShard_General_TrustedOperators;
+use crate::db::notifications::{QueryShard_Notification, SubscriptionShard_Notification};
 use crate::db::subscriptions::{QueryShard_Subscription, SubscriptionShard_Subscription};
 use crate::db::timeline_steps::{SubscriptionShard_TimelineStep, QueryShard_TimelineStep};
 use crate::db::timelines::{SubscriptionShard_Timeline, QueryShard_Timeline};
@@ -140,6 +142,7 @@ pub struct QueryRoot(
     QueryShard_GlobalData,
     QueryShard_Map,
     QueryShard_Subscription,
+    QueryShard_Notification,
     QueryShard_Term,
     QueryShard_Timeline, QueryShard_TimelineStep,
     QueryShard_AccessPolicy,
@@ -155,6 +158,7 @@ pub struct QueryRoot(
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(
     MutationShard_AddSubscription,
+    MutationShard_AddNotification,
     MutationShard_General, MutationShard_General_Subtree,
     // commands, matching standard add/delete/update pattern
     MutationShard_AddAccessPolicy, MutationShard_AddMap, MutationShard_AddMedia, MutationShard_AddNodeLink, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag,
@@ -181,6 +185,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_GlobalData,
     SubscriptionShard_Map,
     SubscriptionShard_Subscription,
+    SubscriptionShard_Notification,
     SubscriptionShard_Term,
     SubscriptionShard_Timeline, SubscriptionShard_TimelineStep,
     SubscriptionShard_AccessPolicy,

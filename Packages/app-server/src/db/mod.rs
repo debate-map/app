@@ -79,6 +79,7 @@ pub mod commands {
     pub mod update_user_hidden;
     pub mod refresh_lq_data;
     pub mod add_subscription;
+    pub mod add_notification;
     //pub mod transfer_nodes;
 }
 pub mod _general;
@@ -110,6 +111,7 @@ pub mod user_hiddens;
 pub mod global_data;
 pub mod maps;
 pub mod subscriptions;
+pub mod notifications;
 pub mod terms;
 pub mod access_policies;
 pub mod medias;

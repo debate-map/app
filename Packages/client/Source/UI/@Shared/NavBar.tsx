@@ -13,6 +13,7 @@ import {ReputationPanel} from "./NavBar/ReputationPanel.js";
 import {SearchPanel} from "./NavBar/SearchPanel.js";
 import {StreamPanel} from "./NavBar/StreamPanel.js";
 import {UserPanel} from "./NavBar/UserPanel.js";
+import {NotificationsPanel} from "./NavBar/NotificationsPanel.js";
 
 export const navBarHeight = 45;
 
@@ -65,6 +66,8 @@ export class NavBar extends BaseComponent<{}, {}> {
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton text="Notifications"panel="notifications" corner="top-right"/>
+
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
@@ -74,6 +77,7 @@ export class NavBar extends BaseComponent<{}, {}> {
 					}}>
 						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
 						{uiState.topRightOpenPanel == "guide" && <GuidePanel/>}
+						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel/>}
 						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>

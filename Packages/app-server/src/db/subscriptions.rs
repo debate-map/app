@@ -17,7 +17,7 @@ use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_co
 
 use super::commands::_command::{CanNullOrOmit, CanOmit};
 
-pub async fn get_subscriptions(ctx: &AccessorContext<'_>, id: &str) -> Result<Subscription, Error> {
+pub async fn get_subscription(ctx: &AccessorContext<'_>, id: &str) -> Result<Subscription, Error> {
     get_db_entry(ctx, "subscriptions", &Some(json!({
         "id": {"equalTo": id}
     }))).await
