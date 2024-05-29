@@ -23,8 +23,6 @@ export class NavBar extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main;
 
-		const notifications: any[] = [];
-
 		const USER_NOTIFICATIONS_SUBSCRIPTION = gql`
 subscription($user: String!) {
 	notificationsUser(user: $user) {
@@ -37,11 +35,9 @@ subscription($user: String!) {
 
 		const {data, loading} = useSubscription(USER_NOTIFICATIONS_SUBSCRIPTION, {
 			variables: {user: MeID()},
-			onSubscriptionData: data=>{
-				console.log("Got notifications:", data.subscriptionData.data.notificationsUser.nodes);
-			},
 		});
 
+		const notifications = (data?.notificationsUser?.nodes ?? []);
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
@@ -87,7 +83,7 @@ subscription($user: String!) {
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NotificationNavBarPanelButton unreadNotifications={3}/>
+						<NotificationNavBarPanelButton unreadNotifications={notifications.filter(x=>!x.readTime).length ?? 0}/>
 
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>

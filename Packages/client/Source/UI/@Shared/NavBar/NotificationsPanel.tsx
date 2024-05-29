@@ -1,26 +1,68 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, UseMemo} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {Column} from "react-vcomponents";
+import {Column, Div} from "react-vcomponents";
+import {CommandRun, GetCommandRun, GetManyCommandRuns} from "dm_common";
+import {Observer} from "web-vcore";
+import {css} from "tree-grapher";
+import {CommandRunUI} from "../../Social/StreamUI.js";
+import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
 
-export class NotificationsPanel extends BaseComponentPlus({} as {notifications: any[]}, {}, {}) {
+type UserNotification = {
+	id: string, user: string, commandRun: string, readTime: number, command: CommandRun|n,
+}
+
+@Observer
+export class NotificationsPanel extends BaseComponentPlus({} as {notifications: UserNotification[]}, {}, {}) {
 	render() {
+		const {notifications: notificationsProp} = this.props;
 
-		const {notifications} = this.props;
+		const notifications = UseMemo(()=>(notificationsProp ?? []).map(a=>{
+			return {
+				...a,
+				command: a.commandRun ? GetCommandRun(a.commandRun) : null,
+			};
+		}).sort((a, b)=>{
+			if (a.readTime == null && b.readTime != null) return -1;
+			if (a.readTime != null && b.readTime == null) return 1;
+			return (b.command?.runTime ?? 0) - (a.command?.runTime ?? 0);
+		}), [notificationsProp]);
+
+		const entryLimit = 5; // for now, only show the last 5 notifications (need a paging system or the like)
 
 		return (
-			<Column style={{
-				width: 750, padding: 5, borderRadius: "0 0 0 5px",
+			<Div style={{
+				width: 750, borderRadius: "0 0 0 5px",
+				overflow: "hidden",
 				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 			}}>
-                {notifications.map((notification, index)=>{
-                	return (
-                        <div key={index} style={{padding: "5px 0", borderBottom: liveSkin.OverlayBorder()}}>
-                            <div style={{fontSize: 14, color: "rgba(255,255,255,1)"}}>{notification.text}</div>
-                            <div style={{fontSize: 12, color: "rgba(255,255,255,.5)"}}>{notification.time}</div>
-                        </div>
-                	);
-                })}
-			</Column>
+
+				{notifications.Take(entryLimit).map((notification, index)=>{
+					return <Column style={{
+						position: "relative",
+						padding: 5,
+					}} key={notification.id}>
+						{!notification.readTime && <Div onClick={()=>{
+							RunCommand_UpdateNotification({id: notification.id, updates: {
+								readTime: Date.now(),
+							}});
+						}} style={{position: "absolute", top: 0, bottom: 0, right: 0, left: 0, backgroundColor: "rgba(0,0,0,0.15)"}}>
+							<Div style={{
+								position: "absolute", top: 6, left: 6,
+								width: 8, height: 8,
+								stroke: "red",
+								display: "flex",
+							}}>
+							<svg width="100%" height="100%" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
+								<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+							</Div>
+						</Div>}
+						{notification.command &&
+							<CommandRunUI panel={false} key={index} run={notification.command!} index={index} last={index == notifications.length - 1} />
+						}
+					</Column>;
+				})}
+			</Div>
 		);
 	}
 }

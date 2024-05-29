@@ -32,6 +32,12 @@ pub struct Notification {
     pub commandRun: String,
     pub readTime: Option<i64>,
 }
+
+#[derive(InputObject, Serialize, Deserialize,Debug)]
+pub struct NotificationUpdateReadInput {
+    pub readTime: Option<i64>,
+}
+
 impl From<Row> for Notification {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

@@ -62,5 +62,6 @@ export * from "./DB/userHiddens/@UserHidden.js";
 export * from "./DB/subscriptions/@Subscription.js";
 export * from "./DB/subscription.js";
 export * from "./DB/subscriptions/@AddSubscription.js";
+export * from "./DB/notifications/@Notification.js";
 /*export * from "./DB/visibilityDirectives.js";
 export * from "./DB/visibilityDirectives/@VisibilityDirective.js";*/

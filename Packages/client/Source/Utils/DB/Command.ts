@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep, Subscription, AddSubscriptionInput} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep, Subscription, Notification, AddSubscriptionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 
@@ -219,5 +219,6 @@ export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInp
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");
 export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
 export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);
+export const RunCommand_UpdateNotification = CreateFunc_RunCommand_UpdateX(Notification);
 
 export const RunCommand_UpdateSubscription = CreateFunc_RunCommand_UpdateX(Subscription);

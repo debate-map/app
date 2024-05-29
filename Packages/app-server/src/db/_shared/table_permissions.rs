@@ -1,7 +1,7 @@
-use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::{bail, anyhow}, anyhow::Error};
+use rust_shared::{anyhow::{anyhow, bail, Error}, async_graphql::ID, utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}};
 use tracing::info;
 
-use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget, nodes::get_node, general::permission_helpers::is_user_admin, feedback_user_infos::UserInfo, timelines::{Timeline, get_timeline}, timeline_steps::TimelineStep}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
+use crate::{db::{_shared::access_policy_target::AccessPolicyTarget, access_policies::get_access_policy, access_policies_::{_access_policy::AccessPolicy, _permission_set::{APAction, APTable}}, command_runs::CommandRun, feedback_proposals::Proposal, feedback_user_infos::UserInfo, general::permission_helpers::is_user_admin, global_data::GlobalData, map_node_edits::MapNodeEdit, maps::Map, medias::Media, node_links::NodeLink, node_phrasings::NodePhrasing, node_ratings::NodeRating, node_revisions::NodeRevision, node_tags::NodeTag, nodes::get_node, nodes_::_node::Node, notifications::Notification, shares::Share, terms::Term, timeline_steps::TimelineStep, timelines::{get_timeline, Timeline}, user_hiddens::UserHidden, users::User}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
 
 // Why are the permission-checks for modifying/deleting defined here, rather than in the updateX and deleteX command endpoints?
 // Because we want all such logic to use the `can_modify` and `can_delete` macros, so that we can be sure that they always start by checking...
@@ -137,6 +137,9 @@ can_delete!(MapNodeEdit, self, actor, { Ok(false });*/
 
 // only the given user can edit their own hidden-data
 can_modify!(UserHidden, self, actor, { actor.id == self.id });
+
+can_modify!(Notification, self, actor, { actor.id.to_string() == self.user });
+
 //can_delete!(UserHidden, self, actor, { Ok(false }); // account deletion will be possible eventually, but too many complications for now
 
 /*can_modify!(CommandRun, self, actor, { Ok(false });

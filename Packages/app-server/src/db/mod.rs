@@ -80,6 +80,7 @@ pub mod commands {
     pub mod refresh_lq_data;
     pub mod add_subscription;
     pub mod add_notification;
+    pub mod update_notification;
     //pub mod transfer_nodes;
 }
 pub mod _general;

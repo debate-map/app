@@ -90,6 +90,7 @@ use crate::db::commands::update_media::MutationShard_UpdateMedia;
 use crate::db::commands::update_node::MutationShard_UpdateNode;
 use crate::db::commands::update_node_phrasing::MutationShard_UpdateNodePhrasing;
 use crate::db::commands::update_node_tag::MutationShard_UpdateNodeTag;
+use crate::db::commands::update_notification::MutationShard_UpdateNotification;
 use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
 use crate::db::commands::update_timeline::MutationShard_UpdateTimeline;
@@ -167,6 +168,7 @@ pub struct MutationRoot(
         MutationShard_DeleteShare, MutationShard_DeleteTerm, MutationShard_DeleteTimeline, MutationShard_DeleteTimelineStep,
     MutationShard_UpdateAccessPolicy, MutationShard_UpdateMap, MutationShard_UpdateMedia, MutationShard_UpdateNodeLink, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag,
         MutationShard_UpdateShare, MutationShard_UpdateTerm, MutationShard_UpdateTimeline, MutationShard_UpdateTimelineStep,
+    MutationShard_UpdateNotification,
     // commands, others
     MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating, MutationShard_DeleteNodeRevision,
