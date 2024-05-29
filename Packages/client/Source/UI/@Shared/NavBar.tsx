@@ -47,7 +47,7 @@ subscription($user: String!) {
 				background: "rgba(0,0,0,1)",
 			}}>
 				<div style={{display: "flex"}}>
-					<span style={{position: "absolute", left: 0}}>
+					<span style={{position: "absolute", left: 0, display: "flex"}}>
 						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
 						{HasAdminPermissions(MeID()) && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 						{/* <NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>

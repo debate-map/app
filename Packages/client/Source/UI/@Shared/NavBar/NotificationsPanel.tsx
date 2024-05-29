@@ -35,7 +35,7 @@ export class NotificationsPanel extends BaseComponentPlus({} as {notifications: 
 				overflow: "hidden",
 				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 			}}>
-
+				{notifications.length == 0 && "No notifications."}
 				{notifications.Take(entryLimit).map((notification, index)=>{
 					return <Column style={{
 						position: "relative",
