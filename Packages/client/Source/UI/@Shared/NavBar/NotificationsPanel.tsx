@@ -1,22 +1,16 @@
-import {BaseComponentPlus, UseMemo} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus, UseMemo} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {Column, Div} from "react-vcomponents";
-import {CommandRun, GetCommandRun, GetManyCommandRuns} from "dm_common";
+import {CommandRun, GetCommandRun, GetManyCommandRuns, GetNotifications, MeID} from "dm_common";
 import {Observer} from "web-vcore";
-import {css} from "tree-grapher";
 import {CommandRunUI} from "../../Social/StreamUI.js";
 import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
 
-type UserNotification = {
-	id: string, user: string, commandRun: string, readTime: number, command: CommandRun|n,
-}
-
 @Observer
-export class NotificationsPanel extends BaseComponentPlus({} as {notifications: UserNotification[]}, {}, {}) {
+export class NotificationsPanel extends BaseComponent<{}, {}> {
 	render() {
-		const {notifications: notificationsProp} = this.props;
-
-		const notifications = UseMemo(()=>(notificationsProp ?? []).map(a=>{
+		const notifications_raw = GetNotifications(MeID());
+		const notifications = UseMemo(()=>notifications_raw.map(a=>{
 			return {
 				...a,
 				command: a.commandRun ? GetCommandRun(a.commandRun) : null,
@@ -25,10 +19,9 @@ export class NotificationsPanel extends BaseComponentPlus({} as {notifications: 
 			if (a.readTime == null && b.readTime != null) return -1;
 			if (a.readTime != null && b.readTime == null) return 1;
 			return (b.command?.runTime ?? 0) - (a.command?.runTime ?? 0);
-		}), [notificationsProp]);
+		}), [notifications_raw]);
 
 		const entryLimit = 5; // for now, only show the last 5 notifications (need a paging system or the like)
-
 		return (
 			<Div style={{
 				width: 750, borderRadius: "0 0 0 5px",
@@ -52,9 +45,9 @@ export class NotificationsPanel extends BaseComponentPlus({} as {notifications: 
 								stroke: "red",
 								display: "flex",
 							}}>
-							<svg width="100%" height="100%" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
-								<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-							</svg>
+								<svg width="100%" height="100%" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
+									<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
 							</Div>
 						</Div>}
 						{notification.command &&

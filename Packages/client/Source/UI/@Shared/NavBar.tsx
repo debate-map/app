@@ -2,7 +2,7 @@ import {RootState, store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {GetUser, HasAdminPermissions, Me, MeID} from "dm_common";
+import {GetNotifications, GetUser, HasAdminPermissions, Me, MeID} from "dm_common";
 import React, {useCallback} from "react";
 import {Link, NavBarPanelButton, NotificationsUI, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
@@ -23,21 +23,6 @@ export class NavBar extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main;
 
-		const USER_NOTIFICATIONS_SUBSCRIPTION = gql`
-subscription($user: String!) {
-	notificationsUser(user: $user) {
-		nodes {
-			id, user, commandRun, readTime
-		}
-	}
-}
-`;
-
-		const {data, loading} = useSubscription(USER_NOTIFICATIONS_SUBSCRIPTION, {
-			variables: {user: MeID()},
-		});
-
-		const notifications = (data?.notificationsUser?.nodes ?? []);
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
@@ -83,7 +68,7 @@ subscription($user: String!) {
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NotificationNavBarPanelButton unreadNotifications={notifications.filter(x=>!x.readTime).length ?? 0}/>
+						<NotificationNavBarPanelButton/>
 
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
@@ -94,7 +79,7 @@ subscription($user: String!) {
 					}}>
 						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
 						{uiState.topRightOpenPanel == "guide" && <GuidePanel/>}
-						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel notifications={notifications}/>}
+						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel/>}
 						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>
@@ -104,9 +89,10 @@ subscription($user: String!) {
 }
 
 @Observer
-export class NotificationNavBarPanelButton extends BaseComponentPlus({} as {unreadNotifications: number}, {}, {}) {
+export class NotificationNavBarPanelButton extends BaseComponent<{}, {}> {
 	render() {
-		const {unreadNotifications} = this.props;
+		const notifications = GetNotifications(MeID());
+		const unreadNotifications = notifications.filter(a=>a.readTime == null).length;
 
 		return (
 			<div style={{

@@ -16,6 +16,7 @@ import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {NodePhrasing} from "./DB/nodePhrasings/@NodePhrasing.js";
 import {GlobalData} from "./DB/globalData/@GlobalData.js";
 import {Timeline, TimelineStep} from "./DB.js";
+import {Notification} from "./DB/notifications/@Notification.js";
 import {Subscription} from "./DB/subscriptions/@Subscription.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
@@ -52,7 +53,9 @@ export class GraphDBShape {
 	nodePhrasings = DefineCollection(NodePhrasing);
 	nodeLinks = DefineCollection(NodeLink);
 	nodeTags = DefineCollection(NodeTag);
+	notifications = DefineCollection(Notification);
 	shares = DefineCollection(Share);
+	subscriptions = DefineCollection(Subscription);
 	terms = DefineCollection(Term);
 	//termNames = DefineCollection(any);
 	timelines = DefineCollection(Timeline);
@@ -60,7 +63,6 @@ export class GraphDBShape {
 	users = DefineCollection(User);
 	userHiddens = DefineCollection(UserHidden);
 
-	subscriptions = DefineCollection(Subscription);
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//visibilityDirectives = DefineCollection(VisibilityDirective);
 }

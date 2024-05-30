@@ -40,6 +40,7 @@ export * from "./DB/nodes/$node/equation.js";
 export * from "./DB/nodes/@Node.js";
 export * from "./DB/nodes/@NodeRevision.js";
 export * from "./DB/nodes/@NodeType.js";
+export * from "./DB/notifications.js";
 export * from "./DB/shares.js";
 export * from "./DB/shares/@Share.js";
 export * from "./DB/shares/@MapView.js";
