@@ -26,6 +26,7 @@ use std::ops::Sub;
 #[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct AddNotificationInput {
     pub commandRun: String,
+    pub user: String,
     pub readTime: Option<i64>,
 }
 
@@ -53,20 +54,21 @@ impl MutationShard_AddNotification {
 
 pub async fn add_notification(
     ctx: &AccessorContext<'_>,
-    actor: &User,
+    _actor: &User,
     _is_root: bool,
     input: AddNotificationInput,
     _extras: NoExtras,
 ) -> Result<AddNotificationResult, Error> {
     let AddNotificationInput {
         commandRun,
+        user,
         readTime,
     } = input.clone();
 
 
     let notification = Notification {
         id: ID(new_uuid_v4_as_b64()),
-        user: actor.id.to_string(),
+        user,
         commandRun,
         readTime,
     };

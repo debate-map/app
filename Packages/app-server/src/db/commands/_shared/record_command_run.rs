@@ -102,7 +102,7 @@ pub async fn record_command_run(
             "subscriptions",
             &Some(json!({
                 "node": {"equalTo": node},
-                "user": {"equalTo": actor.id.to_string()}
+                "user": {"notEqualTo": actor.id.to_string()}
             })),
         )
         .await;
@@ -120,6 +120,7 @@ pub async fn record_command_run(
                     actor,
                     false,
                     AddNotificationInput {
+                        user: subscription.user,
                         commandRun: id.to_string(),
                         readTime: None,
                     },

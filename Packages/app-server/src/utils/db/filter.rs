@@ -48,6 +48,7 @@ impl QueryFilter {
             for (op_json, op_val_json) in field_filters_json.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
                 let op_val_json_clone = op_val_json.clone();
                 let op: FilterOp = match op_json.as_str() {
+                    "notEqualTo" => FilterOp::NotEqualsX(op_val_json_clone),
                     "equalTo" => FilterOp::EqualsX(op_val_json_clone),
                     "in" => {
                         let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"in\" requires an array value!"))?;
@@ -79,6 +80,7 @@ impl QueryFilter {
         for (_field_name, field_filter) in &self.field_filters {
             for op in &field_filter.filter_ops {
                 match op {
+                    FilterOp::NotEqualsX(val) => ensure!(val.is_null()),
                     FilterOp::EqualsX(val) => ensure!(val.is_null()),
                     FilterOp::IsWithinX(vals) => for val in vals { ensure!(val.is_null()); },
                     FilterOp::ContainsAllOfX(vals) => for val in vals { ensure!(val.is_null()); },
@@ -151,6 +153,7 @@ pub struct FieldFilter {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum FilterOp {
+    NotEqualsX(JSONValue),
     EqualsX(JSONValue),
     IsWithinX(Vec<JSONValue>),
     ContainsAllOfX(Vec<JSONValue>),
@@ -164,6 +167,10 @@ impl FilterOp {
     /// The SQL for the "comparison operator" is provided in the "match" within the `get_sql_for_application` method below.
     pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {
         Ok(match self {
+            FilterOp::NotEqualsX(val) => {
+
+                json_value_to_guessed_sql_value_param_fragment(&val)?
+            },
             FilterOp::EqualsX(val) => {
                 /*let temp = json_value_to_guessed_sql_value_param(&val)?;
                 SF::value(*temp)*/
@@ -185,6 +192,11 @@ impl FilterOp {
             SF::lit(")"),
         ]);
         match self {
+            FilterOp::NotEqualsX(_) => SF::merge(vec![
+                bracket_plus_val_in_db,
+                SF::lit(" != "),
+                bracket_plus_val_in_filter_op,
+            ]),
             FilterOp::EqualsX(_) => SF::merge(vec![
                 bracket_plus_val_in_db,
                 SF::lit(" = "),
@@ -221,6 +233,11 @@ pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<boo
         
         for op in &field_filter.filter_ops {
             match op {
+                FilterOp::NotEqualsX(val) => {
+                    if field_value == val {
+                        return Ok(false);
+                    }
+                },
                 FilterOp::EqualsX(val) => {
                     if field_value != val {
                         return Ok(false);

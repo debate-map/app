@@ -11,6 +11,7 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
         let field_filter_mut = filter_shape.field_filters.get_mut(field_name).unwrap();
         field_filter_mut.filter_ops = field_filter.filter_ops.clone().iter().map(|op| {
             let op_with_vals_stripped = match op {
+                FilterOp::NotEqualsX(_val) => FilterOp::NotEqualsX(JSONValue::Null),
                 FilterOp::EqualsX(_val) => FilterOp::EqualsX(JSONValue::Null),
                 FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
                 FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
