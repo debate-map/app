@@ -47,18 +47,20 @@ impl<'a> AccessorContext<'a> {
     // low-level constructors
     pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: Option<&'a async_graphql::Context<'a>>, db_pool: &DBPool, user: Option<UserJWTData>, mut bypass_rls: bool, isolation_level: IsolationLevel) -> Result<AccessorContext<'a>, Error> {
         let tx = start_read_transaction(anchor, db_pool, isolation_level).await?;
-        let user_id = &user.map(|a| a.id).unwrap_or("<none>".o());
-        tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[user_id]).await?;
+        let user_id_or_placeholder = user.as_ref().map(|a| a.id.clone()).unwrap_or("<none>".o());
+        tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user_id_or_placeholder]).await?;
         /*let user_is_admin = TODO;
         tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
         let new_self = Self { gql_ctx, tx, only_validate: false, rls_enabled: AtomicBool::new(false) }; // rls not enabled quite yet; we'll do that in a moment
 
         // if user is admin, set bypass_rls to true (an optimization, to remove the need for having the RLS rules involved at all)
         // todo: maybe change `bypass_rls` to an enum named `rls_apply`, with values "Bypass", "BypassIfAdmin", and "Apply"
-        let user_admin = get_user(&new_self, user_id).await?.permissionGroups.admin;
-        if user_admin {
-            bypass_rls = true;
-            new_self.rls_enabled.store(true, Ordering::SeqCst);
+        if let Some(user_id) = user.map(|a| a.id) {
+            let user_admin = get_user(&new_self, &user_id).await?.permissionGroups.admin;
+            if user_admin {
+                bypass_rls = true;
+                new_self.rls_enabled.store(true, Ordering::SeqCst);
+            }
         }
 
         // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
