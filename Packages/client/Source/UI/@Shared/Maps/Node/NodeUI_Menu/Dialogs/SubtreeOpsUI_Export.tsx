@@ -21,6 +21,7 @@ enum ExportSubtreeUI_MidTab {
 const splitAt = 120;
 const splitAt_includeKeys = 120;
 
+@Observer
 export class SubtreeOpsUI_Export_Left extends BaseComponentPlus(
 	{} as {} & MI_SharedProps,
 	{
