@@ -1,10 +1,17 @@
-use std::iter::{once, empty};
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::{sync::Arc};
-use rust_shared::anyhow::{Error};
-use rust_shared::async_graphql::{Result};
+use crate::store::live_queries_::lq_instance::LQInstance;
+use crate::store::live_queries_::lq_param::LQParam;
+use crate::utils::db::filter::QueryFilter;
+use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
+use crate::utils::db::sql_fragment::SQLFragment;
+use crate::utils::db::sql_fragment::SF;
+use crate::utils::db::sql_ident::SQLIdent;
+use crate::utils::db::sql_param::{SQLParam, SQLParamBoxed};
+use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
+use crate::utils::type_aliases::PGClientObject;
 use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
+use rust_shared::anyhow::Error;
+use rust_shared::async_graphql::Result;
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::new_mtx;
@@ -12,20 +19,14 @@ use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::mtx::mtx::Mtx;
-use crate::store::live_queries_::lq_instance::LQInstance;
-use crate::store::live_queries_::lq_param::LQParam;
-use crate::utils::db::filter::{QueryFilter};
-use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
-use crate::utils::db::sql_fragment::{SF};
-use crate::utils::db::sql_ident::SQLIdent;
-use crate::utils::db::sql_param::{SQLParam, SQLParamBoxed};
-use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
-use crate::utils::type_aliases::PGClientObject;
-use crate::{utils::{db::{sql_fragment::{SQLFragment}}}};
+use std::iter::{empty, once};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 
+#[rustfmt::skip]
 pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query_instance_vals: &Vec<&Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<(String, Vec<SQLParamBoxed>), Error> {
-    new_mtx!(mtx, "1:prep", mtx_p);
-    let lq_last_index = query_instance_vals.len() as i64 - 1;
+	new_mtx!(mtx, "1:prep", mtx_p);
+	let lq_last_index = query_instance_vals.len() as i64 - 1;
 
     // each entry of the root-chain is considered its own line, with `merge_lines()` adding line-breaks between them
     let mut combined_sql = SF::merge_lines(chain!(
@@ -92,59 +93,54 @@ pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query
 
 #[cfg(test)]
 mod tests {
-    use std::{sync::Arc, iter::once};
+	use std::{iter::once, sync::Arc};
 
-    use rust_shared::itertools::chain;
-    use rust_shared::utils::general_::extensions::ToOwnedV;
-    use rust_shared::{utils::time::time_since_epoch_ms, utils::type_aliases::JSONValue};
-    use rust_shared::serde_json::json;
-    use crate::store::live_queries_::lq_instance::LQInstance;
-    use crate::store::live_queries_::lq_key::LQKey;
-    use crate::store::live_queries_::lq_param::LQParam;
-    use crate::utils::db::filter::{FilterOp, QueryFilter};
+	use crate::store::live_queries_::lq_instance::LQInstance;
+	use crate::store::live_queries_::lq_key::LQKey;
+	use crate::store::live_queries_::lq_param::LQParam;
+	use crate::utils::db::filter::{FilterOp, QueryFilter};
+	use rust_shared::itertools::chain;
+	use rust_shared::serde_json::json;
+	use rust_shared::utils::general_::extensions::ToOwnedV;
+	use rust_shared::{utils::time::time_since_epoch_ms, utils::type_aliases::JSONValue};
 
-    use super::prepare_sql_query;
+	use super::prepare_sql_query;
 
-    // run in PowerShell using: `cargo test sql_generator_simple -- --nocapture`
-    #[test]
-    fn sql_generator_simple() {
-        //match std::panic::catch_unwind(|| {
-        let table_name = "maps";
-        let lq_param_protos = vec![
-            LQParam::LQIndex(0),
-            LQParam::FilterOpValue("id".to_owned(), 0, FilterOp::EqualsX(JSONValue::String("GLOBAL_ROOT_0000000001".to_owned()))),
-        ];
-        let filter_input = json!({
-            "id": {
-                "equalTo": "GLOBAL_ROOT_0000000001"
-            }
-        });
-        let filter = QueryFilter::from_filter_input(&filter_input).unwrap();
-        let lq_key = LQKey::new(table_name.o(), filter.o());
-        let instance1 = Arc::new(LQInstance::new(lq_key, vec![]));
-        let query_instance_vals: Vec<&Arc<LQInstance>> = vec![
-            &instance1
-        ];
+	// run in PowerShell using: `cargo test sql_generator_simple -- --nocapture`
+	#[test]
+	fn sql_generator_simple() {
+		//match std::panic::catch_unwind(|| {
+		let table_name = "maps";
+		let lq_param_protos = vec![LQParam::LQIndex(0), LQParam::FilterOpValue("id".to_owned(), 0, FilterOp::EqualsX(JSONValue::String("GLOBAL_ROOT_0000000001".to_owned())))];
+		let filter_input = json!({
+			"id": {
+				"equalTo": "GLOBAL_ROOT_0000000001"
+			}
+		});
+		let filter = QueryFilter::from_filter_input(&filter_input).unwrap();
+		let lq_key = LQKey::new(table_name.o(), filter.o());
+		let instance1 = Arc::new(LQInstance::new(lq_key, vec![]));
+		let query_instance_vals: Vec<&Arc<LQInstance>> = vec![&instance1];
 
-        let start_time = time_since_epoch_ms();
-        let mut last_print_time = start_time;
-        for i in 0..1_000_000_000 {
-        //for i in 0..10 {
-            let now = time_since_epoch_ms();
-            if now - last_print_time >= 1000f64 {
-                let ms_since_start = now - start_time;
-                let seconds_since_start = ms_since_start / 1000f64;
-                let loops_per_second = (f64::from(i) + 1f64) / seconds_since_start;
-                let loop_time = ms_since_start / (f64::from(i) + 1f64);
-                println!("loopTime:{:.3}ms loopsPerSecond:{:.1} @timeSinceStart:{:.1}", loop_time, loops_per_second, seconds_since_start);
-                last_print_time = now;
-            }
-            //println!("Starting loop:{i}");
-            prepare_sql_query(table_name, &lq_param_protos, &query_instance_vals, None).unwrap();
-        }
-        /*}) {
-            Ok(_) => println!("Done!"),
-            Err(err) => println!("Got error:{err:?}")
-        };*/
-    }
+		let start_time = time_since_epoch_ms();
+		let mut last_print_time = start_time;
+		for i in 0..1_000_000_000 {
+			//for i in 0..10 {
+			let now = time_since_epoch_ms();
+			if now - last_print_time >= 1000f64 {
+				let ms_since_start = now - start_time;
+				let seconds_since_start = ms_since_start / 1000f64;
+				let loops_per_second = (f64::from(i) + 1f64) / seconds_since_start;
+				let loop_time = ms_since_start / (f64::from(i) + 1f64);
+				println!("loopTime:{:.3}ms loopsPerSecond:{:.1} @timeSinceStart:{:.1}", loop_time, loops_per_second, seconds_since_start);
+				last_print_time = now;
+			}
+			//println!("Starting loop:{i}");
+			prepare_sql_query(table_name, &lq_param_protos, &query_instance_vals, None).unwrap();
+		}
+		/*}) {
+			Ok(_) => println!("Done!"),
+			Err(err) => println!("Got error:{err:?}")
+		};*/
+	}
 }

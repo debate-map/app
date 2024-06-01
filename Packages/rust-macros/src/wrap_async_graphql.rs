@@ -1,5 +1,9 @@
-use std::{env, str::FromStr, time::{SystemTime, UNIX_EPOCH}};
-use proc_macro2::{TokenStream};
+use proc_macro2::TokenStream;
+use std::{
+	env,
+	str::FromStr,
+	time::{SystemTime, UNIX_EPOCH},
+};
 
 use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequences_for_macros};
 
@@ -11,43 +15,43 @@ pub const SKIP_AGQL_WRAPPING: bool = false;
 //pub const SKIP_AGQL_WRAPPING: bool = true;
 
 pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
-    if SKIP_AGQL_WRAPPING { return input; } // can set this flag to true temporarily, to make debugging easier
+	if SKIP_AGQL_WRAPPING {
+		return input;
+	} // can set this flag to true temporarily, to make debugging easier
 
-    let proceed = force_proceed || {
-        let mut temp = false;
-        if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {
-            if val == "1" {
-                println!("Macro wrap_async_graphql: Modifying tokens, since STRIP_ASYNC_GRAPHQL is true.");
-                temp = true;
-            }
-        }
-        temp
-    };
-    if !proceed {
-        return input;
-    }
-    
-    let output = input.clone();
-    let output = remove_graphql_tags(output);
-    //output
+	let proceed = force_proceed || {
+		let mut temp = false;
+		if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {
+			if val == "1" {
+				println!("Macro wrap_async_graphql: Modifying tokens, since STRIP_ASYNC_GRAPHQL is true.");
+				temp = true;
+			}
+		}
+		temp
+	};
+	if !proceed {
+		return input;
+	}
 
-    // add unused alias of async_graphql crate (so that if dev forgets "use rust_shared::async_graphql", they'll get a reminder even in cargo-check)
-    /*let pre_tokens = proc_macro::TokenStream::from(quote! {
-        use async_graphql as _async_graphql_unused_alias;
-    });*/
-    let pre_tokens = TokenStream::from_str(format!("use async_graphql as _async_graphql_unused_alias_{};", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()).as_str()).unwrap();
-    pre_tokens.into_iter()
-        .chain(output)
-        .collect()
+	let output = input.clone();
+	let output = remove_graphql_tags(output);
+	//output
+
+	// add unused alias of async_graphql crate (so that if dev forgets "use rust_shared::async_graphql", they'll get a reminder even in cargo-check)
+	/*let pre_tokens = proc_macro::TokenStream::from(quote! {
+		use async_graphql as _async_graphql_unused_alias;
+	});*/
+	let pre_tokens = TokenStream::from_str(format!("use async_graphql as _async_graphql_unused_alias_{};", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()).as_str()).unwrap();
+	pre_tokens.into_iter().chain(output).collect()
 }
 
 static MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "Subscription"];
 static DERIVE_MACROS_TO_REMOVE: &'static [&'static str] = &["SimpleObject", "MergedObject", "MergedSubscription", "InputObject"];
 fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
-    let mut result = tokens;
-    result = remove_token_sequences_for_macros(result, MACROS_TO_REMOVE);
-    result = remove_token_sequences_for_derive_macros(result, DERIVE_MACROS_TO_REMOVE);
-    result
+	let mut result = tokens;
+	result = remove_token_sequences_for_macros(result, MACROS_TO_REMOVE);
+	result = remove_token_sequences_for_derive_macros(result, DERIVE_MACROS_TO_REMOVE);
+	result
 }
 
 // tests (run these with "cargo test -- --nocapture" to see log output)
@@ -55,14 +59,15 @@ fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-    use proc_macro2::TokenStream;
+	use proc_macro2::TokenStream;
+	use std::str::FromStr;
 
-    use crate::wrap_async_graphql::remove_graphql_tags;
+	use crate::wrap_async_graphql::remove_graphql_tags;
 
-    #[test]
-    fn test1() {
-        let tokens = TokenStream::from_str(r#"
+	#[test]
+	fn test1() {
+		let tokens = TokenStream::from_str(
+			r#"
             #[Object]
             struct Test1 {
                 #[graphql(name = "public_base")]
@@ -79,78 +84,80 @@ mod tests {
 
             #[Subscription]
             impl SubscriptionShard_CommandRun {}
-        "#);
-        println!("Tokens:{:#?}", tokens);
-        /* output:
-        ==========
-        Tokens:Ok(TokenStream [
-            Punct { char: '#', spacing: Alone },
-            Group { delimiter: Bracket, stream: TokenStream [
-                Ident { sym: Object },
-            ] },
-            Ident { sym: struct },
-            Ident { sym: Test1 },
-            Group { delimiter: Brace, stream: TokenStream [
-                Punct { char: '#', spacing: Alone },
-                Group { delimiter: Bracket, stream: TokenStream [
-                    Ident { sym: graphql },
-                    Group { delimiter: Parenthesis, stream: TokenStream [
-                        Ident { sym: name },
-                        Punct { char: '=', spacing: Alone },
-                        Literal { lit: "public_base" },
-                    ] },
-                ] },
-                Ident { sym: public_base },
-                Punct { char: ':', spacing: Alone },
-                Ident { sym: bool, },
-                Punct { char: ';', spacing: Alone },
-            ]},
-            Punct { char: '#', spacing: Alone },
-            Group { delimiter: Bracket, stream: TokenStream [
-                Ident { sym: derive },
-                Group { delimiter: Parenthesis, stream: TokenStream [
-                    Ident { sym: MergedObject },
-                    Punct { char: ',', spacing: Alone },
-                    Ident { sym: Default },
-                ] },
-            ] },
-            Ident { sym: pub },
-            Ident { sym: struct },
-            Ident { sym: QueryRoot },
-            Punct { char: ';', spacing: Alone },
-            Punct { char: '#', spacing: Alone },
-            Group { delimiter: Bracket, stream: TokenStream [
-                Ident { sym: derive },
-                Group { delimiter: Parenthesis, stream: TokenStream [
-                    Ident { sym: MergedSubscription },
-                    Punct { char: ',', spacing: Alone },
-                    Ident { sym: Default },
-                ] },
-            ] },
-            Ident { sym: pub },
-            Ident { sym: struct },
-            Ident { sym: SubscriptionRoot },
-            Punct { char: ';', spacing: Alone },
-            Punct { char: '#', spacing: Alone },
-            Group { delimiter: Bracket, stream: TokenStream [
-                Ident { sym: SimpleObject },
-            ] },
-            Ident { sym: struct },
-            Ident { sym: Test2 },
-            Group { delimiter: Brace, stream: TokenStream [] },
-            Punct { char: '#', spacing: Alone },
-            Group { delimiter: Bracket, stream: TokenStream [
-                Ident { sym: Subscription },
-            ] },
-            Ident { sym: impl },
-            Ident { sym: SubscriptionShard_CommandRun },
-            Group { delimiter: Brace, stream: TokenStream [] },
-        ])*/
-    }
+        "#,
+		);
+		println!("Tokens:{:#?}", tokens);
+		/* output:
+		==========
+		Tokens:Ok(TokenStream [
+			Punct { char: '#', spacing: Alone },
+			Group { delimiter: Bracket, stream: TokenStream [
+				Ident { sym: Object },
+			] },
+			Ident { sym: struct },
+			Ident { sym: Test1 },
+			Group { delimiter: Brace, stream: TokenStream [
+				Punct { char: '#', spacing: Alone },
+				Group { delimiter: Bracket, stream: TokenStream [
+					Ident { sym: graphql },
+					Group { delimiter: Parenthesis, stream: TokenStream [
+						Ident { sym: name },
+						Punct { char: '=', spacing: Alone },
+						Literal { lit: "public_base" },
+					] },
+				] },
+				Ident { sym: public_base },
+				Punct { char: ':', spacing: Alone },
+				Ident { sym: bool, },
+				Punct { char: ';', spacing: Alone },
+			]},
+			Punct { char: '#', spacing: Alone },
+			Group { delimiter: Bracket, stream: TokenStream [
+				Ident { sym: derive },
+				Group { delimiter: Parenthesis, stream: TokenStream [
+					Ident { sym: MergedObject },
+					Punct { char: ',', spacing: Alone },
+					Ident { sym: Default },
+				] },
+			] },
+			Ident { sym: pub },
+			Ident { sym: struct },
+			Ident { sym: QueryRoot },
+			Punct { char: ';', spacing: Alone },
+			Punct { char: '#', spacing: Alone },
+			Group { delimiter: Bracket, stream: TokenStream [
+				Ident { sym: derive },
+				Group { delimiter: Parenthesis, stream: TokenStream [
+					Ident { sym: MergedSubscription },
+					Punct { char: ',', spacing: Alone },
+					Ident { sym: Default },
+				] },
+			] },
+			Ident { sym: pub },
+			Ident { sym: struct },
+			Ident { sym: SubscriptionRoot },
+			Punct { char: ';', spacing: Alone },
+			Punct { char: '#', spacing: Alone },
+			Group { delimiter: Bracket, stream: TokenStream [
+				Ident { sym: SimpleObject },
+			] },
+			Ident { sym: struct },
+			Ident { sym: Test2 },
+			Group { delimiter: Brace, stream: TokenStream [] },
+			Punct { char: '#', spacing: Alone },
+			Group { delimiter: Bracket, stream: TokenStream [
+				Ident { sym: Subscription },
+			] },
+			Ident { sym: impl },
+			Ident { sym: SubscriptionShard_CommandRun },
+			Group { delimiter: Brace, stream: TokenStream [] },
+		])*/
+	}
 
-    #[test]
-    fn filter_out_graphql() {
-        let tokens = TokenStream::from_str(r#"
+	#[test]
+	fn filter_out_graphql() {
+		let tokens = TokenStream::from_str(
+			r#"
             #[Object]
             struct Test1 {
                 #[graphql(name = "public_base")]
@@ -169,11 +176,13 @@ mod tests {
     
             #[Subscription]
             impl SubscriptionShard_CommandRun {}
-        "#).unwrap();
-        let tokens_filtered = remove_graphql_tags(tokens);
-        assert_eq!(
-            tokens_filtered.to_string().chars().filter(|c| !c.is_whitespace()).collect::<String>(),
-            r##"
+        "#,
+		)
+		.unwrap();
+		let tokens_filtered = remove_graphql_tags(tokens);
+		assert_eq!(
+			tokens_filtered.to_string().chars().filter(|c| !c.is_whitespace()).collect::<String>(),
+			r##"
                 struct Test1 {
                     public_base: bool;
                     #[some_other_macro]
@@ -189,7 +198,10 @@ mod tests {
                 struct Test2 {}
     
                 impl SubscriptionShard_CommandRun {}
-            "##.chars().filter(|c| !c.is_whitespace()).collect::<String>()
-        );
-    }
+            "##
+			.chars()
+			.filter(|c| !c.is_whitespace())
+			.collect::<String>()
+		);
+	}
 }

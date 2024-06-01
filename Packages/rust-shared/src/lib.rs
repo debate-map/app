@@ -2,12 +2,10 @@
 #![feature(iterator_try_collect)]
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
-
 // for lock-chain checks
 #![allow(incomplete_features)]
 #![feature(adt_const_params)]
 #![feature(generic_const_exprs)]
-
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -28,88 +26,89 @@
     // to avoid false-positives, of certain functions, as well as for [Serialize/Deserialize]_Stub macro-usage (wrt private fields)
     dead_code,
 )]
+#![feature(stmt_expr_attributes)] // allow attributes on expressions, eg. for disabling rustfmt per-expression
 
-use std::time::{UNIX_EPOCH, SystemTime, Duration};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // subcrate re-exports (todo: probably replace with "pub use ? as ?;" syntax, as seen here: https://www.reddit.com/r/rust/comments/ayibls/comment/ei0ypg3)
-pub extern crate rust_macros;
 pub extern crate anyhow;
 pub extern crate async_graphql;
 pub extern crate async_graphql_axum;
 pub extern crate axum;
+pub extern crate base64;
 pub extern crate bytes;
-pub extern crate indoc;
-pub extern crate itertools;
-pub extern crate regex;
-pub extern crate once_cell;
-pub extern crate uuid;
-pub extern crate url;
+pub extern crate chrono;
+pub extern crate flume;
 pub extern crate futures;
 pub extern crate http_body_util;
 pub extern crate hyper;
 pub extern crate hyper_util;
+pub extern crate indexmap;
+pub extern crate indoc;
+pub extern crate itertools;
+pub extern crate jwt_simple;
+pub extern crate once_cell;
 pub extern crate postgres_protocol;
+pub extern crate regex;
 pub extern crate reqwest;
+pub extern crate rust_macros;
+pub extern crate sentry;
 pub extern crate serde;
 pub extern crate serde_json;
 pub extern crate thiserror;
 pub extern crate tokio;
 pub extern crate tokio_postgres;
+pub extern crate tokio_tungstenite;
 pub extern crate tower;
 pub extern crate tower_http;
 pub extern crate tower_service;
-pub extern crate jwt_simple;
-pub extern crate chrono;
-pub extern crate flume;
-pub extern crate indexmap;
-pub extern crate tokio_tungstenite;
-pub extern crate base64;
-pub extern crate sentry;
+pub extern crate url;
+pub extern crate uuid;
 
 // this crate's modules
 pub mod db_constants;
 pub mod domains;
 pub mod links {
-    pub mod app_server_to_monitor_backend;
+	pub mod app_server_to_monitor_backend;
 }
 pub mod utils {
-    pub mod auth {
-        pub mod jwt_utils_base;
-    }
-    pub mod db {
-        pub mod uuid;
-        pub mod agql_ext {
-            pub mod gql_general_extension;
-        }
-    }
-    pub mod errors;
-    pub mod errors_ {
-        pub mod backtrace_simplifier;
-    }
-    pub mod futures;
-    pub mod general;
-    pub mod general_ {
-        pub mod extensions;
-        pub mod func_types;
-        pub mod serde;
-    }
-    pub mod _k8s;
-    pub mod k8s {
-        pub mod cert_handling;
-        pub mod k8s_structs;
-        pub mod k8s_client;
-        pub mod upgrade;
-    }
-    pub mod locks {
-        pub mod check_lock_order;
-        pub mod rwlock_tracked;
-    }
-    pub mod mtx {
-        pub mod mtx;
-    }
-    pub mod net;
-    pub mod time;
-    pub mod type_aliases;
+	pub mod auth {
+		pub mod jwt_utils_base;
+	}
+	pub mod db {
+		pub mod uuid;
+		pub mod agql_ext {
+			pub mod gql_general_extension;
+		}
+	}
+	pub mod errors;
+	pub mod errors_ {
+		pub mod backtrace_simplifier;
+	}
+	pub mod futures;
+	pub mod general;
+	pub mod general_ {
+		pub mod extensions;
+		pub mod func_types;
+		pub mod serde;
+	}
+	pub mod _k8s;
+	pub mod k8s {
+		pub mod cert_handling;
+		pub mod k8s_client;
+		pub mod k8s_structs;
+		pub mod upgrade;
+	}
+	pub mod locks {
+		pub mod check_lock_order;
+		pub mod rwlock_tracked;
+	}
+	pub mod mtx {
+		pub mod mtx;
+	}
+	pub mod net;
+	pub mod time;
+	pub mod type_aliases;
 }
 
 pub use utils::errors::*;

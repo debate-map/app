@@ -2,11 +2,11 @@ use std::marker::ConstParamTy;
 
 #[derive(PartialEq, Eq, ConstParamTy)]
 pub enum Lock {
-    unknown_prior = 0,
-    //LQGroup_groups_x = 1,
-    LQGroup_batches_x = 1,
-    LQInstance_entry_watchers = 2,
-    LQInstance_last_entries = 3, // sync this value with macro below
+	unknown_prior = 0,
+	//LQGroup_groups_x = 1,
+	LQGroup_batches_x = 1,
+	LQInstance_entry_watchers = 2,
+	LQInstance_last_entries = 3, // sync this value with macro below
 }
 // these macros are needed for cases where comparisons are done in the "where" clause of a function (where Lock::X cannot be used)
 #[macro_export]
@@ -20,10 +20,12 @@ impl IsTrue for Assert<true> {}
 /// * Usage: Whenever a given scope already holds a guard/lock of a type listed in the `Lock` enum ("T1"), and is about to acquire another ("T2"), call this function with T1 and T2 as const-parameters.
 /// * Effect: The Rust compiler checks whether the "order value" of T1 is lower than that of T2 (as determined by the usize values in the Lock enum); if not, a compile-time error is thrown.
 pub fn check_lock_order<const T1: Lock, const T2: Lock>()
-    where Assert::<{(T1 as usize) < (T2 as usize)}>: IsTrue,
-{}
+where
+	Assert<{ (T1 as usize) < (T2 as usize) }>: IsTrue,
+{
+}
 /*pub fn check_lock_order_usize<const T1: usize, const T2: usize>()
-    where Assert::<{T1 < T2}>: IsTrue,
+	where Assert::<{T1 < T2}>: IsTrue,
 {}*/
 
 #[macro_export]

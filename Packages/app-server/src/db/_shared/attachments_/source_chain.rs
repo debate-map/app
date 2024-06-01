@@ -1,7 +1,12 @@
-use rust_shared::{async_graphql::{self, Enum, SimpleObject, InputObject}, rust_macros::wrap_slow_macros, utils::{type_aliases::JSONValue, general_::serde::JSONValueV}, anyhow::Error};
-use serde::{Serialize, Deserialize};
+use rust_shared::{
+	anyhow::Error,
+	async_graphql::{self, Enum, InputObject, SimpleObject},
+	rust_macros::wrap_slow_macros,
+	utils::{general_::serde::JSONValueV, type_aliases::JSONValue},
+};
+use serde::{Deserialize, Serialize};
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "SourceChainInput")]
@@ -33,49 +38,48 @@ pub struct Source {
 	pub time_min: Option<f64>,
 	pub time_max: Option<f64>,
 	pub link: Option<String>,
-    
+
 	pub hypothesisAnnotationId: Option<String>, // todo: remove this (use extras container instead)
 
-    pub extras: Option<JSONValue>, // used for, eg. external-ids from claim-miner and hypothesis
+	pub extras: Option<JSONValue>, // used for, eg. external-ids from claim-miner and hypothesis
 }
 
 }
 
 pub fn source_chains_from_old_json_data(data: Option<&JSONValue>) -> Result<Vec<SourceChain>, Error> {
-    match data {
-        Some(data) => {
-            let mut result: Vec<SourceChain> = vec![];
-            for source_chain_data in data.try_as_array()? {
-                result.push(source_chain_from_old_json_data(source_chain_data)?);
-            }
-            Ok(result)
-        },
-        None => Ok(vec![]),
-    }
+	match data {
+		Some(data) => {
+			let mut result: Vec<SourceChain> = vec![];
+			for source_chain_data in data.try_as_array()? {
+				result.push(source_chain_from_old_json_data(source_chain_data)?);
+			}
+			Ok(result)
+		},
+		None => Ok(vec![]),
+	}
 }
+#[rustfmt::skip]
 pub fn source_chain_from_old_json_data(data: &JSONValue) -> Result<SourceChain, Error> {
-    let sources: Vec<Source> = data.try_get("sources")?.try_as_array()?.iter().map(|source| {
-        let source_type = match source["type"].as_i64().unwrap() {
-            10 => SourceType::speech,
-            20 => SourceType::text,
-            30 => SourceType::image,
-            40 => SourceType::video,
-            50 => SourceType::webpage,
-            _ => panic!("Invalid source type"),
-        };
-        Source {
-            r#type: source_type,
-            name: source.get("name").map(|a| a.as_string()).unwrap_or(None),
-            author: source.get("author").map(|a| a.as_string()).unwrap_or(None),
-            location: source.get("location").map(|a| a.as_string()).unwrap_or(None),
-            time_min: source.get("time_min").map(|a| a.as_f64()).unwrap_or(None),
-            time_max: source.get("time_max").map(|a| a.as_f64()).unwrap_or(None),
-            link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
-            hypothesisAnnotationId: None,
-            extras: None,
-        }
-    }).collect();
-    Ok(SourceChain {
-        sources,
-    })
+	let sources: Vec<Source> = data.try_get("sources")?.try_as_array()?.iter().map(|source| {
+		let source_type = match source["type"].as_i64().unwrap() {
+			10 => SourceType::speech,
+			20 => SourceType::text,
+			30 => SourceType::image,
+			40 => SourceType::video,
+			50 => SourceType::webpage,
+			_ => panic!("Invalid source type"),
+		};
+		Source {
+			r#type: source_type,
+			name: source.get("name").map(|a| a.as_string()).unwrap_or(None),
+			author: source.get("author").map(|a| a.as_string()).unwrap_or(None),
+			location: source.get("location").map(|a| a.as_string()).unwrap_or(None),
+			time_min: source.get("time_min").map(|a| a.as_f64()).unwrap_or(None),
+			time_max: source.get("time_max").map(|a| a.as_f64()).unwrap_or(None),
+			link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
+			hypothesisAnnotationId: None,
+			extras: None,
+		}
+	}).collect();
+	Ok(SourceChain { sources })
 }

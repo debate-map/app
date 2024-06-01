@@ -1,31 +1,31 @@
-use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
+use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
+use rust_shared::async_graphql::Object;
+use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
+use rust_shared::db_constants::{GLOBAL_ROOT_NODE_ID, SYSTEM_USER_ID};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde_json::{Value, json};
-use rust_shared::db_constants::{SYSTEM_USER_ID, GLOBAL_ROOT_NODE_ID};
-use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
-use rust_shared::async_graphql::{Object};
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::{json, Value};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::anyhow::{anyhow, Error, ensure, bail, Context};
-use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::_shared::common_errors::err_should_be_populated;
-use crate::db::_shared::table_permissions::{does_policy_allow_x, CanVote, CanAddChild};
+use crate::db::_shared::table_permissions::{does_policy_allow_x, CanAddChild, CanVote};
 use crate::db::access_policies::get_access_policy;
 use crate::db::access_policies_::_permission_set::{APAction, APTable};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::permission_helpers::assert_user_can_add_child;
-use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_links::{get_node_links, ChildGroup, NodeLink, NodeLinkInput, Polarity, CHILD_GROUPS_WITH_POLARITY_REQUIRED_OR_OPTIONAL, CHILD_GROUPS_WITH_POLARITY_REQUIRED};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
+use crate::db::node_links::{get_node_links, ChildGroup, NodeLink, NodeLinkInput, Polarity, CHILD_GROUPS_WITH_POLARITY_REQUIRED, CHILD_GROUPS_WITH_POLARITY_REQUIRED_OR_OPTIONAL};
 use crate::db::nodes::get_node;
-use crate::db::nodes_::_node::{Node};
+use crate::db::nodes_::_node::Node;
 use crate::db::nodes_::_node_type::{get_node_type_info, NodeType};
-use crate::db::users::{User, PermissionGroups, get_user};
+use crate::db::users::{get_user, PermissionGroups, User};
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
-use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 /// Does basic checking of validity of parent<>child linkage. See `assert_new_link_is_valid` for a more thorough validation.
 // sync: js[CheckLinkIsValid]
@@ -57,7 +57,7 @@ pub fn assert_link_is_valid(parent_type: NodeType, child_type: NodeType, child_g
 		ensure!(link_polarity.is_some(), "A link with an argument child must have a polarity specified.");
 	}
 	if link_polarity.is_some() {
-        ensure!(CHILD_GROUPS_WITH_POLARITY_REQUIRED_OR_OPTIONAL.contains(&child_group), r#"Only links in child-groups "truth", "relevance", "neutrality", or "freeform" can have a polarity specified."#);
+		ensure!(CHILD_GROUPS_WITH_POLARITY_REQUIRED_OR_OPTIONAL.contains(&child_group), r#"Only links in child-groups "truth", "relevance", "neutrality", or "freeform" can have a polarity specified."#);
 		ensure!(child_type == NodeType::argument || child_type == NodeType::claim, "Only links with an argument child (or claim child, in sl-mode) can have a polarity specified.");
 	}
 
@@ -78,8 +78,10 @@ pub async fn assert_new_link_is_valid(ctx: &AccessorContext<'_>, parent_id: &str
 		Some(actor) => (actor, &actor.permissionGroups),
 		None => bail!("You're not signed in."),
 	};
-	if !permissions.basic { bail!("You lack basic permissions."); }
-	
+	if !permissions.basic {
+		bail!("You lack basic permissions.");
+	}
+
 	let parent = get_node(ctx, parent_id).await.with_context(|| "Parent data not found")?;
 	// client-side version
 	//if !does_policy_allow_x(ctx, actor_id, &parent.accessPolicy, APTable::nodes, APAction::addChild).await? { bail!("Parent node's permission policy does not grant you the ability to add children."); }
@@ -89,13 +91,21 @@ pub async fn assert_new_link_is_valid(ctx: &AccessorContext<'_>, parent_id: &str
 	};
 	if !guessedCanAddChild { bail!("Parent node's permission policy does not grant you the ability to add children."); }*/
 	// server-side version (on server, no need for this call-path to be called without actor)
-	if !parent.can_add_child(ctx, actor).await? { bail!("Parent node's permission policy does not grant you the ability to add children."); }
+	if !parent.can_add_child(ctx, actor).await? {
+		bail!("Parent node's permission policy does not grant you the ability to add children.");
+	}
 
-	if parent.id == GLOBAL_ROOT_NODE_ID && !permissions.admin { bail!("Only admins can add children to the global-root."); }
-	if parent.id == new_child_id { bail!("Cannot link node as its own child."); }
+	if parent.id == GLOBAL_ROOT_NODE_ID && !permissions.admin {
+		bail!("Only admins can add children to the global-root.");
+	}
+	if parent.id == new_child_id {
+		bail!("Cannot link node as its own child.");
+	}
 
 	let is_already_child = get_node_links(ctx, Some(parent_id), Some(&new_child_id)).await?.len() > 0;
-	if is_already_child { bail!("Node is already a child of the parent."); }
+	if is_already_child {
+		bail!("Node is already a child of the parent.");
+	}
 
 	assert_link_is_valid(parent.r#type, new_child_type, new_child_group, new_link_polarity)
 }

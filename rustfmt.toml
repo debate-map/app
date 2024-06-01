@@ -1,0 +1,15 @@
+hard_tabs = true
+fn_params_layout = "Compressed"
+match_block_trailing_comma = true
+newline_style = "Unix"
+use_field_init_shorthand = true
+overflow_delimited_expr = true
+
+inline_attribute_width = 50 # this doesn't apply for in-function code-lines with the #[cfg(...)] attribute unfortunately
+
+max_width = 290
+use_small_heuristics = "Max"
+# overrides for fields that (otherwise) default to max_width (keep these as multiples of 50)
+single_line_if_else_max_width = 100
+struct_lit_width = 150
+struct_variant_width = 150

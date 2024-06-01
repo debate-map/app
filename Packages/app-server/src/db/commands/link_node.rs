@@ -1,51 +1,51 @@
-use std::fmt::{Formatter, Display};
+use std::fmt::{Display, Formatter};
 
-use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
-use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde_json::{Value, json};
+use rust_shared::anyhow::{anyhow, ensure, Context, Error};
+use rust_shared::async_graphql::Object;
+use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::{json, Value};
 use rust_shared::utils::general_::extensions::ToOwnedV;
-use rust_shared::{async_graphql, serde_json, anyhow, GQLError, to_anyhow};
-use rust_shared::async_graphql::{Object};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::anyhow::{anyhow, Error, Context, ensure};
-use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::{anyhow, async_graphql, serde_json, to_anyhow, GQLError};
 use tracing::info;
 
-use crate::db::_shared::path_finder::{search_up_from_node_for_node_matching_x, id_is_of_node_that_is_root_of_map};
+use crate::db::_shared::path_finder::{id_is_of_node_that_is_root_of_map, search_up_from_node_for_node_matching_x};
 use crate::db::commands::_command::{command_boilerplate, CanOmit};
-use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
+use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
 use crate::db::commands::delete_node_link::{self, delete_node_link, DeleteNodeLinkInput};
 use crate::db::general::permission_helpers::assert_user_can_add_child;
-use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_links::{NodeLinkInput, ClaimForm, ChildGroup, Polarity, get_node_links, get_first_link_under_parent, get_highest_order_key_under_parent};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
+use crate::db::node_links::{get_first_link_under_parent, get_highest_order_key_under_parent, get_node_links, ChildGroup, ClaimForm, NodeLinkInput, Polarity};
 use crate::db::node_links_::node_link_validity::assert_link_is_valid;
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
-use crate::db::nodes_::_node::{NodeInput, ArgumentType};
+use crate::db::nodes_::_node::{ArgumentType, NodeInput};
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::order_key::OrderKey;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
-use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
+use super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::add_node::add_node;
 use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Default)] pub struct MutationShard_LinkNode;
 #[Object] impl MutationShard_LinkNode {
 	/// This is a higher-level wrapper around `addNodeLink`, which handles unlinking from old parent (if requested), etc.
 	async fn link_node(&self, gql_ctx: &async_graphql::Context<'_>, input: LinkNodeInput, only_validate: Option<bool>) -> Result<LinkNodeResult, GQLError> {
 		command_boilerplate!(gql_ctx, input, only_validate, link_node);
-    }
+	}
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -77,7 +77,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 	let LinkNodeInput { mapID, oldParentID, newParentID, nodeID, childGroup, newForm, newPolarity, unlinkFromOldParent, deleteEmptyArgumentWrapper } = input;
 	let unlink_from_old_parent = unlinkFromOldParent.unwrap_or(false);
 	let delete_empty_argument_wrapper = deleteEmptyArgumentWrapper.unwrap_or(false);
-	
+
 	let node_data = get_node(ctx, &nodeID).await?;
 	//let old_parent = oldParentID.map_or(async { None }, |a| get_node(ctx, &a)).await?;
 	let old_parent = if let Some(oldParentID) = &oldParentID { Some(get_node(ctx, oldParentID).await?) } else { None };
@@ -88,7 +88,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 		get_highest_order_key_under_parent(ctx, Some(&newParentID)).await?.next()?
 	};
 
-    assert_user_can_add_child(ctx, actor, &new_parent).await?; // defensive
+	assert_user_can_add_child(ctx, actor, &new_parent).await?; // defensive
 
 	let pasting_premise_as_relevance_arg = node_data.r#type == NodeType::claim && childGroup == ChildGroup::relevance;
 	ensure!(oldParentID.as_ref() != Some(&newParentID) || pasting_premise_as_relevance_arg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
@@ -107,8 +107,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 	let add_arg_wrapper_result = match wrapper_arg_needed {
 		false => None,
 		true => {
-			ensure!(childGroup == ChildGroup::relevance || childGroup == ChildGroup::truth,
-				"Claim is being linked under parent that requires a wrapper-argument, but the specified child-group ({childGroup:?}) is incompatible with that.");
+			ensure!(childGroup == ChildGroup::relevance || childGroup == ChildGroup::truth, "Claim is being linked under parent that requires a wrapper-argument, but the specified child-group ({childGroup:?}) is incompatible with that.");
 
 			let new_polarity = newPolarity.unwrap_or(Polarity::supporting); // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
 			let argument_wrapper = NodeInput {
@@ -121,10 +120,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 				//extras: json!({}),
 				extras: CanOmit::None,
 			};
-			let argument_wrapper_revision = NodeRevisionInput {
-				phrasing: NodePhrasing_Embedded { text_base: "".o(), ..Default::default() },
-				..Default::default()
-			};
+			let argument_wrapper_revision = NodeRevisionInput { phrasing: NodePhrasing_Embedded { text_base: "".o(), ..Default::default() }, ..Default::default() };
 			let argument_wrapper_link = NodeLinkInput {
 				group: childGroup,
 				orderKey: order_key_for_outer_node.clone(),
@@ -147,6 +143,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 		NodeType::claim => newPolarity, // note: this case *should* only be happening for clients that are in "sl mode" (since debate-map standard doesn't want these claim->claim truth links)
 		_ => None,
 	};
+	#[rustfmt::skip]
 	add_node_link(ctx, actor, false, AddNodeLinkInput {
 		//mapID,
 		link: NodeLinkInput {
@@ -173,12 +170,10 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 			delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string() }, Default::default()).await?;
 		}
 	}
-	
+
 	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
-	Ok(LinkNodeResult {
-		argumentWrapperID: add_arg_wrapper_result.map(|a| a.nodeID),
-	})
+	Ok(LinkNodeResult { argumentWrapperID: add_arg_wrapper_result.map(|a| a.nodeID) })
 }
 
 pub fn is_wrapper_arg_needed_for_transfer(parent_type: NodeType, parent_child_group: ChildGroup, transfer_node_type: NodeType, transfer_node_child_group: Option<ChildGroup>) -> bool {

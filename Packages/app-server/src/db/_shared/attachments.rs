@@ -1,12 +1,12 @@
-use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use rust_shared::async_graphql;
+use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
+use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::utils::type_aliases::JSONValue;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use super::attachments_::source_chain::SourceChain;
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "TermAttachmentInput")]
@@ -18,15 +18,15 @@ pub struct TermAttachment {
 #[graphql(input_name = "AttachmentInput")]
 pub struct Attachment {
 	pub expandedByDefault: Option<bool>,
-    pub extras: Option<JSONValue>,
-	
+	pub extras: Option<JSONValue>,
+
 	// components
-    pub equation: Option<JSONValue>,
-    pub references: Option<JSONValue>,
-    pub quote: Option<JSONValue>,
-    pub media: Option<JSONValue>,
-    //pub media: Option<MediaAttachment>,
-    pub description: Option<JSONValue>,
+	pub equation: Option<JSONValue>,
+	pub references: Option<JSONValue>,
+	pub quote: Option<JSONValue>,
+	pub media: Option<JSONValue>,
+	//pub media: Option<MediaAttachment>,
+	pub description: Option<JSONValue>,
 }
 
 // todo: have Attachment struct use these directly (delayed, since means a change in the graphql api)

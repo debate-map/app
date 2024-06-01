@@ -1,35 +1,36 @@
 use std::collections::HashMap;
 
-use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
+use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::async_graphql::Object;
+use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
+use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde_json::{Value, json};
-use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::{json, Value};
 use rust_shared::utils::general::{average, enum_to_string};
-use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
-use rust_shared::async_graphql::{Object};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::anyhow::{anyhow, Error};
-use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
-use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
-use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_ratings_::_node_rating_type::{rating_value_is_in_range, get_rating_type_info, NodeRatingType};
-use crate::db::node_ratings::{NodeRatingInput, get_node_ratings, get_node_ratings_base};
-use crate::db::nodes::{get_node, get_node_parents, get_node_children};
-use crate::db::nodes_::_node::{RatingSummary};
+use crate::db::commands::_command::{command_boilerplate, delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
+use crate::db::node_ratings::{get_node_ratings, get_node_ratings_base, NodeRatingInput};
+use crate::db::node_ratings_::_node_rating_type::{get_rating_type_info, rating_value_is_in_range, NodeRatingType};
+use crate::db::nodes::{get_node, get_node_children, get_node_parents};
+use crate::db::nodes_::_node::RatingSummary;
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
-use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::jsonb_utils::jsonb_set;
 use super::rating_processor::get_argument_impact_pseudo_ratings;
 
+#[rustfmt::skip]
 pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, _actor: &User, node_id: String, rating_type: NodeRatingType) -> Result<(), Error> {
 	ctx.with_rls_disabled(|| async {
 		let rating_type_info = get_rating_type_info(rating_type);

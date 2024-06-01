@@ -18,6 +18,7 @@
     // to avoid false-positives, of certain functions, as well as for [Serialize/Deserialize]_Stub macro-usage (wrt private fields)
     dead_code,
 )]
+#![feature(stmt_expr_attributes)] // allow attributes on expressions, eg. for disabling rustfmt per-expression
 
 use rust_shared::anyhow::Error;
 use static_web_server::Settings;
@@ -27,18 +28,18 @@ use std::path::PathBuf;
 //use axum_server::main_axum;
 //mod axum_server;
 
-static STATIC_DIR_PATH: &'static str  = "../client/Dist";
+static STATIC_DIR_PATH: &'static str = "../client/Dist";
 
 fn main() -> Result<(), Error> {
-    //return main_axum();
+	//return main_axum();
 
-    let mut opts = Settings::get(true)?;
-    opts.general.port = 5100;
-    opts.general.root = PathBuf::from(STATIC_DIR_PATH);
-    opts.general.health = true;
-    opts.general.compression_static = true;
-    opts.general.page_fallback = format!("{STATIC_DIR_PATH}/index.html").into();
-    static_web_server::Server::new(opts)?.run_standalone(None)?;
+	let mut opts = Settings::get(true)?;
+	opts.general.port = 5100;
+	opts.general.root = PathBuf::from(STATIC_DIR_PATH);
+	opts.general.health = true;
+	opts.general.compression_static = true;
+	opts.general.page_fallback = format!("{STATIC_DIR_PATH}/index.html").into();
+	static_web_server::Server::new(opts)?.run_standalone(None)?;
 
-    Ok(())
+	Ok(())
 }

@@ -1,36 +1,40 @@
 use std::panic;
 
-use rust_shared::anyhow::{Error, anyhow};
-use rust_shared::indexmap::IndexMap;
-use rust_shared::serde_json::json;
+use futures_util::{stream, Stream, TryFutureExt};
+use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
-use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{async_graphql, SubError, serde, serde_json, GQLError};
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
-use futures_util::{Stream, stream, TryFutureExt};
+use rust_shared::indexmap::IndexMap;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde::{Serialize, Deserialize};
-use rust_shared::tokio_postgres::{Client};
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::json;
+use rust_shared::tokio_postgres::Client;
 use rust_shared::tokio_postgres::Row;
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
 
-use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext};
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
-use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::{QueryFilter, FilterInput}}};
+use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
+use crate::utils::db::{
+	filter::{FilterInput, QueryFilter},
+	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
+};
 
 use super::access_policies_::_access_policy::AccessPolicy;
 use super::commands::_command::CanOmit;
 
+#[rustfmt::skip]
 pub async fn get_access_policy(ctx: &AccessorContext<'_>, id: &str) -> Result<AccessPolicy, Error> {
     get_db_entry(ctx, "accessPolicies", &Some(json!({
         "id": {"equalTo": id}
     }))).await
 }
 pub async fn get_access_policies(ctx: &AccessorContext<'_>, creator_id: Option<String>) -> Result<Vec<AccessPolicy>, Error> {
-    let mut filter_map = serde_json::Map::new();
-    if let Some(creator_id) = creator_id {
-        filter_map.insert("creator".to_owned(), json!({"equalTo": creator_id}));
-    }
-    get_db_entries(ctx, "accessPolicies", &Some(JSONValue::Object(filter_map))).await
+	let mut filter_map = serde_json::Map::new();
+	if let Some(creator_id) = creator_id {
+		filter_map.insert("creator".to_owned(), json!({"equalTo": creator_id}));
+	}
+	get_db_entries(ctx, "accessPolicies", &Some(JSONValue::Object(filter_map))).await
 }
 
 pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> Result<AccessPolicy, Error> {
@@ -40,13 +44,13 @@ pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> 
 	Ok(matching_policy)
 }
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Clone)] pub struct GQLSet_AccessPolicy { pub nodes: Vec<AccessPolicy> }
 #[Object] impl GQLSet_AccessPolicy { async fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes } }
 impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
-    fn from(entries: Vec<AccessPolicy>) -> GQLSet_AccessPolicy { Self { nodes: entries } }
-    fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes }
+	fn from(entries: Vec<AccessPolicy>) -> GQLSet_AccessPolicy { Self { nodes: entries } }
+	fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes }
 }
 
 #[derive(Default)] pub struct QueryShard_AccessPolicy;
@@ -61,12 +65,12 @@ impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
 
 #[derive(Default)] pub struct SubscriptionShard_AccessPolicy;
 #[Subscription] impl SubscriptionShard_AccessPolicy {
-    async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
-        handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
-    }
-    async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<AccessPolicy>, SubError>> + 'a {
-        handle_generic_gql_doc_subscription::<AccessPolicy>(ctx, "accessPolicies", id).await
-    }
+	async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
+	}
+	async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<AccessPolicy>, SubError>> + 'a {
+		handle_generic_gql_doc_subscription::<AccessPolicy>(ctx, "accessPolicies", id).await
+	}
 }
 
 }

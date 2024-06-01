@@ -1,18 +1,21 @@
 use deadpool_postgres::tokio_postgres::Row;
+use rust_shared::async_graphql::{self, Enum, InputObject, SimpleObject, ID};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::serde_json;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{anyhow::Error, rust_macros::wrap_slow_macros};
-use rust_shared::async_graphql::{self, ID, Enum, SimpleObject, InputObject};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::db::commands::_command::{CanNullOrOmit, CanOmit};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::{db::node_links::{get_node_links, ClaimForm, get_first_link_under_parent}, utils::db::accessors::AccessorContext};
+use crate::{
+	db::node_links::{get_first_link_under_parent, get_node_links, ClaimForm},
+	utils::db::accessors::AccessorContext,
+};
 
 use super::_node_type::NodeType;
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ArgumentType {
@@ -24,7 +27,7 @@ pub enum ArgumentType {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Node_Extras {
 	pub ratingSummaries: Option<IndexMap<String, RatingSummary>>,
-	
+
 	// namespaces/patterns used/expected atm: "claimgen:<uuid, full-form>"
 	// commented; new approach is to use extras.TOOL_NAMESPACE.id
 	//pub externalId: Option<String>,
@@ -59,7 +62,7 @@ impl Node {
 	pub fn extras_known(&self) -> Result<Node_Extras, Error> {
 		Ok(serde_json::from_value(self.extras.clone())?)
 	}
-    pub fn into_input(self, try_keep_extras: bool) -> NodeInput {
+	pub fn into_input(self, try_keep_extras: bool) -> NodeInput {
 		let extras = match try_keep_extras {
 			false => None,
 			true => match self.extras {

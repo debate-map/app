@@ -1,43 +1,43 @@
-use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
+use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
+use rust_shared::async_graphql::Object;
+use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
+use rust_shared::db_constants::{GLOBAL_ROOT_NODE_ID, SYSTEM_USER_ID};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde_json::{Value, json};
-use rust_shared::db_constants::{SYSTEM_USER_ID, GLOBAL_ROOT_NODE_ID};
-use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
-use rust_shared::async_graphql::{Object};
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::{json, Value};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::anyhow::{anyhow, Error, ensure, bail, Context};
-use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::_shared::common_errors::err_should_be_populated;
-use crate::db::_shared::table_permissions::{does_policy_allow_x, CanVote, CanAddChild};
+use crate::db::_shared::table_permissions::{does_policy_allow_x, CanAddChild, CanVote};
 use crate::db::access_policies::get_access_policy;
 use crate::db::access_policies_::_permission_set::{APAction, APTable};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::permission_helpers::assert_user_can_add_child;
-use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::node_links::{get_node_links, ChildGroup, NodeLink, NodeLinkInput, Polarity};
 use crate::db::node_links_::node_link_validity::assert_new_link_is_valid;
 use crate::db::nodes::get_node;
-use crate::db::nodes_::_node::{Node};
+use crate::db::nodes_::_node::Node;
 use crate::db::nodes_::_node_type::{get_node_type_info, NodeType};
-use crate::db::users::{User, PermissionGroups, get_user};
+use crate::db::users::{get_user, PermissionGroups, User};
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
-use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Default)] pub struct MutationShard_AddNodeLink;
 #[Object] impl MutationShard_AddNodeLink {
 	/// This is a low-level function; for many use-cases, the higher-level `linkNode` command is preferred.
 	async fn add_node_link(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeLinkInput, only_validate: Option<bool>) -> Result<AddNodeLinkResult, GQLError> {
 		command_boilerplate!(gql_ctx, input, only_validate, add_node_link);
-    }
+	}
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -54,7 +54,7 @@ pub struct AddNodeLinkResult {
 
 pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeLinkInput, _extras: NoExtras) -> Result<AddNodeLinkResult, Error> {
 	let AddNodeLinkInput { link: link_ } = input;
-	
+
 	let parent_id = link_.parent.ok_or(err_should_be_populated("link.parent"))?;
 	let child_id = link_.child.ok_or(err_should_be_populated("link.child"))?;
 	let parent = get_node(&ctx, &parent_id).await?;
@@ -88,7 +88,7 @@ pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bo
 
 		assert_new_link_is_valid(ctx, &parent_id, &link.child, link.c_childType, link.group, link.polarity, Some(actor)).await?;
 	}
-	
+
 	upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link.clone()).await?;
 
 	Ok(AddNodeLinkResult { id: link.id.to_string() })

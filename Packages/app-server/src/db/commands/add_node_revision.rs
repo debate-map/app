@@ -1,44 +1,44 @@
-use std::fmt::{Formatter, Display};
+use std::fmt::{Display, Formatter};
 
-use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
-use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::serde_json::{Value, json};
+use rust_shared::anyhow::{anyhow, Context, Error};
+use rust_shared::async_graphql::Object;
+use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json::{json, Value};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::general_::serde::to_json_value_for_borrowed_obj;
-use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
-use rust_shared::async_graphql::{Object};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::anyhow::{anyhow, Error, Context};
-use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_populated;
-use crate::db::access_policies_::_permission_set::{APTable, APAction};
+use crate::db::access_policies_::_permission_set::{APAction, APTable};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::general::permission_helpers::assert_user_can_modify;
-use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::get_map;
-use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
+use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
-use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::record_command_run::{record_command_run, record_command_run_if_root};
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Default)] pub struct MutationShard_AddNodeRevision;
 #[Object] impl MutationShard_AddNodeRevision {
 	async fn add_node_revision(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeRevisionInput, only_validate: Option<bool>) -> Result<AddNodeRevisionResult, GQLError> {
 		command_boilerplate!(gql_ctx, input, only_validate, add_node_revision);
-    }
+	}
 }
 
 #[derive(InputObject, Deserialize, Serialize, Clone)]
@@ -62,7 +62,7 @@ pub struct AddNodeRevisionExtras {
 
 pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
 	let AddNodeRevisionInput { mapID, revision: revision_ } = input.clone();
-	
+
 	let node_id = revision_.node.ok_or(err_should_be_populated("revision.node"))?;
 	let node = get_node(ctx, &node_id).await?;
 	//assert_user_can_do_x_for_commands(ctx, actor, APAction::Modify, ActionTarget::for_node(APTable::Nodes, node.accessPolicy.o())).await?;
@@ -95,9 +95,14 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 
 		// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits, to avoid table getting too large
 		// (we also limit the number of rows removed to 30, to avoid the possibility of hundreds of rows being removed all at once -- which caused a crash in the past)
-		ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE id IN (
+		ctx.tx
+			.execute(
+				r#"DELETE FROM "mapNodeEdits" WHERE id IN (
 			SELECT id FROM "mapNodeEdits" WHERE map = $1 ORDER BY time DESC OFFSET 100 LIMIT 30
-		)"#, &[&map_id]).await?;
+		)"#,
+				&[&map_id],
+			)
+			.await?;
 
 		// add new node-edit entry
 		let edit = MapNodeEdit {
@@ -115,10 +120,6 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 
 	let result = AddNodeRevisionResult { id: revision.id.to_string() };
 	//if extras.is_child_command != Some(true) {
-	record_command_run_if_root(
-		ctx, actor, is_root,
-		"addNodeRevision".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
-		vec![input.revision.node.ok_or(err_should_be_populated("input.revision.node"))?],
-	).await?;
+	record_command_run_if_root(ctx, actor, is_root, "addNodeRevision".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?, vec![input.revision.node.ok_or(err_should_be_populated("input.revision.node"))?]).await?;
 	Ok(result)
 }

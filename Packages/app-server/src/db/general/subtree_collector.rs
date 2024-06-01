@@ -1,24 +1,40 @@
-use std::{rc::Rc, sync::Arc};
+use super::subtree::Subtree;
+use crate::{
+	db::{
+		commands::_command::ToSqlWrapper,
+		medias::{get_media, Media},
+		node_links::{get_node_links, NodeLink},
+		node_phrasings::{get_node_phrasings, NodePhrasing},
+		node_revisions::get_node_revision,
+		node_tags::{get_node_tags, NodeTag},
+		nodes::get_node,
+		terms::{get_terms_attached, Term},
+	},
+	utils::db::{
+		accessors::AccessorContext,
+		filter::{FilterInput, QueryFilter},
+		queries::get_entries_in_collection_base,
+		sql_fragment::SQLFragment,
+	},
+};
+use async_recursion::async_recursion;
+use futures_util::{pin_mut, Future, FutureExt, StreamExt, TryStreamExt};
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::ID;
-use async_recursion::async_recursion;
-use futures_util::{Future, FutureExt, TryStreamExt, StreamExt, pin_mut};
 use rust_shared::indexmap::IndexMap;
-use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
-use rust_shared::tokio_postgres::{Row, types::ToSql};
-use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_links::{NodeLink, get_node_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags}, commands::_command::ToSqlWrapper}, utils::{db::{queries::{get_entries_in_collection_base}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
-use super::{subtree::Subtree};
+use rust_shared::tokio_postgres::{types::ToSql, Row};
+use std::{rc::Rc, sync::Arc};
 
 /// Helper to make it easier to provide inline sql-params of different types.
 pub fn params<'a>(parameters: &'a [&'a (dyn ToSql + Sync)]) -> Vec<&(dyn ToSql + Sync)> {
-    parameters.iter()
-        .map(|x| *x as &(dyn ToSql + Sync))
-        .collect()
+	parameters.iter().map(|x| *x as &(dyn ToSql + Sync)).collect()
 }
 
 #[async_recursion]
+#[rustfmt::skip]
 pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_depth_usize: usize) -> Result<Subtree, Error> {
     let max_depth = max_depth_usize as i32;
     
@@ -67,20 +83,21 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
         ) AS media_ids_from_revisions ON (medias.id = media_ids_from_revisions.id#>>'{}')
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
 
-    let mut subtree = Subtree {
-        terms: term_rows.into_iter().map(|a| a.into()).collect(),
-        medias: media_rows.into_iter().map(|a| a.into()).collect(),
-        nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-        nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
-        nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
-        nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
-        nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
-    };
-    subtree.sort_all_entries();
-    Ok(subtree)
+	let mut subtree = Subtree {
+		terms: term_rows.into_iter().map(|a| a.into()).collect(),
+		medias: media_rows.into_iter().map(|a| a.into()).collect(),
+		nodes: node_rows.into_iter().map(|a| a.into()).collect(),
+		nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
+		nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
+		nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
+		nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
+	};
+	subtree.sort_all_entries();
+	Ok(subtree)
 }
 
 #[async_recursion]
+#[rustfmt::skip]
 pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_depth_usize: usize) -> Result<Subtree, Error> {
     let max_depth = max_depth_usize as i32;
     
@@ -126,15 +143,15 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
         ) AS media_ids_from_revisions ON (medias.id = media_ids_from_revisions.id#>>'{}')
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
 
-    let subtree = Subtree {
-        terms: term_rows.into_iter().map(|a| a.into()).collect(),
-        medias: media_rows.into_iter().map(|a| a.into()).collect(),
-        nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-        nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
-        nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
-        nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
-        nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
-    };
-    //subtree.sort_all_entries();
-    Ok(subtree)
+	let subtree = Subtree {
+		terms: term_rows.into_iter().map(|a| a.into()).collect(),
+		medias: media_rows.into_iter().map(|a| a.into()).collect(),
+		nodes: node_rows.into_iter().map(|a| a.into()).collect(),
+		nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
+		nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
+		nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
+		nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
+	};
+	//subtree.sort_all_entries();
+	Ok(subtree)
 }

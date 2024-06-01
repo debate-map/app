@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use deadpool::managed::Object;
 use deadpool_postgres::Manager;
-use rust_shared::serde_json::{Map, self};
+use rust_shared::serde_json::{self, Map};
 
 // sync with type_aliases.rs in app-server
 // ==========

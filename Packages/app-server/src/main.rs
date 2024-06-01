@@ -9,12 +9,10 @@
 #![feature(negative_impls)]
 #![feature(try_blocks)]
 #![recursion_limit = "512"]
-
 // for lock-chain checks
 #![allow(incomplete_features)]
 #![feature(adt_const_params)]
 #![feature(generic_const_exprs)]
-
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -35,12 +33,25 @@
     // to avoid false-positives, of certain functions, as well as for [Serialize/Deserialize]_Stub macro-usage (wrt private fields)
     dead_code,
 )]
+#![feature(stmt_expr_attributes)] // allow attributes on expressions, eg. for disabling rustfmt per-expression
 
-use rust_shared::{tokio, sentry, domains::{DomainsConstants, get_env}};
+use rust_shared::{
+	domains::{get_env, DomainsConstants},
+	sentry, tokio,
+};
 use store::storage::AppStateArc;
-use tracing::{error};
+use tracing::error;
 
-use crate::{links::{pgclient::{self, start_pgclient_with_restart}, db_live_cache::start_db_live_cache}, globals::{set_up_globals, set_up_globals_linux}, router::start_router, store::storage::AppState, utils::general::data_anchor::DataAnchorFor1};
+use crate::{
+	globals::{set_up_globals, set_up_globals_linux},
+	links::{
+		db_live_cache::start_db_live_cache,
+		pgclient::{self, start_pgclient_with_restart},
+	},
+	router::start_router,
+	store::storage::AppState,
+	utils::general::data_anchor::DataAnchorFor1,
+};
 
 // folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)
 mod db;
@@ -55,24 +66,27 @@ mod router;
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    let _sentry_guard = set_up_globals();
-    #[cfg(unix)] let agent = set_up_globals_linux();
-    #[cfg(unix)] let agent_running = agent.start().unwrap();
-    println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
+	let _sentry_guard = set_up_globals();
+	#[cfg(unix)]
+	let agent = set_up_globals_linux();
+	#[cfg(unix)]
+	let agent_running = agent.start().unwrap();
+	println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
-    let app_state = AppState::new_in_arc();
+	let app_state = AppState::new_in_arc();
 
-    // start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
-    start_pgclient_with_restart(app_state.clone());
+	// start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
+	start_pgclient_with_restart(app_state.clone());
 
-    // start db-live-cache; this launches some live-queries for certain data (eg. list of admin user-ids, and access-policies), and keeps those results in memory
-    start_db_live_cache(app_state.clone());
+	// start db-live-cache; this launches some live-queries for certain data (eg. list of admin user-ids, and access-policies), and keeps those results in memory
+	start_db_live_cache(app_state.clone());
 
-    // start router; this handles all "external web requests"
-    start_router(app_state).await;
+	// start router; this handles all "external web requests"
+	start_router(app_state).await;
 
-    #[cfg(unix)] {
-        let agent_ready = agent_running.stop().unwrap();
-        agent_ready.shutdown();
-    }
+	#[cfg(unix)]
+	{
+		let agent_ready = agent_running.stop().unwrap();
+		agent_ready.shutdown();
+	}
 }

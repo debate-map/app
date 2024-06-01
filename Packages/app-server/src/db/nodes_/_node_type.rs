@@ -1,24 +1,24 @@
 use std::collections::HashMap;
 
-use rust_shared::once_cell::sync::Lazy;
-use rust_shared::itertools::Itertools;
-use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Enum};
+use rust_shared::async_graphql::Enum;
+use rust_shared::itertools::Itertools;
+use rust_shared::once_cell::sync::Lazy;
+use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::utils::general::average;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::db::node_links::ChildGroup;
 
-wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
 pub enum NodeType {
-    #[graphql(name = "category")] category,
-    #[graphql(name = "package")] package,
-    #[graphql(name = "multiChoiceQuestion")] multiChoiceQuestion,
-    #[graphql(name = "claim")] claim,
-    #[graphql(name = "argument")] argument,
+	#[graphql(name = "category")] category,
+	#[graphql(name = "package")] package,
+	#[graphql(name = "multiChoiceQuestion")] multiChoiceQuestion,
+	#[graphql(name = "claim")] claim,
+	#[graphql(name = "argument")] argument,
 }
 
 }
@@ -30,6 +30,7 @@ pub struct NodeType_Info {
 	pub childGroup_childTypes: HashMap<ChildGroup, Vec<NodeType>>,
 }
 // sync:js
+#[rustfmt::skip]
 pub static BASE_NODE_TYPE_INFO: Lazy<HashMap<NodeType, NodeType_Info>> = Lazy::new(|| {
     HashMap::from([
         (NodeType::category, NodeType_Info {
