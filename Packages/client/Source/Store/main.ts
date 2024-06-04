@@ -15,6 +15,7 @@ import {SearchState} from "./main/search.js";
 import {ShareUIState} from "./main/shareUI.js";
 import {SocialPageState} from "./main/social.js";
 import {TimelinesState} from "./main/timelines.js";
+import {NotificationsState} from "./main/notifications.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
@@ -42,6 +43,7 @@ export class MainState {
 	// ==========
 
 	//@O stream = new StreamState();
+	@O notifications = new NotificationsState();
 	//@O chat: {subpage: string};
 	//@O reputation: {subpage: string};
 

@@ -34,6 +34,7 @@ export class NavBar extends BaseComponent<{}, {}> {
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0, display: "flex"}}>
 						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						<NotificationNavBarPanelButton/>
 						{HasAdminPermissions(MeID()) && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 						{/* <NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
@@ -50,6 +51,7 @@ export class NavBar extends BaseComponent<{}, {}> {
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{uiState.topLeftOpenPanel == "stream" && <StreamPanel/>}
+						{uiState.topLeftOpenPanel == "notifications" && <NotificationsPanel/>}
 						{uiState.topLeftOpenPanel == "debug" && <DebugPanel/>}
 						{uiState.topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
@@ -68,8 +70,6 @@ export class NavBar extends BaseComponent<{}, {}> {
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NotificationNavBarPanelButton/>
-
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
@@ -79,7 +79,6 @@ export class NavBar extends BaseComponent<{}, {}> {
 					}}>
 						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
 						{uiState.topRightOpenPanel == "guide" && <GuidePanel/>}
-						{uiState.topRightOpenPanel == "notifications" && <NotificationsPanel/>}
 						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>
@@ -98,7 +97,7 @@ export class NotificationNavBarPanelButton extends BaseComponent<{}, {}> {
 			<div style={{
 				position: "relative",
 			}}>
-				<NavBarPanelButton panel="notifications" corner="top-right">
+				<NavBarPanelButton panel="notifications" corner="top-left">
 					<svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
 							d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z"
@@ -108,7 +107,6 @@ export class NotificationNavBarPanelButton extends BaseComponent<{}, {}> {
 							strokeLinejoin="round"
 						/>
 					</svg>
-
 				</NavBarPanelButton>
 				{unreadNotifications > 0 &&
 					<div style={{

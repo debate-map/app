@@ -1,17 +1,21 @@
 import {BaseComponent, UseMemo, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {Button, CheckBox, Column, Div} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Div, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCommandRun, GetNotifications, MeID} from "dm_common";
+import {GetEntries} from "web-vcore/nm/js-vextensions.js";
 import {CommandRunUI} from "../../Social/StreamUI.js";
 import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
 import {GetMapState} from "../../../Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "../../../Store/main.js";
+import {store} from "../../../Store/index.js";
+import {NotificationLevel} from "../../../Store/main/notifications.js";
 
 @Observer
 export class NotificationsPanel extends BaseComponent<{}, {}> {
 	render() {
 		const mapState = GetMapState(GetOpenMapID());
+		const uiState = store.main.notifications;
 
 		const notifications_raw = GetNotifications(MeID());
 		const notifications = UseMemo(()=>notifications_raw.map(a=>{
@@ -77,54 +81,60 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 						}
 					</Column>;
 				})}
-				<Column style={{
+				<Row style={{
 					padding: 5,
-					display: "flex", flexFlow: "row nowrap", justifyContent: "space-between", alignItems: "center",
+					flexWrap: "nowrap", alignItems: "center",
 				}}>
-					<Div style={{
-						display: "flex", flexFlow: "row nowrap", alignItems: "center",
+					<Row style={{
+						display: "flex", flexWrap: "nowrap", alignItems: "center",
 					}}>
 						<CheckBox ml="auto" text="Paint Mode" value={mapState?.subscriptionPaintMode ?? false} onChange={val=>RunInAction_Set(this, ()=>{ if (mapState) mapState.subscriptionPaintMode = val; })} />
 						<InfoButton ml={5} text="When enabled, paint mode allows you to more simply select nodes you are subscribed to" />
-					</Div>
-					<Div style={{
-						display: "flex", flexFlow: "column nowrap", alignItems: "flex-start",
+					</Row>
+					<Row ml={10}>
+						<Text>Notification level:</Text>
+						<Select ml={5} displayType="button bar" options={GetEntries(NotificationLevel, "ui")} value={uiState.paintMode_notificationLevel} onChange={val=>{
+							RunInAction_Set(this, ()=>uiState.paintMode_notificationLevel = val);
+						}}/>
+					</Row>
+					<Column ml="auto" style={{
+						flexWrap: "nowrap", alignItems: "flex-start",
 					}}>
-						<Div style={{
-							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						<Row style={{
+							flexWrap: "nowrap", alignItems: "center", gap: 4,
 						}}>
 							<div style={{
 								width: 8, height: 8,
 								borderRadius: "50%",
 								border: "1px solid black",
 								background: "none",
-							}}></div>
+							}}/>
 							<span style={{fontSize: 10}}>No Notifications</span>
-						</Div>
-						<Div style={{
-							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						</Row>
+						<Row style={{
+							flexWrap: "nowrap", alignItems: "center", gap: 4,
 						}}>
 							<div style={{
 								width: 8, height: 8,
 								borderRadius: "50%",
 								border: "1px solid yellow",
 								background: "yellow",
-							}}></div>
+							}}/>
 							<span style={{fontSize: 10}}>Partial Notifications</span>
-						</Div>
-						<Div style={{
-							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						</Row>
+						<Row style={{
+							flexWrap: "nowrap", alignItems: "center", gap: 4,
 						}}>
 							<div style={{
 								width: 8, height: 8,
 								borderRadius: "50%",
 								border: "1px solid green",
 								background: "green",
-							}}></div>
+							}}/>
 							<span style={{fontSize: 10}}>All Notifications</span>
-						</Div>
-					</Div>
-				</Column>
+						</Row>
+					</Column>
+				</Row>
 			</Div>
 		);
 	}
