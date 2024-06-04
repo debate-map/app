@@ -1,6 +1,7 @@
 import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep, Subscription, Notification, AddSubscriptionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
+import {SubscriptionLevel} from "../../UI/@Shared/Maps/Node/NodeBox/NodeNotificationControl.js";
 
 // standardized add/update/delete commands
 // ==========
@@ -214,6 +215,28 @@ export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInp
 		variables: {input: inputFields},
 	});
 	return result.data.addSubscription as {id: string};
+}
+
+export async function RunCommand_AddSubscriptionWithLevel({
+	node,
+	level,
+}: {
+	node: string
+	level: SubscriptionLevel
+}) {
+	switch (level) {
+		case "none":
+			RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			break;
+		case "some":
+			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			break;
+		case "all":
+			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: true, addNodeRevision: true, deleteNode: true, deleteNodeLink: true, setNodeRating: true});
+			break;
+		default:
+			throw new Error(`Unknown subscription level: ${level}`);
+	}
 }
 
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");

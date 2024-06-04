@@ -61,7 +61,7 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 	let rating = NodeRating {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: actor.id.to_string(),
+		// creator: actor.id.to_string(), // we need to hide the creator of a node 
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		accessPolicy: rating_.accessPolicy,

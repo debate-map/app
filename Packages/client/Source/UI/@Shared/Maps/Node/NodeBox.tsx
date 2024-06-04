@@ -26,7 +26,7 @@ import {autorun} from "mobx";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {GetPlaybackTimeSinceNodeRevealed} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
-import {RunCommand_AddSubscription, RunCommand_UpdateSubscription} from "Utils/DB/Command.js";
+import {RunCommand_AddSubscription, RunCommand_AddSubscriptionWithLevel, RunCommand_UpdateSubscription} from "Utils/DB/Command.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -326,7 +326,20 @@ export class NodeBox extends BaseComponentPlus(
 		};
 
 		const subscription = GetNodeSubscription(MeID()!, node.id);
-		const subscriptionLevel: "all" | "some" | "none" = getSubscriptionLevel(subscription);
+		const subscriptionLevel = getSubscriptionLevel(subscription);
+
+		const showNotificationButton = [NodeType.category, NodeType.claim, NodeType.package, NodeType.multiChoiceQuestion].includes(node.type);
+		const showNotificationPaint = showNotificationButton && (mapState?.subscriptionPaintMode ?? false);
+		let showNotificationPaintCss = "none";
+		if (showNotificationPaint) {
+			if (subscriptionLevel == "all") {
+				showNotificationPaintCss = "1px solid green";
+			} else if (subscriptionLevel == "some") {
+				showNotificationPaintCss = "1px solid yellow";
+			} else if (subscriptionLevel == "none") {
+				showNotificationPaintCss = "none";
+			}
+		}
 
 		UseDocumentEventListener("click", e=>{
 			// if user clicked outside of node-box, close the subscription-level dropdown
@@ -403,10 +416,11 @@ export class NodeBox extends BaseComponentPlus(
 			//const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 			//const isShowingToolbarButtonAtTopLeft = extractedPrefixTextInfo?.extractLocation == "toolbar";
 			const isShowingToolbarButtonAtTopLeft = toolbarItemsToShow.Any(a=>a.panel == "prefix");
+
 			return (
 				<>
 					<ExpandableBox
-						showNotificationButton={[NodeType.category, NodeType.claim, NodeType.package, NodeType.multiChoiceQuestion].includes(node.type)}
+						showNotificationButton={showNotificationButton}
 						notificationLevel={subscriptionLevel}
 						onToggleNotifications={()=>this.SetState({showNotificationPanel: !this.state.showNotificationPanel})}
 
@@ -441,6 +455,7 @@ export class NodeBox extends BaseComponentPlus(
 						{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, above
 						style={E(
 							{
+								pointerEvents: showNotificationPaint ? "none" : "auto",
 								color: liveSkin.NodeTextColor().css(),
 								//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
 								//minHeight: 25, // so that argument nodes remain 25px high, even when toolbar is hidden
@@ -475,6 +490,7 @@ export class NodeBox extends BaseComponentPlus(
 
 							{showNotificationPanel &&
 								<NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
+
 						</>}
 						//onTextHolderClick={onTextHolderClick}
 						//textHolderStyle={E(isMultiPremiseArg && {width: null})}
@@ -512,6 +528,27 @@ export class NodeBox extends BaseComponentPlus(
 								&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
 						</>}
 					/>
+					{showNotificationPaint && <div onClick={()=>{
+						switch (subscriptionLevel) {
+							case "all":
+								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "none"});
+								break;
+							case "some":
+								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "all"});
+								break;
+							case "none":
+								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "some"});
+								break;
+							default:
+								throw new Error(`Unknown subscription-level: ${subscriptionLevel}`);
+						}
+
+					}} style={{
+								borderRadius: "5px",
+								position: "absolute", width: width_final, right: 0, top: 0, bottom: 0,
+								zIndex: 1000,
+								border: showNotificationPaintCss,
+					}}/>}
 					<div style={{width: lastWidthWhenNotPreview}}/>
 					<FrameRenderSignal map={map}/>
 				</>

@@ -1,14 +1,18 @@
-import {BaseComponent, BaseComponentPlus, UseMemo} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, UseMemo, cssHelper} from "web-vcore/nm/react-vextensions.js";
+import {Button, CheckBox, Column, Div} from "web-vcore/nm/react-vcomponents.js";
+import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {Column, Div} from "react-vcomponents";
-import {CommandRun, GetCommandRun, GetManyCommandRuns, GetNotifications, MeID} from "dm_common";
-import {Observer} from "web-vcore";
+import {GetCommandRun, GetNotifications, MeID} from "dm_common";
 import {CommandRunUI} from "../../Social/StreamUI.js";
 import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
+import {GetMapState} from "../../../Store/main/maps/mapStates/$mapState.js";
+import {GetOpenMapID} from "../../../Store/main.js";
 
 @Observer
 export class NotificationsPanel extends BaseComponent<{}, {}> {
 	render() {
+		const mapState = GetMapState(GetOpenMapID());
+
 		const notifications_raw = GetNotifications(MeID());
 		const notifications = UseMemo(()=>notifications_raw.map(a=>{
 			return {
@@ -22,6 +26,9 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 		}), [notifications_raw]);
 
 		const entryLimit = 5; // for now, only show the last 5 notifications (need a paging system or the like)
+
+		const unreadCount = UseMemo(()=>notifications.filter(a=>a.readTime == null).length, [notifications]);
+
 		return (
 			<Div style={{
 				width: 750, borderRadius: "0 0 0 5px",
@@ -29,6 +36,21 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 			}}>
 				{notifications.length == 0 && "No notifications."}
+				{notifications.length > 0 && <Column style={
+					{padding: 5, display: "flex", flexFlow: "row nowrap", justifyContent: "space-between", alignItems: "center"}
+				}>
+					<span style={{fontSize: 18, fontWeight: "bold"}}>Notifications</span>
+					{unreadCount > 0 && <Button text="Mark as Read" onClick={()=>{
+						for (const notification of notifications_raw) {
+							if (notification.readTime == null) {
+								RunCommand_UpdateNotification({id: notification.id, updates: {
+									readTime: Date.now(),
+								}});
+							}
+						}
+					}}/>
+}
+				</Column>}
 				{notifications.Take(entryLimit).map((notification, index)=>{
 					return <Column style={{
 						position: "relative",
@@ -55,6 +77,54 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 						}
 					</Column>;
 				})}
+				<Column style={{
+					padding: 5,
+					display: "flex", flexFlow: "row nowrap", justifyContent: "space-between", alignItems: "center",
+				}}>
+					<Div style={{
+						display: "flex", flexFlow: "row nowrap", alignItems: "center",
+					}}>
+						<CheckBox ml="auto" text="Paint Mode" value={mapState?.subscriptionPaintMode ?? false} onChange={val=>RunInAction_Set(this, ()=>{ if (mapState) mapState.subscriptionPaintMode = val; })} />
+						<InfoButton ml={5} text="When enabled, paint mode allows you to more simply select nodes you are subscribed to" />
+					</Div>
+					<Div style={{
+						display: "flex", flexFlow: "column nowrap", alignItems: "flex-start",
+					}}>
+						<Div style={{
+							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						}}>
+							<div style={{
+								width: 8, height: 8,
+								borderRadius: "50%",
+								border: "1px solid black",
+								background: "none",
+							}}></div>
+							<span style={{fontSize: 10}}>No Notifications</span>
+						</Div>
+						<Div style={{
+							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						}}>
+							<div style={{
+								width: 8, height: 8,
+								borderRadius: "50%",
+								border: "1px solid yellow",
+								background: "yellow",
+							}}></div>
+							<span style={{fontSize: 10}}>Partial Notifications</span>
+						</Div>
+						<Div style={{
+							display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: 4,
+						}}>
+							<div style={{
+								width: 8, height: 8,
+								borderRadius: "50%",
+								border: "1px solid green",
+								background: "green",
+							}}></div>
+							<span style={{fontSize: 10}}>All Notifications</span>
+						</Div>
+					</Div>
+				</Column>
 			</Div>
 		);
 	}

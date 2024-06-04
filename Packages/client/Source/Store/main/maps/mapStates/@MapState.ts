@@ -37,6 +37,9 @@ export class MapState {
 	@O timelineEditMode = false;
 	@O timelinePlayback = false;
 	@O showTimelineDetails = false;
+
+	@O subscriptionPaintMode = false;
+
 	@O selectedTimeline: string|n;
 
 	@O zoomLevel = 1;

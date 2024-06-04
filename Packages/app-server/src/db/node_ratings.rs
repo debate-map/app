@@ -128,7 +128,7 @@ wrap_slow_macros!{
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeRating {
     pub id: ID,
-	pub creator: String,
+	// pub creator: String,
 	pub createdAt: i64,
     pub accessPolicy: String,
     pub node: String,
