@@ -3,6 +3,7 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::utils::general_::extensions::{ToOwnedV};
+use rust_shared::utils::general_::serde::to_json_value_for_borrowed_obj;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
@@ -11,6 +12,8 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Serialize, Deserialize};
 use tracing::info;
 
+use crate::db::_shared::common_errors::err_should_be_populated;
+use crate::db::commands::_shared::record_command_run::record_command_run_if_root;
 use crate::db::commands::_shared::update_node_rating_summaries::update_node_rating_summaries;
 use crate::db::commands::delete_node_rating::{delete_node_rating, DeleteNodeRatingInput};
 use crate::db::general::permission_helpers::assert_user_can_vote;
@@ -39,14 +42,14 @@ pub struct SetNodeRatingInput {
 	pub rating: NodeRatingInput,
 }
 
-#[derive(SimpleObject, Debug)]
+#[derive(SimpleObject, Debug,Serialize, Deserialize)]
 pub struct SetNodeRatingResult {
 	pub id: String,
 }
 
 }
 
-pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
+pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
 	let SetNodeRatingInput { rating: rating_ } = input;
 	
 	ensure!(rating_.r#type != NodeRatingType::impact, "Cannot set impact rating directly.");
@@ -73,7 +76,21 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 
 	upsert_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
 
-	update_node_rating_summaries(ctx, actor, rating.node, rating.r#type).await?;
+	update_node_rating_summaries(ctx, actor, rating.node.clone(), rating.r#type).await?;
 
-	Ok(SetNodeRatingResult { id: rating.id.to_string() })
+	let result = SetNodeRatingResult { id: rating.id.to_string() };
+
+	let input = json!({ 
+		"createdAt": rating.createdAt,
+		"node": rating.node.clone(),
+		"type": rating.r#type
+	 });
+
+	record_command_run_if_root(
+		ctx, actor, is_root,
+		"setNodeRating".to_owned(), input, to_json_value_for_borrowed_obj(&result)?,
+		vec![rating.node]
+	).await?;
+
+	Ok(result)
 }
