@@ -2,17 +2,23 @@ import {TextPlus} from "web-vcore";
 import {Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {NodeL3, Subscription} from "dm_common";
-import {RunCommand_AddSubscription, RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
+import {RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
 
-export type SubscriptionLevel = "none" | "some" | "all";
+export const SubscriptionLevel = {
+	None: "none",
+	Partial: "partial",
+	All: "all",
+} as const;
+
+export type SubscriptionLevel = typeof SubscriptionLevel[keyof typeof SubscriptionLevel];
 
 export const getSubscriptionLevel = (subscription?: Subscription): SubscriptionLevel=>{
-	if (!subscription) return "none";
+	if (!subscription) return SubscriptionLevel.None;
 	const all = subscription.addChildNode && subscription.addNodeLink && subscription.addNodeRevision && subscription.deleteNode && subscription.deleteNodeLink && subscription.setNodeRating;
 	const notAll = subscription.addChildNode || subscription.addNodeLink || subscription.addNodeRevision || subscription.deleteNode || subscription.deleteNodeLink || subscription.setNodeRating;
-	if (all) return "all";
-	if (notAll) return "some";
-	return "none";
+	if (all) return SubscriptionLevel.All;
+	if (notAll) return SubscriptionLevel.Partial;
+	return SubscriptionLevel.None;
 };
 
 export class NodeNotificationControl extends BaseComponent<{node: NodeL3, backgroundColor: chroma.Color, subscriptionLevel: SubscriptionLevel}, {}> {
@@ -31,8 +37,8 @@ export class NodeNotificationControl extends BaseComponent<{node: NodeL3, backgr
 					</svg>
 					<TextPlus style={{color: "#D7D9DA"}} info="All notifications disabled.">None</TextPlus>
 				</NotificationLevelButton>
-				<NotificationLevelButton backgroundColor={backgroundColor} active={subscriptionLevel == "some"} onClick={e=>{
-					RunCommand_AddSubscriptionWithLevel({node: node.id, level: "some"});
+				<NotificationLevelButton backgroundColor={backgroundColor} active={subscriptionLevel == "partial"} onClick={e=>{
+					RunCommand_AddSubscriptionWithLevel({node: node.id, level: "partial"});
 				}}>
 					<svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z" stroke="#D7D9DA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

@@ -9,7 +9,7 @@ import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
 import {GetMapState} from "../../../Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "../../../Store/main.js";
 import {store} from "../../../Store/index.js";
-import {NotificationLevel} from "../../../Store/main/notifications.js";
+import {SubscriptionLevel} from "../Maps/Node/NodeBox/NodeNotificationControl.js";
 
 @Observer
 export class NotificationsPanel extends BaseComponent<{}, {}> {
@@ -93,7 +93,7 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 					</Row>
 					<Row ml={10}>
 						<Text>Notification level:</Text>
-						<Select ml={5} displayType="button bar" options={GetEntries(NotificationLevel, "ui")} value={uiState.paintMode_notificationLevel} onChange={val=>{
+						<Select ml={5} displayType="button bar" options={GetEntries(SubscriptionLevel, "ui")} value={uiState.paintMode_notificationLevel} onChange={val=>{
 							RunInAction_Set(this, ()=>uiState.paintMode_notificationLevel = val);
 						}}/>
 					</Row>

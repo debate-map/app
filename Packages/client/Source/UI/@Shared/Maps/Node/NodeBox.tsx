@@ -180,6 +180,7 @@ export class NodeBox extends BaseComponentPlus(
 		}, [map, path]);
 
 		const mapState = GetMapState(map?.id);
+		const uiState = store.main.notifications;
 
 		// the rest
 		// ==========
@@ -334,7 +335,7 @@ export class NodeBox extends BaseComponentPlus(
 		if (showNotificationPaint) {
 			if (subscriptionLevel == "all") {
 				showNotificationPaintCss = "1px solid green";
-			} else if (subscriptionLevel == "some") {
+			} else if (subscriptionLevel == "partial") {
 				showNotificationPaintCss = "1px solid yellow";
 			} else if (subscriptionLevel == "none") {
 				showNotificationPaintCss = "none";
@@ -528,22 +529,24 @@ export class NodeBox extends BaseComponentPlus(
 								&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
 						</>}
 					/>
-					{showNotificationPaint && <div onClick={()=>{
-						switch (subscriptionLevel) {
-							case "all":
-								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "none"});
-								break;
-							case "some":
-								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "all"});
-								break;
-							case "none":
-								RunCommand_AddSubscriptionWithLevel({node: node.id, level: "some"});
-								break;
-							default:
-								throw new Error(`Unknown subscription-level: ${subscriptionLevel}`);
+					{showNotificationPaint && <div
+					onMouseDown={()=>{
+						uiState.paintMode_painting = true;
+						RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+					}}
+					onMouseUp={()=>{
+						uiState.paintMode_painting = false;
+					}}
+					onMouseEnter={()=>{
+						if (uiState.paintMode_painting) {
+							RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+							if (!expanded) {
+								graph?.SetAnchorNode(treePath, {nodePath: path});
+								ACTNodeExpandedSet({mapID: map?.id, path, expanded: true});
+							}
 						}
-
-					}} style={{
+					}}
+					style={{
 								borderRadius: "5px",
 								position: "absolute", width: width_final, right: 0, top: 0, bottom: 0,
 								zIndex: 1000,

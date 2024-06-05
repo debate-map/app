@@ -228,7 +228,7 @@ export async function RunCommand_AddSubscriptionWithLevel({
 		case "none":
 			RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
-		case "some":
+		case "partial":
 			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
 		case "all":

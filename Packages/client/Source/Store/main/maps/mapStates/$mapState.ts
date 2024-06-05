@@ -30,10 +30,6 @@ export const GetShowTimelineDetails = CreateAccessor({ctx: 1}, function(mapID: s
 	return this.store.main.maps.mapStates.get(mapID)?.showTimelineDetails ?? false;
 });
 
-export const GetSubscriptionPaintMode = CreateAccessor({ctx: 1}, function(mapID: string) {
-	return this.store.main.maps.mapStates.get(mapID)?.subscriptionPaintMode;
-});
-
 // timeline-related
 // ==========
 
