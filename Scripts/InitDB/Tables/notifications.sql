@@ -2,7 +2,7 @@ CREATE TABLE app.notifications (
     "id" text NOT NULL,
     "user" text NOT NULL,
     "commandRun" text NOT NULL,
-    "readTime" bigint,
+    "readTime" bigint
 );
 
 ALTER TABLE ONLY app.notifications

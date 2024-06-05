@@ -8,8 +8,8 @@ CREATE TABLE app.subscriptions (
     "deleteNodeLink" boolean NOT NULL DEFAULT FALSE,
     "addNodeRevision" boolean NOT NULL DEFAULT FALSE,
     "setNodeRating" boolean NOT NULL DEFAULT FALSE,
-    CONSTRAINT pk_user_node UNIQUE KEY ("user", "node")
+    CONSTRAINT pk_user_node UNIQUE ("user", "node")
 );
 
 ALTER TABLE ONLY app.subscriptions
-    ADD CONSTRAINT pk_user_node PRIMARY KEY (id);
+    ADD CONSTRAINT v1_draft_subscriptions_pkey PRIMARY KEY (id);
