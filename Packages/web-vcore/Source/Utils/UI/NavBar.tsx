@@ -92,24 +92,31 @@ export class NavBarPageButton extends BaseComponentPlus({} as {page?: string, su
 }
 
 @Observer
-export class NavBarPanelButton extends BaseComponentPlus({} as {text?: string, panel: string, hasPage?: boolean, corner: "top-left" | "top-right", style?}, {}, {active: false}) {
+export class NavBarPanelButton extends BaseComponentPlus({} as {text?: string, panel: string, onClick?: (e: any) => void, hasPage?: boolean, corner: "top-left" | "top-right", style?}, {}, {active: false}) {
 	render() {
-		const {text, panel, hasPage, corner, style, children} = this.props;
+		const {text, onClick, panel, hasPage, corner, style, children} = this.props;
 		const {topLeftOpenPanel, topRightOpenPanel} = manager.store.main;
 		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
 
 		this.Stash({active});
 		const {css} = cssHelper(this);
 		return (
-			<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={this.OnClick} style={css(style)}>
+			<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={e=>{
+				if (onClick) {
+					onClick(e);
+				}
+				this.OnClick(e);
+			}} style={css(style)}>
 				{children}
 			</NavBarButton>
 		);
 	}
+
 	OnClick = (e: MouseEvent)=>{
 		e.preventDefault();
 		const {corner, panel, active} = this.PropsStateStash;
 		RunInAction("NavBarPanelButton_OnClick", ()=>{
+
 			if (corner == "top-left") {
 				manager.store.main.topLeftOpenPanel = active ? null : panel;
 			} else {

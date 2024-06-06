@@ -80,7 +80,7 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, is_root: b
 
 	let result = SetNodeRatingResult { id: rating.id.to_string() };
 
-	let input = json!({ 
+	let input_stripped = json!({ 
 		"createdAt": rating.createdAt,
 		"node": rating.node.clone(),
 		"type": rating.r#type
@@ -88,7 +88,7 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, is_root: b
 
 	record_command_run_if_root(
 		ctx, actor, is_root,
-		"setNodeRating".to_owned(), input, to_json_value_for_borrowed_obj(&result)?,
+		"setNodeRating".to_owned(), input_stripped, to_json_value_for_borrowed_obj(&result)?,
 		vec![rating.node]
 	).await?;
 
