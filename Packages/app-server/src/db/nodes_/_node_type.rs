@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, vec};
 
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::Enum;
@@ -19,6 +19,7 @@ pub enum NodeType {
 	#[graphql(name = "multiChoiceQuestion")] multiChoiceQuestion,
 	#[graphql(name = "claim")] claim,
 	#[graphql(name = "argument")] argument,
+	#[graphql(name = "comment")] comment,
 }
 
 }
@@ -37,24 +38,28 @@ pub static BASE_NODE_TYPE_INFO: Lazy<HashMap<NodeType, NodeType_Info>> = Lazy::n
             childGroup_childTypes: HashMap::from([
                 (ChildGroup::generic, vec![NodeType::category, NodeType::package, NodeType::multiChoiceQuestion, NodeType::claim]),
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
+				(ChildGroup::comment, vec![NodeType::comment]),
             ]),
         }),
         (NodeType::package, NodeType_Info {
             childGroup_childTypes: HashMap::from([
                 (ChildGroup::generic, vec![NodeType::claim]),
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
+				(ChildGroup::comment, vec![NodeType::comment]),
             ]),
         }),
         (NodeType::multiChoiceQuestion, NodeType_Info {
             childGroup_childTypes: HashMap::from([
                 (ChildGroup::generic, vec![NodeType::claim]),
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
+				(ChildGroup::comment, vec![NodeType::comment]),
             ]),
         }),
         (NodeType::claim, NodeType_Info {
             childGroup_childTypes: HashMap::from([
                 (ChildGroup::truth, vec![NodeType::argument, NodeType::claim]), // note: if child is "claim", link should have polarity (filling role of single-premise argument, but with no relevance-args possible; used in SL maps)
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
+				(ChildGroup::comment, vec![NodeType::comment]),
             ]),
         }),
         (NodeType::argument, NodeType_Info {
@@ -62,6 +67,12 @@ pub static BASE_NODE_TYPE_INFO: Lazy<HashMap<NodeType, NodeType_Info>> = Lazy::n
                 (ChildGroup::generic, vec![NodeType::claim]),
                 (ChildGroup::relevance, vec![NodeType::argument]),
 				(ChildGroup::freeform, FREEFORM_TYPES.clone()),
+				(ChildGroup::comment, vec![NodeType::comment]),
+            ]),
+        }),
+        (NodeType::comment, NodeType_Info {
+            childGroup_childTypes: HashMap::from([
+				(ChildGroup::comment, vec![NodeType::comment]),
             ]),
         }),
     ])
