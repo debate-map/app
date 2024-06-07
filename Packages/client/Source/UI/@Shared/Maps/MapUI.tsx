@@ -117,7 +117,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 				}
 				.MapUI.scrolling > * { pointer-events: none; }
 				`}</style>
-				<div className="MapUI"
+				<div className={`MapUI ${mapState.subscriptionPaintMode ? "PaintingCursor" : ""}`}
 					ref={mapUI_ref}
 					style={ES(
 						{

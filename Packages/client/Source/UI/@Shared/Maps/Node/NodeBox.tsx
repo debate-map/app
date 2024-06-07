@@ -349,6 +349,10 @@ export class NodeBox extends BaseComponentPlus(
 			}
 		});
 
+		UseDocumentEventListener("mouseup", e=>{
+			uiState.paintMode_painting = false;
+		});
+
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
 			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
@@ -533,9 +537,6 @@ export class NodeBox extends BaseComponentPlus(
 					onMouseDown={()=>{
 						uiState.paintMode_painting = true;
 						RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
-					}}
-					onMouseUp={()=>{
-						uiState.paintMode_painting = false;
 					}}
 					onMouseEnter={()=>{
 						if (uiState.paintMode_painting) {

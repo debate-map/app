@@ -83,57 +83,20 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 				})}
 				<Row style={{
 					padding: 5,
-					flexWrap: "nowrap", alignItems: "center",
+					flexWrap: "nowrap", alignItems: "center", justifyContent: "space-between",
 				}}>
 					<Row style={{
-						display: "flex", flexWrap: "nowrap", alignItems: "center",
+						display: "flex", flexWrap: "nowrap", alignItems: "center", padding: "8px 0px",
 					}}>
 						<CheckBox ml="auto" text="Paint Mode" value={mapState?.subscriptionPaintMode ?? false} onChange={val=>RunInAction_Set(this, ()=>{ if (mapState) mapState.subscriptionPaintMode = val; })} />
 						<InfoButton ml={5} text="When enabled, paint mode allows you to more simply select nodes you are subscribed to" />
 					</Row>
-					<Row ml={10}>
+					{mapState?.subscriptionPaintMode === true && <Row ml={10}>
 						<Text>Notification level:</Text>
 						<Select ml={5} displayType="button bar" options={GetEntries(SubscriptionLevel, "ui")} value={uiState.paintMode_notificationLevel} onChange={val=>{
 							RunInAction_Set(this, ()=>uiState.paintMode_notificationLevel = val);
 						}}/>
-					</Row>
-					<Column ml="auto" style={{
-						flexWrap: "nowrap", alignItems: "flex-start",
-					}}>
-						<Row style={{
-							flexWrap: "nowrap", alignItems: "center", gap: 4,
-						}}>
-							<div style={{
-								width: 8, height: 8,
-								borderRadius: "50%",
-								border: "1px solid black",
-								background: "none",
-							}}/>
-							<span style={{fontSize: 10}}>No Notifications</span>
-						</Row>
-						<Row style={{
-							flexWrap: "nowrap", alignItems: "center", gap: 4,
-						}}>
-							<div style={{
-								width: 8, height: 8,
-								borderRadius: "50%",
-								border: "1px solid yellow",
-								background: "yellow",
-							}}/>
-							<span style={{fontSize: 10}}>Partial Notifications</span>
-						</Row>
-						<Row style={{
-							flexWrap: "nowrap", alignItems: "center", gap: 4,
-						}}>
-							<div style={{
-								width: 8, height: 8,
-								borderRadius: "50%",
-								border: "1px solid green",
-								background: "green",
-							}}/>
-							<span style={{fontSize: 10}}>All Notifications</span>
-						</Row>
-					</Column>
+					</Row>}
 				</Row>
 			</Div>
 		);
