@@ -11,6 +11,7 @@ export enum NodeType {
 	multiChoiceQuestion = "multiChoiceQuestion",
 	claim = "claim",
 	argument = "argument",
+    comment = "comment"
 }
 //AddSchema("NodeType", {enum: GetValues(NodeType)});
 AddSchema("NodeType", {enum: GetValues(NodeType)});
@@ -23,6 +24,7 @@ export class NodeType_Info {
 			childGroup_childTypes: new Map([
 				[ChildGroup.generic, [NodeType.category, NodeType.package, NodeType.multiChoiceQuestion, NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
+				[ChildGroup.comment, [NodeType.comment]],
 			]),
 			minWidth: 150, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
@@ -32,6 +34,7 @@ export class NodeType_Info {
 			childGroup_childTypes: new Map([
 				[ChildGroup.generic, [NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
+				[ChildGroup.comment, [NodeType.comment]],
 			]),
 			minWidth: 150, maxWidth: 250,
 			/* mainRatingTypes: ["significance"],
@@ -41,6 +44,7 @@ export class NodeType_Info {
 			childGroup_childTypes: new Map([
 				[ChildGroup.generic, [NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
+				[ChildGroup.comment, [NodeType.comment]],
 			]),
 			minWidth: 150, maxWidth: 600,
 			// minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
@@ -51,6 +55,7 @@ export class NodeType_Info {
 			childGroup_childTypes: new Map([
 				[ChildGroup.truth, [NodeType.argument, NodeType.claim]], // note: if child is "claim", link should have polarity (filling role of single-premise argument, but with no relevance-args possible; used in SL maps)
 				[ChildGroup.freeform, freeformTypes],
+				[ChildGroup.comment, [NodeType.comment]],
 			]),
 			//minWidth: 350, maxWidth: 600,
 			minWidth: 600, maxWidth: 600, // probably temp
@@ -64,6 +69,16 @@ export class NodeType_Info {
 				[ChildGroup.generic, [NodeType.claim]],
 				[ChildGroup.relevance, [NodeType.argument]],
 				[ChildGroup.freeform, freeformTypes],
+				[ChildGroup.comment, [NodeType.comment]],
+			]),
+			// TODO: Figure out what this does
+			minWidth: 80, maxWidth: 600,
+			/* mainRatingTypes: ["strength"],
+			otherRatingTypes: [], */
+		}),
+		[NodeType.comment]: new NodeType_Info({
+			childGroup_childTypes: new Map([
+				[ChildGroup.comment, [NodeType.comment]],
 			]),
 			//minWidth: 150, maxWidth: 600,
 			//minWidth: 80, maxWidth: 380, // keep width small enough that it fits within gap before premise's node-toolbar
@@ -114,7 +129,7 @@ export class NodeType_Info {
 }*/
 export function GetDisplayTextForNewChildConfig(parentNode: NodeL1, c: NewChildConfig, forPaste: boolean, details: {/*omitGroup?: boolean,*/ copiedNode_asCut?: boolean}) {
 	const polarityStr = c.polarity == Polarity.supporting ? "pro" : "con";
-	// showing the child-group in parentheses is not-helpful-enough/too-distracting for certain groups, when adding/pasting 
+	// showing the child-group in parentheses is not-helpful-enough/too-distracting for certain groups, when adding/pasting
 	const omitGroup = forPaste
 		? c.childGroup == ChildGroup.generic
 		: c.childGroup.IsOneOf(ChildGroup.generic, ChildGroup.freeform);
@@ -138,3 +153,4 @@ export function GetDisplayTextForNewChildConfig(parentNode: NodeL1, c: NewChildC
 		parenthesesStr_outer,
 	].filter(a=>a).join(" ");
 }
+

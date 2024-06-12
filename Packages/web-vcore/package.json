@@ -144,7 +144,8 @@
 		"webpack-dependency-tools": "0.0.1",
 		"webpack-dev-middleware": "7.0.0",
 		"webpack-runtime-require": "2.0.0",
-		"webpack-string-replacer": "0.0.20"
+		"webpack-string-replacer": "0.0.20",
+        "minidenticons": "^4.2.1"
 	},
 	"packageManager": "yarn@4.0.2",
 	"resolutions": {

@@ -124,3 +124,4 @@ class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasin
 		);
 	}
 }
+

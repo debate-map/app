@@ -147,6 +147,7 @@ export const NodePanel_values = [
 	"tags",
 	"details",
 	"history",
+	"comments",
 	"others",
 ];
 export type NodePanel = typeof NodePanel_values[number];
@@ -155,3 +156,4 @@ export class ToolbarItem {
 	@Field({type: "string"})
 	panel: NodePanel;
 }
+

@@ -6,6 +6,7 @@ export enum ChildGroup {
 	generic = "generic",
 	truth = "truth",
 	relevance = "relevance",
+	comment = "comment",
 	// testing
 	neutrality = "neutrality",
 	freeform = "freeform",
