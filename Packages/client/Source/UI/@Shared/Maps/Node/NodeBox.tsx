@@ -353,6 +353,10 @@ export class NodeBox extends BaseComponentPlus(
 			uiState.paintMode_painting = false;
 		});
 
+		UseDocumentEventListener("mousedown", e=>{
+			uiState.paintMode_painting = true;
+		});
+
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
 			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
@@ -460,7 +464,6 @@ export class NodeBox extends BaseComponentPlus(
 						{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, above
 						style={E(
 							{
-								pointerEvents: showNotificationPaint ? "none" : "auto",
 								color: liveSkin.NodeTextColor().css(),
 								//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
 								//minHeight: 25, // so that argument nodes remain 25px high, even when toolbar is hidden
@@ -541,17 +544,13 @@ export class NodeBox extends BaseComponentPlus(
 					onMouseEnter={()=>{
 						if (uiState.paintMode_painting) {
 							RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
-							if (!expanded) {
-								graph?.SetAnchorNode(treePath, {nodePath: path});
-								ACTNodeExpandedSet({mapID: map?.id, path, expanded: true});
-							}
 						}
 					}}
 					style={{
-								borderRadius: "5px",
-								position: "absolute", width: width_final, right: 0, top: 0, bottom: 0,
-								zIndex: 1000,
-								border: showNotificationPaintCss,
+						borderRadius: "6px",
+						position: "absolute", width: width_final + 1, right: -1, top: -1, bottom: -1,
+						zIndex: 20,
+						border: showNotificationPaintCss,
 					}}/>}
 					<div style={{width: lastWidthWhenNotPreview}}/>
 					<FrameRenderSignal map={map}/>
