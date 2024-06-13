@@ -140,7 +140,7 @@ export class CG_Claim extends CG_Node {
 	counter_claim?: string;
 
 	// v5
-	examples?: CG_Argument[];
+	examples?: (string | CG_Argument)[];
 	counter_claims?: string[];
 }
 

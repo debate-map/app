@@ -56,7 +56,7 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	const args = [] as CG_Argument[];
 	if (claim.argument) args.push({argument: claim.argument} as CG_Argument);
 	if (claim.arguments) args.push(...claim.arguments.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
-	if (claim.examples) args.push(...claim.examples);
+	if (claim.examples) args.push(...claim.examples.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
 	const counterClaimStrings = [...(claim.counter_claims ?? []), ...(claim.counter_claim ? [claim.counter_claim] : [])];
 	args.push(...counterClaimStrings.map(str=>({argument: str} as CG_Argument)));
 	for (const [i, argument] of args.entries()) {
