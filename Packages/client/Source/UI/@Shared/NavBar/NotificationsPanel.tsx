@@ -2,23 +2,57 @@ import {BaseComponent, UseMemo, cssHelper} from "web-vcore/nm/react-vextensions.
 import {Button, CheckBox, Column, Div, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {GetCommandRun, GetNotifications, MeID} from "dm_common";
+import {CommandRun, GetCommandRun, GetNotifications, MeID, Notification, SubscriptionLevel} from "dm_common";
 import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
+import ReactList from "react-list";
 import {CommandRunUI} from "../../Social/StreamUI.js";
 import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";
 import {GetMapState} from "../../../Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "../../../Store/main.js";
 import {store} from "../../../Store/index.js";
-import {SubscriptionLevel} from "../Maps/Node/NodeBox/NodeNotificationControl.js";
 
 @Observer
-export class NotificationsPanel extends BaseComponent<{}, {}> {
+export class NotificationsPanel extends BaseComponent<{}, {}, {
+	notifications:(Notification & { command: CommandRun|n })[];
+}> {
+
+	renderItem = (index, key)=>{
+
+		const {notifications} = this.stash;
+		const notification = notifications[index];
+
+		return (
+			<Column key={key}
+				style={E(
+					{position: "relative", padding: 5},
+					!notification.readTime && {backgroundColor: "rgba(0,0,0,0.15)"},
+				)}
+				onClick={()=>{
+					RunCommand_UpdateNotification({id: notification.id, updates: {
+						readTime: Date.now(),
+					}});
+				}}
+			>
+				{!notification.readTime &&
+				<Div style={{
+					position: "absolute", top: 6, left: 6, width: 8, height: 8,
+					display: "flex", stroke: "red", pointerEvents: "none",
+				}}>
+					<svg width="100%" height="100%" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+					</svg>
+				</Div>}
+				{notification.command &&
+				<CommandRunUI panel={true} key={index} run={notification.command!} index={index} last={index == notifications.length - 1}/>}
+			</Column>
+		);
+	}
+
 	render() {
 		const mapState = GetMapState(GetOpenMapID());
 		const uiState = store.main.notifications;
 
-		const notifications_raw = GetNotifications(MeID());
-		const notifications = UseMemo(()=>notifications_raw.map(a=>{
+		const notifications = GetNotifications(MeID()).map(a=>{
 			return {
 				...a,
 				command: a.commandRun ? GetCommandRun(a.commandRun) : null,
@@ -27,11 +61,11 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 			if (a.readTime == null && b.readTime != null) return -1;
 			if (a.readTime != null && b.readTime == null) return 1;
 			return (b.command?.runTime ?? 0) - (a.command?.runTime ?? 0);
-		}), [notifications_raw]);
+		});
 
-		const entryLimit = 5; // for now, only show the last 5 notifications (need a paging system or the like)
+		this.Stash({notifications});
 
-		const unreadCount = UseMemo(()=>notifications.filter(a=>a.readTime == null).length, [notifications]);
+		const unreadCount = notifications.filter(a=>a.readTime == null).length;
 
 		return (
 			<Div style={{
@@ -46,7 +80,7 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 					<span style={{fontSize: 18, fontWeight: "bold"}}>Notifications</span>
 					{unreadCount > 0 &&
 					<Button text="Mark all as read" onClick={()=>{
-						for (const notification of notifications_raw) {
+						for (const notification of notifications) {
 							if (notification.readTime == null) {
 								RunCommand_UpdateNotification({id: notification.id, updates: {
 									readTime: Date.now(),
@@ -55,36 +89,18 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 						}
 					}}/>}
 				</Column>}
-				{notifications.Take(entryLimit).map((notification, index)=>{
-					return (
-						<Column key={notification.id}
-							style={E(
-								{position: "relative", padding: 5},
-								!notification.readTime && {backgroundColor: "rgba(0,0,0,0.15)"},
-							)}
-							onClick={()=>{
-								RunCommand_UpdateNotification({id: notification.id, updates: {
-									readTime: Date.now(),
-								}});
-							}}
-						>
-							{!notification.readTime &&
-							<Div style={{
-								position: "absolute", top: 6, left: 6, width: 8, height: 8,
-								display: "flex", stroke: "red", pointerEvents: "none",
-							}}>
-								<svg width="100%" height="100%" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
-									<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-								</svg>
-							</Div>}
-							{notification.command &&
-							<CommandRunUI panel={true} key={index} run={notification.command!} index={index} last={index == notifications.length - 1}/>}
-						</Column>
-					);
-				})}
-				<Row style={{padding: 5, alignItems: "center", justifyContent: "space-between"}}>
+				<Div style={{
+					overflowY: "auto", height: 500,
+				}}>
+					<ReactList
+						itemRenderer={this.renderItem}
+						length={notifications.length}
+						type='uniform'
+					/>
+				</Div>
+				{mapState && <Row style={{padding: 5, alignItems: "center", justifyContent: "space-between"}}>
 					<Row center style={{padding: "8px 0px"}}>
-						<CheckBox ml="auto" text="Paint Mode" value={mapState?.subscriptionPaintMode ?? false} onChange={val=>RunInAction_Set(this, ()=>{ if (mapState) mapState.subscriptionPaintMode = val; })}/>
+						<CheckBox ml="auto" text="Paint Mode" value={mapState.subscriptionPaintMode} onChange={val=>RunInAction_Set(this, ()=>{ mapState.subscriptionPaintMode = val; })}/>
 						<InfoButton ml={5} text="When enabled, you can simply drag over nodes to set their subscription state."/>
 					</Row>
 					{mapState?.subscriptionPaintMode === true && <Row ml={10}>
@@ -94,6 +110,7 @@ export class NotificationsPanel extends BaseComponent<{}, {}> {
 						}}/>
 					</Row>}
 				</Row>
+				}
 			</Div>
 		);
 	}

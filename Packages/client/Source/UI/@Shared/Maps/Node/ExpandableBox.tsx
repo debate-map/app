@@ -8,8 +8,8 @@ import {ES, Observer, RunInAction_Set} from "web-vcore";
 import {BorderRadiusCSS as CSSForCorners} from "Utils/UI/General";
 import {store} from "Store";
 import {TourDot} from "UI/@Shared/TourUI/TourDot";
+import {SubscriptionLevel} from "dm_common";
 import {NodeBox} from "./NodeBox";
-import {SubscriptionLevel} from "./NodeBox/NodeNotificationControl.js";
 
 type Props = {
 	parent?,

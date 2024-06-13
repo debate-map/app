@@ -1,25 +1,8 @@
 import {TextPlus} from "web-vcore";
 import {Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {NodeL3, Subscription} from "dm_common";
+import {NodeL3, Subscription, SubscriptionLevel} from "dm_common";
 import {RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
-
-export const SubscriptionLevel = {
-	None: "none",
-	Partial: "partial",
-	All: "all",
-} as const;
-
-export type SubscriptionLevel = typeof SubscriptionLevel[keyof typeof SubscriptionLevel];
-
-export const getSubscriptionLevel = (subscription?: Subscription): SubscriptionLevel=>{
-	if (!subscription) return SubscriptionLevel.None;
-	const all = subscription.addChildNode && subscription.addNodeLink && subscription.addNodeRevision && subscription.deleteNode && subscription.deleteNodeLink && subscription.setNodeRating;
-	const notAll = subscription.addChildNode || subscription.addNodeLink || subscription.addNodeRevision || subscription.deleteNode || subscription.deleteNodeLink || subscription.setNodeRating;
-	if (all) return SubscriptionLevel.All;
-	if (notAll) return SubscriptionLevel.Partial;
-	return SubscriptionLevel.None;
-};
 
 export class NodeNotificationControl extends BaseComponent<{node: NodeL3, backgroundColor: chroma.Color, subscriptionLevel: SubscriptionLevel}, {}> {
 	render() {

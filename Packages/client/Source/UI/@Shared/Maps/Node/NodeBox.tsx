@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel} from "dm_common";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -36,7 +36,7 @@ import {NodeToolbar} from "./NodeBox/NodeToolbar.js";
 import {SubPanel} from "./NodeBox/SubPanel.js";
 import {TitlePanel} from "./NodeBox/TitlePanel.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
-import {getSubscriptionLevel, NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
+import {NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
 
 // drag and drop
 // ==========
@@ -327,7 +327,7 @@ export class NodeBox extends BaseComponentPlus(
 		};
 
 		const subscription = GetNodeSubscription(MeID()!, node.id);
-		const subscriptionLevel = getSubscriptionLevel(subscription);
+		const subscriptionLevel = GetSubscriptionLevel(subscription);
 
 		const showNotificationButton = [NodeType.category, NodeType.claim, NodeType.package, NodeType.multiChoiceQuestion].includes(node.type);
 		const showNotificationPaint = showNotificationButton && (mapState?.subscriptionPaintMode ?? false);
