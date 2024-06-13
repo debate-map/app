@@ -110,7 +110,15 @@ export class MessageUI extends BaseComponent<{message?: NotificationMessage, pin
 								fontSize: 12,
 								gap: 5,
 							})} text="Copy" mdIcon="content-copy" onClick={()=>{
-								CopyText(`${message?.stackTrace ?? message?.text}`);
+								let fullText = message.stackTrace;
+								if (fullText != null) {
+									if (message.text && !fullText.includes(message.text)) {
+										fullText = `${message.text}\n\n${fullText}`;
+									}
+								} else {
+									fullText = message.text;
+								}
+								CopyText(fullText);
 							}} />
 							<span className={`mdi ${expanded ? "mdi-menu-up" : "mdi-menu-down"}`}
 								style={{padding: "0 10px", color: manager.GetSkin().TextColor().css(), fontSize: 20, cursor: "pointer"}}
