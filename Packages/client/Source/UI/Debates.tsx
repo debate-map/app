@@ -1,4 +1,4 @@
-import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map} from "dm_common";
+import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map, Me} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
@@ -46,34 +46,42 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 		const uiState = store.main.debates;
 
 		let maps = GetMaps(true);
-		if (SLMode_Main) {
-			maps = maps
-				.filter(a=>{
-					const creator = GetUser(a.creator);
-					if (creator?.permissionGroups.admin) return false;
+
+		// this block is for various filterings of the map-list based on the current skin; only do these filterings if the user is non-admin
+		// (admins should see all maps, for more convenient curation, eg. moving nodes between maps)
+		if (!Me()?.permissionGroups.admin) {
+			if (SLMode_Main) {
+				maps = maps
+					.filter(a=>{
+						const creator = GetUser(a.creator);
+						if (creator?.permissionGroups.admin) return false;
+						return true;
+					});
+			}
+			const prefixFilterKey = GetMapNamePrefixFilterKey();
+			// if current-skin targets one of the "skin-specific map-prefixes", filter the map-list to just the ones with that prefix
+			if (prefixFilterKey) {
+				maps = maps
+					.filter(a=>{
+						if (!a.name.toLowerCase().startsWith(`[${prefixFilterKey}`)) return false;
+						const creator = GetUser(a.creator);
+						if (!creator?.permissionGroups.admin) return false;
+						return true;
+					})
+					.OrderBy(a=>{
+						const [matchStr, orderingNumber] = GetSkinPrefixInfoFromMapName(a.name, prefixFilterKey!);
+						return orderingNumber != null ? Number(orderingNumber) : 0;
+					});
+			}
+			// else, *exclude* all maps that have one of those "skin-specific map-prefixes"
+			else {
+				maps = maps.filter(map=>{
+					for (const prefixKey of namePrefixesForMapsToShowOnlyInAssociatedSkin) {
+						if (map.name.toLowerCase().startsWith(`[${prefixKey}`)) return false;
+					}
 					return true;
 				});
-		}
-		const prefixFilterKey = GetMapNamePrefixFilterKey();
-		if (prefixFilterKey) {
-			maps = maps
-				.filter(a=>{
-					if (!a.name.toLowerCase().startsWith(`[${prefixFilterKey}`)) return false;
-					const creator = GetUser(a.creator);
-					if (!creator?.permissionGroups.admin) return false;
-					return true;
-				})
-				.OrderBy(a=>{
-					const [matchStr, orderingNumber] = GetSkinPrefixInfoFromMapName(a.name, prefixFilterKey!);
-					return orderingNumber != null ? Number(orderingNumber) : 0;
-				});
-		} else {
-			maps = maps.filter(map=>{
-				for (const prefixKey of namePrefixesForMapsToShowOnlyInAssociatedSkin) {
-					if (map.name.toLowerCase().startsWith(`[${prefixKey}`)) return false;
-				}
-				return true;
-			});
+			}
 		}
 
 		const columns: ColumnData[] = [
