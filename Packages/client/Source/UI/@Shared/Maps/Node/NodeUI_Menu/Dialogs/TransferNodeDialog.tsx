@@ -247,8 +247,8 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 								? `
 									Yes: All children (^1) of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked (^2).
 									No: The clone is created without any children (^1).
-									
-									^1: If this transfer's source-node is a single-premise argument (${payload.nodes.length == 1 ? "in this case, it's not" : "in this case, it is"}), then transfer of that child premise is controlled by the "Transfer #2" section below. 
+
+									^1: If this transfer's source-node is a single-premise argument (${payload.nodes.length == 1 ? "in this case, it's not" : "in this case, it is"}), then transfer of that child premise is controlled by the "Transfer #2" section below.
 									^2: Exception: If old-node-type is category (with claim children), and new-node-type is claim, then children claims are wrapped into argument nodes. (for fixing common structuring mistake)
 								`.AsMultiline(0)
 								: `
@@ -361,3 +361,4 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 		);
 	}
 }
+
