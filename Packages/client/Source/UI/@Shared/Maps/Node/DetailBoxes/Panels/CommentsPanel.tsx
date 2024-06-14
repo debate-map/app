@@ -178,9 +178,9 @@ class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvote
     	const {onUpvoteClick, onDownvoteClick, onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator} = this.props;
     	return (
             <div style={{display: "flex", paddingTop: "5px"}}>
-                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" mdIcon="thumb-up" enabled={true} onClick={onToggleReplyClick} />
+                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" mdIcon="thumb-up" enabled={true} onClick={onUpvoteClick} />
                 <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" ml={5} mdIcon="thumb-down" enabled={true} onClick={onDownvoteClick} />
-                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" ml={5} text="Reply" enabled={true} onClick={onUpvoteClick} />
+                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" ml={5} text="Reply" enabled={true} onClick={onToggleReplyClick} />
                 {currentNodeCreator === MeID() && <MoreOptionsDropDown onEditClick={onEditClick} onDeleteClick={onDeleteClick} />}
             </div>
     	);
