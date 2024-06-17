@@ -36,6 +36,8 @@ pub struct Subscription {
     pub deleteNodeLink: bool,
     pub addNodeRevision: bool,
     pub setNodeRating: bool,
+    pub createdAt: i64,
+    pub updatedAt: i64,
 }
 impl From<Row> for Subscription {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

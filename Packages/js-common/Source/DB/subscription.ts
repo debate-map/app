@@ -9,6 +9,10 @@ export const SubscriptionLevel = {
 
 export type SubscriptionLevel = typeof SubscriptionLevel[keyof typeof SubscriptionLevel];
 
+export const GetSubscriptions = CreateAccessor((userId: string): Subscription[]=>GetDocs({
+	params: {filter: {user: {equalTo: userId}}},
+}, a=>a.subscriptions));
+
 export const GetNodeSubscription = CreateAccessor((userId: string, nodeId: string): Subscription|undefined=>{
 	return GetDocs({
 		params: {filter: {

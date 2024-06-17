@@ -124,7 +124,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						</>} // size={28}
 						style={css(
 							{
-								zIndex: 50,
+								zIndex: 5,
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
 								padding: 0,

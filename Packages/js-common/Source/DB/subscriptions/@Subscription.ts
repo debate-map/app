@@ -43,4 +43,11 @@ export class Subscription {
 	@Field({type: "boolean"})
 	setNodeRating: boolean;
 
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"}, {opt: true})
+	createdAt: number;
+
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"}, {opt: true})
+	updatedAt: number;
 }

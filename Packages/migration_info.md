@@ -41,4 +41,8 @@ ALTER TABLE app.subscriptions
     DROP CONSTRAINT pk_user_node;
 ALTER TABLE app.subscriptions
     ADD CONSTRAINT unique_node_user UNIQUE ("node", "user");
+
+ALTER TABLE app.subscriptions
+ADD COLUMN "createdAt" bigint NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT * 1000,
+ADD COLUMN "updatedAt" bigint NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT * 1000;
 ```

@@ -5,7 +5,7 @@ import {makeObservable} from "web-vcore/nm/mobx";
 
 export class DatabaseState {
 	constructor() { makeObservable(this); }
-	@O subpage: "users" | "policies" | "terms" | "media";
+	@O subpage: "users" | "policies" | "terms" | "media" | "subscriptions";
 	@O selectedUserID: string|n;
 	@O selectedTermID: string|n;
 	//@O selectedTermComponentID: string|n;

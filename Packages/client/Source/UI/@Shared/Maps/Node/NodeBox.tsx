@@ -549,7 +549,7 @@ export class NodeBox extends BaseComponentPlus(
 					style={{
 						borderRadius: "6px",
 						position: "absolute", width: width_final + 1, right: -1, top: -1, bottom: -1,
-						zIndex: 20,
+						zIndex: 4,
 						border: showNotificationPaintCss,
 					}}/>}
 					<div style={{width: lastWidthWhenNotPreview}}/>

@@ -8,6 +8,8 @@ CREATE TABLE app.subscriptions (
     "deleteNodeLink" boolean NOT NULL DEFAULT FALSE,
     "addNodeRevision" boolean NOT NULL DEFAULT FALSE,
     "setNodeRating" boolean NOT NULL DEFAULT FALSE,
+    "createdAt" bigint NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT * 1000;
+    "updatedAt" bigint NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT * 1000;
     CONSTRAINT pk_user_node UNIQUE ("user", "node")
 );
 
