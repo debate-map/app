@@ -23,6 +23,7 @@
 		".yalc"
 	],
 	"scripts": {
+		"start": "cd ../.. && npx nps",
 		"@comment_postinstall": "Behavior of the node-js subscript below: if '.git' doesn't exist under web-vcore, it's installed as a dep, so do nothing -- else, return error-code 1, causing patch-package to run.",
 		"postinstall_old": "node -e \"let wvcAsDep = !require('fs').existsSync('.git'); if (!wvcAsDep) process.exit(1);\" || patch-package",
 		"postinstall_old2": "node ./Scripts/@CJS/ApplyPatches.js",
@@ -101,7 +102,7 @@
 		"html-webpack-plugin": "5.6.0",
 		"immer": "^7.0.7",
 		"ip": "^1.1.5",
-		"js-vextensions": "1.0.77",
+		"js-vextensions": "1.0.78",
 		"lodash": "^4.17.15",
 		"mini-css-extract-plugin": "^1.6.0",
 		"mobx": "^6.3.2",

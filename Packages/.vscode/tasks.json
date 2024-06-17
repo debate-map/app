@@ -8,7 +8,7 @@
 
 			//"problemMatcher": "$tsc-watch",
 			// The below are needed so that tsc's errors (as shown in Terminal and Problems panels) are resolved properly. (caused by our unusual usage, of opening vscode window #1 in "./Packages")
-			// It's needed here only because tsc requires working directly to be "./Packages/client". (because it doesn't allow specifying both "--build" and "--project")
+			// It's needed here only because tsc requires working directory to be "./Packages/client". (because it doesn't allow specifying both "--build" and "--project")
 			"options": {
 				"cwd": "${workspaceRoot}/client"
 		  	},
@@ -77,6 +77,27 @@
 			"type": "shell",
 			"command": "npm start monitorClient.build.prodQuick",
 			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+
+		// wvc
+		{
+			"label": "wvc.tsc (for external wvc users)",
+			"type": "shell",
+			"command": "npm start wvc.tsc",
+			
+			//"problemMatcher": "$tsc-watch",
+			// The below are needed so that tsc's errors (as shown in Terminal and Problems panels) are resolved properly. (caused by our unusual usage, of opening vscode window #1 in "./Packages")
+			// It's needed here only because tsc requires working directory to be "./Packages/client". (because it doesn't allow specifying both "--build" and "--project")
+			"options": {
+				"cwd": "${workspaceRoot}/web-vcore"
+		  	},
+			"problemMatcher": {
+				"base": "$tsc-watch",
+				"fileLocation": ["relative", "${workspaceRoot}/web-vcore"]
+		  	},
+
 			"isBackground": true,
 			"group": "build"
 		},

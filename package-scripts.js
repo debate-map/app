@@ -88,6 +88,14 @@ Object.assign(scripts, {
 	},
 });
 
+// these scripts are currently only needed when working on external (ie. non-debate-map) projects that user the web-vcore package
+Object.assign(scripts, {
+	wvc: {
+		tsc:         `cd Packages/web-vcore && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		tsc_noWatch: `cd Packages/web-vcore && ${pathToNPMBin("tsc", 2)} --build`,
+	},
+});
+
 const appNamespace = "default"; //"app";
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
 const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOutNonRunning = true)=>{
