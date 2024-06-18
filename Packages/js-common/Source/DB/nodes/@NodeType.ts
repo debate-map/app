@@ -60,7 +60,7 @@ export class NodeType_Info {
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			//minWidth: 350, maxWidth: 600,
-			minWidth: 600, maxWidth: 600, // probably temp
+			minWidth: 150, maxWidth: 600, // probably temp
 			// mainRatingTypes: ["probability", "intensity"],
 			// mainRatingTypes: ["probability", "support"],
 			/* mainRatingTypes: ["probability", "truth"],

@@ -2,11 +2,17 @@ import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-ve
 import {ES, Link, Observer, PageContainer, TextPlus} from "web-vcore";
 import {useState} from "react";
 import {ScrollView} from "react-vscrollview";
-import {GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
+import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row} from "react-vcomponents";
 import Moment from "web-vcore/nm/moment";
+import useResizeObserver from "use-resize-observer";
+import {Button} from "web-vcore/nm/react-vcomponents.js";
+import {ShowMessageBox} from "react-vmessagebox";
+import {E} from "js-vextensions";
 import {ColumnData, TableData, TableHeader} from "../@Shared/TableHeader/TableHeader.js";
 import {liveSkin} from "../../Utils/Styles/SkinManager.js";
+import {NodeBox} from "../@Shared/Maps/Node/NodeBox.js";
+import {RunCommand_AddSubscriptionWithLevel} from "../../Utils/DB/Command.js";
 
 const columns: ColumnData[] = [{
 	key: "node" as const,
@@ -131,22 +137,63 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
             case "all": levelText = "All"; break;
             case "partial": levelText = "Partial"; break;
             case "none": levelText = "None"; break;
+			default: {
+				console.warn(`Unknown subscription level: ${level}`);
+				levelText = "Unknown"; break;
+			}
 		}
 
 		const {css} = cssHelper(this);
+
+		const node = GetNode(subscription.node);
+		if (node == null) return null;
+
+		const revision = GetNodeRevision(node.c_currentRevision);
+		if (revision == null) return null;
+
+		const accessPolicy = GetAccessPolicy(node.accessPolicy);
+		if (accessPolicy == null) return null;
+
+		const nodeL2 = AsNodeL2(node, revision, accessPolicy);
+
+		const nodeFinal = AsNodeL3(nodeL2, null);
+
+		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
+
 		return (
 			<Column p="7px 10px" style={css(
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
-				<Row>
-                    <span style={{flex: columns[0].width}}>node</span>
+				<Row style={{
+					display: "flex", flexDirection: "row", alignItems: "center",
+				}}>
+                    <span ref={rootRef} style={{flex: columns[0].width, paddingRight: 10, pointerEvents: "none", marginTop: nodeFinal.type === "claim" ? 30 : 0}}>
+						<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false}
+							backgroundFillPercentOverride={100} width={width}
+							useLocalPanelState={true} usePortalForDetailBoxes={true} />
+					</span>
 					<span style={{flex: columns[1].width}}>
                         <TextPlus info={levelInfo}>{levelText}</TextPlus>
                     </span>
 					<span style={{flex: columns[2].width}}>{Moment(subscription.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
 					<span style={{flex: columns[3].width}}>{Moment(subscription.updatedAt).format("YYYY-MM-DD HH:mm:ss")}</span>
-                    <Link text="Delete" actionFunc={()=>{}} style={{flex: columns[4].width, fontSize: 17}}/>
+					<span onClick={()=>{
+						ShowMessageBox({
+							title: `Delete node subscription?`, cancelButton: true,
+							message: `Delete node subscription?`,
+							onOK: ()=>{
+								RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
+								// invalidate the current subscriptions list, so that the deleted subscription is removed from the list
+
+							},
+						});
+					}} style={{
+						flex: columns[4].width,
+						color: "red",
+						textDecoration: "underline",
+						cursor: "pointer",
+					}}>Delete</span>
 				</Row>
 			</Column>
 		);

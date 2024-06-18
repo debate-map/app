@@ -5,7 +5,7 @@ use crate::{db::{commands::_command::{command_boilerplate, insert_db_entry_by_id
 use rust_shared::{async_graphql,serde_json};
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::anyhow::{anyhow, Error, Context};
-use super::_command::NoExtras;
+use super::_command::{delete_db_entry_by_id, NoExtras};
 
 
 
@@ -125,8 +125,12 @@ pub async fn add_or_update_subscription(ctx: &AccessorContext<'_>, actor: &User,
         subscription.setNodeRating = setNodeRating.unwrap_or(subscription.setNodeRating);
         subscription.updatedAt = time_since_epoch_ms_i64();
 
-        upsert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
-    
+        if !subscription.addChildNode && !subscription.addNodeLink && !subscription.deleteNode && !subscription.deleteNodeLink && !subscription.addNodeRevision && !subscription.setNodeRating {
+            delete_db_entry_by_id(&ctx,"subscriptions".o() , subscription.id.to_string()).await?;
+        } else {
+            upsert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
+        }
+
         Ok(AddSubscriptionResult {
             id: subscription.id.to_string(),
             node: subscription.node.to_string(),
@@ -154,8 +158,10 @@ pub async fn add_or_update_subscription(ctx: &AccessorContext<'_>, actor: &User,
             updatedAt: time_since_epoch_ms_i64(),
         };
         
-        insert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
-    
+        if subscription.addChildNode || subscription.addNodeLink || subscription.deleteNode || subscription.deleteNodeLink || subscription.addNodeRevision || subscription.setNodeRating {
+            insert_db_entry_by_id_for_struct(&ctx, "subscriptions".o(), subscription.id.to_string(), subscription.clone()).await?;
+        }
+
         Ok(AddSubscriptionResult {
             id: subscription.id.to_string(),
             node: subscription.node.to_string(),
