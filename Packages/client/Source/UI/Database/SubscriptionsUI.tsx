@@ -1,6 +1,6 @@
 import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {ES, Link, Observer, PageContainer, TextPlus} from "web-vcore";
-import {useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {ScrollView} from "react-vscrollview";
 import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row} from "react-vcomponents";
@@ -48,31 +48,27 @@ const columns: ColumnData[] = [{
 ];
 
 @Observer
-export class SubscriptionsUI extends BaseComponentPlus({} as {}, {}) {
+export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
+	tableData: {columnSort: "", columnSortDirection: "", filters: []} as TableData,
+}) {
+
 	render() {
+		const {tableData} = this.state;
+
 		const userId = MeID();
 
-		const subscriptions = userId ? GetSubscriptions(userId).filter(s=>{
-			return GetSubscriptionLevel(s) != "none";
-		}) : [];
+		const subscriptions = GetSubscriptions(userId);
 
-		const [sortedAndFilteredSubscriptions, setSortedAndFilteredSubscriptions] = useState(subscriptions);
+		const onTableChange = (newTableData:TableData)=>{
+			this.SetState({tableData: newTableData});
+		};
 
-		const onTableChange = (tableData:TableData)=>{
-			setTableData({
-				columnSort: tableData.columnSort,
-				columnSortDirection: tableData.columnSortDirection,
-				filters: [...tableData.filters],
-			});
-
+		const sortedAndFilteredSubscriptions = useMemo(()=>{
 			let output = subscriptions;
-
 			if (tableData.columnSort) {
 				switch (tableData.columnSort) {
 					case "level": {
-						output = subscriptions.OrderByDescending(a=>{
-							return [a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length;
-						});
+						output = subscriptions.OrderByDescending(a=>[a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length);
 						break;
 					}
 					case "createdAt": {
@@ -89,15 +85,13 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {}) {
 					}
 				}
 			}
+
 			if (tableData.columnSortDirection == "desc") {
-				output = output.reverse();
+				output = sortedAndFilteredSubscriptions.reverse();
 			}
 
-			setSortedAndFilteredSubscriptions([...output]);
-
-		};
-
-		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
+			return output;
+		}, [subscriptions, tableData.columnSort, tableData.columnSortDirection]);
 
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
@@ -107,7 +101,7 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {}) {
 				})}>
 					{sortedAndFilteredSubscriptions.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No Subscriptions</div>}
 					{sortedAndFilteredSubscriptions.map((subscription, index)=>{
-						return <SubscriptionRow key={subscription.id} index={index} last={index == subscriptions.length - 1} subscription={subscription}/>;
+						return <SubscriptionRow key={subscription.id} index={index} last={index == sortedAndFilteredSubscriptions.length - 1} subscription={subscription}/>;
 					})}
 				</ScrollView>
 			</PageContainer>
@@ -146,13 +140,22 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 		const {css} = cssHelper(this);
 
 		const node = GetNode(subscription.node);
-		if (node == null) return null;
+		if (node == null) {
+			console.warn(`Node with ID ${subscription.node} not found.`);
+			return null;
+		}
 
 		const revision = GetNodeRevision(node.c_currentRevision);
-		if (revision == null) return null;
+		if (revision == null) {
+			console.warn(`Node Revision with ID ${node.c_currentRevision} not found.`);
+			return null;
+		}
 
 		const accessPolicy = GetAccessPolicy(node.accessPolicy);
-		if (accessPolicy == null) return null;
+		if (accessPolicy == null) {
+			console.warn(`Node Access Policy with ID ${accessPolicy} not found.`);
+			return null;
+		}
 
 		const nodeL2 = AsNodeL2(node, revision, accessPolicy);
 
@@ -184,8 +187,6 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 							message: `Delete node subscription?`,
 							onOK: ()=>{
 								RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
-								// invalidate the current subscriptions list, so that the deleted subscription is removed from the list
-
 							},
 						});
 					}} style={{

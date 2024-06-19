@@ -223,12 +223,8 @@ export async function RunCommand_AddSubscriptionWithLevel({
 	node: string
 	level: SubscriptionLevel
 }) {
-	console.log("RunCommand_AddSubscriptionWithLevel", {node, level});
-
 	const currentSubscription = GetNodeSubscription(MeID()!, node);
 	const currentLevel = GetSubscriptionLevel(currentSubscription);
-	console.log("currentLevel:", currentLevel);
-	console.log("currentSubscription:", currentSubscription);
 
 	switch (level) {
 		case SubscriptionLevel.None:
