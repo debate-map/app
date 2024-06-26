@@ -173,3 +173,24 @@ CREATE OR REPLACE FUNCTION app.timelines_refresh_targets_for_others() RETURNS TR
 END $$;
 DROP TRIGGER IF EXISTS timelines_refresh_targets_for_others on app."timelines";
 CREATE TRIGGER timelines_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."timelines" FOR EACH ROW EXECUTE FUNCTION app.timelines_refresh_targets_for_others();
+
+-- this function is not called during regular operation, but it's useful for manual maintenance (eg. it's needed just after the restore of a pgdump backup)
+CREATE OR REPLACE FUNCTION app.recalculate_all_access_policy_targets() RETURNS void LANGUAGE plpgsql AS $$
+DECLARE
+	-- all tables that have a "c_accessPolicyTargets" field
+	tables text[] := array[
+		'mapNodeEdits',
+		'nodeLinks',
+		'nodePhrasings',
+		'nodeRatings',
+		'nodeRevisions',
+		'nodeTags',
+		'commandRuns',
+		'timelineSteps'
+	];
+BEGIN
+	-- loop through all tables, and update their "c_accessPolicyTargets" fields
+	FOR i IN 1..array_length(tables, 1) LOOP
+		EXECUTE format('UPDATE app.%I SET "c_accessPolicyTargets" = array[]::text[]', tables[i]);
+	END LOOP;
+END $$;

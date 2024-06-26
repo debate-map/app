@@ -1,3 +1,9 @@
+# You can deploy this pod to the prod cluster (independently from tilt) by running the following command:
+# ```
+# kubectl --context dm-ovh apply -f Packages/deploy/PGO/@Operations/@explore-pvc_debate-map-instance1-XXX-pgdata.yaml
+# ```
+# Note: You'll generally want to delete this pod once you're done (can be done thorugh Lens). If you don't, it'll keep a hold on the database persistent-volume.
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -14,5 +20,5 @@ spec:
   volumes:
   - name: volume1
     persistentVolumeClaim:
-      claimName: debate-map-instance1-84f4-pgdata
+      claimName: debate-map-instance1-l88g-pgdata
   restartPolicy: Never

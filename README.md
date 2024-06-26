@@ -910,21 +910,37 @@ To create a backup:
 	* 2.2\) Press Tools->Backup, select "app", press Next, set format to "Tar", and press Start.
 
 To restore a backup:
-* 1\) It's recommended to rename the existing `app` schema to `app_old` or the like, before restoring a backup file.
-* 2\) Before restoring the backup file, make sure the `rls_obeyer` role is created, by executing the `create role "rls_obeyer"...` section in `General_End.sql`.
+* 1\) If the `debate-map` database doesn't exist yet, create it:
+	* 1.1\) Start psql: `npm start "db.psql_k8s dm-[local/ovh] db:postgres"`
+	* 1.2\) Run the `@CreateDB.sql` script: `\i ./Scripts/InitDB/@CreateDB.sql`
+	* 1.3\) Close this terminal/session. (you will not need to connect to this "postgres" database anymore)
+* 2\) If the `app` schema already exists, delete or rename it (eg. to `app_old`).
+	* 2.1\) Start psql: `npm start "db.psql_k8s dm-[local/ovh]"`
+	* 2.2\) Rename or delete it:
+		* 2.2.1\) Option 1: Rename it: `ALTER SCHEMA app RENAME TO app_old;`
+		* 2.2.2\) Option 2: Delete it: `DROP SCHEMA IF EXISTS app CASCADE;`
 * 3\) Do some cleanup of the backup file: (`pgdump` is not perfect, and can output some lines that fail to restore as-is)
-	* 3.1\) If present, comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app.pg_stat_statements TO rls_obeyer;`
+	* 3.1\) For cleaner restores, add a `BEGIN;` line at very start, and an `END;` line at very end. (runs restore in a transaction, so if a failure happens, you can edit and retry without conditions changing)
+		* Note: While this step is recommended, in some cases you may need to omit this, if the pgdump is such that you need to "re-attempt" applying of it 2+ times in order for eg. dependency conflicts to be resolved. Usually the constraint-deferring line below will be enough though.
+	* 3.2\) Some foreign-key constraints may cause ordering conflicts normally. Avoid this by adding a `SET CONSTRAINTS ALL DEFERRED;` line just after the `BEGIN;` line.
+	* 3.3\) Copy-paste the contents of `General_Start.sql` into the psql shell, right after the `SET CONSTRAINTS ALL DEFERRED;` line. (adding space padding around inserted section is fine)
+		* 3.3.1\) Omit all of the lines in the "search/text-match config" section. (which includes all the lines containing `TEXT SEARCH`)
+	* 3.4\) Comment out the line from the original pgdump text that creates the `app` schema, because the code from `General_Start.sql` already does this. 
+	* 3.5\) If present, comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app.pg_stat_statements TO rls_obeyer;`
+	* 3.6\) The pgdump sql file probably contains a line of `SELECT pg_catalog.set_config('search_path', '', false);`; comment it out (by adding to start of line): `-- `
+		* Note: Why is this necessary? Because SQL dumps/backups do not record the "search-path" of the database. This is by design apparently (https://postgrespro.com/list/thread-id/2448092), but means that the search-path must be set manually, if restoring to a fresh database.
 * 4\) Execute the SQL dump/backup-file using psql or DBeaver.
 	* 4.1\) Option 1: Using psql:
-		* 4.1.1\) TODO
+		* 4.1.1\) Start psql: `npm start "db.psql_k8s dm-[local/ovh]"`
+			* NOTE: This command is NOT the same as the one above, since this connects to the (new) "debate-map" database instead of the "postgres" one. (so don't just re-use your existing terminal)
+		* 4.1.2\) Import the pgdump file: `\i PATH_TO_BACKUP_FILE.sql` (eg. `\i ../Others/@Backups/DBDumps_local/XXX.sql`)
 	* 4.2\) Option 2: Using DBeaver:
 		* 4.2.1\) After connecting to the debate-map database, right-click it and press Tools->"Execute script", then supply the path to the backup file.
-* 5\) Execute the SQL:
-	```sql
-	ALTER DATABASE "debate-map" SET search_path TO 'app'; -- for future pg-sessions
-	SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
-	```
-	* Note: Why is this necessary? Because SQL dumps/backups do not record the "search-path" of the database. This is by design apparently (https://postgrespro.com/list/thread-id/2448092), but means that the search-path must be set manually, if restoring to a fresh database. If you get errors during restore relating to search-paths (eg. due to a dev forgetting to add the schema qualifier to a recently-added function), try adding the sql code above to the start of the sql file (replacing the emptying search-path line already there).
+* 5\) Trigger the `c_accessPolicyTargets` cells to be recalculated: (since the data needed to calculate them may not have been fully available while the import was initially happening)
+	* 5.1\) Execute SQL: `SELECT app.recalculate_all_access_policy_targets();`
+	* 5.2\) For space cleanup, execute SQL: `VACUUM FULL`
+
+> Note: During the import, if you hit an error similar to `ERROR:  duplicate key value violates unique constraint "pg_ts_config_map_index"`, it likely means there's two copies of the dictionary-related creation/update commands. Find the less elegant one and remove it. (shouldn't be needed for newer pgdumps, I think)
 
 </details>
 
