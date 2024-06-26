@@ -75,6 +75,14 @@ postgresVersion: 15
 # to the value below. Settings "instances" overrides this value.
 instanceSize: 10Gi
 
+# V-NOTE on instanceSize above + the 3 related sizes in contents below:
+# ==========
+# * You might hit a situation where you want to increase the sizes slightly, eg. to fix an urgent out-of-space issue.
+# * When I did X.1Gi, that seemed to work in past. (didn't really check logs for errors though)
+# * Recently when I tried X.1Gi, I checked logs and noticed an error/warning of "size not being an integer" or something.
+# * So then I tried entering an exact bytes value (to avoid fractions theoretically possible from 10% of Gi), that avoided the integer issue, but...
+#   ...seemed to result in a persistent-volume of X+1Gi, rather than X.1Gi. (the PVC sizes appeared as expected though) 
+
 # instanceMemory sets the memory limit for the Postgres instances. This defaults
 # to no limit being set, but an example value is set below. Settings "instances"
 # overrides this value.
