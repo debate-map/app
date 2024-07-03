@@ -29,9 +29,9 @@ export class DefaultSkin extends Skin {
 	override OverlayBorderColor() { return undefined; }
 	override OverlayBorder() { return undefined; }
 	override HeaderFont() { return this.MainFont(); }
-	override MainFont() {
+	MainFont_List() {
 		// keep list in-sync with Main.scss
-		const fonts = [
+		return [
 			// fonts we supply ourselves (in most projects)
 			// ----------
 			// "Quicksand" is the standard "main font" for my projects; not all use it atm, but eventually all should converge
@@ -47,7 +47,9 @@ export class DefaultSkin extends Skin {
 			// try to supply colored emojis, using some emoji fonts that might be present on OS (otherwise it falls back to non-colored ones for, eg. ✔ and ⚙ -- though not 🚧)
 			"Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", "EmojiOne Mozilla", "TweMoji Mozilla", "Segoe UI Symbol",
 		];
-		return fonts.join(", ");
+	}
+	override MainFont() {
+		return this.MainFont_List().join(", ");
 	}
 	override TextColor() { return this.TextColor_Light(); }
 	override TextColor_Dark() { return Chroma("rgb(50,50,50)"); }
