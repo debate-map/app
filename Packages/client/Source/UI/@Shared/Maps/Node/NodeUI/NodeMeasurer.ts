@@ -1,11 +1,11 @@
-import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbar, NodeType, ChildGroup, GetToolbarItemsToShow} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbar, NodeType, ChildGroup, GetToolbarItemsToShow, ShowNotification} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {AssertWarn} from "web-vcore/nm/js-vextensions";
 import {createAtom} from "web-vcore/nm/mobx";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
-import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_WIDTH_WITH_BORDER} from "../NodeLayoutConstants";
+import {GUTTER_WIDTH_SMALL, NOTIFICATION_BELL_WIDTH, TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_WIDTH_WITH_BORDER} from "../NodeLayoutConstants";
 
 /* keep func-name, for clearer profiling */ // eslint-disable-next-line
 export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementInfoForNode(node: NodeL3, path: string, map: Map, calcHeight = false) {
@@ -45,6 +45,10 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 	if (node.type == NodeType.argument) {
 		const toolbarItemsToShow_inline = GetToolbarItemsToShow(node, path, map).filter(a=>a.panel != "prefix"); // todo: confirm whether the filter op is correct here
 		expectedOtherStuffWidth += (toolbarItemsToShow_inline.length * TOOLBAR_BUTTON_WIDTH_WITH_BORDER); // add space for the inline toolbar-items (eg. "Relevance")
+	}
+
+	if (ShowNotification(node.type)) {
+		expectedOtherStuffWidth += NOTIFICATION_BELL_WIDTH; // add space for the notification-button
 	}
 
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;

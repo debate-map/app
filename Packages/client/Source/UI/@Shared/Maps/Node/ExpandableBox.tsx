@@ -10,6 +10,7 @@ import {store} from "Store";
 import {TourDot} from "UI/@Shared/TourUI/TourDot";
 import {SubscriptionLevel} from "dm_common";
 import {NodeBox} from "./NodeBox";
+import {NOTIFICATION_BELL_WIDTH} from "./NodeLayoutConstants.js";
 
 type Props = {
 	parent?,
@@ -63,7 +64,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					<div ref={c=>this.textHolder = c} onClick={onTextHolderClick} style={ES(
 						{
 							position: "relative", width: "calc(100% - 17px)", padding,
-							paddingRight: showNotificationButton ? 20 : undefined,
+							paddingRight: showNotificationButton ? NOTIFICATION_BELL_WIDTH : undefined,
 							// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 						},
 						textHolderStyle,

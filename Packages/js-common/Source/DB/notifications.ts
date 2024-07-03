@@ -1,5 +1,5 @@
 import {GetDocs, CreateAccessor} from "mobx-graphlink";
-import {Subscription} from "../DB.js";
+import {NodeType} from "../DB.js";
 
 export const GetNotifications = CreateAccessor((userId: string|n)=>{
 	return GetDocs({
@@ -10,3 +10,7 @@ export const GetNotifications = CreateAccessor((userId: string|n)=>{
 		},
 	}, a=>a.notifications);
 });
+
+export const ShowNotification = (type: NodeType)=>{
+	return [NodeType.category, NodeType.claim, NodeType.package, NodeType.multiChoiceQuestion].includes(type);
+};
