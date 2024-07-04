@@ -92,10 +92,9 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const zoomLevel = mapState && mapState.zoomLevel != 1 ? mapState.zoomLevel : 1;
 		//graphInfo.contentScaling = zoomLevel;
 		//graphInfo.SetContentScaling(zoomLevel);
-
 		return (
 			<ScrollView {...rest} ref={c=>this.scrollView = c}
-				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
+				backgroundDrag={!mapState.subscriptionPaintMode} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
 				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 				contentOuterStyle={E(
@@ -117,7 +116,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 				}
 				.MapUI.scrolling > * { pointer-events: none; }
 				`}</style>
-				<div className="MapUI"
+				<div className={`MapUI ${mapState.subscriptionPaintMode ? "PaintingCursor" : ""}`}
 					ref={mapUI_ref}
 					style={ES(
 						{

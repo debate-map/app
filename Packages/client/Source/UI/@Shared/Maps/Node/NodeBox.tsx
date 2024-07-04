@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -11,21 +11,22 @@ import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {FlashComp} from "ui-debug-kit";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
+import {Chroma, DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener, TextPlus} from "web-vcore";
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, GetPercentFromXToY, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {DEL, DoNothing, E, GetPercentFromXToY, GetValues, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/hello-pangea-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {Graph, GraphContext, useRef_nodeLeftColumn} from "tree-grapher";
-import {Row} from "web-vcore/nm/react-vcomponents.js";
+import {Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {autorun} from "mobx";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {GetPlaybackTimeSinceNodeRevealed} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
+import {RunCommand_AddSubscription, RunCommand_AddSubscriptionWithLevel, RunCommand_UpdateSubscription} from "Utils/DB/Command.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -35,6 +36,7 @@ import {NodeToolbar} from "./NodeBox/NodeToolbar.js";
 import {SubPanel} from "./NodeBox/SubPanel.js";
 import {TitlePanel} from "./NodeBox/TitlePanel.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
+import {NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
 
 // drag and drop
 // ==========
@@ -78,6 +80,7 @@ export class NodeBox extends BaseComponentPlus(
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false,
 		lastHoveredPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
+		showNotificationPanel: false,
 	},
 ) {
 	root: ExpandableBox|n;
@@ -114,7 +117,7 @@ export class NodeBox extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, treePath, forLayoutHelper, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
-		let {hovered, moreButtonHovered, leftPanelHovered, lastHoveredPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, lastHoveredPanel, hoverTermIDs, lastWidthWhenNotPreview, showNotificationPanel} = this.state;
 
 		// connector part
 		// ==========
@@ -177,6 +180,7 @@ export class NodeBox extends BaseComponentPlus(
 		}, [map, path]);
 
 		const mapState = GetMapState(map?.id);
+		const uiState = store.main.notifications;
 
 		// the rest
 		// ==========
@@ -321,6 +325,38 @@ export class NodeBox extends BaseComponentPlus(
 				if (useLocalPanelState) this.Update();
 			});
 		};
+
+		const subscription = GetNodeSubscription(MeID()!, node.id);
+		const subscriptionLevel = GetSubscriptionLevel(subscription);
+
+		const showNotificationButton = ShowNotification(node.type);
+		const showNotificationPaint = showNotificationButton && (mapState?.subscriptionPaintMode ?? false);
+		let showNotificationPaintCss = "none";
+		if (showNotificationPaint) {
+			if (subscriptionLevel == "all") {
+				showNotificationPaintCss = "1px solid green";
+			} else if (subscriptionLevel == "partial") {
+				showNotificationPaintCss = "1px solid yellow";
+			} else if (subscriptionLevel == "none") {
+				showNotificationPaintCss = "none";
+			}
+		}
+
+		UseDocumentEventListener("click", e=>{
+			// if user clicked outside of node-box, close the subscription-level dropdown
+			if (!e.composedPath().includes(this.root?.DOM as any)) {
+				this.SetState({showNotificationPanel: false});
+			}
+		});
+
+		UseDocumentEventListener("mouseup", e=>{
+			uiState.paintMode_painting = false;
+		});
+
+		UseDocumentEventListener("mousedown", e=>{
+			uiState.paintMode_painting = true;
+		});
+
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
 			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
@@ -389,9 +425,14 @@ export class NodeBox extends BaseComponentPlus(
 			//const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 			//const isShowingToolbarButtonAtTopLeft = extractedPrefixTextInfo?.extractLocation == "toolbar";
 			const isShowingToolbarButtonAtTopLeft = toolbarItemsToShow.Any(a=>a.panel == "prefix");
+
 			return (
 				<>
 					<ExpandableBox
+						showNotificationButton={showNotificationButton}
+						notificationLevel={subscriptionLevel}
+						onToggleNotifications={()=>this.SetState({showNotificationPanel: !this.state.showNotificationPanel})}
+
 						ref={useCallback(c=>{
 							dragInfo?.provided.innerRef(GetDOM(c) as any);
 							this.root = c;
@@ -454,6 +495,9 @@ export class NodeBox extends BaseComponentPlus(
 							</NodeUI_LeftBox>}
 							{/* fixes click-gap */}
 							{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
+
+							{showNotificationPanel &&
+								<NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
 						</>}
 						//onTextHolderClick={onTextHolderClick}
 						//textHolderStyle={E(isMultiPremiseArg && {width: null})}
@@ -491,6 +535,22 @@ export class NodeBox extends BaseComponentPlus(
 								&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
 						</>}
 					/>
+					{showNotificationPaint && <div
+					onMouseDown={()=>{
+						uiState.paintMode_painting = true;
+						RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+					}}
+					onMouseEnter={()=>{
+						if (uiState.paintMode_painting) {
+							RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+						}
+					}}
+					style={{
+						borderRadius: "6px",
+						position: "absolute", width: width_final + 1, right: -1, top: -1, bottom: -1,
+						zIndex: 4,
+						border: showNotificationPaintCss,
+					}}/>}
 					<div style={{width: lastWidthWhenNotPreview}}/>
 					<FrameRenderSignal map={map}/>
 				</>

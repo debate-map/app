@@ -2,6 +2,7 @@ use rust_shared::{
 	anyhow::{anyhow, Error},
 	async_graphql::ID,
 	itertools::Itertools,
+	serde_json::json,
 	utils::{db::uuid::new_uuid_v4_as_b64, general_::extensions::ToOwnedV, time::time_since_epoch_ms_i64, type_aliases::JSONValue},
 };
 use tracing::error;
@@ -9,13 +10,21 @@ use tracing::error;
 use crate::{
 	db::{
 		command_runs::CommandRun,
-		commands::_command::upsert_db_entry_by_id_for_struct,
+		commands::{
+			_command::upsert_db_entry_by_id_for_struct,
+			add_notification::{self, add_notification, AddNotificationInput},
+		},
 		maps::{get_map, Map},
+		subscriptions::Subscription,
 		user_hiddens::get_user_hidden,
 		users::User,
 	},
 	utils::{
-		db::{accessors::AccessorContext, filter::QueryFilter, queries::get_entries_in_collection},
+		db::{
+			accessors::{get_db_entry, AccessorContext},
+			filter::QueryFilter,
+			queries::get_entries_in_collection,
+		},
 		general::data_anchor::DataAnchorFor1,
 	},
 };
@@ -34,20 +43,46 @@ pub async fn record_command_run(ctx: &AccessorContext<'_>, actor: &User, command
 	ctx.with_rls_disabled(|| async { trim_old_command_runs(ctx).await }, Some("Failed to perform trimming of old command-runs.")).await?;
 
 	let id = new_uuid_v4_as_b64();
+
 	let command_run = CommandRun {
 		// set by this func
-		id: ID(id),
+		id: ID(id.clone()),
 		actor: actor.id.to_string(),
 		runTime: time_since_epoch_ms_i64(),
 		public_base: make_public_base,
 		// pass-through
-		commandName: command_name,
+		commandName: command_name.clone(),
 		commandInput: command_input,
 		commandResult: command_result,
-		c_involvedNodes: involved_nodes,
+		c_involvedNodes: involved_nodes.clone(),
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};
+
 	upsert_db_entry_by_id_for_struct(&ctx, "commandRuns".to_owned(), command_run.id.to_string(), command_run).await?;
+
+	for node in involved_nodes {
+		let subscription = get_db_entry::<Subscription>(
+			&ctx,
+			"subscriptions",
+			&Some(json!({
+				"node": {"equalTo": node},
+				"user": {"notEqualTo": actor.id.to_string()}
+			})),
+		)
+		.await;
+
+		if let Ok(subscription) = subscription {
+			if (subscription.addChildNode && command_name == "addChildNode")
+				|| (subscription.addNodeLink && command_name == "addNodeLink")
+				|| (subscription.addNodeRevision && command_name == "addNodeRevision")
+				|| (subscription.deleteNode && command_name == "deleteNode")
+				|| (subscription.deleteNodeLink && command_name == "deleteNodeLink")
+				|| (subscription.setNodeRating && command_name == "setNodeRating")
+			{
+				add_notification(ctx, actor, false, AddNotificationInput { user: subscription.user, commandRun: id.to_string(), readTime: None }, false).await?;
+			}
+		};
+	}
 
 	Ok(())
 }

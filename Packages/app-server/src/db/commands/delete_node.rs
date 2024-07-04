@@ -76,7 +76,7 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool,
 
 			// todo: for any tag where this node is a member, update it to remove this node's id from the `nodes` array (and possibly other fields too)
 			// todo: delete any tags for which this node is the only associated node
-
+			ctx.tx.execute(r#"DELETE FROM "subscriptions" WHERE node = $1"#, &[&nodeID]).await?;
 			Ok(())
 		},
 		Some("Failed to delete data associated with node."),

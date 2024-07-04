@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep, Subscription, Notification, AddSubscriptionInput, GetNodeSubscription, MeID, SubscriptionLevel, GetSubscriptionLevel} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 
@@ -208,9 +208,48 @@ export async function RunCommand_TransferNodes(inputFields: {mapID?: string|n, n
 	return result.data.transferNodes as {};
 }
 
+export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInput) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: AddSubscriptionInput!) { addSubscription(input: $input) { id } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.addSubscription as {id: string};
+}
+
+export async function RunCommand_AddSubscriptionWithLevel({
+	node,
+	level,
+}: {
+	node: string
+	level: SubscriptionLevel
+}) {
+	const currentSubscription = GetNodeSubscription(MeID()!, node);
+	const currentLevel = GetSubscriptionLevel(currentSubscription);
+
+	switch (level) {
+		case SubscriptionLevel.None:
+			if (currentLevel == SubscriptionLevel.None) return;
+			RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			break;
+		case SubscriptionLevel.Partial:
+			if (currentLevel == SubscriptionLevel.Partial) return;
+			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			break;
+		case SubscriptionLevel.All:
+			if (currentLevel == SubscriptionLevel.All) return;
+			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: true, addNodeRevision: true, deleteNode: true, deleteNodeLink: true, setNodeRating: true});
+			break;
+		default:
+			throw new Error(`Unknown subscription level: ${level}`);
+	}
+}
+
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");
 export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
 export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);
+export const RunCommand_UpdateNotification = CreateFunc_RunCommand_UpdateX(Notification);
+
+export const RunCommand_UpdateSubscription = CreateFunc_RunCommand_UpdateX(Subscription);
 
 export function RunCommand_DeleteSubtree(inputFields: {mapId?: string|n, rootNodeId: string, maxDepth?: number|n}, onProgress?: (subcommandsCompleted: number, subcommandsTotal: number)=>void) {
 	const fetchResult_subscription = apolloClient.subscribe<{deleteSubtree: DeleteSubtreeResult}>({

@@ -165,3 +165,13 @@ impl UsesRLS for CommandRun {
 			)
 	}
 }
+impl UsesRLS for Subscription {
+	fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+		is_user_admin_or_creator(user_id, &self.user)
+	}
+}
+impl UsesRLS for Notification {
+	fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+		is_user_admin_or_creator(user_id, &self.user)
+	}
+}

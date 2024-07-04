@@ -24,6 +24,7 @@ use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::get_map;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
+use crate::db::user_hiddens::get_user_hidden;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::general::data_anchor::DataAnchorFor1;
@@ -31,6 +32,7 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::record_command_run::{record_command_run, record_command_run_if_root};
+use super::add_subscription::{add_or_update_subscription, AddSubscriptionInput, AddSubscriptionInputBuilder};
 
 wrap_slow_macros! {
 
@@ -76,7 +78,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		//phrasing_tsvector: "<tbd>".to_owned(), // auto-set by db
 		replacedBy: None, // auto-set by db
 		// pass-through
-		node: node_id,
+		node: node_id.clone(),
 		phrasing: revision_.phrasing,
 		displayDetails: revision_.displayDetails,
 		attachments: revision_.attachments,
@@ -117,6 +119,21 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 	}
 
 	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+
+    let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
+    if user_hiddens.notificationPolicy == "S" {
+        let subscription = AddSubscriptionInputBuilder::new(node_id.clone())
+            .with_add_child_node(true)
+            .with_add_child_node(true)
+            .with_add_node_link(true)
+            .with_add_node_revision(true)
+            .with_delete_node(true)
+            .with_delete_node_link(true)
+            .with_set_node_rating(true)
+            .build();
+
+        add_or_update_subscription(ctx, actor, false, subscription, Default::default()).await?;
+    }
 
 	let result = AddNodeRevisionResult { id: revision.id.to_string() };
 	//if extras.is_child_command != Some(true) {

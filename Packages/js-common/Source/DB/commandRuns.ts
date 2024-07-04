@@ -18,6 +18,16 @@ export const GetCommandRuns = CreateAccessor((commandTypes?: string[], actorID?:
 		}},
 	}, a=>a.commandRuns);
 });
+
+export const GetManyCommandRuns = CreateAccessor((commandIds?: string[])=>{
+
+	return GetDocs({
+		params: {filter: {
+			id:  {in: commandIds},
+		}},
+	}, a=>a.commandRuns);
+});
+
 export const GetCommandRun = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.commandRuns.get(id!));
 });

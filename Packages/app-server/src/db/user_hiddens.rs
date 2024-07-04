@@ -52,6 +52,7 @@ pub struct UserHidden {
 	#[graphql(name = "backgroundCustom_position")]
 	pub backgroundCustom_position: Option<String>,
 	pub addToStream: bool,
+	pub notificationPolicy: String,
 	// todo: fix that this is not actually getting updated when user creates choosen a different access-policy for a new entry (or, rename this field)
 	pub lastAccessPolicy: Option<String>,
 	pub extras: JSONValue,
@@ -76,6 +77,7 @@ pub struct UserHiddenUpdates {
 	pub backgroundCustom_url: CanNullOrOmit<String>,
 	#[graphql(name = "backgroundCustom_position")]
 	pub backgroundCustom_position: CanNullOrOmit<String>,
+	pub notificationPolicy: CanOmit<String>,
 	pub addToStream: CanOmit<bool>,
 	pub extras: CanOmit<JSONValue>,
 }

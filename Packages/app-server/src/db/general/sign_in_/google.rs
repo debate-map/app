@@ -119,6 +119,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
 		backgroundCustom_color: None,
 		backgroundCustom_url: None,
 		backgroundCustom_position: None,
+		notificationPolicy: "S".to_owned(),
 		addToStream: true,
 		extras: serde_json::to_value(UserHidden_Extras { defaultAccessPolicy_nodeRatings: Some(policy_private_governed.id.as_str().to_owned()), userFollows: None })?,
 	};

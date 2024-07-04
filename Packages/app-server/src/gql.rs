@@ -11,7 +11,9 @@ use crate::db::commands::add_node_link::MutationShard_AddNodeLink;
 use crate::db::commands::add_node_phrasing::MutationShard_AddNodePhrasing;
 use crate::db::commands::add_node_revision::MutationShard_AddNodeRevision;
 use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
+use crate::db::commands::add_notification::MutationShard_AddNotification;
 use crate::db::commands::add_share::MutationShard_AddShare;
+use crate::db::commands::add_subscription::MutationShard_AddSubscription;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::add_timeline::MutationShard_AddTimeline;
 use crate::db::commands::add_timeline_step::MutationShard_AddTimelineStep;
@@ -43,6 +45,7 @@ use crate::db::commands::update_node::MutationShard_UpdateNode;
 use crate::db::commands::update_node_link::MutationShard_UpdateNodeLink;
 use crate::db::commands::update_node_phrasing::MutationShard_UpdateNodePhrasing;
 use crate::db::commands::update_node_tag::MutationShard_UpdateNodeTag;
+use crate::db::commands::update_notification::MutationShard_UpdateNotification;
 use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
 use crate::db::commands::update_timeline::MutationShard_UpdateTimeline;
@@ -67,9 +70,13 @@ use crate::db::node_ratings::{QueryShard_NodeRating, SubscriptionShard_NodeRatin
 use crate::db::node_revisions::{QueryShard_NodeRevision, SubscriptionShard_NodeRevision};
 use crate::db::node_tags::{QueryShard_NodeTag, SubscriptionShard_NodeTag};
 use crate::db::nodes::{QueryShard_Node, SubscriptionShard_Node};
+use crate::db::notifications::{QueryShard_Notification, SubscriptionShard_Notification};
 use crate::db::shares::{QueryShard_Share, SubscriptionShard_Share};
+use crate::db::subscriptions::{QueryShard_Subscription, SubscriptionShard_Subscription};
 use crate::db::terms::{QueryShard_Term, SubscriptionShard_Term};
 use crate::db::timeline_steps::{QueryShard_TimelineStep, SubscriptionShard_TimelineStep};
+use crate::db::timeline_steps::{QueryShard_TimelineStep, SubscriptionShard_TimelineStep};
+use crate::db::timelines::{QueryShard_Timeline, SubscriptionShard_Timeline};
 use crate::db::timelines::{QueryShard_Timeline, SubscriptionShard_Timeline};
 use crate::db::user_hiddens::{QueryShard_UserHidden, SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, SubscriptionShard_User};
@@ -133,6 +140,7 @@ wrap_slow_macros! {
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
+<<<<<<< HEAD
 	QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators,
 	// table-specific
 	QueryShard_User, QueryShard_UserHidden,
@@ -148,10 +156,30 @@ pub struct QueryRoot(
 	QueryShard_UserInfo,
 	QueryShard_Node, QueryShard_NodeLink, QueryShard_NodeEdit, QueryShard_NodePhrasing, QueryShard_NodeRating, QueryShard_NodeRevision, QueryShard_NodeTag,
 	QueryShard_Share,
+=======
+	QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators,
+	// table-specific
+	QueryShard_User, QueryShard_UserHidden,
+	QueryShard_GlobalData,
+	QueryShard_Map,
+	QueryShard_Subscription,
+	QueryShard_Notification,
+	QueryShard_Term,
+	QueryShard_Timeline, QueryShard_TimelineStep,
+	QueryShard_AccessPolicy,
+	QueryShard_Media,
+	QueryShard_CommandRun,
+	//QueryShard_RunCommandBatch,
+	QueryShard_Proposal,
+	QueryShard_UserInfo,
+	QueryShard_Node, QueryShard_NodeLink, QueryShard_NodeEdit, QueryShard_NodePhrasing, QueryShard_NodeRating, QueryShard_NodeRevision, QueryShard_NodeTag,
+	QueryShard_Share,
+>>>>>>> alvinosh/notifications
 );
 
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(
+<<<<<<< HEAD
 	MutationShard_General, MutationShard_General_Subtree,
 	// commands, matching standard add/delete/update pattern
 	MutationShard_AddAccessPolicy, MutationShard_AddMap, MutationShard_AddMedia, MutationShard_AddNodeLink, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag,
@@ -168,6 +196,27 @@ pub struct MutationRoot(
 	MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
 	MutationShard_TransferNodes,
 	MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
+=======
+	MutationShard_AddSubscription,
+	MutationShard_AddNotification,
+	MutationShard_General, MutationShard_General_Subtree,
+	// commands, matching standard add/delete/update pattern
+	MutationShard_AddAccessPolicy, MutationShard_AddMap, MutationShard_AddMedia, MutationShard_AddNodeLink, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag,
+		MutationShard_AddShare, MutationShard_AddTerm, MutationShard_AddTimeline, MutationShard_AddTimelineStep,
+	MutationShard_DeleteAccessPolicy, MutationShard_DeleteMap, MutationShard_DeleteMedia, MutationShard_DeleteNodeLink, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag,
+		MutationShard_DeleteShare, MutationShard_DeleteTerm, MutationShard_DeleteTimeline, MutationShard_DeleteTimelineStep,
+	MutationShard_UpdateAccessPolicy, MutationShard_UpdateMap, MutationShard_UpdateMedia, MutationShard_UpdateNodeLink, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag,
+		MutationShard_UpdateShare, MutationShard_UpdateTerm, MutationShard_UpdateTimeline, MutationShard_UpdateTimelineStep,
+	MutationShard_UpdateNotification,
+	// commands, others
+	MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
+	MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating, MutationShard_DeleteNodeRevision,
+	MutationShard_ImportFirestoreDump,
+	MutationShard_LinkNode,
+	MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
+	MutationShard_TransferNodes,
+	MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
+>>>>>>> alvinosh/notifications
 );
 
 #[derive(MergedSubscription, Default)]
@@ -177,6 +226,8 @@ pub struct SubscriptionRoot(
 	SubscriptionShard_User, SubscriptionShard_UserHidden,
 	SubscriptionShard_GlobalData,
 	SubscriptionShard_Map,
+	SubscriptionShard_Subscription,
+	SubscriptionShard_Notification,
 	SubscriptionShard_Term,
 	SubscriptionShard_Timeline, SubscriptionShard_TimelineStep,
 	SubscriptionShard_AccessPolicy,

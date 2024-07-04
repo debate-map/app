@@ -41,6 +41,7 @@ export * from "./DB/nodes/$node/equation.js";
 export * from "./DB/nodes/@Node.js";
 export * from "./DB/nodes/@NodeRevision.js";
 export * from "./DB/nodes/@NodeType.js";
+export * from "./DB/notifications.js";
 export * from "./DB/shares.js";
 export * from "./DB/shares/@Share.js";
 export * from "./DB/shares/@MapView.js";
@@ -60,5 +61,9 @@ export * from "./DB/users/$user.js";
 export * from "./DB/users/@User.js";
 export * from "./DB/userHiddens.js";
 export * from "./DB/userHiddens/@UserHidden.js";
+export * from "./DB/subscriptions/@Subscription.js";
+export * from "./DB/subscription.js";
+export * from "./DB/subscriptions/@AddSubscription.js";
+export * from "./DB/notifications/@Notification.js";
 /*export * from "./DB/visibilityDirectives.js";
 export * from "./DB/visibilityDirectives/@VisibilityDirective.js";*/

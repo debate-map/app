@@ -1,4 +1,4 @@
-import {ChildGroup, GetNodeChildrenL3, GetToolbarItemsToShow, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType} from "dm_common";
+import {ChildGroup, GetNodeChildrenL3, GetToolbarItemsToShow, GetUser, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType} from "dm_common";
 import React, {useCallback} from "react";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {store} from "Store/index.js";
@@ -14,7 +14,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
 import {BailError, BailInfo} from "mobx-graphlink";
 import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
-import {Column} from "web-vcore/nm/react-vcomponents.js";
+import {Column, Div} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
@@ -245,6 +245,7 @@ export class NodeUI extends BaseComponentPlus(
 						style,
 					)}
 				>
+
 					{showFocusNodeStatusMarker &&
 						<FocusNodeStatusMarker map={map} node={node} path={path}/>}
 					{!showFocusNodeStatusMarker && !store.main.maps.screenshotMode &&
