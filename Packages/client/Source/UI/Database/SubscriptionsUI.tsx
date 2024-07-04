@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-ve
 import {ES, Link, Observer, PageContainer, TextPlus} from "web-vcore";
 import {useEffect, useMemo, useState} from "react";
 import {ScrollView} from "react-vscrollview";
-import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
+import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeL2, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row} from "react-vcomponents";
 import Moment from "web-vcore/nm/moment";
 import useResizeObserver from "use-resize-observer";
@@ -59,24 +59,24 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
 
 		const subscriptions = GetSubscriptions(userId);
 
-		const onTableChange = (newTableData:TableData)=>{
+		const onTableChange = (newTableData: TableData) => {
 			this.SetState({tableData: newTableData});
 		};
 
-		const sortedAndFilteredSubscriptions = useMemo(()=>{
+		const sortedAndFilteredSubscriptions = useMemo(() => {
 			let output = subscriptions;
 			if (tableData.columnSort) {
 				switch (tableData.columnSort) {
 					case "level": {
-						output = subscriptions.OrderByDescending(a=>[a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length);
+						output = subscriptions.OrderByDescending(a => [a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a => a).length);
 						break;
 					}
 					case "createdAt": {
-						output = subscriptions.OrderByDescending(a=>a.createdAt);
+						output = subscriptions.OrderByDescending(a => a.createdAt);
 						break;
 					}
 					case "updatedAt": {
-						output = subscriptions.OrderByDescending(a=>a.updatedAt);
+						output = subscriptions.OrderByDescending(a => a.updatedAt);
 						break;
 					}
 					default: {
@@ -95,13 +95,13 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
 
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData}/>
+				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData} />
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
 					{sortedAndFilteredSubscriptions.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No Subscriptions</div>}
-					{sortedAndFilteredSubscriptions.map((subscription, index)=>{
-						return <SubscriptionRow key={subscription.id} index={index} last={index == sortedAndFilteredSubscriptions.length - 1} subscription={subscription}/>;
+					{sortedAndFilteredSubscriptions.map((subscription, index) => {
+						return <SubscriptionRow key={subscription.id} index={index} last={index == sortedAndFilteredSubscriptions.length - 1} subscription={subscription} />;
 					})}
 				</ScrollView>
 			</PageContainer>
@@ -117,20 +117,20 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 		const level = GetSubscriptionLevel(subscription);
 
 		const levelInfo = [[subscription.addChildNode, "Add Child Node"],
-			[subscription.addNodeLink, "Add Node Link"],
-			[subscription.addNodeRevision, "Add Node Revision"],
-			[subscription.deleteNode, "Delete Node"],
-			[subscription.deleteNodeLink, "Delete Node Link"],
-			[subscription.setNodeRating, "Set Node Rating"],
-		].map((entry, index)=>{
+		[subscription.addNodeLink, "Add Node Link"],
+		[subscription.addNodeRevision, "Add Node Revision"],
+		[subscription.deleteNode, "Delete Node"],
+		[subscription.deleteNodeLink, "Delete Node Link"],
+		[subscription.setNodeRating, "Set Node Rating"],
+		].map((entry, index) => {
 			return entry[0] ? entry[1] : null;
-		}).filter(a=>a).join("\n");
+		}).filter(a => a).join("\n");
 
 		let levelText = "";
 		switch (level) {
-            case "all": levelText = "All"; break;
-            case "partial": levelText = "Partial"; break;
-            case "none": levelText = "None"; break;
+			case "all": levelText = "All"; break;
+			case "partial": levelText = "Partial"; break;
+			case "none": levelText = "None"; break;
 			default: {
 				console.warn(`Unknown subscription level: ${level}`);
 				levelText = "Unknown"; break;
@@ -139,27 +139,8 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 
 		const {css} = cssHelper(this);
 
-		const node = GetNode(subscription.node);
-		if (node == null) {
-			console.warn(`Node with ID ${subscription.node} not found.`);
-			return null;
-		}
-
-		const revision = GetNodeRevision(node.c_currentRevision);
-		if (revision == null) {
-			console.warn(`Node Revision with ID ${node.c_currentRevision} not found.`);
-			return null;
-		}
-
-		const accessPolicy = GetAccessPolicy(node.accessPolicy);
-		if (accessPolicy == null) {
-			console.warn(`Node Access Policy with ID ${accessPolicy} not found.`);
-			return null;
-		}
-
-		const nodeL2 = AsNodeL2(node, revision, accessPolicy);
-
-		const nodeFinal = AsNodeL3(nodeL2, null);
+		const nodeL2 = GetNodeL2(subscription.node);
+		const nodeFinal = nodeL2 ? AsNodeL3(nodeL2, null) : null;
 
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 
@@ -171,21 +152,23 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 				<Row style={{
 					display: "flex", flexDirection: "row", alignItems: "center",
 				}}>
-                    <span ref={rootRef} style={{flex: columns[0].width, paddingRight: 10, pointerEvents: "none", marginTop: nodeFinal.type === "claim" ? 30 : 0}}>
-						<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false}
-							backgroundFillPercentOverride={100} width={width}
-							useLocalPanelState={true} usePortalForDetailBoxes={true} />
+					<span ref={rootRef} style={{flex: columns[0].width, paddingRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
+						{nodeFinal != null &&
+							<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false} forSubscriptionsPage={true}
+								backgroundFillPercentOverride={100} width={width}
+								useLocalPanelState={true} usePortalForDetailBoxes={true} />}
+						{nodeFinal == null && <div className="selectable" style={{flex: 1, fontSize: 12, color: "rgba(255,255,255,.5)"}}>Node "{subscription.node}" not found.</div>}
 					</span>
 					<span style={{flex: columns[1].width}}>
-                        <TextPlus info={levelInfo}>{levelText}</TextPlus>
-                    </span>
+						<TextPlus info={levelInfo}>{levelText}</TextPlus>
+					</span>
 					<span style={{flex: columns[2].width}}>{Moment(subscription.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
 					<span style={{flex: columns[3].width}}>{Moment(subscription.updatedAt).format("YYYY-MM-DD HH:mm:ss")}</span>
-					<span onClick={()=>{
+					<span onClick={() => {
 						ShowMessageBox({
 							title: `Delete node subscription?`, cancelButton: true,
 							message: `Delete node subscription?`,
-							onOK: ()=>{
+							onOK: () => {
 								RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
 							},
 						});

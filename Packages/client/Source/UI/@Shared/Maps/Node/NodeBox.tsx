@@ -57,7 +57,7 @@ import {NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeBox_Props = {
-	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map, forLayoutHelper: boolean,
+	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map, forLayoutHelper: boolean, forSubscriptionsPage?: boolean,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	childrenShownByNodeExpandButton?: number, usePortalForDetailBoxes?: boolean,
@@ -116,7 +116,7 @@ export class NodeBox extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, treePath, forLayoutHelper, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
+		const {indexInNodeList, map, node, path, treePath, forLayoutHelper, forSubscriptionsPage, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, lastHoveredPanel, hoverTermIDs, lastWidthWhenNotPreview, showNotificationPanel} = this.state;
 
 		// connector part
@@ -429,7 +429,7 @@ export class NodeBox extends BaseComponentPlus(
 			return (
 				<>
 					<ExpandableBox
-						showNotificationButton={showNotificationButton}
+						showNotificationButton={showNotificationButton && !forSubscriptionsPage}
 						notificationLevel={subscriptionLevel}
 						onToggleNotifications={()=>this.SetState({showNotificationPanel: !this.state.showNotificationPanel})}
 
@@ -538,10 +538,12 @@ export class NodeBox extends BaseComponentPlus(
 					{showNotificationPaint && <div
 					onMouseDown={()=>{
 						uiState.paintMode_painting = true;
-						RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+						if (subscriptionLevel != uiState.paintMode_notificationLevel) {
+							RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
+						}
 					}}
 					onMouseEnter={()=>{
-						if (uiState.paintMode_painting) {
+						if (uiState.paintMode_painting && subscriptionLevel != uiState.paintMode_notificationLevel) {
 							RunCommand_AddSubscriptionWithLevel({node: node.id, level: uiState.paintMode_notificationLevel});
 						}
 					}}

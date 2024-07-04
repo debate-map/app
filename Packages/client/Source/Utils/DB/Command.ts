@@ -216,27 +216,15 @@ export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInp
 	return result.data.addSubscription as {id: string};
 }
 
-export async function RunCommand_AddSubscriptionWithLevel({
-	node,
-	level,
-}: {
-	node: string
-	level: SubscriptionLevel
-}) {
-	const currentSubscription = GetNodeSubscription(MeID()!, node);
-	const currentLevel = GetSubscriptionLevel(currentSubscription);
-
+export async function RunCommand_AddSubscriptionWithLevel({node, level}: {node: string, level: SubscriptionLevel}) {
 	switch (level) {
 		case SubscriptionLevel.None:
-			if (currentLevel == SubscriptionLevel.None) return;
 			RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
 		case SubscriptionLevel.Partial:
-			if (currentLevel == SubscriptionLevel.Partial) return;
 			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
 		case SubscriptionLevel.All:
-			if (currentLevel == SubscriptionLevel.All) return;
 			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: true, addNodeRevision: true, deleteNode: true, deleteNodeLink: true, setNodeRating: true});
 			break;
 		default:

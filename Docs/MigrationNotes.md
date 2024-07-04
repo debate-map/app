@@ -7,6 +7,16 @@
 
 ## Main series
 
+### Pushed on 2024-07-03
+
+* 1\) Added some new tables and columns, for the new node "subscription" system.
+	* DB response:
+		* 1\) Execute the sql in files `subscriptions.sql` and `notifications.sql`.
+		* 2\) Execute sql:
+			```sql
+			ALTER TABLE app."userHiddens" ADD COLUMN "notificationPolicy" character varying(1) DEFAULT 'S' NOT NULL;
+			```
+
 ### Pushed on 2024-05-23
 
 * 1\) Added a `deleteSubtree` graphql endpoint (plus `getPreparedDataForDeletingSubtree` endpoint), and a sql function to back it.

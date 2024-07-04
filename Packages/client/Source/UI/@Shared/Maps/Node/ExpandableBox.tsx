@@ -87,13 +87,16 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						{text}
 						{/* children */}
 						{showNotificationButton &&
-						<Div style={css({
-							position: "absolute", right: 0, bottom: 0,
-							display: "flex", alignItems: "flex-end", justifyContent: "center",
-							":hover": {
-								padding: 3,
+						<Div style={css(
+							{
+								position: "absolute", right: 0, bottom: 0,
+								display: "flex", alignItems: "flex-end", justifyContent: "center",
+								":hover": {
+									padding: 3,
+								},
 							},
-						})}>
+							notificationLevel == "none" && {opacity: .3},
+						)}>
 							<button style={css({display: "inline-flex", background: "none", padding: "8px 2px", border: "none", cursor: "pointer"})} onClick={e=>{
 								e.stopPropagation();
 								e.preventDefault();
@@ -125,7 +128,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						</>} // size={28}
 						style={css(
 							{
-								zIndex: 5,
+								//zIndex: 5,
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
 								padding: 0,

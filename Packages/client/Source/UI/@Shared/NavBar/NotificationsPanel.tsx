@@ -13,11 +13,9 @@ import {store} from "../../../Store/index.js";
 
 @Observer
 export class NotificationsPanel extends BaseComponent<{}, {}, {
-	notifications:(Notification & { command: CommandRun|n })[];
+	notifications: (Notification & { command: CommandRun|n })[];
 }> {
-
 	renderItem = (index, key)=>{
-
 		const {notifications} = this.stash;
 		const notification = notifications[index];
 
@@ -109,8 +107,7 @@ export class NotificationsPanel extends BaseComponent<{}, {}, {
 							RunInAction_Set(this, ()=>uiState.paintMode_notificationLevel = val);
 						}}/>
 					</Row>}
-				</Row>
-				}
+				</Row>}
 			</Div>
 		);
 	}
