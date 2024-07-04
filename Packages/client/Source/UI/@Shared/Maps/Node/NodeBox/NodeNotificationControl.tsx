@@ -5,15 +5,9 @@ import {MeID, NodeL3, Subscription, SubscriptionLevel} from "dm_common";
 import {RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
 import {SLMode} from "../../../../@SL/SL.js";
 
-@Observer
 export class NodeNotificationControl extends BaseComponent<{node: NodeL3, backgroundColor: chroma.Color, subscriptionLevel: SubscriptionLevel}, {}> {
 	render() {
 		const {node, backgroundColor, subscriptionLevel} = this.props;
-		// don't show subscription-level controls unless user is signed-in (adds a bit of visual clutter that isn't relevant for non-signed-in users)
-		if (MeID() == null) return null;
-		// for now, don't show subscription-level controls in SL mode (I haven't asked yet if it's wanted there)
-		if (SLMode) return null;
-
 		return (
 			<Div style={{
 				position: "absolute", zIndex: 1, right: 0, width: 145, bottom: 0, borderRadius: 5,

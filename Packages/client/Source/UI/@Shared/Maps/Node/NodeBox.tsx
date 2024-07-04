@@ -498,7 +498,6 @@ export class NodeBox extends BaseComponentPlus(
 
 							{showNotificationPanel &&
 								<NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
-
 						</>}
 						//onTextHolderClick={onTextHolderClick}
 						//textHolderStyle={E(isMultiPremiseArg && {width: null})}
