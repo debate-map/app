@@ -5,29 +5,38 @@ const paths = require("path");
 
 require("dotenv").config({path: `${__dirname}/../../.env`});
 
+function GetInvalidJWTErrorMessage(jwtTokenEnvVarName, jwtMissing) {
+	const reasonMessage = jwtMissing
+		? `No jwt-token was provided. (neither as command-line arg, nor as environment variable, eg. in .env file in repo-root)`
+		: `A jwt-token was provided, but it was rejected by the server (probably just outdated).`;
+	return `
+		${reasonMessage}
+		You can provide a valid jwt either through a ".env" file in repo-root (see ".env.template" file for expected format), or by passing it directly as the \`--jwt "..."\` argument.
+		As for retrieving the jwt-token in the first place, you can either:
+		1) Go to https://debatemap.app/app-server/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
+		2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
+	`.trim();
+}
+
 const program = require("commander");
 program
 	.command("backup").description(`Calls the graphql "getDBDump" endpoint, and saves the result to a file. (the file is saved to the folder specified by --backupFolder)`)
 	.option("--dev", `If specified, then "localhost:5110" is used as the gql endpoint, and "DM_USER_JWT_DEV" is the env-var read, and the default backup-folder is "../Others/@Backups/DBDumps_local/" (is overriden by --backupFolder).`)
+	.option("--jwt <>", `If specified, uses the jwt here rather than getting it from an env-var. (useful for testing)`)
 	.option("--backupFolder <>", `Path to folder where the db dump/backup should be placed. (path is relative to repo root, which is "<this-folder>/../../")`)
 	.action(async command=>{
-		const {dev, backupFolder} = command;
+		const {dev, jwt, backupFolder} = command;
+		//console.log("Flags:", {dev, jwt, backupFolder});
 		const backupFolder_final_relToRepoRoot = backupFolder ?? `../Others/@Backups/DBDumps_${dev ? "local" : "ovh"}/`;
 
 		const fetch = (await import("node-fetch")).default;
 		try {
 			const origin = dev ? "http://localhost:5100/app-server" : "https://debatemap.app/app-server";
-			//console.log("Origin:", origin);
 
 			const jwtTokenEnvVarName = `DM_USER_JWT${dev ? `_DEV` : "_PROD"}`;
-			const jwtToken = process.env[jwtTokenEnvVarName];
+			const jwtToken = jwt ?? process.env[jwtTokenEnvVarName];
 			if (jwtToken == null) {
-				console.error(`
-			No environment-variable named "${jwtTokenEnvVarName}" found! The recommended way to provide it is through a ".env" file in repo-root; see ".env.template" file for expected format.
-			As for retrieving the jwt-token in the first place, you can either:
-			1) Go to https://debatemap.app/app-server/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
-			2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
-				`.trim());
+				console.error(GetInvalidJWTErrorMessage(jwtTokenEnvVarName, true));
 				return void WaitForEnterKeyThenExit(1);
 			}
 
@@ -56,6 +65,9 @@ program
 			}
 			if (response_structure.errors) {
 				console.error("Got graphql/server errors:", response_structure.errors);
+				if (response_structure.errors.find(a=>a.message.includes("Authentication tag didn't verify"))) {
+					console.error("Extra note: " + GetInvalidJWTErrorMessage(jwtTokenEnvVarName, false));
+				}
 				return void WaitForEnterKeyThenExit(1);
 			}
 			const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;

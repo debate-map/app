@@ -4,6 +4,7 @@ use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::domains::is_dev;
 use rust_shared::hyper::{Method, Request};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
@@ -86,6 +87,11 @@ pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
 	let failed_conversion_chars = chars.iter().filter(|c| **c == char::REPLACEMENT_CHARACTER).count();
 	if failed_conversion_chars > 0 {
 		warn!("During retrieval of pg-dump, {} chars failed to convert to utf-8; they were replaced with \"{}\". @pgdump_output_len:{}", failed_conversion_chars, char::REPLACEMENT_CHARACTER, pgdump_output.len());
+	}
+
+	// TEMPORARY: While working on the feature to add chunking to the transfer of pg-dump data, we want to artifically set the pg-dump data to a very large length in dev-cluster, to surface the issue.
+	if is_dev() {
+		return Ok("a".repeat(600_000_000)); // 600mb is over the NodeJS 500mb string-size limit
 	}
 
 	Ok(pgdump_output)
