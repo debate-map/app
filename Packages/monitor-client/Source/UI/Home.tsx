@@ -104,15 +104,19 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 	});
 	const healthData: HealthStats[] = dataHealth?.healthStats ?? [];
 
-	const sddHealth = healthData.find(a=>a.filesystem == "/dev/sdd") ?? HealthStats.empty();
+	const storageHealth = healthData.find(a=>a.mountedOn == "/pgdata")
+		// if no "/pgdata" filesystem was found, fallback to finding the stats for whichever filesystem has the most usage
+		// (for some reason, rancher desktop doesn't seem to mount a separate filesystem for the "/pgdata" directory; it must have some other "fake" filesystem implementation for K8s PVCs)
+		?? healthData.OrderByDescending(a=>a.usePercent).FirstOrX()
+		?? HealthStats.empty();
 
-	let sddHealthColor = "";
-	if (sddHealth.usePercent >= 90) {
-		sddHealthColor = "#dc3545";
-	} else if (sddHealth.usePercent >= 70) {
-		sddHealthColor = "#ffc107";
+	let storageHealthColor = "";
+	if (storageHealth.usePercent >= 90) {
+		storageHealthColor = "#dc3545";
+	} else if (storageHealth.usePercent >= 70) {
+		storageHealthColor = "#ffc107";
 	} else {
-		sddHealthColor = "#28a745";
+		storageHealthColor = "#28a745";
 	}
 
 	const [showKey, setShowKey] = useState(false);
@@ -175,8 +179,8 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 				<Row>
 					<Text>Persistent Volume Claim: <span style={{
 						marginLeft: 5,
-						color: sddHealthColor,
-					}}>{formatBytes(sddHealth.used)} / {formatBytes(sddHealth.available)} ({sddHealth.usePercent}%)</span></Text>
+						color: storageHealthColor,
+					}}>{formatBytes(storageHealth.used)} / {formatBytes(storageHealth.available)} ({storageHealth.usePercent}%)</span></Text>
 				</Row>
 			</Column>
 		</Column>
