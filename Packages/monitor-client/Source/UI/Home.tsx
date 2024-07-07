@@ -7,6 +7,7 @@ import {observer} from "web-vcore/nm/mobx-react";
 import {Column, Row, TextInput, Text, CheckBox, Button, TextArea} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {formatBytes} from "../Utils/UI/General.js";
 
 export class HomeUI extends BaseComponent<{}, {}> {
 	render() {
@@ -34,6 +35,19 @@ query($adminKey: String!) {
 }
 `;
 
+export const HEALTH_STATS_QUERY = gql`
+query($adminKey: String!) {
+	healthStats(adminKey: $adminKey) {
+		filesystem,
+		blocks1K,
+		used,
+		available,
+		usePercent,
+		mountedOn,
+	}
+}
+`;
+
 class BasicInfo {
 	static empty() {
 		return new BasicInfo().VSet({
@@ -41,6 +55,27 @@ class BasicInfo {
 		});
 	}
 	memUsed: number;
+}
+
+class HealthStats {
+	static empty() {
+		return new HealthStats().VSet({
+			filesystem: "",
+			blocks1K: -1,
+			used: -1,
+			available: -1,
+			usePercent: -1,
+			mountedOn: "",
+		});
+	}
+
+	filesystem: string;
+	blocks1K: number;
+	used: number;
+	available: number;
+	usePercent: number;
+	mountedOn: string;
+
 }
 
 // see Requests.ts for why we can't use the comp-approach
@@ -60,6 +95,25 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 		nextFetchPolicy: "no-cache",
 	});
 	const basicInfo: BasicInfo = data?.basicInfo ?? BasicInfo.empty();
+
+	const {data: dataHealth, loading: loadingHealth, refetch: refetchHealth} = useQuery(HEALTH_STATS_QUERY, {
+		variables: {adminKey},
+		// not sure if these are needed
+		fetchPolicy: "no-cache",
+		nextFetchPolicy: "no-cache",
+	});
+	const healthData: HealthStats[] = dataHealth?.healthStats ?? [];
+
+	const sddHealth = healthData.find(a=>a.filesystem == "/dev/sdd") ?? HealthStats.empty();
+
+	let sddHealthColor = "";
+	if (sddHealth.usePercent >= 90) {
+		sddHealthColor = "#dc3545";
+	} else if (sddHealth.usePercent >= 70) {
+		sddHealthColor = "#ffc107";
+	} else {
+		sddHealthColor = "#28a745";
+	}
 
 	const [showKey, setShowKey] = useState(false);
 	return (
@@ -109,6 +163,20 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 				<Row>
 					<Text>MemUsed:{basicInfo.memUsed.toLocaleString()} bytes</Text>
 					{/*<TextArea value={JSON.stringify(basicInfo)}/>*/}
+				</Row>
+			</Column>
+			<Row mt={5}>
+				<Text>Basic Health Stats</Text>
+				<Button ml={5} text="Refresh" onClick={()=>{
+					refetchHealth();
+				}}/>
+			</Row>
+			<Column ml={10}>
+				<Row>
+					<Text>Persistent Volume Claim: <span style={{
+						marginLeft: 5,
+						color: sddHealthColor,
+					}}>{formatBytes(sddHealth.used)} / {formatBytes(sddHealth.available)} ({sddHealth.usePercent}%)</span></Text>
 				</Row>
 			</Column>
 		</Column>
