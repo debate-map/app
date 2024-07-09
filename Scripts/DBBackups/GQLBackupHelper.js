@@ -1,7 +1,14 @@
 const fs = require("fs");
 //const fetch = require("node-fetch");
 const child_process = require("child_process");
+const {chain} = require("stream-chain");
+const {parser} = require("stream-json");
+const {pick} = require("stream-json/filters/Pick");
+const {streamValues} = require("stream-json/streamers/StreamValues");
+const {disassembler} = require("stream-json/Disassembler");
+const {stringer} = require("stream-json/Stringer");
 const paths = require("path");
+const ora = require("ora-classic");
 
 require("dotenv").config({path: `${__dirname}/../../.env`});
 
@@ -27,6 +34,9 @@ program
 	.action(async command=>{
 		const {dev, jwt, backupFolder} = command;
 		//console.log("Flags:", {dev, jwt, backupFolder});
+
+		const dir = paths.dirname(__filename);
+
 		const backupFolder_final_relToRepoRoot = backupFolder ?? `../Others/@Backups/DBDumps_${dev ? "local" : "ovh"}/`;
 
 		const fetch = (await import("node-fetch")).default;
@@ -39,6 +49,8 @@ program
 				console.error(GetInvalidJWTErrorMessage(jwtTokenEnvVarName, true));
 				return void WaitForEnterKeyThenExit(1);
 			}
+
+			const spinner = ora("Fetching DB dump...").start();
 
 			const pgdump_sql_response = await fetch(`${origin}/graphql`, {
 				method: "POST",
@@ -53,30 +65,53 @@ program
 					authorization: `Bearer ${jwtToken}`,
 				},
 			});
-			const response_structure_str = await pgdump_sql_response.text();
-			//console.log(`Got response-structure-string:\n==========\n${response_structure_str}\n==========`);
 
-			let response_structure;
-			try {
-				response_structure = JSON.parse(response_structure_str);
-			} catch (ex) {
-				console.error("Got error parsing response-structure as json. Response-structure-string:", response_structure_str);
-				return void WaitForEnterKeyThenExit(1);
-			}
-			if (response_structure.errors) {
-				console.error("Got graphql/server errors:", response_structure.errors);
+			spinner.succeed("Fetched DB dump.");
+
+			if (!pgdump_sql_response.ok) {
+				const errorString = `Got graphql/server errors:${response_structure.errors}`;
+				spinner.fail(errorString);
+
 				if (response_structure.errors.find(a=>a.message.includes("Authentication tag didn't verify"))) {
-					console.error("Extra note: " + GetInvalidJWTErrorMessage(jwtTokenEnvVarName, false));
+					console.error(`\n\nExtra note: ${GetInvalidJWTErrorMessage(jwtTokenEnvVarName, false)}`);
 				}
 				return void WaitForEnterKeyThenExit(1);
 			}
-			const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;
-
 			const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
-			const folderPathAbsolute = paths.resolve(`${__dirname}/../../${backupFolder_final_relToRepoRoot}`);
+			const folderPathAbsolute = paths.resolve(`${__dirname}/../${backupFolder_final_relToRepoRoot}`);
 			const filePath = paths.join(`${folderPathAbsolute}/${CurrentTime_SafeStr()}.sql`); // normalize slashes
-			fs.writeFileSync(filePath, pgdumpSqlStr);
-			console.log(`Database backup saved to file:`, filePath);
+			const fileStream = fs.createWriteStream(filePath);
+
+			const saveSpinner = ora("Saving DB dump to file...").start();
+
+			const pipeline = chain([
+				pgdump_sql_response.body,
+				parser({
+					packStrings: false,
+					streamStrings: true,
+				}),
+				pick({filter: "data.getDBDump.pgdumpSql"}),
+				data=>data.value,
+			]);
+
+			const streamPromise = new Promise((resolve, reject)=>{
+				pipeline.on("data", val=>{
+					fileStream.write(val);
+				});
+
+				pipeline.on("end", ()=>{
+					fileStream.close(()=>{
+						resolve();
+
+					});
+				});
+				pipeline.on("error", reject);
+			});
+
+			await streamPromise;
+
+			const successText = `Database backup saved to file: ${filePath}`;
+			saveSpinner.succeed(successText);
 
 			// open file explorer (cross platform) to path above:
 			if (process.platform === "win32") {
