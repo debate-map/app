@@ -83,11 +83,12 @@ pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
 
 	// Above, we request utf-8 encoding; however, some chars in prod-cluster's db-dump still fail to parse as utf-8!
 	// So, we pass `true` above to allow lossy utf-8 conversion, and then we log a warning if any chars failed to convert.
-	let chars = pgdump_output.chars().collect_vec();
+	// commented; this causes a crash in production for large (700mb+) pg-dumps; not yet sure if this is a code problem, or just it hitting some memory limits a bit earlier than it otherwise would/will
+	/*let chars = pgdump_output.chars().collect_vec();
 	let failed_conversion_chars = chars.iter().filter(|c| **c == char::REPLACEMENT_CHARACTER).count();
 	if failed_conversion_chars > 0 {
 		warn!("During retrieval of pg-dump, {} chars failed to convert to utf-8; they were replaced with \"{}\". @pgdump_output_len:{}", failed_conversion_chars, char::REPLACEMENT_CHARACTER, pgdump_output.len());
-	}
+	}*/
 
 	// TEMPORARY: While working on the feature to add chunking to the transfer of pg-dump data, we want to artifically set the pg-dump data to a very large length in dev-cluster, to surface the issue.
 	/*if is_dev() {

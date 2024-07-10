@@ -50,7 +50,7 @@ program
 				return void WaitForEnterKeyThenExit(1);
 			}
 
-			fetchSpinner = ora("Fetching DB dump...").start();
+			fetchSpinner = ora("Performing DB dump...").start();
 
 			// Note: When testing this backup process locally, it can get stuck at this "fetch call" step (port-forwarder seems to get overwhelmed).
 			// If this happens, try using the "forward_[local/ovh]" script for the port-forwards rather than Tilt's port-forwarder, so you can quickly restart it when this happens.
@@ -74,8 +74,9 @@ program
 				fetchSpinner.fail(errorString);
 				return void WaitForEnterKeyThenExit(1);
 			}
-			fetchSpinner.succeed("DB dump created.");
+			fetchSpinner.succeed("DB dump created on server.");
 
+			//const pgdumpResponseBody = pgdump_sql_response.body;
 			const pgdumpResponseBody = cloneable(pgdump_sql_response.body);
 			const pgdumpResponseBody_clone = pgdumpResponseBody.clone();
 			// read the first 1-million chars of the stream clone, to check for errors (read it using "pipe")
@@ -141,23 +142,43 @@ function WriteStreamContentsToFileStream(stream, filePath) {
 		pick({filter: "data.getDBDump.pgdumpSql"}),
 		data=>data.value,
 	]);
-	let charsWritten = 0;
 	return new Promise((resolve, reject)=>{
-		let fileStream;
+		const fileStream = fs.createWriteStream(filePath);
 		pipeline.on("error", reject);
-		pipeline.on("data", val=>{
+		/*pipeline.on("data", async val=>{
 			// only create write-stream once we've confirmed that there is data to write
 			if (fileStream == null) {
 				fileStream = fs.createWriteStream(filePath);
 			}
 			charsWritten += val.length;
 			fileStream.write(val);
-		});
-		pipeline.on("end", ()=>{
-			if (fileStream == null || charsWritten == 0) {
-				return void resolve(pgdumpContentsNotFoundMessage);
+		});*/
+		/*pipeline.on("readable", async ()=>{
+			console.log("NewReadable");
+			let val;
+			while (null !== (val = pipeline.read())) {
+				fileStream ??= fs.createWriteStream(filePath, {
+					highWaterMark: 10000,
+				});
+				charsWritten += val.length;
+				if (!fileStream.write(val)) {
+					/*console.log("Wait");
+					await new Promise(resolve=>fileStream.once("drain", resolve));
+					console.log("Done");*#/
+				}
 			}
-			fileStream.close(()=>resolve(null));
+			console.log("Test1");
+		});*/
+		pipeline.pipe(fileStream);
+		pipeline.on("end", ()=>{
+			// calling end() is better than close(), as end() waits for the buffer to be flushed before closing the stream (https://github.com/nodejs/node/issues/5631#issuecomment-194509781)
+			fileStream.end(()=>{
+				if (fs.statSync(filePath).size == 0) {
+					fs.unlinkSync(filePath);
+					return void resolve(pgdumpContentsNotFoundMessage);
+				}
+				resolve(null);
+			});
 		});
 	});
 }
