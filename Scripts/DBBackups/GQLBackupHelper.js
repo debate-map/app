@@ -145,30 +145,7 @@ function WriteStreamContentsToFileStream(stream, filePath) {
 	return new Promise((resolve, reject)=>{
 		const fileStream = fs.createWriteStream(filePath);
 		pipeline.on("error", reject);
-		/*pipeline.on("data", async val=>{
-			// only create write-stream once we've confirmed that there is data to write
-			if (fileStream == null) {
-				fileStream = fs.createWriteStream(filePath);
-			}
-			charsWritten += val.length;
-			fileStream.write(val);
-		});*/
-		/*pipeline.on("readable", async ()=>{
-			console.log("NewReadable");
-			let val;
-			while (null !== (val = pipeline.read())) {
-				fileStream ??= fs.createWriteStream(filePath, {
-					highWaterMark: 10000,
-				});
-				charsWritten += val.length;
-				if (!fileStream.write(val)) {
-					/*console.log("Wait");
-					await new Promise(resolve=>fileStream.once("drain", resolve));
-					console.log("Done");*#/
-				}
-			}
-			console.log("Test1");
-		});*/
+		// we use pipe rather than a manual "data" listener, because pipe() keeps memory usage much lower (~100mb rather than 5gb+) [reason: I think pipe() handles "stream backpressure" correctly]
 		pipeline.pipe(fileStream);
 		pipeline.on("end", ()=>{
 			// calling end() is better than close(), as end() waits for the buffer to be flushed before closing the stream (https://github.com/nodejs/node/issues/5631#issuecomment-194509781)
