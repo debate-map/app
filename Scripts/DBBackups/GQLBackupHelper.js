@@ -4,9 +4,7 @@ const child_process = require("child_process");
 const {chain} = require("stream-chain");
 const {parser} = require("stream-json");
 const {pick} = require("stream-json/filters/Pick");
-const {streamValues} = require("stream-json/streamers/StreamValues");
 const cloneable = require('cloneable-readable')
-const {PassThrough} = require("readable-stream");
 const paths = require("path");
 const ora = require("ora-classic");
 
@@ -80,8 +78,6 @@ program
 
 			const pgdumpResponseBody = cloneable(pgdump_sql_response.body);
 			const pgdumpResponseBody_clone = pgdumpResponseBody.clone();
-			//const pgdumpResponseBody_clone = pgdumpResponseBody_clone_raw.pipe(new PassThrough()); // this also works, but wasn't in thread below, perhaps because it doesn't use the nodejs native streams (either way seems to work fine)
-			//const pgdumpResponseBody_clone = require("stream").pipeline(pgdumpResponseBody_clone_raw, new PassThrough(), ()=>{}); // from: https://github.com/mcollina/cloneable-readable/issues/46#issuecomment-2199494017
 			// read the first 1-million chars of the stream clone, to check for errors (read it using "pipe")
 			let firstMillionChars = "";
 			// when we call `.on("data", ...)`, it seems to have the same effect as `.pipe(...)`, in that it triggers the cloneable-readable stream to start its splitting/cloning process
@@ -102,12 +98,12 @@ program
 				// for write issue of contents simply being empty, check for graphql/server errors in the response instead
 				// (this error-processing route will error if run on a stream that has the full dbdump contents present, due to it not using streaming of the contents)
 				if (writeIssue == pgdumpContentsNotFoundMessage) {
-					//const errors = await GetGQLErrorsFromStream(pgdumpResponseBody_clone);
-					//const errors = await GetGQLErrorsFromStream(pgdumpResponseBody_clone_firstMillionChars_stream);
-					//const errors = await GetGQLErrorsFromStream(new PassThrough().end(firstMillionChars));
 					const errors = JSON.parse(firstMillionChars)?.errors;
 					if (errors?.length) {
 						saveSpinner.fail(`Got graphql/server errors: ${JSON.stringify(errors)}`);
+						if (errors.find(a=>a.message.includes("Authentication tag didn't verify"))) {
+							console.error(`\nExtra note: ${GetInvalidJWTErrorMessage(jwtTokenEnvVarName, false)}`);
+						}
 						return void WaitForEnterKeyThenExit(1);
 					}
 				}
@@ -135,28 +131,6 @@ program
 		}
 	});
 
-/** @returns {Promise<{locations: any[], path: any[], message: string}[]>} */
-/*function GetGQLErrorsFromStream(stream) {
-	// the pgdump result can be so long that it doesn't fit within a single NodeJS string, so stream the contents out into the target file
-	const pipeline = chain([
-		stream,
-		parser(), // leave defaults, so that strings get packed (error messages will not exceed the NodeJS string-length limit)
-		pick({filter: "errors"}),
-		streamValues(),
-		data=>data.value,
-	]);
-	return new Promise((resolve, reject)=>{
-		pipeline.on("error", reject);
-		/** @type {{locations: any[], path: any[]}[]} *#/
-		let errors = [];
-		pipeline.on("data", val=>{
-			//console.log("ErrData:", val);
-			errors.push(val);
-		});
-		pipeline.on("end", ()=>resolve(errors));
-	});
-}*/
-
 const pgdumpContentsNotFoundMessage = `No string contents were found at json path: "data.getDBDump.pgdumpSql"`;
 /** @returns {string|null} Returns null if successfully wrote file; else, reason for failure to write. */
 function WriteStreamContentsToFileStream(stream, filePath) {
@@ -180,7 +154,6 @@ function WriteStreamContentsToFileStream(stream, filePath) {
 			fileStream.write(val);
 		});
 		pipeline.on("end", ()=>{
-			//console.log("Chars written:", charsWritten);
 			if (fileStream == null || charsWritten == 0) {
 				return void resolve(pgdumpContentsNotFoundMessage);
 			}
