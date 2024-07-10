@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "chalk": "^4.1.1",
+    "cloneable-readable": "^3.0.0",
     "commander": "2.19.0",
     "concurrently": "^7.6.0",
     "fractional-indexing": "^3.1.0",

@@ -259,8 +259,8 @@ function GetPortForwardCommandsStr(context) {
 	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} 5${d2}20:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
-	// NOTE: This port-forward doesn't currently work! (config may need to be more complex since now targeting a load-balancer service)
-	const forLoadBalancer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:80`;
+	//const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:80`;
+	const forLoadBalancer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_NginxGatewayFabric(context)} 5${d2}00:80`;
 	/*const forHKServer = `TODO`;
 	const forHKPostgres = `TODO`;*/
 
