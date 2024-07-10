@@ -90,9 +90,9 @@ pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
 	}
 
 	// TEMPORARY: While working on the feature to add chunking to the transfer of pg-dump data, we want to artifically set the pg-dump data to a very large length in dev-cluster, to surface the issue.
-	if is_dev() {
+	/*if is_dev() {
 		return Ok("a".repeat(600_000_000)); // 600mb is over the NodeJS 500mb string-size limit
-	}
+	}*/
 
 	Ok(pgdump_output)
 }
