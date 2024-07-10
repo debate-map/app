@@ -98,29 +98,58 @@ pub async fn is_root_node(ctx: &AccessorContext<'_>, node: &Node) -> Result<bool
 	Ok(true)
 }
 
+/// Error thrown while checking if a user can delete a node.
+#[derive(thiserror::Error, Debug)]
+pub enum NodeDeleteAssertionError {
+	#[error("Cannot delete node #{}, since you are not the owner of this node. (or a mode)", 0.to_string())]
+	NoPermission(ID),
+
+	#[error("Cannot delete node #{}, since it has more than one parent. Try unlinking it instead.", 0.to_string())]
+	HasMultipleParents(ID),
+
+	#[error("Cannot delete node #{}, since it's the root-node of a map.", 0.to_string())]
+	IsRootNode(ID),
+
+	#[error("Cannot delete this node (#{}) until all its children have been unlinked or deleted.", 0.to_string())]
+	HasChildren(ID),
+
+	/// Errors that are more generic and caused by some operation
+	/// rather than some constraint check Eg. getting data from the db
+	/// We'll preserve their error message and return it as a string.
+	#[error("{}", 0)]
+	Unknown(String),
+}
+
 // sync:js[CheckUserCanDeleteNode]
-pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), Error> {
+/// Checks if the user can delete a node.
+pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node) -> Result<(), NodeDeleteAssertionError> {
 	// first check generic delete permissions
-	assert_user_can_delete(&ctx, &actor, node).await?;
-
-	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
-	// todo: I think this should be removed now, since permissions are handled by generic access-policy check above
+	assert_user_can_delete(&ctx, &actor, node).await.map_err(|_| NodeDeleteAssertionError::NoPermission(node.id.clone()))?;
+	//	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
+	//
+	//	// todo: I think this should be removed now, since permissions are handled by generic access-policy check above
 	if !is_user_creator_or_mod(actor, &node.creator) {
-		bail!("{base_text}you are not the owner of this node. (or a mod)");
+		return Err(NodeDeleteAssertionError::NoPermission(node.id.clone()));
 	}
-	let parent_links = get_node_links(ctx, None, Some(node.id.as_str())).await?;
+	Ok(())
+}
+
+/// Checks if a node is deletable by checking if it's linked to other node or not
+pub async fn assert_node_is_deletable(ctx: &AccessorContext<'_>, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), NodeDeleteAssertionError> {
+	let parent_links = get_node_links(ctx, None, Some(node.id.as_str())).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))?;
+
 	if parent_links.into_iter().map(|a| a.parent).filter(|a| !parents_to_ignore.contains(a)).collect::<Vec<String>>().len() > 1 {
-		bail!("{base_text}it has more than one parent. Try unlinking it instead.");
-	}
-	if is_root_node(ctx, &node).await? && !as_part_of_map_delete {
-		bail!("{base_text}it's the root-node of a map.");
+		return Err(NodeDeleteAssertionError::HasMultipleParents(node.id.clone()));
 	}
 
-	/*let node_children = get_node_children(ctx, node.id.as_str()).await?;
-	if node_children.iter().map(|a| a.id).Exclude(children_to_ignore).len() {*/
-	let child_links = get_node_links(ctx, Some(node.id.as_str()), None).await?;
-	if child_links.into_iter().map(|a| a.child).filter(|a| !children_to_ignore.contains(a)).next().is_some() {
-		bail!("Cannot delete this node (#{}) until all its children have been unlinked or deleted.", node.id.as_str());
+	if is_root_node(ctx, &node).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))? && !as_part_of_map_delete {
+		return Err(NodeDeleteAssertionError::IsRootNode(node.id.clone()));
 	}
-	return Ok(());
+
+	let child_links = get_node_links(ctx, Some(node.id.as_str()), None).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))?;
+	if child_links.into_iter().map(|a| a.child).filter(|a| !children_to_ignore.contains(a)).next().is_some() {
+		return Err(NodeDeleteAssertionError::HasChildren(node.id.clone()));
+	}
+
+	Ok(())
 }

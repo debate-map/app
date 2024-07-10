@@ -54,6 +54,7 @@ serde = "1.0.144"
 # ==========
 
 itoa = "1.0.4"
+thiserror = "1.0.61"
 
 # To calculate build time:
 # 1) Run tilt-up-local and wait for everything to deploy and settle.
