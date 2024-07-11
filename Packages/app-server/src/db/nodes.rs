@@ -101,48 +101,47 @@ pub async fn is_root_node(ctx: &AccessorContext<'_>, node: &Node) -> Result<bool
 /// Error thrown while checking if a user can delete a node.
 #[derive(thiserror::Error, Debug)]
 pub enum NodeDeleteAssertionError {
-	#[error("Cannot delete node #{}, since you are not the owner of this node. (or a mode)", 0.to_string())]
+	#[error("Cannot delete node #{}, since you are not the owner of this node. (or a mode)", .0.to_string())]
 	NoPermission(ID),
 
-	#[error("Cannot delete node #{}, since it has more than one parent. Try unlinking it instead.", 0.to_string())]
+	#[error("Cannot delete node #{}, since it has more than one parent. Try unlinking it instead.", .0.to_string())]
 	HasMultipleParents(ID),
 
-	#[error("Cannot delete node #{}, since it's the root-node of a map.", 0.to_string())]
+	#[error("Cannot delete node #{}, since it's the root-node of a map.", .0.to_string())]
 	IsRootNode(ID),
 
-	#[error("Cannot delete this node (#{}) until all its children have been unlinked or deleted.", 0.to_string())]
+	#[error("Cannot delete this node (#{}) until all its children have been unlinked or deleted.", .0.to_string())]
 	HasChildren(ID),
 
 	/// Errors that are more generic and caused by some operation
 	/// rather than some constraint check Eg. getting data from the db
 	/// We'll preserve their error message and return it as a string.
-	#[error("{}", 0)]
+	#[error("{}", .0)]
 	Unknown(String),
 }
 
 // sync:js[CheckUserCanDeleteNode]
 /// Checks if the user can delete a node.
-pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node) -> Result<(), NodeDeleteAssertionError> {
-	// first check generic delete permissions
-	assert_user_can_delete(&ctx, &actor, node).await.map_err(|_| NodeDeleteAssertionError::NoPermission(node.id.clone()))?;
-	//	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
-	//
-	//	// todo: I think this should be removed now, since permissions are handled by generic access-policy check above
-	if !is_user_creator_or_mod(actor, &node.creator) {
-		return Err(NodeDeleteAssertionError::NoPermission(node.id.clone()));
+pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node, for_map_delete: bool, for_recursive_comments_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), NodeDeleteAssertionError> {
+	let skip_perm_check = for_recursive_comments_delete && node.r#type == NodeType::comment;
+	if !skip_perm_check {
+		// first check generic delete permissions
+		assert_user_can_delete(&ctx, &actor, node).await.map_err(|_| NodeDeleteAssertionError::NoPermission(node.id.clone()))?;
+		//	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
+		//
+		//	// todo: I think this should be removed now, since permissions are handled by generic access-policy check above
+		if !is_user_creator_or_mod(actor, &node.creator) {
+			return Err(NodeDeleteAssertionError::NoPermission(node.id.clone()));
+		}
 	}
-	Ok(())
-}
 
-/// Checks if a node is deletable by checking if it's linked to other node or not
-pub async fn assert_node_is_deletable(ctx: &AccessorContext<'_>, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), NodeDeleteAssertionError> {
 	let parent_links = get_node_links(ctx, None, Some(node.id.as_str())).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))?;
 
 	if parent_links.into_iter().map(|a| a.parent).filter(|a| !parents_to_ignore.contains(a)).collect::<Vec<String>>().len() > 1 {
 		return Err(NodeDeleteAssertionError::HasMultipleParents(node.id.clone()));
 	}
 
-	if is_root_node(ctx, &node).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))? && !as_part_of_map_delete {
+	if is_root_node(ctx, &node).await.map_err(|e| NodeDeleteAssertionError::Unknown(e.to_string()))? && !for_map_delete {
 		return Err(NodeDeleteAssertionError::IsRootNode(node.id.clone()));
 	}
 

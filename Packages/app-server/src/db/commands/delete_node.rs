@@ -6,7 +6,7 @@ use crate::db::commands::_shared::increment_edit_counts::{increment_edit_counts_
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::node_links::get_node_links;
-use crate::db::nodes::{assert_node_is_deletable, assert_user_can_delete_node, get_node, get_node_children, is_root_node, NodeDeleteAssertionError};
+use crate::db::nodes::{assert_user_can_delete_node, get_node, get_node_children, is_root_node, NodeDeleteAssertionError};
 use crate::db::nodes_::_node::Node;
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
@@ -16,6 +16,7 @@ use rust_shared::anyhow::{anyhow, bail, ensure, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Value};
@@ -53,7 +54,7 @@ pub struct DeleteNodeResult {
 
 #[derive(Default)]
 pub struct DeleteNodeExtras {
-	pub as_part_of_map_delete: bool,
+	pub for_map_delete: bool,
 	//pub parent_node_ids: Vec<String>,
 	//pub child_node_ids: Vec<String>,
 }
@@ -62,47 +63,28 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool,
 	let DeleteNodeInput { mapID, nodeID } = input;
 	let node = get_node(&ctx, &nodeID).await?;
 
-	// to check the user permission for node deletion or not
-	// it's only useful for deleting the nodes user doesn't own(i.e for nested comments)
-	let check_perm = true;
-	delete(ctx, actor, &node, &extras, &mapID, is_root, check_perm).await?;
+	delete(ctx, actor, &node, &extras, &mapID, is_root, false).await?;
 
 	Ok(DeleteNodeResult { __: gql_placeholder() })
 }
 
-async fn delete(ctx: &AccessorContext<'_>, actor: &User, node: &Node, extras: &DeleteNodeExtras, map_id: &Option<String>, is_root: bool, check_perm: bool) -> Result<(), Error> {
+async fn delete(ctx: &AccessorContext<'_>, actor: &User, node: &Node, extras: &DeleteNodeExtras, map_id: &Option<String>, is_root: bool, for_recursive_comments_delete: bool) -> Result<(), Error> {
 	let node_id = &node.id.to_string();
 	let run = Box::pin(async {
-		if check_perm {
-			assert_user_can_delete_node(&ctx, &actor, &node).await?;
-		} else {
-			// defensive; node parent<>child constraints *should* prevent this scenario)
-			ensure!(node.r#type == NodeType::comment, "Only comments can be deleted without permission check. (and only for descendants of a comment user *can* delete)");
+		let children_nodes = get_node_children(ctx, &node.id).await?;
+		let comment_children_to_delete = children_nodes.into_iter().filter(|n| n.r#type == NodeType::comment).collect_vec();
+		let comment_children_to_delete_ids = comment_children_to_delete.iter().map(|n| n.id.to_string()).collect_vec();
+
+		// do an initial check, with comment-children excluded from children-checks
+		assert_user_can_delete_node(&ctx, &actor, &node, extras.for_map_delete, for_recursive_comments_delete, vec![], comment_children_to_delete_ids).await?;
+
+		// now delete any comment children of node (includes comments created by others)
+		for comment_child in comment_children_to_delete {
+			delete(ctx, actor, &comment_child, extras, map_id, is_root, true).await?;
 		}
 
-		if let Err(err) = assert_node_is_deletable(&ctx, &node, extras.as_part_of_map_delete, vec![], vec![]).await {
-			match err {
-				NodeDeleteAssertionError::HasChildren(_) => {
-					if node.r#type == NodeType::comment {
-						let children_nodes = get_node_children(ctx, &node.id).await?;
-						// comment nodes can only have comment children, so it's okay to delete them all
-						for children_node in children_nodes {
-							delete(ctx, actor, &children_node, extras, map_id, is_root, false).await?;
-						}
-					} else {
-						bail!("{err}");
-					}
-				},
-				_ => {
-					bail!("{err}");
-				},
-			}
-		}
-
-		// after attempting resolution of errors (in block above), do one final check to ensure that the node is now deletable (eg. in case of other issues that get checked later in assertion code)
-		if let Err(err) = assert_node_is_deletable(&ctx, &node, extras.as_part_of_map_delete, vec![], vec![]).await {
-			bail!("{err}");
-		}
+		// do a final check, with no comment-children exclusion (since we've done the in-db-transaction deletion of them now)
+		assert_user_can_delete_node(&ctx, &actor, &node, extras.for_map_delete, for_recursive_comments_delete, vec![], vec![]).await?;
 
 		ctx.with_rls_disabled(
 			|| async {

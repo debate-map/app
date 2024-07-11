@@ -108,7 +108,7 @@ pub async fn run_command_batch<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 				command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
 			} else if let Some(command_input) = &command.deleteNode {
 				let command_input_final = command_input.clone();
-				let result = delete_node(&ctx, &actor, false, command_input_final, DeleteNodeExtras { as_part_of_map_delete: false }).await.map_err(to_sub_err)?;
+				let result = delete_node(&ctx, &actor, false, command_input_final, DeleteNodeExtras { for_map_delete: false }).await.map_err(to_sub_err)?;
 				command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
 			} else if let Some(command_input) = &command.deleteNodeLink {
 				let command_input_final = command_input.clone();
