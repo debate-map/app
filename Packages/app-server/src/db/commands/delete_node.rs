@@ -12,7 +12,7 @@ use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::general::data_anchor::DataAnchorFor1;
-use rust_shared::anyhow::{anyhow, bail, Error};
+use rust_shared::anyhow::{anyhow, bail, ensure, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
@@ -75,6 +75,9 @@ async fn delete(ctx: &AccessorContext<'_>, actor: &User, node: &Node, extras: &D
 	let run = Box::pin(async {
 		if check_perm {
 			assert_user_can_delete_node(&ctx, &actor, &node).await?;
+		} else {
+			// defensive; node parent<>child constraints *should* prevent this scenario)
+			ensure!(node.r#type == NodeType::comment, "Only comments can be deleted without permission check. (and only for descendants of a comment user *can* delete)");
 		}
 
 		if let Err(err) = assert_node_is_deletable(&ctx, &node, extras.as_part_of_map_delete, vec![], vec![]).await {
@@ -82,6 +85,7 @@ async fn delete(ctx: &AccessorContext<'_>, actor: &User, node: &Node, extras: &D
 				NodeDeleteAssertionError::HasChildren(_) => {
 					if node.r#type == NodeType::comment {
 						let children_nodes = get_node_children(ctx, &node.id).await?;
+						// comment nodes can only have comment children, so it's okay to delete them all
 						for children_node in children_nodes {
 							delete(ctx, actor, &children_node, extras, map_id, is_root, false).await?;
 						}
@@ -93,6 +97,11 @@ async fn delete(ctx: &AccessorContext<'_>, actor: &User, node: &Node, extras: &D
 					bail!("{err}");
 				},
 			}
+		}
+
+		// after attempting resolution of errors (in block above), do one final check to ensure that the node is now deletable (eg. in case of other issues that get checked later in assertion code)
+		if let Err(err) = assert_node_is_deletable(&ctx, &node, extras.as_part_of_map_delete, vec![], vec![]).await {
+			bail!("{err}");
 		}
 
 		ctx.with_rls_disabled(
