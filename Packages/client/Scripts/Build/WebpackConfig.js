@@ -80,6 +80,7 @@ export const webpackConfig = CreateWebpackConfig({
 /*webpackConfig.resolve.alias["postgraphile"] = FindNodeModule_FromUserProjectRoot(config, "postgraphile");
 webpackConfig.resolve.alias["graphile-utils"] = FindNodeModule_FromUserProjectRoot(config, "graphile-utils");*/
 // we don't use pg, postgraphile, and graphile-utils from frontend, so resolve to nothing
+webpackConfig.resolve.alias ??= {};
 webpackConfig.resolve.alias["pg"] = false;
 webpackConfig.resolve.alias["postgraphile"] = false;
 webpackConfig.resolve.alias["graphile-utils"] = false;

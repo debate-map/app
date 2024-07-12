@@ -1,4 +1,4 @@
-import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
+import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 @MGLClass({table: "globalData"})
 export class GlobalData {

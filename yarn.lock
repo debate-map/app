@@ -8560,24 +8560,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-vextensions@npm:1.0.73":
-  version: 1.0.73
-  resolution: "js-vextensions@npm:1.0.73"
-  checksum: 499a5c102c7295c20ea91a7f46f4dcc61fec6721cea43e3f95cb130a3f9928a755c089208f73438721dccf28accab52182238db79992f8fc964df23b389c3697
-  languageName: node
-  linkType: hard
-
 "js-vextensions@npm:1.0.78":
   version: 1.0.78
   resolution: "js-vextensions@npm:1.0.78"
   checksum: b7cc7c348c85d19149293903a6a194bc494ced460469be4e814931b91a3927212fa98458d22b065eeb6268f24103e22c543742df104b680d8bc5475092aafa03
-  languageName: node
-  linkType: hard
-
-"js-vextensions@npm:^1.0.74":
-  version: 1.0.77
-  resolution: "js-vextensions@npm:1.0.77"
-  checksum: 01b393d7df12567c8995f2ecf5c5e264b9c6b67db668ae013736754d0eb84058f775b38b90057129d6129ddab5250af4c4b023a6b00d73fb4bc1a574ee94a689
   languageName: node
   linkType: hard
 

@@ -1,4 +1,4 @@
-import {CE} from "web-vcore/nm/js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 /** For a command-run to be visible:

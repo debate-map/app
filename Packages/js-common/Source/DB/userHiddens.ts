@@ -1,4 +1,4 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions";
+import {emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {UserFollow, UserHidden} from "./userHiddens/@UserHidden.js";
 

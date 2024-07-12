@@ -2,6 +2,7 @@ const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
+const glob = require("glob");
 
 const {noTimings} = SetUpLoggingOfScriptStartAndEndTimes();
 
@@ -631,6 +632,21 @@ Object.assign(scripts, {
 			psqlProcess.stdin.write(`\\q\n`);
 		}),
 	},
+});
+
+
+Object.assign(scripts, {
+	clearTSBuildInfos: Dynamic(()=>{
+		const tsBuildInfoFiles = glob.sync("./**/*.tsbuildinfo", {
+			ignore: [
+				"./node_modules/**",
+				"./**/node_modules/**",
+			]
+		});
+		for (const file of tsBuildInfoFiles) {
+			fs.unlinkSync(file);
+		}
+	}),
 });
 
 function GetBuildSeedDBScriptCommand() {

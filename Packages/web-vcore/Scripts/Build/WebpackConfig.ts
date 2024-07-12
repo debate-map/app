@@ -197,7 +197,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 				".ts", ".tsx", // always accept ts[x], because there might be some in node_modules (eg. web-vcore)
 				".mjs", // needed for mobx-sync
 			],
-			alias: GetModuleConsolidations(opt),
+			//alias: GetModuleConsolidations(opt),
 			// for nodejs polyfills
 			/*fallback: {
 				//buffer: require.resolve("buffer/"),
@@ -309,7 +309,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 	const packagesThatMayBeYalcLinked_asRegexSubstrings = packagesThatMayBeYalcLinked.map(a=>a.name.replace("/", sep)).join("|");
 	// based on example at: https://webpack.js.org/configuration/other-options/#managedpaths
 	const regexForAllNodeModulesExceptPotentialYalcLinked = new RegExp(`^(.+?${sep}node_modules${sep}(?!(${packagesThatMayBeYalcLinked_asRegexSubstrings}))(@.+?${sep})?.+?)${sep}`);
-	webpackConfig.snapshot = {managedPaths: [regexForAllNodeModulesExceptPotentialYalcLinked]};
+	//webpackConfig.snapshot = {managedPaths: [regexForAllNodeModulesExceptPotentialYalcLinked]};
 
 	// even the usage of the "managedPaths" field above had some flakiness; perhaps the most reliable is to just enable watching on the entire node_modules folder
 	// (devs don't recommend this [https://github.com/webpack/webpack/issues/11612#issuecomment-705806843], but it seems at least roughly as reliable as the managedPaths regex approach above) 
