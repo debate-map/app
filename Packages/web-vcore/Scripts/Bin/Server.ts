@@ -49,8 +49,11 @@ export function Serve(
 					+ `(.(?!\\.(${extToServe.join("|")})))*$`, // paths with these extensions will NOT be redirected to "index.html"
 				),
 				to(context) {
-					if (webpackConfig?.output?.publicPath) {
-						return `${webpackConfig.output.publicPath}/index.html`;
+					let publicPath = webpackConfig?.output?.publicPath;
+					if (publicPath) {
+						if (typeof publicPath != "string") throw new Error("Public path must be a string.");
+						if (!publicPath.endsWith("/")) publicPath += "/";
+						return `${publicPath}index.html`;
 					}
 					return "/index.html";
 				},
