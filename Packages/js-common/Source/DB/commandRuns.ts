@@ -20,10 +20,9 @@ export const GetCommandRuns = CreateAccessor((commandTypes?: string[], actorID?:
 });
 
 export const GetManyCommandRuns = CreateAccessor((commandIds?: string[])=>{
-
 	return GetDocs({
 		params: {filter: {
-			id:  {in: commandIds},
+			id: {in: commandIds},
 		}},
 	}, a=>a.commandRuns);
 });

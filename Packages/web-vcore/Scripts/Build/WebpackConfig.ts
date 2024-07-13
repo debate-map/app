@@ -1,11 +1,7 @@
 import CSSNano from "cssnano";
 import debug_base from "debug";
-// import resolverFactory from 'enhanced-resolve/lib/ResolverFactory';
-import SymlinkPlugin from "enhanced-resolve/lib/SymlinkPlugin.js";
 import fs from "fs";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-//import {CE} from "js-vextensions";
-//import {CE, E} from "js-vextensions/Source"; // temp; require source, thus ts-node compiles to commonjs (fix for that ts-node doesn't support es2015-modules)
 import {CE, E} from "js-vextensions";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import {createRequire} from "module";
@@ -49,73 +45,6 @@ export function FindNodeModule_FromWebVCoreRoot(config: CreateConfig_ReturnType,
 		return PathFromWebVCoreRoot("node_modules", name);
 	}
 	return FindNodeModule_FromUserProjectRoot(config, name);
-}
-
-// Note: These consolidations are only for webpack/runtime. If you need typescript/compile-time consolidations, adds entries to the "paths" field in tsconfig.json.
-function GetModuleConsolidations(opt: CreateWebpackConfig_Options) {
-	const result = {};
-
-	// these consolidations are done in case web-vcore is symlinked; we don't want web-vcore's dev-dep versions of these being used over the user-project's versions
-	const depsToConsolidate_fromParent = CE(wvcPackageJSON.peerDependencies).VKeys(); // eg: mobx-firelink, firebase-feedback, firebase-forum
-	for (const name of depsToConsolidate_fromParent) {
-		try {
-			result[name] = FindNodeModule_FromUserProjectRoot(opt.config, name);
-		} catch {
-			// if couldn't find node-module, just ignore entry (to match with old behavior; the alias stuff needs a general cleanup)
-		}
-	}
-
-	// these consolidations are done for a variety of reasons (see notes below)
-	const depsToConsolidate_fromWVCFirst = [
-		// standard/long-term (ie. under "/nm" folder) consolidations provided by web-vcore (there's a risk of issues either way, but the risk of consolidation is lower than the risk of multiple versions)
-		// ==========
-
-		// written by others
-		...[
-			"react", // doesn't like multiple
-			"react-dom", // doesn't like multiple
-			"mobx", // doesn't like multiple
-			"mobx-react", // doesn't like multiple
-		],
-		// written by self (separate category, because consolidations for these should always be fine/good,since we know the different versions will be compatible anyway -- or at least easily modifiable to be so)
-		...[
-			"js-vextensions", // js (base)
-			"react-vextensions", "react-vcomponents", "react-vmenu", "react-vmessagebox", "react-vscrollview", "react-vmarkdown", // +react
-			"graphql-forum", // +graphql
-			"mobx-graphlink", // +mobx
-			"web-vcore", // +framework
-			"webpack-runtime-require", // misc
-		],
-
-		// specialized/temporary consolidations
-		// ==========
-
-		...[
-			// necessary consolidations, to fix issues
-			//"mobx-firelink/node_modules/mobx": paths.base("node_modules", "mobx"), // fsr, needed to prevent 2nd mobx, when mobx-firelink is npm-linked [has this always been true?]
-
-			// convenience consolidations, since they have npm-patches applied (and we don't want to have to adjust the match-counts)
-			//"react-beautiful-dnd",
-			//"@hello-pangea/dnd",
-			"immer",
-		],
-	];
-	for (const name of depsToConsolidate_fromWVCFirst) {
-		try {
-			//result[name] = FindNodeModule_FromUserProjectRoot(opt.config, name);
-			result[name] = FindNodeModule_FromWebVCoreRoot(opt.config, name);
-
-			// cause an error to occur if the parent project tried importing from the web-vcore ".yalc" folder directly (it should never do this)
-			// todo: replace with eslint rule
-			result[`web-vcore/.yalc/${name}`] = "never_import_from_the_yalc_folder_directly";
-		} catch {
-			// if couldn't find node-module, just ignore entry (to match with old behavior; the alias stuff needs a general cleanup)
-		}
-	}
-
-	console.log("Found aliases/consolidations for:", Object.keys(result).filter(a=>!a.includes("/.yalc/")));
-
-	return result;
 }
 
 export class TSLoaderEntry {
@@ -197,7 +126,6 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 				".ts", ".tsx", // always accept ts[x], because there might be some in node_modules (eg. web-vcore)
 				".mjs", // needed for mobx-sync
 			],
-			//alias: GetModuleConsolidations(opt),
 			// for nodejs polyfills
 			/*fallback: {
 				//buffer: require.resolve("buffer/"),
@@ -206,7 +134,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 		module: {
 			rules: [
 				// load source-maps (doesn't seem to actually work atm, at least for, eg. js-vextensions lib)
-				/* {
+				/*{
 					test: /(\.jsx?|\.jsx?\.map)$/,
 					use: 'source-map-loader',
 					include: [
@@ -214,7 +142,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 						paths.base('node_modules', 'js-vextensions'),
 					],
 					enforce: 'pre',
-				}, */
+				},*/
 				// load fonts/images
 				{test: /\.woff(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff"},
 				{test: /\.woff2(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff2"},
@@ -254,25 +182,6 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 		pathinfo: true, // include comments next to require-funcs saying path
 	};
 
-	// fix for symlinks
-	// ==========
-
-	/*
-	Pros of disabling symlink-resolution:
-	1) Principle: behavior should be the same whether a module is symlinked or not.
-	2) Specific reason: [I forget what it was]
-	Cons:
-	1) It made-so webpack-dev-server wasn't actually updating/reacting-to-changes-in symlinked-deps' output files. (maybe solvable, but I don't know how)
-	2) It makes-so webpack doesn't detect "duplicates", eg. "nm/mobx-graphlink" and "nm/graphql-feedback/nm/mobx-graphlink" are both part of bundle [by default] when graphql-feedback is symlinked.
-	3) It substantially reduced incremental-compilation performance. I'd estimate it slowed recompiles (from save to page-loaded) from ~5s to ~10s.
-	The cons outweigh the pros at the moment, thus I'm re-enabling symlink-resolution for now.
-	*/
-	/*webpackConfig.resolve.symlinks = false;
-	// not sure if this is needed (given flag-set above), but keeping, since it apparently does still get called once
-	SymlinkPlugin.prototype.apply = function() {
-		console.log("Symlink-plugin disabled...");
-	};*/
-
 	// fix so that webpack can detect additions/removals of folders/symlinks in the "node_modules" folder, as caused by "yarn install" (as called by "Scripts/zalc2.js" during its operations)
 	// ==========
 
@@ -309,7 +218,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 	const packagesThatMayBeYalcLinked_asRegexSubstrings = packagesThatMayBeYalcLinked.map(a=>a.name.replace("/", sep)).join("|");
 	// based on example at: https://webpack.js.org/configuration/other-options/#managedpaths
 	const regexForAllNodeModulesExceptPotentialYalcLinked = new RegExp(`^(.+?${sep}node_modules${sep}(?!(${packagesThatMayBeYalcLinked_asRegexSubstrings}))(@.+?${sep})?.+?)${sep}`);
-	//webpackConfig.snapshot = {managedPaths: [regexForAllNodeModulesExceptPotentialYalcLinked]};
+	webpackConfig.snapshot = {managedPaths: [regexForAllNodeModulesExceptPotentialYalcLinked]};
 
 	// even the usage of the "managedPaths" field above had some flakiness; perhaps the most reliable is to just enable watching on the entire node_modules folder
 	// (devs don't recommend this [https://github.com/webpack/webpack/issues/11612#issuecomment-705806843], but it seems at least roughly as reliable as the managedPaths regex approach above) 
@@ -342,51 +251,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 			inject: "body",
 			minify: false,
 		}),
-
-		// speeds up (non-incremental) builds by quite a lot // disabled atm, since causes webpack crash after every 30 or so rebuilds!
-		/* new HardSourceWebpackPlugin({
-			configHash: function(webpackConfig) {
-				const setIn = require("lodash/fp/set");
-				let indexOfStringReplaceRule = webpackConfig.module.rules.findIndex(a=>a.loader && a.loader.includes && a.loader.includes("string-replace-webpack-plugin\\loader.js?id="));
-				let config_excludeVolatiles = webpackConfig;
-				//config_excludeVolatiles = WithDeepSet(config_excludeVolatiles, ["module", "rules", indexOfStringReplaceRule, "loader"], null);
-				config_excludeVolatiles = setIn(`module.rules.${indexOfStringReplaceRule}.loader`, null, config_excludeVolatiles);
-				return require("node-object-hash")({sort: false}).hash(config_excludeVolatiles);
-			},
-			// if all caches combined are over the size-threshold (in bytes), then any caches older than max-age (in ms) are deleted
-			/*cachePrune: {
-				maxAge: 2 * 24 * 60 * 60 * 1000,
-				sizeThreshold: 50 * 1024 * 1024
-			},*#/
-		}), */
 	];
-
-	/* if (DEV) {
-		debug('Enable plugins for live development (HMR, NoErrors).');
-		webpackConfig.plugins.push(
-			new webpack.HotModuleReplacementPlugin(),
-			new webpack.NoEmitOnErrorsPlugin(),
-			// new webpack.NamedModulesPlugin()
-		);
-	} else  if (PROD && !QUICK) {
-		debug('Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).');
-		webpackConfig.plugins.push(
-			// new webpack.optimize.OccurrenceOrderPlugin(),
-			// new webpack.optimize.DedupePlugin(),
-			new webpack.optimize.UglifyJsPlugin({
-				compress: {
-					unused: true,
-					dead_code: true,
-					warnings: false,
-					keep_fnames: true,
-				},
-				mangle: {
-					keep_fnames: true,
-				},
-				sourceMap: true,
-			}),
-		);
-	} */
 
 	// rules
 	// ==========
@@ -451,49 +316,6 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 			},
 		},
 	];
-
-	// for using ts-loader to compile the main Source folder files
-	/* if (USE_TSLOADER) {
-		//webpackConfig.module.rules.push({test: /\.tsx?$/, use: "awesome-typescript-loader"});
-		webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", options: {include: [paths.source()]}});
-	}*/
-
-	// for using ts-loader to compile ts files in various locations outside of Source (eg. in node_modules)
-	/*function resolvePath(...segmentsFromRoot: string[]) {
-		//return fs.realpathSync(paths.base(...segmentsFromRoot));
-		return paths.base(...segmentsFromRoot);
-	}
-	const tsLoaderEntries_base = [
-		{context: resolvePath("node_modules", "web-vcore"), test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
-		{context: resolvePath("node_modules", "js-vextensions"), test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.tsx?$/},
-	];*/
-	const tsLoaderEntries_base = [
-		/*{test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
-		{test: /web-vcore[/\\]nm[/\\].*\.tsx?$/}, // some of the "nm/X" files use typescript tricks to fix issues, so use ts-loader for them*/
-		{test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.d\.ts$/},
-	];
-	const tsLoaderEntries = opt.tsLoaderEntries ?? tsLoaderEntries_base;
-
-	// to reliably run ts-loader on node_modules folders, each must use a separate ts-loader instance
-	// (else it [sometimes] "finds" the tsconfig.json in one, and complains when the other packages' files aren't under its rootDir)
-	for (const [index, entry] of tsLoaderEntries.entries()) {
-		webpackConfig.module!.rules.push({
-			// ensures that ts-loader ignores files outside of the path (not needed atm)
-			//include: entry.context,
-			test: entry.test,
-			loader: SubdepPath("ts-loader"),
-			options: {
-				allowTsInNodeModules: true,
-				// forces separate ts-loader instance
-				instance: `tsLoader_instance${index}`,
-				// ensures that ts-loader finds the correct context and config-file for the path (not needed atm)
-				/*context: entry.context,
-				configFile: path.resolve(entry.context, "tsconfig.json"),*/
-
-				//onlyCompileBundledFiles: true,
-			},
-		});
-	}
 
 	// for mobx-sync
 	webpackConfig.module!.rules.push({test: /\.mjs$/, type: "javascript/auto"});
@@ -664,5 +486,5 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 }
 
 // also do this, for if sending to cli-started webpack
-// export default webpackConfig;
-// module.exports = webpackConfig;
+//export default webpackConfig;
+//module.exports = webpackConfig;

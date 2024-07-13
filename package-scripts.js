@@ -1,8 +1,8 @@
 const fs = require("fs");
+const glob = require("glob");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
-const glob = require("glob");
 
 const {noTimings} = SetUpLoggingOfScriptStartAndEndTimes();
 
@@ -76,6 +76,7 @@ Object.assign(scripts, {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
 		},
+		devRS: "",
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
 		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
@@ -634,14 +635,14 @@ Object.assign(scripts, {
 	},
 });
 
-
 Object.assign(scripts, {
+	wvcSync: "node ./Packages/web-vcore/Scripts/@CJS/SyncDepsToOuterProject.js",
 	clearTSBuildInfos: Dynamic(()=>{
 		const tsBuildInfoFiles = glob.sync("./**/*.tsbuildinfo", {
 			ignore: [
 				"./node_modules/**",
 				"./**/node_modules/**",
-			]
+			],
 		});
 		for (const file of tsBuildInfoFiles) {
 			fs.unlinkSync(file);
