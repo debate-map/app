@@ -21,11 +21,11 @@ function GetDepsToConsolidate() {
 
 			// these packages used to be among the "web-vcore/nm/XXX" entries; these need a closer look eventually to determine which ones are worth consolidating (for now we just continue doing so)
 			"@apollo/client",
+			"@hello-pangea/dnd",
 			"chroma-js",
 			"codemirror",
 			"graphql-tag",
 			"graphql",
-			"hello-pangea-dnd",
 			"moment",
 			"raven-js",
 			"rc-slider",
@@ -66,6 +66,16 @@ function GetDepsToConsolidate() {
 	];
 }
 
+const bufferedLogs = [];
+function BufferLog(message) {
+	bufferedLogs.push(message);
+}
+function PrintBufferedLogs() {
+	for (const log of bufferedLogs) {
+		console.log(log);
+	}
+}
+
 Start();
 function Start() {
 	//const outerPkg_path = "../../../../package.json";
@@ -77,12 +87,12 @@ function Start() {
 	for (const depName of GetDepsToConsolidate()) {
 		const depVersion = wvcPkg.dependencies[depName];
 		if (depVersion == null) {
-			console.log(`Dependency not found in web-vcore/package.json: ${depName}`);
+			BufferLog(`Dependency not found in web-vcore/package.json: ${depName}`);
 			continue;
 		}
 		const exactVersionRegex = /^[\d.]+$/;
 		if (depVersion.match(exactVersionRegex) == null) {
-			console.log(`Dependency version is not exact ("${depVersion}"); skipping: ${depName}`);
+			BufferLog(`Dependency version is not exact ("${depVersion}"); skipping: ${depName}`);
 			continue;
 		}
 
@@ -98,6 +108,15 @@ function Start() {
 	]);
 
 	const outerPkg_new = {...outerPkg_old, resolutions: outerPkg_newResolutions};
+	const resolutions_oldJSON = JSON.stringify(outerPkg_old.resolutions, null, 2);
+	const resolutions_newJSON = JSON.stringify(outerPkg_new.resolutions, null, 2);
+	if (resolutions_oldJSON == resolutions_newJSON) {
+		console.log(`Yarn pre-install (web-vcore): The "resolutions" field of the outer project's package.json was already up-to-date.`);
+		return;
+	}
+
+	// wait to print these buffered logs until we're sure we're actually going to make changes (too noisy to be worth including unless an actual dependency version-change was made)
+	PrintBufferedLogs();
 	writeFileSync(outerPkg_path, JSON.stringify(outerPkg_new, null, 2));
-	console.log("Outer project's package.json was updated.");
+	console.log("Yarn pre-install (web-vcore): Outer project's package.json was updated.");
 }

@@ -18,12 +18,6 @@ const config = {
 	resolve: {
 		modules: ["node_modules", "./Source"],
 		extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".mjs"],
-		alias: {
-			// we don't use pg, postgraphile, or graphile-utils from frontend, so resolve to nothing
-			pg: false,
-			postgraphile: false,
-			"graphile-utils": false,
-		},
 		fallback: {
 			stream: "../../stream-browserify/index.js",
 		},

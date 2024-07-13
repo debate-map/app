@@ -146,9 +146,5 @@
 		"webpack-dev-middleware": "7.0.0",
 		"webpack-runtime-require": "2.0.0",
 		"webpack-string-replacer": "0.0.20"
-	},
-	"packageManager": "yarn@4.0.2",
-	"resolutions": {
-		"@types/node": "~20"
 	}
 }

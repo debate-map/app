@@ -21,11 +21,6 @@ export const webpackConfig = CreateWebpackConfig({
 		},
 	},
 });
-// we don't use pg, postgraphile, and graphile-utils from frontend, so resolve to nothing
-webpackConfig.resolve.alias ??= {};
-webpackConfig.resolve.alias["pg"] = false;
-webpackConfig.resolve.alias["postgraphile"] = false;
-webpackConfig.resolve.alias["graphile-utils"] = false;
 
 // temp (till url-rewriter is active); fix that Dist/index.html is trying to load "/app.js" rather than "/monitor/app.js"
 const htmlPlugin /** @type {import("html-webpack-plugin").HtmlWebpackPlugin} */ = webpackConfig.plugins.find(a=>a.constructor.name == "HtmlWebpackPlugin");
