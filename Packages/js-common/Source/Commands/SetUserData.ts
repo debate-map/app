@@ -1,5 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "js-vextensions";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "mobx-graphlink";
 import {GetUser} from "../DB/users.js";
 import {User} from "../DB/users/@User.js";
 

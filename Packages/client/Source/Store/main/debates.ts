@@ -1,7 +1,7 @@
 import {O} from "web-vcore";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetMap} from "dm_common";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {makeObservable} from "mobx";
 
 export class DebatesPageState {
 	constructor() { makeObservable(this); }

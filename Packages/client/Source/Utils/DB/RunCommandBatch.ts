@@ -1,5 +1,5 @@
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
-import {gql} from "web-vcore/nm/@apollo/client";
+import {gql} from "@apollo/client";
 import {NodeL1} from "dm_common";
 import {AddChildNodeInput} from "./Command.js";
 

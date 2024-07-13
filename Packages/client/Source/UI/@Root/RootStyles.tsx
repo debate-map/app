@@ -3,7 +3,7 @@ import React from "react";
 import {GetUserBackground} from "Store/db_ext/users/$user";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "react-vextensions";
 
 //export const Button_background_dark = Chroma("rgba(90,100,110,0.9)").css(); // same as hover color, except .9 alpha instead of .8
 //export const Button_background_dark = Chroma(Button_styles.root.backgroundColor).darken(chroma_maxDarken * .05).css();

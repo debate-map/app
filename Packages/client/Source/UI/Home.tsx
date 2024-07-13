@@ -1,5 +1,5 @@
-import {Switch} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Switch} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {Observer, SubNavBar, SubNavBarButton} from "web-vcore";
 import {AboutUI} from "./Home/About.js";

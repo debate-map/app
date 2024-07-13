@@ -1,4 +1,4 @@
-import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {Assert} from "js-vextensions";
 
 // sync:rs
 // ==========

@@ -1,7 +1,7 @@
 import {GetExpandedByDefaultAttachment, GetMedia, GetNode, GetNodeChildren, GetNodeChildrenL2, GetNodeChildrenL3, GetNodeL3, GetNodePhrasings, GetTermsAttached, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeTag, Term} from "dm_common";
-import {gql} from "web-vcore/nm/@apollo/client";
-import {Assert, NN} from "web-vcore/nm/js-vextensions.js";
-import {ClassKeys, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {gql} from "@apollo/client";
+import {Assert, NN} from "js-vextensions";
+import {ClassKeys, CreateAccessor} from "mobx-graphlink";
 import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";
 
 export class SubtreeData_Server {

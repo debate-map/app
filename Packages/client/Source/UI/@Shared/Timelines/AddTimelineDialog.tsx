@@ -1,8 +1,8 @@
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Column, Row} from "react-vcomponents";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, OrderKey, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {RunCommand_AddTimeline, RunCommand_AddTimelineStep} from "Utils/DB/Command.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync} from "mobx-graphlink";
 import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
 
 const defaultIntroMessage = `

@@ -1,7 +1,7 @@
 import React from "react";
 import {ES} from "web-vcore";
-import {Row} from "web-vcore/nm/react-vcomponents";
-import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Row} from "react-vcomponents";
+import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 
 /*export function CSS_Button_MatchSelectOption(selected = false) {
 	return ES(

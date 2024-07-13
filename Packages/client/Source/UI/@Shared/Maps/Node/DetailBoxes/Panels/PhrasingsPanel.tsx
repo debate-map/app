@@ -1,12 +1,12 @@
-import {Button, Column, Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Pre, Row, Select} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {InfoButton, Observer} from "web-vcore";
 import {NodeL2, GetNodePhrasings, NodePhrasing, NodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, NodeType, Map, GetAccessPolicy, CanAddPhrasing, NodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
-import {GetEntries} from "web-vcore/nm/js-vextensions";
+import {GetEntries} from "js-vextensions";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
-import {BailIfNull, GetDoc} from "web-vcore/nm/mobx-graphlink";
+import {BailIfNull, GetDoc} from "mobx-graphlink";
 import {ShowAddPhrasingDialog} from "../../../../../Database/Phrasings/PhrasingDetailsUI.js";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel.js";
 import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeBox/TitlePanel.js";

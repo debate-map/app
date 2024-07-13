@@ -1,9 +1,9 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {E} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
 import {InfoButton, Link, Observer} from "web-vcore";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Validate} from "mobx-graphlink";
 import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {zIndexes} from "Utils/UI/ZIndexes.js";

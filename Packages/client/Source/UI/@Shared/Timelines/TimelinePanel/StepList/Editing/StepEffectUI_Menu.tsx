@@ -5,9 +5,9 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetNodeDisplayText, GetNodeL3, GetTimelineStep, TimelineStep, TimelineStepEffect} from "dm_common";
 import React from "react";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {Clone, DeepEquals} from "web-vcore/nm/js-vextensions.js";
-import {BaseComponent, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
+import {Clone, DeepEquals} from "js-vextensions";
+import {BaseComponent, WarnOfTransientObjectProps} from "react-vextensions";
+import {VMenuItem, VMenuStub} from "react-vmenu";
 
 type Props = {step: TimelineStep, effect: TimelineStepEffect|n, effectIndex: number};
 

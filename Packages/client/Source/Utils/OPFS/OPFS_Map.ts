@@ -1,5 +1,5 @@
 import {O, RunInAction} from "web-vcore";
-import {computed, makeObservable} from "web-vcore/nm/mobx";
+import {computed, makeObservable} from "mobx";
 import {OPFSFolder} from "./OPFSFolder";
 import {OPFS_Step} from "./Map/OPFS_Step";
 

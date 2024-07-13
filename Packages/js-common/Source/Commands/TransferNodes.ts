@@ -1,5 +1,5 @@
-import {Assert, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, Clone, GetValues} from "js-vextensions";
+import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "mobx-graphlink";
 import {MaybeCloneAndRetargetNodeTag, NodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@NodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";

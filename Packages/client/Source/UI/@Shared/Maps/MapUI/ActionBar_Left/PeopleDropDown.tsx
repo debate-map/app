@@ -1,7 +1,7 @@
-import {CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {CloneWithPrototypes} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";

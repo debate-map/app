@@ -1,8 +1,8 @@
-import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer, emptyArray, EA} from "web-vcore/nm/js-vextensions.js";
-import {observable} from "web-vcore/nm/mobx.js";
+import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer, emptyArray, EA} from "js-vextensions";
+import {observable} from "mobx";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
-import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges, WaitTillResolvedThenExecuteSideEffects, RunInAction, BailError} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges, WaitTillResolvedThenExecuteSideEffects, RunInAction, BailError} from "mobx-graphlink";
 import {PathSegmentToNodeID, MapView, NodeView, GetNode, NodeType, GetDefaultExpansionFieldsForNodeView, ToPathNodes} from "dm_common";
 
 export let cache_lastSelectedNode_nodePath: string[] = [];

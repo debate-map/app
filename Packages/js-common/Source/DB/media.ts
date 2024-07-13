@@ -1,5 +1,5 @@
-import {CachedTransform, IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CachedTransform, IsNaN} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
 import {Media} from "./media/@Media.js";
 
 export const GetMedia = CreateAccessor((id: string|n)=>{

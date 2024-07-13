@@ -1,6 +1,6 @@
-import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {Button, Div, Row} from "react-vcomponents";
+import {BaseComponent, cssHelper} from "react-vextensions";
+import {Assert, E} from "js-vextensions";
 import React from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 import {liveSkin} from "Utils/Styles/SkinManager";

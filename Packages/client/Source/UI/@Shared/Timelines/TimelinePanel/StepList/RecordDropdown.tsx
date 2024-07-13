@@ -6,8 +6,8 @@ import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimeli
 import {Assert, CopyText, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {AddNotificationMessage, Observer, RunInAction_Set, TextPlus} from "web-vcore";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {FastScrollModeCheckbox, ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";

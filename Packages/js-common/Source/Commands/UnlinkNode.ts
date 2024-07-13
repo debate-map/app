@@ -1,5 +1,5 @@
-import {FancyFormat} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {FancyFormat} from "js-vextensions";
+import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeLinks} from "../DB/nodeLinks.js";

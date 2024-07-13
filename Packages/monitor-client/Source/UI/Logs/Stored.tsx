@@ -3,9 +3,9 @@ import React, {useState} from "react";
 import {store} from "Store";
 import {DateToDateTimeInputStr} from "UI/DB/Requests.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
-import {Button, CheckBox, Column, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Button, CheckBox, Column, Row, Spinner, Text, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {LogEntryUI} from "./LogEntryUI.js";
 import {LogEntry} from "./Realtime.js";
 

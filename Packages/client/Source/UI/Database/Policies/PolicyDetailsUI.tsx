@@ -7,12 +7,12 @@ import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {RunCommand_AddAccessPolicy} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, observer_simple, TextPlus} from "web-vcore";
-import {Clone, E} from "web-vcore/nm/js-vextensions.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
+import {Clone, E} from "js-vextensions";
+import {observer} from "mobx-react";
+import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {observer_mgl} from "mobx-graphlink";
 import {PolicyPicker} from "./PolicyPicker.js";
 
 @Observer

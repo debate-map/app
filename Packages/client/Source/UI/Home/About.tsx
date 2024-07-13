@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {VReactMarkdown, PageContainer} from "web-vcore";
 import {slackInviteLink} from "UI/More/Links.js";
 

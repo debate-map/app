@@ -1,6 +1,6 @@
-import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {CheckBox, Column, Pre, Row, RowLR, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
+import {CheckBox, Column, Pre, Row, RowLR, TextArea, TextInput} from "react-vcomponents";
+import {BaseComponent, GetDOM} from "react-vextensions";
 import {Attachment, EquationAttachment} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 

@@ -4,9 +4,9 @@ import {GetTalkTimeSummaryAtTimeX} from "Store/main/maps/mapStates/PlaybackAcces
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel";
 import {GetTimelineSteps, Map} from "dm_common";
 import {Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
-import {Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {E} from "js-vextensions";
+import {Row} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 
 const secondsToMMSS = (seconds: number)=>{
 	return `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;

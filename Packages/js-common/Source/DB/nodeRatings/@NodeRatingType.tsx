@@ -1,5 +1,5 @@
-import {Assert, CE, GetValues, IsInt, ModifyString, ToInt} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, CE, GetValues, IsInt, ModifyString, ToInt} from "js-vextensions";
+import {AddSchema} from "mobx-graphlink";
 import {NodeL3} from "../nodes/@Node.js";
 
 export enum NodeRatingType {

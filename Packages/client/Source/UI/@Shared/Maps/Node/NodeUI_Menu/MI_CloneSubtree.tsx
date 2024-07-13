@@ -4,14 +4,14 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer} from "web-vcore";
-import {gql} from "web-vcore/nm/@apollo/client";
-import {GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, Column, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {gql} from "@apollo/client";
+import {GetEntries, GetValues, ModifyString} from "js-vextensions";
+import {SlicePath, observer_mgl} from "mobx-graphlink";
+import {observer} from "mobx-react";
+import {Button, Column, Row, RowLR, Select, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 export class CloneSubtreePayload {

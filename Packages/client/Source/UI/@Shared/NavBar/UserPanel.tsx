@@ -1,14 +1,14 @@
-import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Div, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Assert, E, WaitXThenRun} from "js-vextensions";
+import {Button, Column, Div, Row, Text, TextInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {AddNotificationMessage, ES, GetCurrentURL, InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
-import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
+import {FetchResult, gql} from "@apollo/client";
 import {OnUserJWTChanged} from "Utils/AutoRuns/UserInfoCheck";
 import {SignInButton} from "./UserPanel/SignInButton.js";
 

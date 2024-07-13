@@ -1,7 +1,7 @@
 import React from "react";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {GetMapUICSSFilter} from "../../MapUI";
 
 export let nodeDetailBoxesLayer_container: HTMLDivElement;

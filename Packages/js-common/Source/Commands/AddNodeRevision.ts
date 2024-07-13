@@ -1,5 +1,5 @@
-import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, CE} from "js-vextensions";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, WrapDBValue} from "mobx-graphlink";
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";

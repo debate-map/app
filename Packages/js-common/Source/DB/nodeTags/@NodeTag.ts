@@ -1,5 +1,5 @@
-import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "mobx-graphlink";
+import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "js-vextensions";
 import {NodeTagCloneType} from "../../Commands.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 

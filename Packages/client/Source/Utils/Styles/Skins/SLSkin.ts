@@ -1,8 +1,8 @@
 import {UserRow} from "UI/Database/Users.js";
 import {chroma_maxDarken, inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import chroma from "web-vcore/nm/chroma-js.js";
-import {addHook_css} from "web-vcore/nm/react-vextensions";
+import chroma from "chroma-js";
+import {addHook_css} from "react-vextensions";
 import {DMSkin} from "./DMSkin.js";
 
 export function GetCinzelStyleForBold() {

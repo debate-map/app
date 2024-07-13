@@ -1,5 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {DB, MGLClass, Field, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "js-vextensions";
+import {DB, MGLClass, Field, PartialBy} from "mobx-graphlink";
 import {NodeRatingType} from "./@NodeRatingType.js";
 
 @MGLClass({table: "nodeRatings"})

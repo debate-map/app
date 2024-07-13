@@ -1,4 +1,4 @@
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetAccessPolicy} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {APAction, APTable, PermissionSetForType} from "../accessPolicies/@PermissionSet.js";

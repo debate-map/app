@@ -1,6 +1,6 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
 import {GetUserHidden} from "dm_common";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {CreateAccessor} from "mobx-graphlink";
 import {SLMode, ShowHeader} from "../../../UI/@SL/SL.js";
 
 // backgrounds

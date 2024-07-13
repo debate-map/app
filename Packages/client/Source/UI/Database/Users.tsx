@@ -1,10 +1,10 @@
-import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {Row, Column} from "web-vcore/nm/react-vcomponents.js";
-import Moment from "web-vcore/nm/moment";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
+import {Row, Column} from "react-vcomponents";
+import Moment from "moment";
+import {ScrollView} from "react-vscrollview";
 import {Link, PageContainer, Observer, ES, AddNotificationMessage} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
-import {ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {ToNumber} from "js-vextensions";
 import {GetUsers, GetUser, User} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {useMemo, useState} from "react";

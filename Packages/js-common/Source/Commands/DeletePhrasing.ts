@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";

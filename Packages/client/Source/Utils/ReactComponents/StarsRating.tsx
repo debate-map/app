@@ -1,7 +1,7 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {Row, Button, RowProps} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "react-vextensions";
+import {Row, Button, RowProps} from "react-vcomponents";
 import {Icon} from "web-vcore";
-import {Range, E} from "web-vcore/nm/js-vextensions.js";
+import {Range, E} from "js-vextensions";
 
 export type StarsRating_Props = {
 	value: number, onChange: (value: number)=>any, titleFunc?: (starValue: number)=>string,

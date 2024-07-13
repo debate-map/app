@@ -6,7 +6,7 @@ import {Graph, NodeGroup, FlexNode, GetTreeNodeBaseRect, GetTreeNodeOffset} from
 import {Map, TimelineStep} from "dm_common";
 import {MapState} from "Store/main/maps/mapStates/@MapState";
 import {GetOpenMapID} from "Store/main";
-import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "web-vcore/nm/mobx-graphlink";
+import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "mobx-graphlink";
 import {GetPathsWith1PlusFocusLevelAfterEffects, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph.js";
 import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI.js";

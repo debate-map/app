@@ -1,5 +1,5 @@
-import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "web-vcore/nm/js-vextensions.js";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "js-vextensions";
+import {BaseComponent, GetDOM} from "react-vextensions";
 
 export type DetailsUI_Phase = "create" | "edit" | "view";
 export type DetailsUI_Base_Props<T, ClassType> = {baseData: T, phase: DetailsUI_Phase, style?, onChange?: (data: T, error: string, instance: ClassType)=>void};

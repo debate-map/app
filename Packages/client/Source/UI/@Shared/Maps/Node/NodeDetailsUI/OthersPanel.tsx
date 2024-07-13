@@ -1,9 +1,9 @@
 import {ArgumentType, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, HasAdminPermissions, NodeType, MeID, NodeRevisionDisplayDetails, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React from "react";
 import {TextPlus} from "web-vcore";
-import {GetEntries, ModifyString, ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {Text, Pre, Row, Select, Spinner, Button} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {GetEntries, ModifyString, ToNumber} from "js-vextensions";
+import {Text, Pre, Row, Select, Spinner, Button} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";

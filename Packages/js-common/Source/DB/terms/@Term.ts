@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
 import {Attachment} from "../../DB.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 

@@ -1,7 +1,7 @@
 import "./Utils/PreRunners/Start_0";
-import {VURL} from "web-vcore/nm/js-vextensions";
-import ReactDOM from "web-vcore/nm/react-dom";
-import {supportReactDevTools} from "web-vcore/nm/react-universal-hooks.js";
+import {VURL} from "js-vextensions";
+import ReactDOM from "react-dom";
+import {supportReactDevTools} from "react-universal-hooks";
 import React from "react";
 
 // stuff from Main.ts (in client)

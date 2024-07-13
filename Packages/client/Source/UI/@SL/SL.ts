@@ -1,5 +1,5 @@
 import {SLSkin} from "Utils/Styles/Skins/SLSkin";
-import {Timer} from "web-vcore/nm/js-vextensions.js";
+import {Timer} from "js-vextensions";
 
 /*
 Notes:

@@ -1,7 +1,7 @@
 import {InlineMath} from "react-katex";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import ReactDOM from "web-vcore/nm/react-dom";
-import {IsNaN} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent, GetDOM} from "react-vextensions";
+import ReactDOM from "react-dom";
+import {IsNaN} from "js-vextensions";
 import {store} from "Store";
 import {Term, PreProcessLatex} from "dm_common";
 import {TermPlaceholder} from "./NodeBox/TermPlaceholder.js";

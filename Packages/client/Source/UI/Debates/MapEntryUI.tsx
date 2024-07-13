@@ -1,11 +1,11 @@
-import {VURL, E} from "web-vcore/nm/js-vextensions.js";
-import Moment from "web-vcore/nm/moment";
-import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VURL, E} from "js-vextensions";
+import Moment from "moment";
+import {Column, Div, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, GetMapNamePrefixFilterKey} from "UI/@SL/SL.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx.js";
+import {runInAction} from "mobx";
 import {GetUser, Map} from "dm_common";
 import {columnWidths} from "UI/Debates";
 import {liveSkin} from "Utils/Styles/SkinManager";

@@ -1,5 +1,5 @@
 import {DeleteNodeSubtree, GetMaps, GetNodeL2, UpdateMapDetails} from "dm_common";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 
 /*
 Basic db-upgrade procedure:

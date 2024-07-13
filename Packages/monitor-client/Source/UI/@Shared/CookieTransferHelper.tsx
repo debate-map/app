@@ -1,7 +1,7 @@
 import {GetServerURL} from "dm_common";
 import React from "react";
-import {AssertWarn} from "web-vcore/nm/js-vextensions";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {AssertWarn} from "js-vextensions";
+import {BaseComponent} from "react-vextensions";
 
 let adminKeyCookieLastSetTo: string|n = null;
 

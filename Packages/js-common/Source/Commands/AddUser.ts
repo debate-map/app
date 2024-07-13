@@ -1,4 +1,4 @@
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {User} from "../DB/users/@User.js";

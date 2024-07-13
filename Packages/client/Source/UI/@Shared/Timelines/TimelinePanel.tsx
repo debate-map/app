@@ -1,8 +1,8 @@
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentWithConnector, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row} from "react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus, BaseComponent} from "react-vextensions";
 import {store} from "Store";
 import {GetSelectedTimeline, GetMapState, GetShowTimelineDetails} from "Store/main/maps/mapStates/$mapState.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
+import {runInAction} from "mobx";
 import {Observer, RunInAction} from "web-vcore";
 import {IsUserCreatorOrMod, Map, MeID} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";

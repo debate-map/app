@@ -1,7 +1,7 @@
-// import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-// import Moment from "web-vcore/nm/moment";
-// import {Column, Pre, RowLR, TextInput, Text} from "web-vcore/nm/react-vcomponents.js";
-// import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+// import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
+// import Moment from "moment";
+// import {Column, Pre, RowLR, TextInput, Text} from "react-vcomponents";
+// import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 // import {Layer} from "dm_common";
 // import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
 

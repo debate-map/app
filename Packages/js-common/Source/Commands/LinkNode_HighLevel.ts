@@ -1,5 +1,5 @@
-import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {E, ObjectCE} from "js-vextensions";
+import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "mobx-graphlink";
 import {ChildGroup, ClaimForm, NodeLink, Polarity} from "../DB/nodeLinks/@NodeLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";

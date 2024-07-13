@@ -1,9 +1,9 @@
-import {FromJSON, GetEntries, ToNumber, E} from "web-vcore/nm/js-vextensions.js";
-import {Button, Pre, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {FromJSON, GetEntries, ToNumber, E} from "js-vextensions";
+import {Button, Pre, Row, Select, Spinner, Text} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
+import {runInAction} from "mobx";
 import {Observer, HSLA, RunInAction, RunInAction_Set} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, ChildOrdering} from "dm_common";

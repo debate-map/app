@@ -1,6 +1,6 @@
 import {O} from "web-vcore";
-import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {CreateStringEnum} from "js-vextensions";
+import {makeObservable} from "mobx";
 
 export enum SortType {
 	creatorID = "creatorID",

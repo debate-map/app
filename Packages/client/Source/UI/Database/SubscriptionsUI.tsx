@@ -1,12 +1,12 @@
-import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
 import {ES, Link, Observer, PageContainer, TextPlus} from "web-vcore";
 import {useEffect, useMemo, useState} from "react";
 import {ScrollView} from "react-vscrollview";
 import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeL2, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row} from "react-vcomponents";
-import Moment from "web-vcore/nm/moment";
+import Moment from "moment";
 import useResizeObserver from "use-resize-observer";
-import {Button} from "web-vcore/nm/react-vcomponents.js";
+import {Button} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
 import {E} from "js-vextensions";
 import {ColumnData, TableData, TableHeader} from "../@Shared/TableHeader/TableHeader.js";

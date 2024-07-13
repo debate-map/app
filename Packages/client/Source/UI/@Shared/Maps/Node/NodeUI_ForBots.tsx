@@ -2,9 +2,9 @@ import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRa
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";
-import {Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Pre, Row} from "react-vcomponents";
+import {BaseComponentPlus, GetInnerComp} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./DetailBoxes/Panels/DetailsPanel.js";
 import {OthersPanel} from "./DetailBoxes/Panels/OthersPanel.js";

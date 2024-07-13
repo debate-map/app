@@ -1,4 +1,4 @@
-import {Bridge} from "web-vcore/nm/js-vextensions.js";
+import {Bridge} from "js-vextensions";
 
 export function InDesktopApp() {
 	return inElectron;

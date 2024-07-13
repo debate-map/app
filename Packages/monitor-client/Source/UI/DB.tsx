@@ -1,5 +1,5 @@
-import {Button, Column, Row, Switch, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Switch, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import React, {useState} from "react";

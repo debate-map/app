@@ -1,5 +1,5 @@
-import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "mobx-graphlink";
+import {Assert, emptyArray_forLoading} from "js-vextensions";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";

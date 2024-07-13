@@ -1,5 +1,5 @@
-import {CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateStringEnum, GetValues, GetValues_ForSchema} from "js-vextensions";
+import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
 
 export enum ChangeType {
 	add = "add",

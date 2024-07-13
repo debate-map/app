@@ -1,5 +1,5 @@
-import {Assert, AssertWarn, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, AssertWarn, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "js-vextensions";
+import {AddSchema} from "mobx-graphlink";
 import {NodeL1, NodeL3} from "./@Node.js";
 import {SLMode_ForJSCommon} from "./$node/$node_sl.js";
 import {ChildGroup, ClaimForm, Polarity, childGroupsWithPolarity_required} from "../nodeLinks/@NodeLink.js";

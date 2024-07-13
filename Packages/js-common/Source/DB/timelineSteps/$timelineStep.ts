@@ -1,4 +1,4 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {emptyArray} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
 import {TimelineStep} from "./@TimelineStep";
 import {NodeEffect, TimelineStepEffect} from "./@TimelineStepEffect";

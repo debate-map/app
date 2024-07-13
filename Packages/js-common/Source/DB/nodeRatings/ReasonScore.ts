@@ -1,5 +1,5 @@
-import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, BailUnless, BIN, BU} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "js-vextensions";
+import {CreateAccessor, BailUnless, BIN, BU} from "mobx-graphlink";
 import {NodeType} from "../nodes/@NodeType.js";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";

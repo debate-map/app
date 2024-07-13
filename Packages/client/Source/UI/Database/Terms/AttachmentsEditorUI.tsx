@@ -4,9 +4,9 @@ import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain";
 import {ES, Observer} from "web-vcore";
-import {DEL, E, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {DEL, E, ModifyString} from "js-vextensions";
+import {Button, Column, Row, Text} from "react-vcomponents";
+import {ShowMessageBox} from "react-vmessagebox";
 
 @Observer
 export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], AttachmentsEditorUI, {target: AttachmentTarget, allowedAttachmentTypes: AttachmentType[]}> {

@@ -1,5 +1,5 @@
-// import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+// import {Column, Row} from "react-vcomponents";
+// import {ShowMessageBox} from "react-vmessagebox";
 // import {Layer} from "dm_common";
 // import {MeID} from "dm_common";
 // import {AddLayer} from "dm_common";

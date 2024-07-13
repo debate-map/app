@@ -1,7 +1,7 @@
 import {GetMap, GetShare, globalMapID, ShareType} from "dm_common";
-import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {autorun, runInAction} from "web-vcore/nm/mobx.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "js-vextensions";
+import {autorun, runInAction} from "mobx";
+import {GetAsync} from "mobx-graphlink";
 import {store} from "Store";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {MapUI} from "UI/@Shared/Maps/MapUI.js";

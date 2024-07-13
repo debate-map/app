@@ -1,10 +1,13 @@
 import {store} from "Store";
-import {SubscriptionClient} from "subscriptions-transport-ws";
+import {Client, createClient} from "graphql-ws";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
-import {Assert, Timer} from "web-vcore/nm/js-vextensions";
-import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
+import {ApolloClient, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "@apollo/client";
+import {getMainDefinition} from "@apollo/client/utilities/index.js";
+import {WebSocketLink} from "@apollo/client/link/ws/index.js";
+import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
+import {onError} from "@apollo/client/link/error/index.js";
+import {Assert, Timer} from "js-vextensions";
+import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "mobx-graphlink";
 
 export function GetAppServerURL(subpath: string): string {
 	Assert(subpath.startsWith("/"));
@@ -21,9 +24,9 @@ export function GetAppServerURL(subpath: string): string {
 const GRAPHQL_URL = GetAppServerURL("/graphql");
 
 let httpLink: HttpLink;
-let wsClient: SubscriptionClient;
+let wsClient: Client;
 let wsClient_connectCount = 0;
-let wsLink: WebSocketLink;
+let wsLink: GraphQLWsLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -37,42 +40,51 @@ export function InitApollo() {
 		},
 	});
 
-	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
-		reconnect: true,
-	});
-	// could also detect general web dc/rc (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events), but doesn't seem necessary
-	wsClient.onConnected(()=>{
-		wsClient_connectCount++;
-		console.log(`WebSocket connected. (count: ${wsClient_connectCount})`);
-		RunInAction("wsClient.onConnected", ()=>store.wvc.webSocketConnected = true);
+	wsClient = createClient({
+		url: GRAPHQL_URL.replace(/^http/, "ws"),
+		/*reconnect:
+			(startURL.GetQueryVar("ws_rc") == "0" ? false : null) ?? // for testing
+			true,*/
+		retryAttempts: Number.MAX_SAFE_INTEGER,
+		on: {
+			// could also detect general web dc/rc (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events), but doesn't seem necessary
+			connected: ()=>{
+				wsClient_connectCount++;
+				console.log(`WebSocket connected. (count: ${wsClient_connectCount})`);
+				RunInAction("wsClient.onConnected", ()=>store.wvc.webSocketConnected = true);
 
-		// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
-		//AuthenticateWebSocketConnection();
-	});
-	wsClient.onReconnected(()=>{
-		wsClient_connectCount++;
-		console.log(`WebSocket reconnected. (count: ${wsClient_connectCount})`);
-		RunInAction("wsClient.onReconnected", ()=>store.wvc.webSocketConnected = true);
+				// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
+				//AttachUserJWTToWebSocketConnection();
+			},
+			/*()=>{
+				wsClient_connectCount++;
+				console.log(`WebSocket reconnected. (count: ${wsClient_connectCount})`);
+				RunInAction("wsClient.onReconnected", ()=>store.wvc.webSocketConnected = true);
 
-		// whenever our web-socket reconnects, we have to authenticate the new websocket connection
-		//AuthenticateWebSocketConnection();
+				// whenever our web-socket reconnects, we have to authenticate the new websocket connection
+				AttachUserJWTToWebSocketConnection();
+			},*/
+			connecting: ()=>{
+				console.log("WebSocket connecting.");
+				//RunInAction("wsClient.onReconnecting", ()=>store.wvc.webSocketConnected = false);
+			},
+			opened: ()=>{
+				console.log("WebSocket opened.");
+			},
+			closed: (event: CloseEvent)=>{
+				// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
+				if (store.wvc.webSocketLastDCTime == null || store.wvc.webSocketConnected) {
+					console.log("WebSocket disconnected. @code:", event.code, "@reason:", event.reason);
+				}
+				RunInAction("wsClient.onDisconnected", ()=>{
+					store.wvc.webSocketConnected = false;
+					store.wvc.webSocketLastDCTime = Date.now();
+				});
+			},
+			error: (error: any)=>console.error("WebSocket error:", error?.message ?? error),
+		},
 	});
-	wsClient.onReconnecting(()=>{
-		console.log("WebSocket reconnecting.");
-		//RunInAction("wsClient.onReconnecting", ()=>store.main.webSocketConnected = false);
-	});
-	wsClient.onDisconnected(()=>{
-		// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
-		if (store.wvc.webSocketLastDCTime == null || store.wvc.webSocketConnected) {
-			console.log("WebSocket disconnected.");
-		}
-		RunInAction("wsClient.onDisconnected", ()=>{
-			store.wvc.webSocketConnected = false;
-			store.wvc.webSocketLastDCTime = Date.now();
-		});
-	});
-	wsClient.onError(error=>console.error("WebSocket error:", error.message));
-	wsLink = new WebSocketLink(wsClient);
+	wsLink = new GraphQLWsLink(wsClient);
 
 	// every 45s, send a "keepalive message" through the WS; this avoids Cloudflare's "100 seconds of dormancy" timeout (https://community.cloudflare.com/t/cloudflare-websocket-timeout/5865)
 	// (we use a <60s interval, so that it will reliably hit each 60s timer-interval that Chrome 88+ allows for hidden pages: https://developer.chrome.com/blog/timer-throttling-in-chrome-88/#intensive-throttling)

@@ -1,8 +1,8 @@
-// import {E} from "web-vcore/nm/js-vextensions.js";
-// import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row} from "web-vcore/nm/react-vcomponents.js";
-// import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-// import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+// import {E} from "js-vextensions";
+// import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row} from "react-vcomponents";
+// import {BaseComponentPlus} from "react-vextensions";
+// import {ShowMessageBox} from "react-vmessagebox";
+// import {ScrollView} from "react-vscrollview";
 // import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "dm_common";
 
 // import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";

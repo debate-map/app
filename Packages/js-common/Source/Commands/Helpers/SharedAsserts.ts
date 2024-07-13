@@ -1,4 +1,4 @@
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV} from "mobx-graphlink";
 import {IsUserCreatorOrMod} from "../../DB.js";
 
 /*export function AssertUserCanModify(command: Command<any, any>, entity: {creator?: string}, act = "modify or delete") {

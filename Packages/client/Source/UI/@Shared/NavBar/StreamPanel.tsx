@@ -1,8 +1,8 @@
 import React from "react";
 import {StreamUI} from "UI/Social/StreamUI";
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {Column} from "web-vcore/nm/react-vcomponents";
+import {Column} from "react-vcomponents";
 
 export class StreamPanel extends BaseComponent<{}, {}> {
 	render() {

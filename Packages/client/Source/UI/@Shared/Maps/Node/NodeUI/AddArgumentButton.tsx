@@ -1,6 +1,6 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {Button} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions.js";
+import {E} from "js-vextensions";
+import {Button} from "react-vcomponents";
+import {BaseComponent, UseCallback} from "react-vextensions";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";

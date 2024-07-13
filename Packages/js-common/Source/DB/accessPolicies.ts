@@ -1,5 +1,5 @@
-import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "js-vextensions";
+import {CreateAccessor, GetDoc, GetDocs} from "mobx-graphlink";
 import {systemUserID} from "../DB_Constants.js";
 import {PermitCriteria} from "./accessPolicies/@PermissionSet.js";
 import {GetUserReputation_ApprovalPercent, GetUserReputation_Approvals, MeID} from "./users.js";

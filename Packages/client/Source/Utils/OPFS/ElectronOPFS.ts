@@ -1,5 +1,5 @@
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
-import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {Assert} from "js-vextensions";
 
 async function Array_FromAsync<T>(asyncIterable: AsyncIterable<T>) {
 	const result = [] as T[];

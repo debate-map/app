@@ -2,9 +2,9 @@ import React from "react";
 import {store} from "Store";
 import {MtxGroup, MtxConstraint, MtxSectionConstraint} from "Store/main/database/MtxGroup";
 import {Chroma, Chroma_Safe, InfoButton, Observer, RunInAction} from "web-vcore";
-import {Clone} from "web-vcore/nm/js-vextensions";
-import {Button, CheckBox, ColorPickerBox, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Clone} from "js-vextensions";
+import {Button, CheckBox, ColorPickerBox, Column, Row, Select, Text, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 
 @Observer
 export class MtxGroupsUI extends BaseComponent<{}, {}> {

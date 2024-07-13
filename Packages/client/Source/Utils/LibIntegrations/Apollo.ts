@@ -4,8 +4,10 @@ import {Client, createClient} from "graphql-ws";
 import {store} from "Store";
 import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {getMainDefinition, GraphQLWsLink, onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, NormalizedCacheObject, split} from "@apollo/client";
+import {getMainDefinition} from "@apollo/client/utilities/index.js";
+import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
+import {onError} from "@apollo/client/link/error/index.js";
 import {VoidCache} from "./Apollo/VoidCache.js";
 
 export function GetPageOrigin_WithWebpackToK8sRetargeting() {

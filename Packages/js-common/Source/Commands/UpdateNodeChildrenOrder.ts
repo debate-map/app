@@ -1,4 +1,4 @@
-import {Command, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, DBHelper, dbp} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {NodeL1} from "../DB/nodes/@Node.js";

@@ -1,5 +1,5 @@
-import {emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray, emptyArray_forLoading} from "js-vextensions";
+import {CreateAccessor, GetDoc, GetDocs} from "mobx-graphlink";
 import {CommandRun} from "./commandRuns/@CommandRun.js";
 import {MeID} from "./users.js";
 

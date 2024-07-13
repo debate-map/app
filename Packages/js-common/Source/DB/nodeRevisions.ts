@@ -1,5 +1,5 @@
-import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray, IsNaN} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
 import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {NodeRevision} from "./nodes/@NodeRevision.js";
 

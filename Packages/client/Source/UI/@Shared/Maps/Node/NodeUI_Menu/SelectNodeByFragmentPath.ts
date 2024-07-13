@@ -4,7 +4,7 @@ import {ACTNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {JumpToNode} from "UI/@Shared/NavBar/SearchPanel.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
 import {AddNotificationMessage} from "web-vcore";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync} from "mobx-graphlink";
 
 let selectNode_fragmentPath_last;
 AutoRun_HandleBail(()=>{

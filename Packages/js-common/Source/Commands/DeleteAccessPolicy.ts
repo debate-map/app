@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp, GetDocs, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp, GetDocs, SimpleSchema} from "mobx-graphlink";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";

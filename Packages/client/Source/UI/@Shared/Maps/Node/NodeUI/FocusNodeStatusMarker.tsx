@@ -6,10 +6,10 @@ import {GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange} from "Store/mai
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {Observer} from "web-vcore";
-import {Button, Column, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowVMenu, VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Button, Column, Row, Spinner, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowVMenu, VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 
 @Observer
 export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3, path: string}, {}> {

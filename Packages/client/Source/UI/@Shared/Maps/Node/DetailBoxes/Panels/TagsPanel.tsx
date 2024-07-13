@@ -9,9 +9,9 @@ import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
 import {RunCommand_AddNodeTag, RunCommand_DeleteNodeTag, RunCommand_UpdateNodeTag} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetUpdates, HSLA, Observer, RunInAction_Set} from "web-vcore";
-import {Button, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Button, Column, Row, Select, Text, TextInput} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 
 @Observer
 export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {}) {

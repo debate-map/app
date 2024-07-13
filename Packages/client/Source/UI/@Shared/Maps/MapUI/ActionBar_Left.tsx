@@ -1,7 +1,7 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {Button, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {E} from "js-vextensions";
+import {runInAction} from "mobx";
+import {Button, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {SLMode, SLMode_2020, SLMode_Climate} from "UI/@SL/SL.js";

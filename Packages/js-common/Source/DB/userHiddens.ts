@@ -1,5 +1,5 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray} from "js-vextensions";
+import {GetDoc, CreateAccessor, GetDocs} from "mobx-graphlink";
 import {UserFollow, UserHidden} from "./userHiddens/@UserHidden.js";
 
 export const GetUserHidden = CreateAccessor((userID: string|n)=>{

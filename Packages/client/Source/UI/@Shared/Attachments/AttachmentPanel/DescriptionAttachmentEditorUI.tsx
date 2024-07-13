@@ -1,7 +1,7 @@
 import {DescriptionAttachment} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {Column, Pre} from "web-vcore/nm/react-vcomponents.js";
-import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
+import {Column, Pre} from "react-vcomponents";
+import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
 
 export class DescriptionAttachmentEditorUI extends DetailsUI_Base<DescriptionAttachment, DescriptionAttachmentEditorUI> {
 	render() {

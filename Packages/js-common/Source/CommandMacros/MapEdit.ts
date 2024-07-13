@@ -1,5 +1,5 @@
-import {IsFunction} from "web-vcore/nm/js-vextensions.js";
-import {Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {IsFunction} from "js-vextensions";
+import {Command, dbp} from "mobx-graphlink";
 import {GetMap} from "../DB/maps.js";
 
 export function MapEdit(targetClass: Function);

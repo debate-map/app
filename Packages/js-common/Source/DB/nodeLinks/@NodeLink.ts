@@ -1,5 +1,5 @@
-import {CE, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {CE, GetValues} from "js-vextensions";
+import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
 import {NodeType} from "../nodes/@NodeType.js";
 
 export enum ChildGroup {

@@ -6,9 +6,9 @@ import {SLMode} from "UI/@SL/SL";
 import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeType, Polarity} from "dm_common";
 import {Assert} from "js-vextensions";
 import {Chroma_Safe, HSLA} from "web-vcore";
-import chroma from "web-vcore/nm/chroma-js.js";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import chroma from "chroma-js";
+import {CE} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 
 export const nodeLightBackground = false;
 //export const nodeLightBackground = true; // experimental; toggle on for testing

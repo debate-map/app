@@ -1,5 +1,5 @@
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
-import {CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
+import {CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "js-vextensions";
 import {MapView} from "./@MapView.js";
 
 export enum ShareType {

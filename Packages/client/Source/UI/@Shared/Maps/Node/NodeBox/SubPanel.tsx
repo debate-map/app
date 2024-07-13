@@ -1,10 +1,10 @@
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed, Chroma} from "web-vcore";
 import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetExpandedByDefaultAttachment, GetAttachmentType, DescriptionAttachment, GetSubPanelAttachments} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React, {Fragment, useState} from "react";
-import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
-import {E, ModifyString} from "web-vcore/nm/js-vextensions";
+import {Button, Row, Text} from "react-vcomponents";
+import {E, ModifyString} from "js-vextensions";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain.js";
 import {SourcesUI} from "./SourcesUI.js";
 

@@ -1,5 +1,5 @@
 import {ChildGroup} from "dm_common";
-import {UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {UUID} from "mobx-graphlink";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {

@@ -1,6 +1,6 @@
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
-import {Button, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Button, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {TimelineStep, Map} from "dm_common";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {store} from "Store";

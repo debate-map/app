@@ -1,4 +1,4 @@
-import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, GetDoc, GetDocs} from "mobx-graphlink";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 
 export const GetTimelineStep = CreateAccessor((id: string|n): TimelineStep|n=>{

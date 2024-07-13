@@ -1,4 +1,4 @@
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetNodeChildrenL3, GetParentNode} from "../../nodes.js";
 import {Map} from "../../maps/@Map.js";
 import {NodeL2} from "../@Node.js";

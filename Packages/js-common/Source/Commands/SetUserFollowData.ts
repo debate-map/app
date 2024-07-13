@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {UserFollow} from "../DB/userHiddens/@UserHidden.js";
 
 @CommandMeta({

@@ -1,13 +1,13 @@
-import {Button, Column, Row, Switch, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Switch, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {ES, Observer} from "web-vcore";
 import React, {useState} from "react";
 import gql from "graphql-tag";
-import {useMutation, useQuery, useSubscription} from "web-vcore/nm/@apollo/client.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {observer} from "web-vcore/nm/mobx-react";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {useMutation, useQuery, useSubscription} from "@apollo/client";
+import {ShowMessageBox} from "react-vmessagebox";
+import {observer} from "mobx-react";
+import {ScrollView} from "react-vscrollview";
 
 export class LQInstance {
 	tableName: string;

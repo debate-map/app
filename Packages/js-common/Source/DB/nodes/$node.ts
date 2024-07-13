@@ -1,6 +1,6 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "web-vcore/nm/js-vextensions.js";
-import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "web-vcore/nm/mobx-graphlink.js";
-import Moment from "web-vcore/nm/moment.js";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "js-vextensions";
+import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "mobx-graphlink";
+import Moment from "moment";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {Map} from "../maps/@Map.js";

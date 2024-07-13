@@ -1,4 +1,4 @@
-import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
+import {Clone, GetTreeNodesInObjTree} from "js-vextensions";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
 /*export class ImportSubtree_Old extends Command<{

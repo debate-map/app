@@ -1,11 +1,11 @@
 import {store} from "Store";
 import React, {useState} from "react";
-import {Button, Button_styles, CheckBox, Column, Row, RowLR, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Button_styles, CheckBox, Column, Row, RowLR, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {AccessPolicy, GetAccessPolicy, NodeL1} from "dm_common";
 import {E} from "js-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ShowMessageBox} from "react-vmessagebox";
 import {MI_SharedProps} from "../../NodeUI_Menu.js";
 import {useSubtreeRetrievalQueryOrAccessors} from "../MI_SubtreeOps.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";

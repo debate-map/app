@@ -1,8 +1,8 @@
-import Moment from "web-vcore/nm/moment";
-import {Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import Moment from "moment";
+import {Column, Pre, Row, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {Link, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {GetAccessPolicy, GetUser} from "dm_common";
 
 @Observer

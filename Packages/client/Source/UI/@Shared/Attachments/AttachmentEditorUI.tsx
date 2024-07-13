@@ -1,6 +1,6 @@
-import {A, DEL, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
-import {Button, CheckBox, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {A, DEL, GetEntries, GetValues, NN} from "js-vextensions";
+import {Button, CheckBox, Row, Select, Text, TextArea} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, NodeL1, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";

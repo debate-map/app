@@ -1,5 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "js-vextensions";
+import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJSON} from "mobx-graphlink";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 import {APTable, PermissionSet, PermissionSetForType, PermitCriteria} from "./@PermissionSet.js";
 

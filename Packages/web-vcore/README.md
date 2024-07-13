@@ -14,7 +14,7 @@ npm install web-vcore
 ```
 2) [opt] Add the following to your code entry-file (or anywhere really):
 ```
-import type {} from "web-vcore/nm/@All"; // helps vscode's auto-importer notice the "web-vcore/nm/*" package re-exports
+import type {} from "@All"; // helps vscode's auto-importer notice the "web-vcore/nm/*" package re-exports
 ```
 3) Add the following to your `tsconfig.json`: (these entries are only needed for packages that are peer-dependencies of a user-project node-module)
 ```

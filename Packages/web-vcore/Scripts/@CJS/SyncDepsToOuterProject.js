@@ -18,15 +18,39 @@ function GetDepsToConsolidate() {
 			"react-dom",
 			"mobx",
 			"mobx-react",
+
+			// these packages used to be among the "web-vcore/nm/XXX" entries; these need a closer look eventually to determine which ones are worth consolidating (for now we just continue doing so)
+			"@apollo/client",
+			"chroma-js",
+			"codemirror",
+			"graphql-tag",
+			"graphql",
+			"hello-pangea-dnd",
+			"moment",
+			"raven-js",
+			"rc-slider",
+			"rc-tooltip",
+			"react-universal-hooks",
+			"subscriptions-transport-ws",
+			"uplot",
 		],
 		// written by self (separate category, because consolidations for these should always be fine/good, since we know the different versions will be compatible anyway -- or at least easily modifiable to be so)
 		...[
-			"js-vextensions", // js (base)
-			"react-vextensions", "react-vcomponents", "react-vmenu", "react-vmessagebox", "react-vscrollview", "react-vmarkdown", // +react
-			//"graphql-forum", // +graphql
-			"mobx-graphlink", // +mobx
-			//"web-vcore", // +framework
-			"webpack-runtime-require", // misc
+			//"graphql-forum",
+			"js-vextensions",
+			"mobx-graphlink",
+			"uplot-vplugins",
+			"webpack-runtime-require",
+			//"web-vcore",
+
+			// react
+			"react-uplot",
+			"react-vcomponents",
+			"react-vextensions",
+			"react-vmarkdown",
+			"react-vmenu",
+			"react-vmessagebox",
+			"react-vscrollview",
 		],
 
 		// specialized/temporary consolidations
@@ -37,8 +61,6 @@ function GetDepsToConsolidate() {
 			//"mobx-firelink/node_modules/mobx": paths.base("node_modules", "mobx"), // fsr, needed to prevent 2nd mobx, when mobx-firelink is npm-linked [has this always been true?]
 
 			// convenience consolidations, since they have npm-patches applied (and we don't want to have to adjust the match-counts)
-			//"react-beautiful-dnd",
-			//"@hello-pangea/dnd",
 			"immer",
 		],
 	];

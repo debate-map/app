@@ -1,14 +1,14 @@
-import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "js-vextensions";
+import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
-import {Validate, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
+import {Validate, observer_mgl} from "mobx-graphlink";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, NodeType, AddNodeTag, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
-import {observer} from "web-vcore/nm/mobx-react";
+import {observer} from "mobx-react";
 import {RunCommand_AddNodeTag} from "Utils/DB/Command";
 
 export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<NodeTag, TagDetailsUI> & DetailsUI_Base_State<NodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
