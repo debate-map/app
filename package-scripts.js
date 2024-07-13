@@ -155,7 +155,7 @@ function GetServeCommand(env_short = null, pkg = "client") {
 	return `cross-env-shell ${env_long ? `NODE_ENV=${env_long} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
 }
 
-const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
+//const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	//"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
@@ -297,7 +297,7 @@ Object.assign(scripts, {
 	backend: {
 		// general
 		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
-		buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
+		//buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
 
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
@@ -645,6 +645,7 @@ Object.assign(scripts, {
 			],
 		});
 		for (const file of tsBuildInfoFiles) {
+			console.log("Deleting:", file);
 			fs.unlinkSync(file);
 		}
 	}),

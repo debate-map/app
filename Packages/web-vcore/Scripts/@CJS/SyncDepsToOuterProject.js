@@ -6,7 +6,7 @@ const wvcPkg = require("../../package.json");
 function GetDepsToConsolidate() {
 	// these consolidations are done for a variety of reasons (see notes below)
 	return [
-		// standard/long-term (ie. under "/nm" folder) consolidations provided by web-vcore (there's a risk of issues either way, but the risk of consolidation is lower than the risk of multiple versions)
+		// standard/long-term consolidations provided by web-vcore (there's a risk of issues either way, but the risk of consolidation is lower than the risk of multiple versions)
 		// ==========
 
 		// written by others

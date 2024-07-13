@@ -6,9 +6,9 @@ Core code shared between my projects, for web-app frontends.
 
 ### Installation
 
-> todo: update these instructions
+> todo: update these instructions (see source for old, incomplete instructions)
 
-1) Install the package: (or symlink it; that's recommended for long-term usage)
+<!-- 1) Install the package: (or symlink it; that's recommended for long-term usage)
 ```
 npm install web-vcore
 ```
@@ -41,7 +41,7 @@ import type {} from "@All"; // helps vscode's auto-importer notice the "web-vcor
 ```
 "postinstall": "cd ./node_modules/web-vcore && node ./Scripts/@CJS/ApplyPatches.js"
 ```
-5) Various other things, like populating the RootStore interface. (for now, just reference an existing project that uses web-vcore, as seen below)
+5) Various other things, like populating the RootStore interface. (for now, just reference an existing project that uses web-vcore, as seen below) -->
 
 ### Creating package patches
 
