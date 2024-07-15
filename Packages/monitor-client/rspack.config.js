@@ -18,51 +18,6 @@ const config = {
   resolve: {
     modules: ["node_modules", "./Source"],
     extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".mjs"],
-    alias: {
-      react: "../../node_modules/react",
-      "web-vcore/.yalc/react": "never_import_from_the_yalc_folder_directly",
-      "react-dom": "../../node_modules/react-dom",
-      "web-vcore/.yalc/react-dom": "never_import_from_the_yalc_folder_directly",
-      mobx: "../../node_modules/mobx",
-      "web-vcore/.yalc/mobx": "never_import_from_the_yalc_folder_directly",
-      "mobx-react": "../../node_modules/mobx-react",
-      "web-vcore/.yalc/mobx-react":
-        "never_import_from_the_yalc_folder_directly",
-      "js-vextensions": "../../node_modules/js-vextensions",
-      "web-vcore/.yalc/js-vextensions":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vextensions": "../../node_modules/react-vextensions",
-      "web-vcore/.yalc/react-vextensions":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vcomponents": "../../node_modules/react-vcomponents",
-      "web-vcore/.yalc/react-vcomponents":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vmenu": "../../node_modules/react-vmenu",
-      "web-vcore/.yalc/react-vmenu":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vmessagebox": "../../node_modules/react-vmessagebox",
-      "web-vcore/.yalc/react-vmessagebox":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vscrollview": "../../node_modules/react-vscrollview",
-      "web-vcore/.yalc/react-vscrollview":
-        "never_import_from_the_yalc_folder_directly",
-      "react-vmarkdown": "../../node_modules/react-vmarkdown",
-      "web-vcore/.yalc/react-vmarkdown":
-        "never_import_from_the_yalc_folder_directly",
-      "mobx-graphlink": "../../node_modules/mobx-graphlink",
-      "web-vcore/.yalc/mobx-graphlink":
-        "never_import_from_the_yalc_folder_directly",
-      "web-vcore": "../../node_modules/web-vcore",
-      "web-vcore/.yalc/web-vcore": "never_import_from_the_yalc_folder_directly",
-      "webpack-runtime-require": "../../node_modules/webpack-runtime-require",
-      "web-vcore/.yalc/webpack-runtime-require":
-        "never_import_from_the_yalc_folder_directly",
-      immer: "../../node_modules/immer",
-      "web-vcore/.yalc/immer": "never_import_from_the_yalc_folder_directly",
-      pg: false,
-      postgraphile: false,
-      "graphile-utils": false,
-    },
     fallback: {
       stream: "../../stream-browserify/index.js",
     },
