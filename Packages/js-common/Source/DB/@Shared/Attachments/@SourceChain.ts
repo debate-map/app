@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, Assert, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues_ForSchema, Assert, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddSchema} from "mobx-graphlink";
 
 //export type SourceChain = { [key: number]: Source; };
 //export type SourceChainI = {[key: number]: Source;};

@@ -1,5 +1,5 @@
-import {Assert, CE, emptyArray_forLoading, IsString} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc, MapWithBailHandling, SplitStringBySlash_Cached, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, CE, emptyArray_forLoading, IsString} from "js-vextensions";
+import {CreateAccessor, GetDoc, MapWithBailHandling, SplitStringBySlash_Cached, UUID} from "mobx-graphlink";
 import {GetNodeLinks} from "./nodeLinks.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3} from "./nodes/$node.js";
 import {NodeL1, NodeL2} from "./nodes/@Node.js";

@@ -1,14 +1,14 @@
-import {autorun, action} from "web-vcore/nm/mobx.js";
+import {autorun, action} from "mobx";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTNodeExpandedSet, GetNodeViewsAlongPath, GetNodeViewsBelowPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
 import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
-import {SleepAsync, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {SleepAsync, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
-import {GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {GetDOM} from "react-vextensions";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
-import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
+import {SlicePath, GetAsync, RunInAction} from "mobx-graphlink";
 import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, Map, GetNodeEffects, NodeView} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";

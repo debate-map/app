@@ -1,4 +1,4 @@
-import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {CE, CreateStringEnum} from "js-vextensions";
 import {Field, MGLClass} from "mobx-graphlink";
 import {NodeRevision} from "../../nodes/@NodeRevision.js";
 import {QuoteAttachment} from "./@QuoteAttachment.js";

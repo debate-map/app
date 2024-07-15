@@ -1,6 +1,6 @@
 import {Observer} from "web-vcore";
-import {Button, Column, Row, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, TextInput} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
 export type TableData = {

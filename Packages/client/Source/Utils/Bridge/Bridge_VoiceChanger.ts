@@ -1,5 +1,5 @@
 import {O, RunInAction} from "web-vcore";
-import {computed, makeObservable} from "web-vcore/nm/mobx";
+import {computed, makeObservable} from "mobx";
 import {IsNumber} from "js-vextensions";
 import {desktopBridge} from "./Bridge_Desktop";
 

@@ -1,7 +1,7 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {E} from "js-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {VReactMarkdown, PageContainer} from "web-vcore";
-import {Row} from "web-vcore/nm/react-vcomponents.js";
+import {Row} from "react-vcomponents";
 import React, {useEffect} from "react";
 import {MapListUI} from "UI/Debates.js";
 import {SLMode_2020, SLMode_AI, SLMode_COVID, SLMode_Climate, SLMode_GAD, SLMode_IA, SLMode_Main} from "./SL.js";

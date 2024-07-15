@@ -1,6 +1,6 @@
 import {InfoButton, Observer} from "web-vcore";
-import {Button, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Button, Row, Text, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {PhrasingDetailsUI_SharedProps} from "./PhrasingDetailsUI.js";
 
 @Observer

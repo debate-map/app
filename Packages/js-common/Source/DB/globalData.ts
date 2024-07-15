@@ -1,5 +1,5 @@
 import {Assert} from "js-vextensions";
-import {CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
+import {CreateAccessor, GetDocs} from "mobx-graphlink";
 import {GlobalData} from "./globalData/@GlobalData.js";
 
 export const GetGlobalData = CreateAccessor((): GlobalData|n=>{

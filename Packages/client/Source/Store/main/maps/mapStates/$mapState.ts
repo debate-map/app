@@ -1,7 +1,7 @@
 import {store} from "Store/index.js";
 import {GetNode, GetTimeline, Timeline} from "dm_common";
-import {FromJSON, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {FromJSON, GetValues} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {ShowChangesSinceType} from "./@MapState.js";
 
 export const GetMapState = CreateAccessor({ctx: 1}, function(mapID: string|n) {

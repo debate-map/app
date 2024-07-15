@@ -1,9 +1,9 @@
-import {BaseComponent, UseMemo, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {Button, CheckBox, Column, Div, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, UseMemo, cssHelper} from "react-vextensions";
+import {Button, CheckBox, Column, Div, Row, Select, Text} from "react-vcomponents";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {CommandRun, GetCommandRun, GetNotifications, MeID, Notification, SubscriptionLevel} from "dm_common";
-import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {E, GetEntries} from "js-vextensions";
 import ReactList from "react-list";
 import {CommandRunUI} from "../../Social/StreamUI.js";
 import {RunCommand_UpdateNotification} from "../../../Utils/DB/Command.js";

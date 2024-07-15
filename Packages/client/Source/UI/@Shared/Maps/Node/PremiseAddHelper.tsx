@@ -1,10 +1,10 @@
 import keycode from "keycode";
-import {Button, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Row, TextArea} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "mobx";
+import {OmitIfFalsy} from "js-vextensions";
 
 /* export class PremiseAddHelper extends BaseComponentPlus({} as {mapID: string, parentNode: NodeL3, parentPath: string}, { premiseTitle: '', adding: false }) {
 	render() {

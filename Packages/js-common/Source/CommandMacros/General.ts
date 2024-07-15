@@ -1,5 +1,5 @@
-import {Assert, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {Command, DBHelper, dbp, GenerateUUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, emptyArray} from "js-vextensions";
+import {Command, DBHelper, dbp, GenerateUUID, Validate} from "mobx-graphlink";
 import {GetCommandRuns} from "../DB/commandRuns.js";
 import {CommandRun} from "../DB/commandRuns/@CommandRun.js";
 import {GetDBReadOnlyMessage, IsDBReadOnly} from "../DB/globalData.js";

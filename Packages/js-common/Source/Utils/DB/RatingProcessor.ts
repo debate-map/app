@@ -1,5 +1,5 @@
-import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, NoID, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "js-vextensions";
+import {CreateAccessor, NoID, PartialBy} from "mobx-graphlink";
 import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";

@@ -1,4 +1,4 @@
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {Command} from "mobx-graphlink";
 
 //type CommandRunMetadata_ConstructorData = Partial<CommandRunMetadata>;
 type CommandRunMetadata_ConstructorData = RequiredBy<Partial<CommandRunMetadata>, "record">;

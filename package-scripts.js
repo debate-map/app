@@ -1,4 +1,5 @@
 const fs = require("fs");
+const glob = require("glob");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
@@ -75,6 +76,7 @@ Object.assign(scripts, {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
 		},
+		devRS: "",
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
 		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
@@ -153,7 +155,7 @@ function GetServeCommand(env_short = null, pkg = "client") {
 	return `cross-env-shell ${env_long ? `NODE_ENV=${env_long} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
 }
 
-const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
+//const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	//"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
@@ -295,7 +297,7 @@ Object.assign(scripts, {
 	backend: {
 		// general
 		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
-		buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
+		//buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
 
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
@@ -631,6 +633,22 @@ Object.assign(scripts, {
 			psqlProcess.stdin.write(`\\q\n`);
 		}),
 	},
+});
+
+Object.assign(scripts, {
+	wvcSync: "node ./Packages/web-vcore/Scripts/@CJS/SyncDepsToOuterProject.js",
+	clearTSBuildInfos: Dynamic(()=>{
+		const tsBuildInfoFiles = glob.sync("./**/*.tsbuildinfo", {
+			ignore: [
+				"./node_modules/**",
+				"./**/node_modules/**",
+			],
+		});
+		for (const file of tsBuildInfoFiles) {
+			console.log("Deleting:", file);
+			fs.unlinkSync(file);
+		}
+	}),
 });
 
 function GetBuildSeedDBScriptCommand() {

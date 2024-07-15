@@ -1,4 +1,4 @@
-import {Collection} from "web-vcore/nm/mobx-graphlink.js";
+import {Collection} from "mobx-graphlink";
 import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {MapNodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";

@@ -1,5 +1,5 @@
-import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
 import {Map} from "./maps/@Map.js";
 
 export const GetMaps = CreateAccessor((orderByEdits = false): Map[]=>{

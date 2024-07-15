@@ -1,7 +1,7 @@
 import {CleanUpdatedSourceChains, QuoteAttachment} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
+import {Column, Pre, Row} from "react-vcomponents";
+import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
 import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 
 //@ApplyBasicStyles

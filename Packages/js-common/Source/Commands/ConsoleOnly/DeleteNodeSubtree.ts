@@ -1,4 +1,4 @@
-import {Command, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, DBHelper} from "mobx-graphlink";
 import {NodeL1} from "../../DB/nodes/@Node.js";
 import {DeleteNode} from "../DeleteNode.js";
 

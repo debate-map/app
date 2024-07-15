@@ -1,9 +1,9 @@
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Button, Column, Row} from "react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, Map, NodeL3} from "dm_common";
 import {RunCommand_DeleteNodePhrasing, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command";
 

@@ -1,5 +1,5 @@
-/*import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {Pre, Button, ButtonProps} from "web-vcore/nm/react-vcomponents.js";
+/*import {BaseComponent} from "react-vextensions";
+import {Pre, Button, ButtonProps} from "react-vcomponents";
 
 export class RenderDelayer extends BaseComponent<{delay: boolean}, {}> {
 	lastResult: JSX.Element;

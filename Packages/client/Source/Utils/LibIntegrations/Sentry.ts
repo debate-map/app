@@ -1,4 +1,4 @@
-import Raven from "web-vcore/nm/raven-js";
+import Raven from "raven-js";
 //import {version} from "Main";
 
 export function InitSentry() {

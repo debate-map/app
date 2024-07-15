@@ -2,9 +2,9 @@ import {observer} from "mobx-react";
 import React from "react";
 import {store} from "Store";
 import {Observer, RunInAction, RunInAction_Set} from "web-vcore";
-import {ModifyString} from "web-vcore/nm/js-vextensions";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {ModifyString} from "js-vextensions";
+import {Button, Column, Row} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 
 const PageButton = observer((p: {page: string, subpage?: string, text?: string, textShort?: string})=>{
 	const uiState = store.main;

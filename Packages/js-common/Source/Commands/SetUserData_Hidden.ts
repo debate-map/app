@@ -1,5 +1,5 @@
-import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema, dbp, CommandMeta, DeriveJSONSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
-import {CE, GetEntries, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema, dbp, CommandMeta, DeriveJSONSchema, DBHelper} from "mobx-graphlink";
+import {CE, GetEntries, GetValues, GetValues_ForSchema} from "js-vextensions";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";

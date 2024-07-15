@@ -1,6 +1,6 @@
 import {Observer, TextPlus} from "web-vcore";
-import {Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Div, Row} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {MeID, NodeL3, Subscription, SubscriptionLevel} from "dm_common";
 import {RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
 import {SLMode} from "../../../../@SL/SL.js";

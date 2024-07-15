@@ -1,16 +1,16 @@
 // use require instead of import, so TS views the interface-extensions as global
 /* let FindReact = require("react-vextensions");
 let chroma = require("chroma-js"); */
-import {FindReact} from "web-vcore/nm/react-vextensions.js";
-import chroma from "web-vcore/nm/chroma-js.js";
+import {FindReact} from "react-vextensions";
+import chroma from "chroma-js";
 
 // groups
 // ==========
 
 // require("./CE_Object");
 import "./CE_Object";
-import {ObjectCES, CE} from "web-vcore/nm/js-vextensions.js";
-import {ObservableMap} from "web-vcore/nm/mobx.js";
+import {ObjectCES, CE} from "js-vextensions";
+import {ObservableMap} from "mobx";
 
 // Node
 // ==========

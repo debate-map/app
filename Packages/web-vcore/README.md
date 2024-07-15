@@ -6,15 +6,15 @@ Core code shared between my projects, for web-app frontends.
 
 ### Installation
 
-> todo: update these instructions
+> todo: update these instructions (see source for old, incomplete instructions)
 
-1) Install the package: (or symlink it; that's recommended for long-term usage)
+<!-- 1) Install the package: (or symlink it; that's recommended for long-term usage)
 ```
 npm install web-vcore
 ```
 2) [opt] Add the following to your code entry-file (or anywhere really):
 ```
-import type {} from "web-vcore/nm/@All"; // helps vscode's auto-importer notice the "web-vcore/nm/*" package re-exports
+import type {} from "@All"; // helps vscode's auto-importer notice the "web-vcore/nm/*" package re-exports
 ```
 3) Add the following to your `tsconfig.json`: (these entries are only needed for packages that are peer-dependencies of a user-project node-module)
 ```
@@ -41,7 +41,7 @@ import type {} from "web-vcore/nm/@All"; // helps vscode's auto-importer notice 
 ```
 "postinstall": "cd ./node_modules/web-vcore && node ./Scripts/@CJS/ApplyPatches.js"
 ```
-5) Various other things, like populating the RootStore interface. (for now, just reference an existing project that uses web-vcore, as seen below)
+5) Various other things, like populating the RootStore interface. (for now, just reference an existing project that uses web-vcore, as seen below) -->
 
 ### Creating package patches
 

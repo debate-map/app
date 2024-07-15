@@ -1,4 +1,3 @@
-import {config} from "webpack";
 import debug_base from "debug";
 import ip from "ip";
 import path from "path";

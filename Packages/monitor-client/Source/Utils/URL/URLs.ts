@@ -2,8 +2,8 @@ import {GetMap, GetNodeDisplayText, NodeL2} from "dm_common";
 import {RootState, store} from "Store";
 import {GetPage, GetSubpage} from "Store/main";
 import {Page} from "web-vcore";
-import {Assert, VURL} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, VURL} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {

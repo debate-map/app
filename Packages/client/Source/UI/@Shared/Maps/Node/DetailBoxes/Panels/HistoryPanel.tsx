@@ -1,11 +1,11 @@
-import Moment from "web-vcore/nm/moment";
-import {Button, Column, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import Moment from "moment";
+import {Button, Column, Row, TextArea} from "react-vcomponents";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus, cssHelper} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {ScrollView} from "react-vscrollview";
 import {UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {ES, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {Map, NodeL3, GetUser, NodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions, IsUserCreatorOrAdmin, HasAdminPermissions, MeID} from "dm_common";
 
 import {liveSkin} from "Utils/Styles/SkinManager.js";

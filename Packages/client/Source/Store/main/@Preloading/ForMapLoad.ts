@@ -1,5 +1,5 @@
 import {GetMap, GetNode, GetNodeLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, NodeView} from "dm_common";
-import {CatchBail, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CatchBail, CreateAccessor} from "mobx-graphlink";
 import {GetMapView} from "../maps/mapViews/$mapView";
 
 export const GetNodeIDsVisibleInNodeViewExpansionState = CreateAccessor((nodeView: NodeView, nodeID: string, includeOneLevelInCollapsed = false)=>{

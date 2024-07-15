@@ -1,5 +1,5 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {globalMapID} from "../../DB_Constants.js";
 import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";

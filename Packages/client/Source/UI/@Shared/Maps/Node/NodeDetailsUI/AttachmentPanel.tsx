@@ -4,7 +4,7 @@ import React from "react";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {DetailsUI_Phase} from "UI/@Shared/DetailsUI_Base";
 import {AttachmentsEditorUI} from "UI/Database/Terms/AttachmentsEditorUI";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 /*export function CanNodeHaveAttachments(node: NodeL1) {

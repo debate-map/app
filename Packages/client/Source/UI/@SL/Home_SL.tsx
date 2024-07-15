@@ -1,8 +1,8 @@
 import React from "react";
 import {store} from "Store";
 import {SubNavBar, SubNavBarButton} from "web-vcore";
-import {Switch} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Switch} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {SLMode_2020, SLMode_AI, GetGADExternalSiteURL} from "./SL.js";
 import {HomeUI2_SL} from "./Home2_SL.js";
 

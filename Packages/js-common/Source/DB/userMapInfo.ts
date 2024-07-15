@@ -1,4 +1,4 @@
-import {GetDoc, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor} from "mobx-graphlink";
 
 export const GetUserMapInfo = CreateAccessor((userID: string, mapID: string)=>{
 	if (userID == null) return null;

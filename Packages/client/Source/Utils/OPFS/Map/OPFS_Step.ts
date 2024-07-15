@@ -1,7 +1,7 @@
 import {GetTimelineSteps} from "dm_common";
 import {Clone} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
-import {computed, makeObservable} from "web-vcore/nm/mobx";
+import {computed, makeObservable} from "mobx";
 import {OPFSFolder} from "../OPFSFolder.js";
 import {OPFS_Map} from "../OPFS_Map.js";
 import {ReadFileText_AsJSON} from "../AccessorsForFiles.js";

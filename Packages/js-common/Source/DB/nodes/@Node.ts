@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "mobx-graphlink";
 import {PickOnly} from "../../Utils/General/General.js";
 import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";

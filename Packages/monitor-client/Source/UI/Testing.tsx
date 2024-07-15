@@ -3,11 +3,11 @@ import {store} from "Store";
 import {TestSequence} from "Store/main/testing";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {Observer} from "web-vcore";
-import {gql, useSubscription} from "web-vcore/nm/@apollo/client";
-import {observer} from "web-vcore/nm/mobx-react";
-import {Button, Column, Row, TextArea, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {gql, useSubscription} from "@apollo/client";
+import {observer} from "mobx-react";
+import {Button, Column, Row, TextArea, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 
 export class TestingLogEntry {
 	text: string;

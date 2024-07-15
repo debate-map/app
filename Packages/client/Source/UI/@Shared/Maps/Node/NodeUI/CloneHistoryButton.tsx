@@ -4,11 +4,11 @@ import React from "react";
 import {store} from "Store";
 import {SearchResultRow} from "UI/@Shared/NavBar/SearchPanel.js";
 import {ES, Observer} from "web-vcore";
-import {MapWithBailHandling} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {MapWithBailHandling} from "mobx-graphlink";
+import {Button, Column, Row, Select} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {ScrollView} from "react-vscrollview";
 
 @Observer
 export class CloneHistoryButton extends BaseComponent<{node: NodeL3}, {}> {

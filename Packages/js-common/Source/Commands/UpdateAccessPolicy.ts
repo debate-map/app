@@ -1,4 +1,4 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";

@@ -1,10 +1,10 @@
 import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
-import {makeObservable, observable} from "web-vcore/nm/mobx.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {ignore, version} from "web-vcore/nm/mobx-sync.js";
+import {makeObservable, observable} from "mobx";
+import {CreateAccessor} from "mobx-graphlink";
+import {ignore, version} from "mobx-sync";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "js-vextensions";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "./maps/mapStates/@MapState.js";

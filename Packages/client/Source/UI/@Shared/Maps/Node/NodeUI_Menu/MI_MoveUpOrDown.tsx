@@ -5,8 +5,8 @@ import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {RunCommand_UpdateNodeLink} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {BaseComponent} from "react-vextensions";
+import {VMenuItem} from "react-vmenu";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer

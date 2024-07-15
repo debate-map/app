@@ -1,7 +1,7 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent} from "react-vextensions";
+import {WaitXThenRun} from "js-vextensions";
 import {gql, useQuery, useSubscription} from "@apollo/client";
-import {Button} from "web-vcore/nm/react-vcomponents.js";
+import {Button} from "react-vcomponents";
 import {GetAppServerURL} from "../../../../Utils/LibIntegrations/Apollo.js";
 import {OpenSignInPopup, SignInProvider} from "../UserPanel.js";
 

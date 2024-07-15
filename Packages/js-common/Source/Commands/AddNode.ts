@@ -1,4 +1,4 @@
-import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, DBHelper, dbp, GenerateUUID, GetSchemaJSON, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, DBHelper, dbp, GenerateUUID, GetSchemaJSON, SimpleSchema} from "mobx-graphlink";
 import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";

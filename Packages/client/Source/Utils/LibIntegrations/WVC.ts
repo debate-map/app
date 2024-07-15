@@ -5,9 +5,9 @@ import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
 import {ActionFunc, AddErrorMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
-import produce from "web-vcore/nm/immer";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
+import produce from "immer";
+import {runInAction} from "mobx";
+import {AddSchema, WithStore} from "mobx-graphlink";
 import "./WVC/Overrides.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 

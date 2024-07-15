@@ -4,9 +4,9 @@ import {RunCommand_LinkNode} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {CheckNewChildConfigUnderParentIsValid, ClaimForm, GetDisplayTextForNewChildConfig, GetNode, GetNodeContributionInfo, GetParentNodeID, GetParentNodeL3, GetPolarityShortStr, Me, MeID, NewChildConfig, NodeContributionInfo_ForPolarity, NodeType, ReversePolarity} from "dm_common";
 import {Observer, RunInAction} from "web-vcore";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {BaseComponent} from "react-vextensions";
+import {VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer

@@ -1,6 +1,6 @@
 import {AsNodeL3, AttachmentType, GetAttachmentType_Node} from "dm_common";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {

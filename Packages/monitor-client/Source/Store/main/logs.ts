@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {makeObservable} from "mobx";
 import {LogGroup} from "./logs/LogGroup.js";
 
 export enum LogsPanel {

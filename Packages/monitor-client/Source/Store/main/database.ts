@@ -1,6 +1,6 @@
 import {version} from "mobx-sync";
 import {O} from "web-vcore";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {makeObservable} from "mobx";
 import {MtxGroup} from "./database/MtxGroup.js";
 
 export class DatabaseState {

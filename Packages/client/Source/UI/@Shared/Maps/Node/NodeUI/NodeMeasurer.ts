@@ -1,9 +1,9 @@
 import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbar, NodeType, ChildGroup, GetToolbarItemsToShow, ShowNotification} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {AssertWarn} from "web-vcore/nm/js-vextensions";
-import {createAtom} from "web-vcore/nm/mobx";
+import {AssertWarn} from "js-vextensions";
+import {createAtom} from "mobx";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GUTTER_WIDTH_SMALL, NOTIFICATION_BELL_WIDTH, TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_WIDTH_WITH_BORDER} from "../NodeLayoutConstants";
 

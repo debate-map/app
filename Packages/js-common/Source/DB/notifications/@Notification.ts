@@ -1,5 +1,5 @@
-import chroma from "web-vcore/nm/chroma-js.js";
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import chroma from "chroma-js";
+import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
 
 @MGLClass({table: "notifications"})
 export class Notification {

@@ -1,6 +1,6 @@
 import {BaseComponent} from "react-vextensions";
 import {Observer} from "web-vcore";
-import {gql, useSubscription} from "web-vcore/nm/@apollo/client";
+import {gql, useSubscription} from "@apollo/client";
 
 export const LINK_PRESERVER_SUBSCRIPTION = gql`
 subscription($input: LinkPreserverInput!) {

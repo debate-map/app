@@ -1,4 +1,4 @@
-import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";

@@ -1,4 +1,4 @@
-import {AssertValidate, Command, CommandMeta, CommandRunInfo, DBHelper, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, CommandRunInfo, DBHelper, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {NodeL1} from "../DB/nodes/@Node.js";

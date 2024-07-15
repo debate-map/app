@@ -1,6 +1,6 @@
-import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
+import {Column, Pre, Row} from "react-vcomponents";
+import {BaseComponent, GetDOM} from "react-vextensions";
 import {ReferencesAttachment, GetNodeDisplayText, NodeType, ClaimForm, CleanUpdatedSourceChains} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";

@@ -1,9 +1,9 @@
 import React, {useEffect} from "react";
 import {StreamUI} from "UI/Social/StreamUI";
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {CheckBox, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {Timer} from "web-vcore/nm/js-vextensions.js";
+import {CheckBox, Column, Row} from "react-vcomponents";
+import {Timer} from "js-vextensions";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";

@@ -2,8 +2,8 @@ import {MeID} from "dm_common";
 import {RootState, store} from "Store/index.js";
 import {MainSkin} from "Utils/Styles/MainSkin.js";
 import {ActionFunc, AddNotificationMessage, AddWVCSchemas, DefaultSkin, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored} from "web-vcore";
-import produce from "web-vcore/nm/immer";
-import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
+import produce from "immer";
+import {AddSchema, WithStore} from "mobx-graphlink";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "../../Utils/URL/URLs.js";
 
 /*const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);

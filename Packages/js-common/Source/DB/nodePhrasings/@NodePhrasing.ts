@@ -1,5 +1,5 @@
-import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "mobx-graphlink";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
 import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 

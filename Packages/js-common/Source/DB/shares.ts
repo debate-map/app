@@ -1,4 +1,4 @@
-import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor, GetDocs} from "mobx-graphlink";
 import {Share} from "./shares/@Share.js";
 
 export const GetShare = CreateAccessor((id: string): Share|n=>{

@@ -5,10 +5,10 @@ import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {RunInAction} from "web-vcore";
 import {CatchBail, GetAsync} from "mobx-graphlink";
-import {Assert, FromJSON, NN} from "web-vcore/nm/js-vextensions.js";
-import {DropResult, ResponderProvided} from "web-vcore/nm/hello-pangea-dnd.js";
-import {Button} from "web-vcore/nm/react-vcomponents.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Assert, FromJSON, NN} from "js-vextensions";
+import {DropResult, ResponderProvided} from "@hello-pangea/dnd";
+import {Button} from "react-vcomponents";
+import {ShowMessageBox} from "react-vmessagebox";
 
 export async function OnDragEnd(result: DropResult, provided: ResponderProvided) {
 	if (result.destination == null) return;

@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "mobx-graphlink";
 import {Map} from "../maps/@Map.js";
 import {NodeL3} from "./@Node.js";
 import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";

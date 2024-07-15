@@ -1,4 +1,4 @@
-import {Command, AssertV, dbp, AssertValidate, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV, dbp, AssertValidate, CommandMeta, SimpleSchema, DBHelper} from "mobx-graphlink";
 import {HasModPermissions} from "../DB/users/$user.js";
 
 @CommandMeta({

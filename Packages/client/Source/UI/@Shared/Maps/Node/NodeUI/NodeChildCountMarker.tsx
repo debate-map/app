@@ -1,6 +1,6 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus} from "react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/Node/NodeUI.js";
-import {E, emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {E, emptyArray} from "js-vextensions";
 import React from "react";
 import {Column} from "react-vcomponents";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";

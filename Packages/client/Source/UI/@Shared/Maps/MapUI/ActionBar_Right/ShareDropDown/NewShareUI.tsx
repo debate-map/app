@@ -4,9 +4,9 @@ import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {ExpandType, ScrollToType} from "Store/main/shareUI.js";
 import {RunCommand_AddShare, RunCommand_UpdateShare} from "Utils/DB/Command.js";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "js-vextensions";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown.js";
 
 @Observer

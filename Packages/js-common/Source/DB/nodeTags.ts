@@ -1,5 +1,5 @@
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
+import {emptyArray_forLoading, CE} from "js-vextensions";
 import {NodePhrasing} from "./nodePhrasings/@NodePhrasing.js";
 import {NodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@NodeTag.js";
 import {GraphDBShape} from "../DBShape.js";

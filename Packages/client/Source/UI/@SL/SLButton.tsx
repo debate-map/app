@@ -1,8 +1,8 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "react-vextensions";
 import React from "react";
-import {ButtonProps, Button} from "web-vcore/nm/react-vcomponents.js";
+import {ButtonProps, Button} from "react-vcomponents";
 import {HSLA} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 
 export class Button_SL extends BaseComponent<{} & ButtonProps, {}> {

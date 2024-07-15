@@ -1,7 +1,7 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/Node/NodeUI.js";
-import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {Column, Row, Text} from "react-vcomponents";
+import {E} from "js-vextensions";
 import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";
 
 export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string}, {}> {

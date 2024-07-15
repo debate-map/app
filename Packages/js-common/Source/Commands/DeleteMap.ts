@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";

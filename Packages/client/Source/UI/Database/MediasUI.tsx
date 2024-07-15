@@ -1,12 +1,12 @@
-import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, UseEffect} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
+import {ScrollView} from "react-vscrollview";
 import {store} from "Store";
 import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
 import {Observer, GetUpdates, ES, RunInAction, chroma_maxDarken} from "web-vcore";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "mobx";
+import {Assert, E} from "js-vextensions";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_DeleteMedia, RunCommand_UpdateMedia} from "Utils/DB/Command.js";

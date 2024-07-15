@@ -1,4 +1,4 @@
-import {ApolloCache, NormalizedCacheObject, Cache} from "web-vcore/nm/@apollo/client.js";
+import {ApolloCache, NormalizedCacheObject, Cache} from "@apollo/client";
 
 const emptyCacheObj = {};
 export class VoidCache extends ApolloCache<NormalizedCacheObject> {

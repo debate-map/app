@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
 
 export enum MediaType {
 	image = "image",

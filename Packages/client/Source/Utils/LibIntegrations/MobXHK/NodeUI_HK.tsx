@@ -1,6 +1,6 @@
 import {Observer} from "web-vcore";
-import {Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Row} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {GetNode_HK} from "./HKStore";
 
 @Observer

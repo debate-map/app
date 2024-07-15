@@ -1,5 +1,5 @@
-import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Text} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {Link, Observer, RunInAction} from "web-vcore";
 import {NodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";

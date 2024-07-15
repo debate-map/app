@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, SimpleSchema} from "mobx-graphlink";
 import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
 
