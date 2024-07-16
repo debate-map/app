@@ -18,7 +18,6 @@ const config = {
         chunkModules: false, // only on prod,
       },
       writeToDisk: true,
-
     },
     port: 5131,
     static: [
@@ -26,7 +25,7 @@ const config = {
         directory: path.resolve(__dirname, "./Resources"),
     	},
     	{
-    	  directory: path.resolve(__dirname, "../client/Resources"),
+        directory: path.resolve(__dirname, "../client/Resources"),
     	},
     ],
     historyApiFallback: {
@@ -36,11 +35,13 @@ const config = {
       	{
           from: /^\/monitor\/.*$/,
           to(context) {
-          	return context.parsedUrl.pathname.replace(/^\/monitor\/.*/, "/");
+          	if (context.parsedUrl.pathname.match(/\.[a-z]+$/)) {
+          		return `/${context.parsedUrl.pathname.split("/").pop()}`;
+          	}
+          	return "/index.html";
           },
       	},
       ],
-
     },
   },
   target: "web",

@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "dev": "rspack dev",
+    "build": "rspack build",
+    
     "start": "cd ../.. && npx nps"
   },
   "devDependencies": {

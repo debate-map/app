@@ -2674,7 +2674,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^17.0.6":
+"@types/react-dom@npm:17.0.11":
   version: 17.0.11
   resolution: "@types/react-dom@npm:17.0.11"
   dependencies:
@@ -7818,7 +7818,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^7.0.7":
+"immer@npm:7.0.15":
   version: 7.0.15
   resolution: "immer@npm:7.0.15"
   checksum: 7df051522b99651f990da5cdf67525e7c837fa79ffe88ec1b706ad91b14990dba754fbd2d83d1fc0f3ef0ebc05643da513e62c9e5195d457be2874cb02ad70b0
@@ -8560,24 +8560,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-vextensions@npm:1.0.73":
-  version: 1.0.73
-  resolution: "js-vextensions@npm:1.0.73"
-  checksum: 499a5c102c7295c20ea91a7f46f4dcc61fec6721cea43e3f95cb130a3f9928a755c089208f73438721dccf28accab52182238db79992f8fc964df23b389c3697
-  languageName: node
-  linkType: hard
-
 "js-vextensions@npm:1.0.78":
   version: 1.0.78
   resolution: "js-vextensions@npm:1.0.78"
   checksum: b7cc7c348c85d19149293903a6a194bc494ced460469be4e814931b91a3927212fa98458d22b065eeb6268f24103e22c543742df104b680d8bc5475092aafa03
-  languageName: node
-  linkType: hard
-
-"js-vextensions@npm:^1.0.74":
-  version: 1.0.77
-  resolution: "js-vextensions@npm:1.0.77"
-  checksum: 01b393d7df12567c8995f2ecf5c5e264b9c6b67db668ae013736754d0eb84058f775b38b90057129d6129ddab5250af4c4b023a6b00d73fb4bc1a574ee94a689
   languageName: node
   linkType: hard
 
@@ -9636,7 +9622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-react@npm:^7.2.0, mobx-react@npm:^7.6.0":
+"mobx-react@npm:7.6.0":
   version: 7.6.0
   resolution: "mobx-react@npm:7.6.0"
   dependencies:
@@ -9673,17 +9659,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx@npm:^6.3.13":
-  version: 6.12.3
-  resolution: "mobx@npm:6.12.3"
-  checksum: 33e1d27d33adea0ceb4de32eb66b4384e81a249be5e01baa6bf556f458fd62a83d23bfa0cf8ba9e87c28f0d810ae301ee0e7322fd48a3bf47db33ffb08d5826c
-  languageName: node
-  linkType: hard
-
-"mobx@npm:^6.3.2":
-  version: 6.3.7
-  resolution: "mobx@npm:6.3.7"
-  checksum: 533d8770a2d6f50f7d9c54320c8d70ea4226e26ed6a62f9c10391185cb9137fe2188d27f305d34eba4f69d9897851e28d5440cc803539a138a5474643fa36a33
+"mobx@npm:6.3.13":
+  version: 6.3.13
+  resolution: "mobx@npm:6.3.13"
+  checksum: ff2ce1b5eaa0696d817c5d08a1f14bfa2225aa925383e91860d5797738f5931f8fd9e812ba7c891d7317458c5c29f6d3d21d691697494738ad80c510f0ce3768
   languageName: node
   linkType: hard
 
@@ -14907,7 +14886,7 @@ __metadata:
     "@types/chroma-js": "npm:^2.1.3"
     "@types/lodash": "npm:^4.14.202"
     "@types/react": "npm:17.0.74"
-    "@types/react-dom": "npm:^17.0.6"
+    "@types/react-dom": "npm:17.0.11"
     "@types/webpack": "npm:5.28.5"
     ajv: "npm:^8.8.1"
     babel-loader: "npm:^8.2.2"
@@ -14936,14 +14915,14 @@ __metadata:
     graphql-ws: "npm:5.13.1"
     history: "npm:^4.10.1"
     html-webpack-plugin: "npm:5.6.0"
-    immer: "npm:^7.0.7"
+    immer: "npm:7.0.15"
     ip: "npm:^1.1.5"
     js-vextensions: "npm:1.0.78"
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
-    mobx: "npm:^6.3.2"
+    mobx: "npm:6.3.13"
     mobx-graphlink: "npm:0.0.47"
-    mobx-react: "npm:^7.6.0"
+    mobx-react: "npm:7.6.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"
     moment: "npm:2.24.0"
@@ -14954,7 +14933,7 @@ __metadata:
     rc-tooltip: "npm:^3.7.3"
     react: "npm:17.0.2"
     react-datetime: "npm:^2.16.3"
-    react-dom: "npm:^17.0.2"
+    react-dom: "npm:17.0.2"
     react-markdown: "npm:^6.0.3"
     react-universal-hooks: "npm:0.5.1"
     react-uplot: "npm:0.0.8"
