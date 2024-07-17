@@ -4,7 +4,6 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineStepTimesFromStart, Map, Timeline, TimelineStep} from "dm_common";
 import {useEffect, useMemo, useState} from "react";
 import {Row} from "react-vcomponents";
-import WaveSurfer from "wavesurfer.js";
 import {Observer} from "web-vcore";
 import {Assert, GetPercentFromXToY, Lerp} from "js-vextensions";
 import {BaseComponent} from "react-vextensions";

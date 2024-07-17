@@ -5621,6 +5621,8 @@ __metadata:
   resolution: "dm_client@workspace:Packages/client"
   dependencies:
     "@fast-csv/parse": "npm:^4.3.6"
+    "@rspack/cli": "npm:^0.7.5"
+    "@rspack/core": "npm:^0.7.5"
     "@types/history": "npm:4.7.3"
     "@types/react-list": "npm:0.8.5"
     commander: "npm:2.19.0"

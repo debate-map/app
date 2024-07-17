@@ -24,44 +24,29 @@ const config = {
     	{
         directory: path.resolve(__dirname, "./Resources"),
     	},
-    	{
-        directory: path.resolve(__dirname, "../client/Resources"),
-    	},
     ],
-    historyApiFallback: {
-      index: "index.html",
-      verbose: true,
-      rewrites: [
-      	{
-          from: /^\/monitor\/.*$/,
-          to(context) {
-          	if (context.parsedUrl.pathname.match(/\.[a-z]+$/)) {
-          		return `/${context.parsedUrl.pathname.split("/").pop()}`;
-          	}
-          	return "/index.html";
-          },
-      	},
-      ],
-    },
+    historyApiFallback: true,
   },
   target: "web",
   devtool: "source-map",
   resolve: {
-    roots: [
-    	path.resolve(__dirname, "./Resources"),
-    	path.resolve(__dirname, "../client/Resources"),
-    ],
+    roots: [path.resolve(__dirname, "./Resources")],
     modules: [
     	"node_modules",
     	path.resolve(__dirname, "./Resources"),
     	path.resolve(__dirname, "./Source"),
     ],
     extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".mjs"],
+    alias: {
+      fs: path.resolve(__dirname, "../../stream-browserify/index.js"),
+      "wavesurfer.js": [path.resolve(__dirname, "../../node_modules/wavesurfer.js/dist/wavesurfer.min.js")],
+    },
     extensionAlias: {
       ".js": [".ts", ".js", ".tsx", ".jsx"],
     },
     fallback: {
       stream: path.resolve(__dirname, "../../stream-browserify/index.js"),
+      fs: path.resolve(__dirname, "../../stream-browserify/index.js"),
     },
     tsConfig: {
       configFile: path.resolve(__dirname, "./tsconfig.json"),
@@ -71,7 +56,6 @@ const config = {
   experiments: {
     css: true,
   },
-
   module: {
     rules: [
     	{
@@ -139,7 +123,7 @@ const config = {
   },
   externals: {fs: "root location"},
   entry: {
-    app: [path.resolve(__dirname, "./Source/Main.tsx")],
+    app: [path.resolve(__dirname, "./Source/Main.ts")],
   },
   output: {
     filename: "[name].js",

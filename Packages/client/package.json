@@ -6,6 +6,8 @@
     "start": "cd ../.. && npx nps"
   },
   "devDependencies": {
+    "@rspack/cli": "^0.7.5",
+    "@rspack/core": "^0.7.5",
     "@types/history": "4.7.3",
     "@types/react-list": "0.8.5",
     "commander": "2.19.0",
