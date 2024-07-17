@@ -12,7 +12,7 @@ use tracing::{error, info};
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder};
-use crate::db::commands::_shared::increment_edit_counts::{increment_edit_counts_if_valid, increment_map_edits};
+use crate::db::commands::_shared::increment_edits::{increment_edits_if_valid, increment_map_edits};
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::node_links::get_node_links;
@@ -38,6 +38,7 @@ wrap_slow_macros! {
 pub struct DeleteNodeInput {
 	pub mapID: Option<String>,
 	pub nodeID: String,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug, Serialize)]
@@ -55,7 +56,7 @@ pub struct DeleteNodeExtras {
 }
 
 pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
-	let DeleteNodeInput { mapID, nodeID } = input;
+	let DeleteNodeInput { mapID, nodeID, incrementEdits } = input;
 
 	let old_data = get_node(&ctx, &nodeID).await?;
 	assert_user_can_delete_node(&ctx, &actor, &old_data, extras.as_part_of_map_delete, vec![], vec![]).await?;
@@ -85,7 +86,7 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool,
 
 	delete_db_entry_by_id(&ctx, "nodes".to_owned(), nodeID.to_string()).await?;
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
 	Ok(DeleteNodeResult { __: gql_placeholder() })
 }

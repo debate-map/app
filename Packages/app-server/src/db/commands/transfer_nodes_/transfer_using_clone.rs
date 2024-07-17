@@ -40,7 +40,6 @@ use crate::utils::general::order_key::OrderKey;
 
 use super::super::_command::{gql_placeholder, tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::super::_shared::add_node::add_node;
-use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
 use super::transfer_using_shim::TransferResult_Shim;
 
@@ -92,7 +91,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
 		},
 	};
 
-	let add_child_node_input = AddChildNodeInput { mapID: None, parentID: new_parent_id, node: new_node.clone(), revision: new_rev, link: new_link };
+	let add_child_node_input = AddChildNodeInput { mapID: None, parentID: new_parent_id, node: new_node.clone(), revision: new_rev, link: new_link, incrementEdits: Some(false) };
 	let add_child_node_result = add_child_node(ctx, actor, false, add_child_node_input, Default::default()).await?;
 	let new_node_id = add_child_node_result.nodeID;
 
@@ -115,6 +114,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
 						newPolarity: link.polarity.clone(),
 						deleteEmptyArgumentWrapper: Some(false),
 						unlinkFromOldParent: Some(false),
+						incrementEdits: Some(false),
 					},
 					Default::default(),
 				)

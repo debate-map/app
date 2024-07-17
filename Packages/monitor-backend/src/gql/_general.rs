@@ -182,7 +182,8 @@ impl QueryShard_General {
 		let target_pod =
 			get_k8s_pod_basic_infos("postgres-operator", true).await.context("Failed to retrieve basic-info of the k8s pods.")?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;
 		let container = "database";
-		let df_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "df", vec![], true).await.context("Failed to run pg_dump command in PG pod.")?;
+		// pass "--block-size=1" to get sizes in bytes (not kibibytes, which is the default)
+		let df_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "df", vec!["--block-size=1".o()], true).await.context("Failed to run pg_dump command in PG pod.")?;
 
 		let df = df_output.lines().skip(1).filter_map(|line| line.parse().ok()).collect();
 

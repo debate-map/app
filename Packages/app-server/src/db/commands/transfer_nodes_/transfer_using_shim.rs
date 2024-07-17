@@ -34,7 +34,6 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::super::_command::{gql_placeholder, tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::super::_shared::add_node::add_node;
-use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
 
 pub struct TransferResult_Shim {
@@ -79,6 +78,7 @@ pub async fn transfer_using_shim(ctx: &AccessorContext<'_>, actor: &User, transf
 			seriesAnchor: None,
 			seriesEnd: None,
 		},
+		incrementEdits: Some(false),
 	};
 	let result = add_child_node(&ctx, actor, false, add_child_node_input, Default::default()).await?;
 

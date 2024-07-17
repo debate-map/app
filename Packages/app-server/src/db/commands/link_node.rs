@@ -35,7 +35,7 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::add_node::add_node;
-use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use super::_shared::increment_edits::increment_edits_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 
 wrap_slow_macros! {
@@ -59,6 +59,7 @@ pub struct LinkNodeInput {
 	pub newPolarity: Option<Polarity>,
 	pub unlinkFromOldParent: Option<bool>,
 	pub deleteEmptyArgumentWrapper: Option<bool>,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -74,7 +75,7 @@ pub struct LinkNodeExtras {
 }
 
 pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: LinkNodeInput, extras: LinkNodeExtras) -> Result<LinkNodeResult, Error> {
-	let LinkNodeInput { mapID, oldParentID, newParentID, nodeID, childGroup, newForm, newPolarity, unlinkFromOldParent, deleteEmptyArgumentWrapper } = input;
+	let LinkNodeInput { mapID, oldParentID, newParentID, nodeID, childGroup, newForm, newPolarity, unlinkFromOldParent, deleteEmptyArgumentWrapper, incrementEdits } = input;
 	let unlink_from_old_parent = unlinkFromOldParent.unwrap_or(false);
 	let delete_empty_argument_wrapper = deleteEmptyArgumentWrapper.unwrap_or(false);
 
@@ -132,7 +133,21 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 				seriesEnd: None,
 			};
 
-			let result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: newParentID.o(), node: argument_wrapper, revision: argument_wrapper_revision, link: argument_wrapper_link }, Default::default()).await?;
+			let result = add_child_node(
+				ctx,
+				actor,
+				false,
+				AddChildNodeInput {
+					mapID: None,
+					parentID: newParentID.o(),
+					node: argument_wrapper,
+					revision: argument_wrapper_revision,
+					link: argument_wrapper_link,
+					incrementEdits: Some(false),
+				},
+				Default::default(),
+			)
+			.await?;
 			new_parent_id_for_claim = result.nodeID.clone();
 			Some(result)
 		},
@@ -161,17 +176,17 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 	if unlink_from_old_parent && let Some(old_parent) = old_parent {
 		//let link = get_first_link_under_parent(ctx, &nodeID, old_parent.id.as_str()).await?;
 		for link in get_node_links(ctx, Some(old_parent.id.as_str()), Some(nodeID.as_str())).await? {
-			delete_node_link(ctx, actor, false, DeleteNodeLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
+			delete_node_link(ctx, actor, false, DeleteNodeLinkInput { mapID: None, id: link.id.to_string(), incrementEdits: Some(false) }, Default::default()).await?;
 		}
 
 		// if parent was argument, and it now has no children left, and the actor allows it (ie. their view has node as single-premise arg), then also delete the argument parent
 		let new_child_count = get_node_links(ctx, Some(old_parent.id.as_str()), None).await?.len();
 		if old_parent.r#type == NodeType::argument && new_child_count == 0 && delete_empty_argument_wrapper {
-			delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string() }, Default::default()).await?;
+			delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string(), incrementEdits: Some(false) }, Default::default()).await?;
 		}
 	}
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
 	Ok(LinkNodeResult { argumentWrapperID: add_arg_wrapper_result.map(|a| a.nodeID) })
 }

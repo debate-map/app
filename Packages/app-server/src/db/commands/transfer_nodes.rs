@@ -33,7 +33,7 @@ use crate::utils::general::order_key::OrderKey;
 
 use super::_command::{gql_placeholder, tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::add_node::add_node;
-use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use super::_shared::increment_edits::increment_edits_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 use super::transfer_nodes_::transfer_using_clone::TransferResult_Clone;
 use super::transfer_nodes_::transfer_using_shim::TransferResult_Shim;
@@ -53,6 +53,7 @@ wrap_slow_macros! {
 pub struct TransferNodesInput {
 	pub mapID: Option<String>,
 	pub nodes: Vec<NodeInfoForTransfer>,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -104,7 +105,7 @@ pub enum TransferResult {
 }
 
 pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: TransferNodesInput, _extras: NoExtras) -> Result<TransferNodesResult, Error> {
-	let TransferNodesInput { mapID, nodes } = input;
+	let TransferNodesInput { mapID, nodes, incrementEdits } = input;
 
 	let mut transfer_results: Vec<TransferResult> = vec![];
 
@@ -125,7 +126,7 @@ pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
 		transfer_results.push(result);
 	}
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
 	Ok(TransferNodesResult { __: gql_placeholder() })
 }

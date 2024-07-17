@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{command_boilerplate, delete_db_entry_by_id, gql_placeholder};
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use crate::db::commands::_shared::increment_edits::increment_edits_if_valid;
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::node_links::{get_node_link, get_node_links};
@@ -38,6 +38,7 @@ wrap_slow_macros! {
 pub struct DeleteNodeLinkInput {
 	pub mapID: Option<String>,
 	pub id: String,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug, Serialize)]
@@ -53,7 +54,7 @@ pub struct DeleteNodeLinkExtras {
 }*/
 
 pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteNodeLinkInput, _extras: NoExtras) -> Result<DeleteNodeLinkResult, Error> {
-	let DeleteNodeLinkInput { mapID, id } = input;
+	let DeleteNodeLinkInput { mapID, id, incrementEdits } = input;
 
 	/*let child_number_of_parents = get_node_links(ctx, None, Some(&childID)).await?.len();
 	let parent_to_child_links = get_node_links(ctx, Some(&parentID), Some(&childID)).await?;
@@ -79,7 +80,7 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, is_root: 
 	}*/
 	delete_db_entry_by_id(ctx, "nodeLinks".to_owned(), link.id.to_string()).await?;
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
 	Ok(DeleteNodeLinkResult { __: gql_placeholder() })
 }

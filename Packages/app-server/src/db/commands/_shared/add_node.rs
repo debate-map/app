@@ -15,7 +15,6 @@ use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::{command_boilerplate, init_field_of_extras, tbd, update_field_of_extras, upsert_db_entry_by_id_for_struct};
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::add_node_revision::{self, add_node_revision, AddNodeRevisionExtras, AddNodeRevisionInput, AddNodeRevisionResult};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
@@ -63,7 +62,7 @@ pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput,
 	// add node-revision to db
 	ensure!(revision.node.is_none(), err_should_be_null("revision.node").to_string());
 	revision.node = Some(node.id.to_string());
-	let add_rev_result = add_node_revision(ctx, actor, false, AddNodeRevisionInput { mapID: None, revision }, AddNodeRevisionExtras { id_override: Some(revision_id.clone()) }).await?;
+	let add_rev_result = add_node_revision(ctx, actor, false, AddNodeRevisionInput { mapID: None, revision, incrementEdits: Some(false) }, AddNodeRevisionExtras { id_override: Some(revision_id.clone()) }).await?;
 	ensure!(add_rev_result.id == revision_id, "The revision-id returned by add_node_revision didn't match the revision-id-override supplied to it!");
 
 	Ok(AddNodeResult { nodeID: node.id.to_string(), revisionID: revision_id.to_string() })

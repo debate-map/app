@@ -14,7 +14,7 @@ use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use crate::db::commands::_shared::increment_edits::increment_edits_if_valid;
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::{Map, MapInput};

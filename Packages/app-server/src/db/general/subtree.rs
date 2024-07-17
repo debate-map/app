@@ -313,12 +313,12 @@ async fn get_prepared_data_for_deleting_subtree(ctx: &AccessorContext<'_>, _acto
 	}
 
 	for link_id in links_to_unlink.iter() {
-		let command = CommandEntry { deleteNodeLink: Some(DeleteNodeLinkInput { mapID: None, id: link_id.clone() }), ..Default::default() };
+		let command = CommandEntry { deleteNodeLink: Some(DeleteNodeLinkInput { mapID: None, id: link_id.clone(), incrementEdits: Some(false) }), ..Default::default() };
 		subcommands.push(command);
 	}
 
 	for node_id in nodes_to_delete_ids.iter() {
-		let command = CommandEntry { deleteNode: Some(DeleteNodeInput { mapID: None, nodeID: node_id.clone() }), ..Default::default() };
+		let command = CommandEntry { deleteNode: Some(DeleteNodeInput { mapID: None, nodeID: node_id.clone(), incrementEdits: Some(false) }), ..Default::default() };
 		subcommands.push(command);
 	}
 

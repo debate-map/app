@@ -11,7 +11,6 @@ use rust_shared::{anyhow, async_graphql, serde_json, to_anyhow, GQLError};
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{command_boilerplate, delete_db_entry_by_id, gql_placeholder};
-use crate::db::commands::_shared::increment_edit_counts::{increment_edit_counts_if_valid, increment_map_edits};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
@@ -52,7 +51,7 @@ pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool,
 	assert_user_can_delete(ctx, actor, &old_data).await?;
 
 	// first delete the root-node
-	delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
+	delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode, incrementEdits: Some(false) }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
 
 	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
 

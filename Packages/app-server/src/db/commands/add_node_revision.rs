@@ -17,7 +17,7 @@ use tracing::info;
 use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::access_policies_::_permission_set::{APAction, APTable};
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use crate::db::commands::_shared::increment_edits::increment_edits_if_valid;
 use crate::db::general::permission_helpers::assert_user_can_modify;
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
@@ -47,6 +47,7 @@ wrap_slow_macros! {
 pub struct AddNodeRevisionInput {
 	pub mapID: Option<String>,
 	pub revision: NodeRevisionInput,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug, Serialize)]
@@ -63,7 +64,7 @@ pub struct AddNodeRevisionExtras {
 }
 
 pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
-	let AddNodeRevisionInput { mapID, revision: revision_ } = input.clone();
+	let AddNodeRevisionInput { mapID, revision: revision_, incrementEdits } = input.clone();
 
 	let node_id = revision_.node.ok_or(err_should_be_populated("revision.node"))?;
 	let node = get_node(ctx, &node_id).await?;
@@ -118,22 +119,14 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		upsert_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
-    let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
-    if user_hiddens.notificationPolicy == "S" {
-        let subscription = AddSubscriptionInputBuilder::new(node_id.clone())
-            .with_add_child_node(true)
-            .with_add_child_node(true)
-            .with_add_node_link(true)
-            .with_add_node_revision(true)
-            .with_delete_node(true)
-            .with_delete_node_link(true)
-            .with_set_node_rating(true)
-            .build();
+	let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
+	if user_hiddens.notificationPolicy == "S" {
+		let subscription = AddSubscriptionInputBuilder::new(node_id.clone()).with_add_child_node(true).with_add_child_node(true).with_add_node_link(true).with_add_node_revision(true).with_delete_node(true).with_delete_node_link(true).with_set_node_rating(true).build();
 
-        add_or_update_subscription(ctx, actor, false, subscription, Default::default()).await?;
-    }
+		add_or_update_subscription(ctx, actor, false, subscription, Default::default()).await?;
+	}
 
 	let result = AddNodeRevisionResult { id: revision.id.to_string() };
 	//if extras.is_child_command != Some(true) {

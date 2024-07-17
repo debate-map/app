@@ -17,7 +17,6 @@ use rust_shared::{anyhow, async_graphql, serde_json, to_anyhow, to_sub_err, GQLE
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::commands::delete_node::delete_node;
