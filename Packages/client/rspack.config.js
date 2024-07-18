@@ -19,13 +19,27 @@ const config = {
       },
       writeToDisk: true,
     },
-    port: 5131,
+    port: 5101,
     static: [
     	{
         directory: path.resolve(__dirname, "./Resources"),
     	},
     ],
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: "index.html",
+      verbose: true,
+      rewrites: [
+      	{
+          from: /^\/.*$/,
+          to(context) {
+          	if (context.parsedUrl.pathname.match(/\.[a-z]+$/)) {
+          		return `/${context.parsedUrl.pathname.split("/").pop()}`;
+          	}
+          	return "/index.html";
+          },
+      	},
+      ],
+    },
   },
   target: "web",
   devtool: "source-map",
@@ -82,6 +96,10 @@ const config = {
         	{
             loader: "sass-loader",
             options: {
+              // using `modern-compiler` and `sass-embedded` together significantly improve build performance
+              api: "modern-compiler",
+              implementation: require.resolve("sass-embedded"),
+
               sassOptions: {
                 includePaths: [path.resolve(__dirname, "./Source")],
               },
@@ -120,7 +138,10 @@ const config = {
     	},
     ],
   },
-  externals: {fs: "root location"},
+  externals: {
+    fs: "root location",
+    "/Fonts/AdobeNotDef-Regular.otf": "root location",
+  },
   entry: {
     app: [path.resolve(__dirname, "./Source/Main.ts")],
   },

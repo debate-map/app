@@ -99,6 +99,10 @@ const config = {
         	{
             loader: "sass-loader",
             options: {
+              // using `modern-compiler` and `sass-embedded` together significantly improve build performance
+              api: "modern-compiler",
+              implementation: require.resolve("sass-embedded"),
+
               sassOptions: {
                 includePaths: [path.resolve(__dirname, "./Source")],
               },

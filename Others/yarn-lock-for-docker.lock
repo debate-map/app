@@ -1631,6 +1631,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bufbuild/protobuf@npm:^1.0.0":
+  version: 1.10.0
+  resolution: "@bufbuild/protobuf@npm:1.10.0"
+  checksum: 5487b9c2e63846d0e3bde4d025cc77ae44a22166a5d6c184df0da5581e1ab6d66dd115af0ccad814576dcd011bb1b93989fb0ac1eb4ae452979bb8b186693ba0
+  languageName: node
+  linkType: hard
+
 "@cerner/duplicate-package-checker-webpack-plugin@npm:^2.1.0":
   version: 2.1.0
   resolution: "@cerner/duplicate-package-checker-webpack-plugin@npm:2.1.0"
@@ -4151,6 +4158,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer-builder@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "buffer-builder@npm:0.2.0"
+  checksum: e50c3a379f4acaea75ade1ee3e8c07ed6d7c5dfc3f98adbcf0159bfe1a4ce8ca1fe3689e861fcdb3fcef0012ebd4345a6112a5b8a1185295452bb66d7b6dc8a1
+  languageName: node
+  linkType: hard
+
 "buffer-from@npm:^1.0.0":
   version: 1.1.1
   resolution: "buffer-from@npm:1.1.1"
@@ -5621,6 +5635,8 @@ __metadata:
   resolution: "dm_client@workspace:Packages/client"
   dependencies:
     "@fast-csv/parse": "npm:^4.3.6"
+    "@rspack/cli": "npm:^0.7.5"
+    "@rspack/core": "npm:^0.7.5"
     "@types/history": "npm:4.7.3"
     "@types/react-list": "npm:0.8.5"
     commander: "npm:2.19.0"
@@ -8742,7 +8758,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"klona@npm:^2.0.4, klona@npm:^2.0.5":
+"klona@npm:^2.0.5":
   version: 2.0.5
   resolution: "klona@npm:2.0.5"
   checksum: 5b752c11ca8e2996612386699f52cc5aed802aa4116663d26239ac0b054fae25191dacb95587ecf1a167b039daa9fc3fa2da17dfd5d0821f3037de3821d9a9e5
@@ -12370,6 +12386,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rxjs@npm:^7.4.0":
+  version: 7.8.1
+  resolution: "rxjs@npm:7.8.1"
+  dependencies:
+    tslib: "npm:^2.1.0"
+  checksum: 3c49c1ecd66170b175c9cacf5cef67f8914dcbc7cd0162855538d365c83fea631167cacb644b3ce533b2ea0e9a4d0b12175186985f89d75abe73dbd8f7f06f68
+  languageName: node
+  linkType: hard
+
 "safe-buffer@npm:5.1.2, safe-buffer@npm:~5.1.0, safe-buffer@npm:~5.1.1":
   version: 5.1.2
   resolution: "safe-buffer@npm:5.1.2"
@@ -12400,20 +12425,230 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^13.2.0":
-  version: 13.2.0
-  resolution: "sass-loader@npm:13.2.0"
+"sass-embedded-android-arm64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-android-arm64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-android-arm@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-android-arm@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"sass-embedded-android-ia32@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-android-ia32@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=android & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"sass-embedded-android-x64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-android-x64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=android & cpu=x64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-darwin-arm64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-darwin-arm64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-darwin-x64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-darwin-x64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-arm64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-arm64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-arm@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-arm@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-ia32@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-ia32@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-musl-arm64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-musl-arm64@npm:1.77.8"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-musl-arm@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-musl-arm@npm:1.77.8"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-musl-ia32@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-musl-ia32@npm:1.77.8"
+  conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-musl-x64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-musl-x64@npm:1.77.8"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-linux-x64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-linux-x64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-win32-arm64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-win32-arm64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass.bat
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"sass-embedded-win32-ia32@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-win32-ia32@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass.bat
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"sass-embedded-win32-x64@npm:1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded-win32-x64@npm:1.77.8"
+  bin:
+    sass: dart-sass/sass.bat
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"sass-embedded@npm:^1.77.8":
+  version: 1.77.8
+  resolution: "sass-embedded@npm:1.77.8"
   dependencies:
-    klona: "npm:^2.0.4"
+    "@bufbuild/protobuf": "npm:^1.0.0"
+    buffer-builder: "npm:^0.2.0"
+    immutable: "npm:^4.0.0"
+    rxjs: "npm:^7.4.0"
+    sass-embedded-android-arm: "npm:1.77.8"
+    sass-embedded-android-arm64: "npm:1.77.8"
+    sass-embedded-android-ia32: "npm:1.77.8"
+    sass-embedded-android-x64: "npm:1.77.8"
+    sass-embedded-darwin-arm64: "npm:1.77.8"
+    sass-embedded-darwin-x64: "npm:1.77.8"
+    sass-embedded-linux-arm: "npm:1.77.8"
+    sass-embedded-linux-arm64: "npm:1.77.8"
+    sass-embedded-linux-ia32: "npm:1.77.8"
+    sass-embedded-linux-musl-arm: "npm:1.77.8"
+    sass-embedded-linux-musl-arm64: "npm:1.77.8"
+    sass-embedded-linux-musl-ia32: "npm:1.77.8"
+    sass-embedded-linux-musl-x64: "npm:1.77.8"
+    sass-embedded-linux-x64: "npm:1.77.8"
+    sass-embedded-win32-arm64: "npm:1.77.8"
+    sass-embedded-win32-ia32: "npm:1.77.8"
+    sass-embedded-win32-x64: "npm:1.77.8"
+    supports-color: "npm:^8.1.1"
+    varint: "npm:^6.0.0"
+  dependenciesMeta:
+    sass-embedded-android-arm:
+      optional: true
+    sass-embedded-android-arm64:
+      optional: true
+    sass-embedded-android-ia32:
+      optional: true
+    sass-embedded-android-x64:
+      optional: true
+    sass-embedded-darwin-arm64:
+      optional: true
+    sass-embedded-darwin-x64:
+      optional: true
+    sass-embedded-linux-arm:
+      optional: true
+    sass-embedded-linux-arm64:
+      optional: true
+    sass-embedded-linux-ia32:
+      optional: true
+    sass-embedded-linux-musl-arm:
+      optional: true
+    sass-embedded-linux-musl-arm64:
+      optional: true
+    sass-embedded-linux-musl-ia32:
+      optional: true
+    sass-embedded-linux-musl-x64:
+      optional: true
+    sass-embedded-linux-x64:
+      optional: true
+    sass-embedded-win32-arm64:
+      optional: true
+    sass-embedded-win32-ia32:
+      optional: true
+    sass-embedded-win32-x64:
+      optional: true
+  checksum: ba1f8a0e4e2ba12db5879ad7b8f6fb312023d31b8c07513431254a82293121808ef8f395516f1fa449419292c93e799b1fe62900a7da5d6497b57602fdfa45ae
+  languageName: node
+  linkType: hard
+
+"sass-loader@npm:14.2.1":
+  version: 14.2.1
+  resolution: "sass-loader@npm:14.2.1"
+  dependencies:
     neo-async: "npm:^2.6.2"
   peerDependencies:
-    fibers: ">= 3.1.0"
-    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+    "@rspack/core": 0.x || 1.x
+    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
     sass: ^1.3.0
     sass-embedded: "*"
     webpack: ^5.0.0
   peerDependenciesMeta:
-    fibers:
+    "@rspack/core":
       optional: true
     node-sass:
       optional: true
@@ -12421,7 +12656,9 @@ __metadata:
       optional: true
     sass-embedded:
       optional: true
-  checksum: 5b62ee7704172f80516382eca3a333a4740da0648104e97a74cacd2bf1d8bd40e15005bdeb5d480cc713b5ab1b5dde8f132f4ce00fa866d6cd18fe9476f80e67
+    webpack:
+      optional: true
+  checksum: 9a48d454584d96d6c562eb323bb9e3c6808e930eeaaa916975b97d45831e0b87936a8655cdb3a4512a25abc9587dea65a9616e42396be0d7e7c507a4795a8146
   languageName: node
   linkType: hard
 
@@ -13500,7 +13737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supports-color@npm:^8.0.0, supports-color@npm:^8.1.0":
+"supports-color@npm:^8.0.0, supports-color@npm:^8.1.0, supports-color@npm:^8.1.1":
   version: 8.1.1
   resolution: "supports-color@npm:8.1.1"
   dependencies:
@@ -14770,6 +15007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"varint@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "varint@npm:6.0.0"
+  checksum: 737fc37088a62ed3bd21466e318d21ca7ac4991d0f25546f518f017703be4ed0f9df1c5559f1dd533dddba4435a1b758fd9230e4772c1a930ef72b42f5c750fd
+  languageName: node
+  linkType: hard
+
 "vary@npm:~1.1.2":
   version: 1.1.2
   resolution: "vary@npm:1.1.2"
@@ -14946,7 +15190,8 @@ __metadata:
     remarkable: "npm:^2.0.1"
     remarkable-react: "npm:^1.4.3"
     sass: "npm:^1.56.1"
-    sass-loader: "npm:^13.2.0"
+    sass-embedded: "npm:^1.77.8"
+    sass-loader: "npm:14.2.1"
     source-map-loader: "npm:^3.0.0"
     subscriptions-transport-ws: "npm:^0.9.19"
     svg-sprite-loader: "npm:^6.0.7"
