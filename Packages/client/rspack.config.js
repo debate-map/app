@@ -38,15 +38,14 @@ const config = {
     ],
     extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".mjs"],
     alias: {
-      fs: path.resolve(__dirname, "../../stream-browserify/index.js"),
       "wavesurfer.js": [path.resolve(__dirname, "../../node_modules/wavesurfer.js/dist/wavesurfer.min.js")],
     },
     extensionAlias: {
       ".js": [".ts", ".js", ".tsx", ".jsx"],
     },
     fallback: {
-      stream: path.resolve(__dirname, "../../stream-browserify/index.js"),
-      fs: path.resolve(__dirname, "../../stream-browserify/index.js"),
+      fs: path.resolve(__dirname, "../../node_modules/stream-browserify/index.js"),
+      stream: path.resolve(__dirname, "../../node_modules/stream-browserify/index.js"),
     },
     tsConfig: {
       configFile: path.resolve(__dirname, "./tsconfig.json"),

@@ -34,6 +34,7 @@ Object.assign(scripts, {
 			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
 			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
 		},
+		devRS: `cd Packages/client && ${pathToNPMBin("rspack", 2)} serve`,
 		cypress: {
 			open: "cd Packages/client && cypress open",
 			run: "cd Packages/client && cypress run",
@@ -76,7 +77,7 @@ Object.assign(scripts, {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
 		},
-		devRS: "",
+		devRS: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} serve`,
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
 		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
