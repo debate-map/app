@@ -1,14 +1,16 @@
 import Moment from "moment";
-import {BaseComponent, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {Observer, VReactMarkdown_Remarkable} from "web-vcore";
-import {Map, NodeL3, GetUser, NodeRevision, GetNodeRevisions, IsUserCreatorOrAdmin, HasAdminPermissions, MeID, GetNodeChildren, NodeType, NodeL1Input, AsNodeL1Input, NodeLink, ChildGroup, NodeL1, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, NodePhrasing, GetNodePhrasings, GetNodePhrasing, GetNodeRevision, DeleteNode} from "dm_common";
+import {Map, NodeL3, GetUser, NodeRevision, MeID, GetNodeChildren, NodeType, AsNodeL1Input, NodeLink, ChildGroup, NodeL1, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, NodePhrasing, GetNodeRevision, GetNodeL2, CheckUserCanDeleteNode, NodeL2} from "dm_common";
 import {minidenticon} from "minidenticons";
 import {RunCommand_AddChildNode, RunCommand_DeleteNode} from "Utils/DB/Command.js";
-import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
-import {Button, DropDown, DropDownContent, DropDownTrigger, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {useMemo, useState} from "react";
+import {Button, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "react-vmessagebox";
-import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {ShowVMenu, VMenuItem} from "react-vmenu";
+import {Vector2} from "js-vextensions";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 const MinidenticonImg = ({username, saturation, lightness, ...props})=>{
@@ -20,7 +22,7 @@ const MinidenticonImg = ({username, saturation, lightness, ...props})=>{
 export class CommentsPanel extends BaseComponentPlus({} as { show: boolean, map?: Map|n, node: NodeL3, path: string }, {}) {
 	detailsUI: NodeDetailsUI;
 	render() {
-		const {show, map, node, path} = this.props;
+		const {show, map, node} = this.props;
 		const rootCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
 		const nodeAccessPolicyID = (map?.nodeAccessPolicy) ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
 		const [value, updateValue] = useState("");
@@ -106,9 +108,9 @@ export class CommentNode extends BaseComponent<{ addComment: (comment: string, p
             okButtonProps : {text : "Yes"},
             cancelButtonProps : {text : "No"},
             cancelButton : true,
-			onOK: async()=>{
-				await RunCommand_DeleteNode({nodeID});
-			},
+            onOK: async()=>{
+            	await RunCommand_DeleteNode({nodeID});
+            },
     	});
     }
 
@@ -124,6 +126,23 @@ export class CommentNode extends BaseComponent<{ addComment: (comment: string, p
     	const user = GetUser(node.creator);
     	const nodeRevision = GetNodeRevision(node.c_currentRevision);
     	const childCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
+    	const nodel2 = GetNodeL2(node);
+
+    	const commentNodeError = (nodel2: NodeL2, isRoot: boolean)=>{
+    	    const nodeChildrens = GetNodeChildren(nodel2.id).filter(n=>n.type === NodeType.comment);
+    		const rootError = CheckUserCanDeleteNode(MeID(), nodel2!, {forRecursiveCommentsDelete : !isRoot, childrenToIgnore : nodeChildrens.map(n=>n.id)});
+    		if (rootError) {
+    			return rootError;
+    		}
+
+    		for (const childNode of nodeChildrens) {
+    			const childNodeL2 = GetNodeL2(childNode)!;
+    			const childError = commentNodeError(childNodeL2, false);
+    			if (childError) {
+    				return childError;
+    			}
+    		}
+    	};
 
     	return (
             <div style={{display: "flex", marginTop: "12px"}}>
@@ -141,7 +160,7 @@ export class CommentNode extends BaseComponent<{ addComment: (comment: string, p
                         <div style={{overflowWrap: "break-word", background: "rgba(255,255,255,.15)", padding: "2px 5px", borderRadius: "5px"}}>
                             <VReactMarkdown_Remarkable source={nodeRevision?.phrasing.text_base!} />
                         </div>
-                        <ActionButtons onUpvoteClick={this.onUpvoteClick} onDownvoteClick={this.onDownvoteClick} onToggleReplyClick={this.onToggleReplyClick} onDeleteClick={()=>this.onDeleteClick(node.id)} onEditClick={this.onEditClick} currentNodeCreator={node.creator}/>
+                        <ActionButtons disableDelete={!!commentNodeError(nodel2!, true)} onUpvoteClick={this.onUpvoteClick} onDownvoteClick={this.onDownvoteClick} onToggleReplyClick={this.onToggleReplyClick} onDeleteClick={()=>this.onDeleteClick(node.id)} onEditClick={this.onEditClick} currentNodeCreator={node.creator}/>
                         {replyExpand && (
                             <CommentInput inputType="Reply" value={value} onSubmit={this.handleSubmit} onCancel={this.clearAndCloseInput} onValueChange={this.updateValue}/>
                         )}
@@ -154,34 +173,28 @@ export class CommentNode extends BaseComponent<{ addComment: (comment: string, p
     }
 }
 
-class MoreOptionsDropDown extends BaseComponent<{onEditClick: () => void, onDeleteClick: (string) => void}, {}> {
+class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvoteClick: () => void, onToggleReplyClick: () => void, onDeleteClick: () => void, onEditClick: () => void, currentNodeCreator: string, disableDelete? : boolean}, {}> {
     render() {
-    	const {onEditClick, onDeleteClick} = this.props;
-    	return (
-            <DropDown autoHide={true}>
-                <DropDownTrigger>
-                    <Button style={{fontSize: "10px", color: "white", height: "20px"}} p="2px 3px" ml={5} mdIcon="dots-horizontal" enabled={true} />
-                </DropDownTrigger>
-                <DropDownContent style={{left: 0, width: 200, borderRadius: "5px", padding: "0px", zIndex: zIndexes.dropdown}}>
-                    <div style={{display: "flex", flexDirection: "column"}}>
-                        <Button style={{fontSize: "12px", color: "white", height: "28px", borderRadius: "none"}} p="2px 3px" text="Edit" enabled={true} onClick={onEditClick} />
-                        <Button style={{fontSize: "12px", color: "white", height: "28px", borderRadius: "none"}} p="2px 3px" text="Delete" enabled={true} onClick={onDeleteClick} />
-                    </div>
-                </DropDownContent>
-            </DropDown>
-    	);
-    }
-}
+    	const {onUpvoteClick, onDownvoteClick, onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator, disableDelete} = this.props;
+    	const buttonStyle = {fontSize: "12px", color: "white", height: "20px"};
 
-class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvoteClick: () => void, onToggleReplyClick: () => void, onDeleteClick: () => void, onEditClick: () => void, currentNodeCreator: string}, {}> {
-    render() {
-    	const {onUpvoteClick, onDownvoteClick, onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator} = this.props;
     	return (
             <div style={{display: "flex", paddingTop: "5px"}}>
-                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" mdIcon="thumb-up" enabled={true} onClick={onUpvoteClick} />
-                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" ml={5} mdIcon="thumb-down" enabled={true} onClick={onDownvoteClick} />
-                <Button style={{fontSize: "12px", color: "white", height: "20px"}} p="2px 3px" ml={5} text="Reply" enabled={true} onClick={onToggleReplyClick} />
-                {currentNodeCreator === MeID() && <MoreOptionsDropDown onEditClick={onEditClick} onDeleteClick={onDeleteClick} />}
+                <Button style={buttonStyle} p="2px 3px" mdIcon="thumb-up" enabled={true} onClick={onUpvoteClick} />
+                <Button style={buttonStyle} p="2px 3px" ml={5} mdIcon="thumb-down" enabled={true} onClick={onDownvoteClick} />
+                <Button style={buttonStyle} p="2px 3px" ml={5} text="Reply" enabled={true} onClick={onToggleReplyClick} />
+                {currentNodeCreator === MeID() &&
+    	            <Button style={buttonStyle} ml={5} mdIcon="dots-horizontal" onClick={e=>{
+                    	const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
+                    	ShowVMenu(
+                    		{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
+                    		<>
+                    			<VMenuItem text="Edit" enabled={true} style={liveSkin.Style_VMenuItem()} onClick={onEditClick} />
+                    			<VMenuItem text="Delete" enabled={!disableDelete} style={liveSkin.Style_VMenuItem()} onClick={onDeleteClick}/>
+                    		</>,
+                    	);
+    	            }}/>
+            }
             </div>
     	);
     }
