@@ -9,14 +9,16 @@ export class ServerLink {
 		Object.assign(this, {
 			url,
 			jwt,
+			useWS: true,
 			isReady: false,
 		}, data);
 		if (onopen) this.onopen = onopen;
-		this.CreateWebsocket();
+		if (this.useWS) this.CreateWebsocket();
 	}
 
 	url;
 	jwt;
+	useWS;
 	isReady;
 	onopen;
 	/** @type {WebSocket} */
@@ -58,7 +60,7 @@ export class ServerLink {
 		return ws;
 	}
 
-	async Query(body) {
+	Query(body) {
 		const response = http.post(this.url, JSON.stringify(body), {
 			headers: {
 				"Content-Type": "application/json",
@@ -76,7 +78,7 @@ export class ServerLink {
 		return json.data;
 	}
 
-	async Mutate(body) {
+	Mutate(body) {
 		/*const reqID = GenReqID();
 		const body = {
 			id: reqID,
@@ -100,20 +102,21 @@ export class ServerLink {
 		return json.data;
 	}
 
-	async SubscribeTemp(payload) {
-		return await this.QueryOrSubscribeTemp(payload, "subscribe");
+	SubscribeTemp(payload) {
+		return this.Subscribe_Base(payload);
 	}
-	/*async Subscribe(payload) {
-		return await this.QueryOrSubscribe(payload, "subscribe");
+	/*Subscribe(payload) {
+		return this.Subscribe_Base(payload, false);
 	}*/
 
-	async QueryOrSubscribeTemp(payload, type) {
+	// todo: add param for whether to unsubscribe after first response message
+	Subscribe_Base(payload) {
 		//payload.operationName = payload.operationName || `K6AutoOp_${++lastAutoOperationNumber}`;
 		return new Promise((resolve, reject)=>{
 			const reqID = GenReqID();
 			this.ws.send(JSON.stringify({
 				id: reqID,
-				type,
+				type: "subscribe",
 				payload,
 			}));
 			let lastDataMessage;

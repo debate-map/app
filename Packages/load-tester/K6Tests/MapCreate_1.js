@@ -4,7 +4,7 @@ import {GetAccessPolicies, GetMaps} from "./@Shared/DMRead.js";
 import {RunCommand_AddMap, RunCommand_AddX} from "./@Shared/DMWrite.js";
 
 export const options = {
-	iterations: 2,
+	iterations: 1,
 	//maxDuration: '30s',
 	//vus: 10,
 	/*stages: [
@@ -24,13 +24,13 @@ export default async function() {
 	}
 }
 async function Main() {
-	const link = new ServerLink({});
-	await link.OnReady();
+	const link = new ServerLink({useWS: false});
+	//await link.OnReady();
 
-	const policies = await GetAccessPolicies(link);
+	const policies = GetAccessPolicies(link);
 	const policyID = policies.find(a=>a.name == "Public, ungoverned (standard)").id;
 
-	const id = await RunCommand_AddMap(link, {
+	const id = RunCommand_AddMap(link, {
 		name: `K6_Depth0_${new Date().toLocaleString("sv")}`,
 		accessPolicy: policyID,
 		defaultExpandDepth: 2,

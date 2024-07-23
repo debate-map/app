@@ -19,6 +19,6 @@ export default function() {
 async function Main() {
 	const link = new ServerLink({});
 	await link.OnReady();
-	const maps = await GetMaps(link);
+	const maps = GetMaps(link);
 	console.log("Maps:", maps);
 }
