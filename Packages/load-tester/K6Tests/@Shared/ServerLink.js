@@ -1,4 +1,5 @@
 import {WebSocket} from "k6/experimental/websockets";
+import http from "k6/http";
 import {url, jwt, GenReqID} from "./General.js";
 
 const lastAutoOperationNumber = 0;
@@ -8,6 +9,7 @@ export class ServerLink {
 		Object.assign(this, {
 			url,
 			jwt,
+			isReady: false,
 		}, data);
 		if (onopen) this.onopen = onopen;
 		this.CreateWebsocket();
@@ -15,12 +17,20 @@ export class ServerLink {
 
 	url;
 	jwt;
+	isReady;
 	onopen;
 	/** @type {WebSocket} */
 	ws;
 
+	async OnReady() {
+		return new Promise(resolve=>{
+			if (this.isReady) resolve();
+			else this.ws.addEventListener("open", resolve);
+		});
+	}
+
 	CreateWebsocket() {
-		const ws = this.ws = new WebSocket(url, ["graphql-transport-ws"], {
+		const ws = this.ws = new WebSocket(url.replace("http", "ws"), ["graphql-transport-ws"], {
 			//headers: GetHeaders(),
 		});
 		ws.onopen = ()=>{
@@ -32,8 +42,9 @@ export class ServerLink {
 				},
 			}));
 			//console.log("Websocket message connection_init message.");
+			this.isReady = true;
 
-			this.onopen();
+			if (this.onopen) this.onopen();
 		};
 		ws.onmessage = data=>{
 			//console.log(`a message received: ${JSON.stringify(data)}`);
@@ -47,15 +58,55 @@ export class ServerLink {
 		return ws;
 	}
 
-	async Query(payload) {
-		return await this.QueryOrSubscribeTemp(payload, "query");
+	async Query(body) {
+		const response = http.post(this.url, JSON.stringify(body), {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${this.jwt}`,
+			},
+		});
+		const responseStr = response.body.toString();
+		if (!responseStr.startsWith("[") && !responseStr.startsWith("{")) {
+			throw new Error(`Response is not JSON: ${responseStr}`);
+		}
+		const json = response.json();
+		if (json.errors) {
+			throw new Error(`Errors in response: ${JSON.stringify(json.errors)}`);
+		}
+		return json.data;
 	}
+
+	async Mutate(body) {
+		/*const reqID = GenReqID();
+		const body = {
+			id: reqID,
+			type: "mutate",
+			payload,
+		};*/
+		const response = http.post(this.url, JSON.stringify(body), {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${this.jwt}`,
+			},
+		});
+		const responseStr = response.body.toString();
+		if (!responseStr.startsWith("[") && !responseStr.startsWith("{")) {
+			throw new Error(`Response is not JSON: ${responseStr}`);
+		}
+		const json = response.json();
+		if (json.errors) {
+			throw new Error(`Errors in response: ${JSON.stringify(json.errors)}`);
+		}
+		return json.data;
+	}
+
 	async SubscribeTemp(payload) {
 		return await this.QueryOrSubscribeTemp(payload, "subscribe");
 	}
 	/*async Subscribe(payload) {
 		return await this.QueryOrSubscribe(payload, "subscribe");
 	}*/
+
 	async QueryOrSubscribeTemp(payload, type) {
 		//payload.operationName = payload.operationName || `K6AutoOp_${++lastAutoOperationNumber}`;
 		return new Promise((resolve, reject)=>{

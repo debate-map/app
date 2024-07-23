@@ -16,9 +16,9 @@ export const options = mainScenarioOptions;
 export default function() {
 	Main();
 }
-function Main() {
-	const link = new ServerLink({}, async()=>{
-		const maps = await GetMaps(link);
-		console.log("Maps:", maps);
-	});
+async function Main() {
+	const link = new ServerLink({});
+	await link.OnReady();
+	const maps = await GetMaps(link);
+	console.log("Maps:", maps);
 }
