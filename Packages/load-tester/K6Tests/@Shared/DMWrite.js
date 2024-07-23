@@ -3,14 +3,14 @@ import {ServerLink} from "./ServerLink.js";
 // standardized add/update/delete commands
 // ==========
 
-export function RunCommand_AddX(/** @type {ServerLink} */ link, typeName, entryFieldName, entry) {
+export async function RunCommand_AddX(/** @type {ServerLink} */ link, typeName, entryFieldName, entry) {
 	const func = CreateFunc_RunCommand_AddX(typeName, entryFieldName);
-	return func(link, entry);
+	return await func(link, entry);
 }
 function CreateFunc_RunCommand_AddX(typeName, entryFieldName) {
-	return function(/** @type {ServerLink} */ link, entry) {
+	return async function(/** @type {ServerLink} */ link, entry) {
 		const inputFields = {[entryFieldName]: entry};
-		const resultData = link.Mutate({
+		const resultData = await link.Mutate({
 			query: `
 				mutation($input: Add${typeName}Input!) {
 					add${typeName}(input: $input) { id }
@@ -21,13 +21,13 @@ function CreateFunc_RunCommand_AddX(typeName, entryFieldName) {
 		return resultData[`add${typeName}`];
 	};
 }
-export function RunCommand_DeleteX(/** @type {ServerLink} */ link, typeName, entry) {
+export async function RunCommand_DeleteX(/** @type {ServerLink} */ link, typeName, entry) {
 	const func = CreateFunc_RunCommand_DeleteX(typeName);
-	return func(link, entry);
+	return await func(link, entry);
 }
 function CreateFunc_RunCommand_DeleteX(typeName) {
-	return function(/** @type {ServerLink} */ link, /** @type {id: string} */ inputFields) {
-		const resultData = link.Mutate({
+	return async function(/** @type {ServerLink} */ link, /** @type {id: string} */ inputFields) {
+		const resultData = await link.Mutate({
 			query: `
 				mutation($input: Delete${typeName}Input!) {
 					delete${typeName}(input: $input) { __typename }
@@ -38,13 +38,13 @@ function CreateFunc_RunCommand_DeleteX(typeName) {
 		return resultData[`delete${typeName}`];
 	};
 }
-export function RunCommand_UpdateX(/** @type {ServerLink} */ link, typeName, entryFieldName, entry) {
+export async function RunCommand_UpdateX(/** @type {ServerLink} */ link, typeName, entryFieldName, entry) {
 	const func = CreateFunc_RunCommand_UpdateX(typeName, entryFieldName);
-	return func(link, entry);
+	return await func(link, entry);
 }
 function CreateFunc_RunCommand_UpdateX(typeName) {
-	return function(/** @type {ServerLink} */ link, /** @type {id: string, updates: Partial<T>} */ inputFields) {
-		const resultData = link.Mutate({
+	return async function(/** @type {ServerLink} */ link, /** @type {id: string, updates: Partial<T>} */ inputFields) {
+		const resultData = await link.Mutate({
 			query: `
 				mutation($input: Update${typeName}Input!) {
 					update${typeName}(input: $input) { __typename }
@@ -98,8 +98,8 @@ export const RunCommand_AddMap = CreateFunc_RunCommand_AddX("Map", "map");
 /** @typedef {import("dm_client/Source/Utils/DB/Command.js").AddChildNodeInput} AddChildNodeInput */
 
 /** @returns {Promise<{nodeID: string, revisionID: string, linkID: string, doneAt: number}>} */
-export function RunCommand_AddChildNode(/** @type {ServerLink} */ link, /** @type {AddChildNodeInput} */ inputFields) {
-	const resultData = link.Mutate({
+export async function RunCommand_AddChildNode(/** @type {ServerLink} */ link, /** @type {AddChildNodeInput} */ inputFields) {
+	const resultData = await link.Mutate({
 		query: `mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,
 		variables: {input: inputFields},
 	});

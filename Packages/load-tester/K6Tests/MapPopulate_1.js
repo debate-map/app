@@ -14,16 +14,16 @@ function Main() {
 	PopulateMap("PJl7qjF5TBaI-zaLOatK0g", 3, 8);
 }
 
-function PopulateMap(mapID, depthToEnsure, childrenPerLayer) {
+async function PopulateMap(mapID, depthToEnsure, childrenPerLayer) {
 	const link = new ServerLink({useWS: false});
 	//await link.OnReady();
 
-	const policies = GetAccessPolicies(link);
+	const policies = await GetAccessPolicies(link);
 	const policyID = policies.find(a=>a.name == "Public, ungoverned (standard)").id;
 
-	const map = GetMaps(link).find(a=>a.id == mapID);
-	const rootNode = GetNode(link, map.rootNode);
-	let lastNodeLayer = [{path: "0", node: rootNode}];
+	const map = (await GetMaps(link)).find(a=>a.id == mapID);
+	const rootNode = await GetNode(link, map.rootNode);
+	let currentNodeLayer = [{path: "0", node: rootNode}];
 
 	let nodesCreated = 0;
 
@@ -31,9 +31,9 @@ function PopulateMap(mapID, depthToEnsure, childrenPerLayer) {
 	for (let depth = 0; depth < depthToEnsure; depth++) {
 		/** @type {{path: string, node: import("dm_common").NodeL1}} */
 		const nextNodeLayer = [];
-		for (const {path, node} of lastNodeLayer) {
-			const childLinks = GetNodeLinks(link, node.id).sort((a, b)=>a.orderKey.localeCompare(b.orderKey));
-			const children = childLinks.map(a=>GetNode(link, a.child));
+		for (const {path, node} of currentNodeLayer) {
+			const childLinks = (await GetNodeLinks(link, node.id)).sort((a, b)=>a.orderKey.localeCompare(b.orderKey));
+			const children = await Promise.all(childLinks.map(a=>GetNode(link, a.child)));
 			for (const [i, child] of children.entries()) {
 				nextNodeLayer.push({path: `${path}.${i}`, node: child});
 			}
@@ -45,7 +45,7 @@ function PopulateMap(mapID, depthToEnsure, childrenPerLayer) {
 					const orderKey = `a${orderKey_number.toString().padStart(2, "0")}`;
 
 					const childPath = `${path}.${fullI}`;
-					const result = RunCommand_AddChildNode(link, {
+					const result = await RunCommand_AddChildNode(link, {
 						mapID,
 						parentID: node.id,
 						link: {
@@ -67,12 +67,12 @@ function PopulateMap(mapID, depthToEnsure, childrenPerLayer) {
 							},
 						},
 					});
-					const childNode = GetNode(link, result.nodeID);
+					const childNode = await GetNode(link, result.nodeID);
 					nextNodeLayer.push({path: childPath, node: childNode});
 					nodesCreated++;
 				}
 			}
-			lastNodeLayer = nextNodeLayer;
+			currentNodeLayer = nextNodeLayer;
 		}
 	}
 	console.log("Nodes created:", nodesCreated);

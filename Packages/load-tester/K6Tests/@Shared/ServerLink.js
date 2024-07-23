@@ -60,6 +60,17 @@ export class ServerLink {
 		return ws;
 	}
 
+	async QueryOrSubOnce(body, key, resultIsArray) {
+		if (this.useWS) {
+			const result = await this.SubscribeTemp(body);
+			//console.log("Result:", result);
+			//return resultIsArray ? result[key].nodes : result[key];
+			return result[key];
+		}
+		const result = this.Query(body);
+		return result[key];
+	}
+
 	Query(body) {
 		const response = http.post(this.url, JSON.stringify(body), {
 			headers: {
@@ -103,14 +114,15 @@ export class ServerLink {
 	}
 
 	SubscribeTemp(payload) {
-		return this.Subscribe_Base(payload);
+		return this.Subscribe_Base(payload, true);
+		//return this.Subscribe_Base(payload, false); // for temp-testing
 	}
 	/*Subscribe(payload) {
 		return this.Subscribe_Base(payload, false);
 	}*/
 
 	// todo: add param for whether to unsubscribe after first response message
-	Subscribe_Base(payload) {
+	Subscribe_Base(payload, autoCloseSubscription) {
 		//payload.operationName = payload.operationName || `K6AutoOp_${++lastAutoOperationNumber}`;
 		return new Promise((resolve, reject)=>{
 			const reqID = GenReqID();
@@ -131,12 +143,17 @@ export class ServerLink {
 				} else if (msg.type == "next") {
 					//console.log("Next:", msg);
 					lastDataMessage = msg;
-					if (type == "subscribe") {
+
+					if (autoCloseSubscription) {
 						this.ws.send(JSON.stringify({type: "stop", id: reqID}));
+					} else {
+						resolve(msg.payload.data);
 					}
 				} else if (msg.type == "complete") {
 					//console.log("Complete:", msg);
-					resolve(lastDataMessage.payload.data);
+					if (autoCloseSubscription) {
+						resolve(lastDataMessage.payload.data);
+					}
 				}
 			});
 		});

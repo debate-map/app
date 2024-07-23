@@ -27,10 +27,10 @@ async function Main() {
 	const link = new ServerLink({useWS: false});
 	//await link.OnReady();
 
-	const policies = GetAccessPolicies(link);
+	const policies = await GetAccessPolicies(link);
 	const policyID = policies.find(a=>a.name == "Public, ungoverned (standard)").id;
 
-	const id = RunCommand_AddMap(link, {
+	const id = await RunCommand_AddMap(link, {
 		name: `K6_Depth0_${new Date().toLocaleString("sv")}`,
 		accessPolicy: policyID,
 		defaultExpandDepth: 2,

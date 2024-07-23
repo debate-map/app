@@ -1,47 +1,47 @@
 import {ServerLink} from "./ServerLink.js";
 
-/** @returns {import("dm_common").AccessPolicy[]} */
-export function GetAccessPolicies(/** @type {ServerLink} */ link) {
-	const result = link.Query({
+/** @returns {Promise<import("dm_common").AccessPolicy[]>} */
+export async function GetAccessPolicies(/** @type {ServerLink} */ link) {
+	return await link.QueryOrSubOnce({
 		query: `query {
 			accessPolicies { id name }
 		}`,
-	});
-	console.log("Policies:", result);
-	return result.accessPolicies;
+	}, "accessPolicies", true);
 }
 
-/** @returns {import("dm_common").Map[]} */
-export function GetMaps(/** @type {ServerLink} */ link) {
-	const result = link.Query({
+/** @returns {Promise<import("dm_common").Map[]>} */
+export async function GetMaps(/** @type {ServerLink} */ link) {
+	return await link.QueryOrSubOnce({
 		query: `query {
 			maps { id creator createdAt name rootNode }
 		}`,
-	});
-	return result.maps;
-	/*const result = await link.SubscribeTemp({
-		query: `subscription {
-			maps { nodes { id creator createdAt name rootNode } }
-		}`,
-	});
-	return result.maps.nodes;*/
+	}, "maps", true);
 }
 
-/** @returns {import("dm_common").NodeL1} */
-export function GetNode(/** @type {ServerLink} */ link, /** @type {string} */ nodeID) {
+/** @returns {Promise<import("dm_common").Map>} */
+export async function GetMap(/** @type {ServerLink} */ link, id) {
+	return await link.QueryOrSubOnce({
+		query: `query($id: ID!) {
+			map(id: $id) { id creator createdAt name rootNode }
+		}`,
+		variables: {id},
+	}, "map");
+}
+
+/** @returns {Promise<import("dm_common").NodeL1>} */
+export async function GetNode(/** @type {ServerLink} */ link, /** @type {string} */ nodeID) {
 	if (!nodeID) throw new Error("NodeID is null/undefined.");
-	const result = link.Query({
+	return await link.QueryOrSubOnce({
 		query: `query($nodeID: ID!) {
 			node(id: $nodeID) { id type }
 		}`,
 		variables: {nodeID},
-	});
-	return result.node;
+	}, "node");
 }
 
-/** @returns {import("dm_common").NodeLink[]} */
-export function GetNodeLinks(/** @type {ServerLink} */ link, /** @type {string} */ parentID) {
-	const result = link.Query({
+/** @returns {Promise<import("dm_common").NodeLink[]>} */
+export async function GetNodeLinks(/** @type {ServerLink} */ link, /** @type {string} */ parentID) {
+	return await link.QueryOrSubOnce({
 		query: `query($parentID: ID!) {
 			nodeLinks(filter: {
 				parent: {equalTo: $parentID},
@@ -51,22 +51,21 @@ export function GetNodeLinks(/** @type {ServerLink} */ link, /** @type {string} 
 			}
 		}`,
 		variables: {parentID},
-	});
-	return result.nodeLinks;
+	}, "nodeLinks", true);
 }
 
-/** @returns {import("dm_common").Node[]} */
-export function GetNodeChildren(/** @type {ServerLink} */ link, /** @type {string} */ parentID) {
-	const links = GetNodeLinks(link, parentID);
-	return GetNodesForLinks(link, links);
+/** @returns {Promise<import("dm_common").Node[]>} */
+export async function GetNodeChildren(/** @type {ServerLink} */ link, /** @type {string} */ parentID) {
+	const links = await GetNodeLinks(link, parentID);
+	return await GetNodesForLinks(link, links);
 }
 
-/** @returns {import("dm_common").Node[]} */
-export function GetNodesForLinks(/** @type {ServerLink} */ link, links) {
+/** @returns {Promise<import("dm_common").Node[]>} */
+export async function GetNodesForLinks(/** @type {ServerLink} */ link, links) {
 	/** @type {import("dm_common").Node[]} */
 	const nodes = [];
 	for (const nodeLink of links) {
-		const node = GetNode(link, nodeLink.child);
+		const node = await GetNode(link, nodeLink.child);
 		nodes.push(node);
 	}
 	return nodes;
