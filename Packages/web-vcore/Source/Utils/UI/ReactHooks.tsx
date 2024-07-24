@@ -1,6 +1,6 @@
 import {UseState, ShallowEquals} from "react-vextensions";
 import {VRect, ToJSON, E} from "js-vextensions";
-import {useRef, useLayoutEffect, MutableRefObject, useState, useCallback, Component, useEffect} from "react";
+import React, {useRef, useLayoutEffect, MutableRefObject, useState, useCallback, Component, useEffect} from "react";
 import ReactDOM from "react-dom";
 import {GetSize, GetSize_Method, Size, SizeComp} from "./Sizes.js";
 
@@ -79,4 +79,36 @@ export function UseDocumentEventListener<K extends keyof DocumentEventMap>(event
 		document.addEventListener(eventName, func, listenerOptions);
 		return ()=>document.removeEventListener(eventName, func, listenerOptions);
 	}, deps);
+}
+
+// If we need more control over the options and such
+// we can use  https://github.com/ZeeCoder/use-resize-observer as reference, it does the same thing
+// using this library directly caused "ResizeObserver loop completed with undelivered notifications." error
+export function useResizeObserver() {
+	const [ref, setRef] = UseState<HTMLElement|n>(null);
+	const [width, setWidth] = UseState(-1);
+	const [height, setHeight] = UseState(-1);
+
+	const observer = new ResizeObserver(entries=>{
+		for (const entry of entries) {
+			const {width, height} = entry.contentRect;
+			setWidth(width);
+			setHeight(height);
+		}
+	});
+
+	React.useEffect(()=>{
+		if (ref) {
+			observer.observe(ref);
+		}
+		return ()=>observer.disconnect();
+	}, [ref]);
+
+	const refCb:React.RefCallback<HTMLElement> = React.useCallback(node=>{
+		if (node) {
+			setRef(node);
+		}
+	}, []);
+
+	return {ref: refCb, width, height};
 }

@@ -29,7 +29,6 @@
     "react-list": "0.8.11",
     "stream-browserify": "^3.0.0",
     "ua-parser-js": "^0.7.12",
-    "updeep": "^1.0.0",
-    "use-resize-observer": "^8.0.0"
+    "updeep": "^1.0.0"
   }
 }

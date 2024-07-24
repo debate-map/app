@@ -5654,7 +5654,6 @@ __metadata:
     ts-node-dev: "npm:1.1.6"
     ua-parser-js: "npm:^0.7.12"
     updeep: "npm:^1.0.0"
-    use-resize-observer: "npm:^8.0.0"
   languageName: unknown
   linkType: soft
 
@@ -5699,7 +5698,6 @@ __metadata:
     ts-node-dev: "npm:1.1.6"
     ua-parser-js: "npm:^0.7.12"
     updeep: "npm:^1.0.0"
-    use-resize-observer: "npm:^8.0.0"
   languageName: unknown
   linkType: soft
 
@@ -12570,7 +12568,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-embedded@npm:^1.77.8":
+"sass-embedded@npm:1.77.8":
   version: 1.77.8
   resolution: "sass-embedded@npm:1.77.8"
   dependencies:
@@ -15190,7 +15188,7 @@ __metadata:
     remarkable: "npm:^2.0.1"
     remarkable-react: "npm:^1.4.3"
     sass: "npm:^1.56.1"
-    sass-embedded: "npm:^1.77.8"
+    sass-embedded: "npm:1.77.8"
     sass-loader: "npm:14.2.1"
     source-map-loader: "npm:^3.0.0"
     subscriptions-transport-ws: "npm:^0.9.19"

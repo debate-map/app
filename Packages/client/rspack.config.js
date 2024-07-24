@@ -52,7 +52,7 @@ const config = {
     ],
     extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".mjs"],
     alias: {
-      "wavesurfer.js": [path.resolve(__dirname, "../../node_modules/wavesurfer.js/dist/wavesurfer.min.js")],
+      "wavesurfer.js": [path.resolve(__dirname, "../../node_modules/wavesurfer.js/dist/wavesurfer.js")],
     },
     extensionAlias: {
       ".js": [".ts", ".js", ".tsx", ".jsx"],

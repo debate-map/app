@@ -45,7 +45,7 @@ const config = {
     },
   },
   target: "web",
-  devtool: "source-map",
+  devtool: "cheap-source-map",
   resolve: {
     roots: [
     	path.resolve(__dirname, "./Resources"),

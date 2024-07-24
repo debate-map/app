@@ -1,12 +1,11 @@
 import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
-import {ES, Link, Observer, PageContainer, TextPlus} from "web-vcore";
+import {ES, Link, Observer, PageContainer, TextPlus, useResizeObserver} from "web-vcore";
 import {useEffect, useMemo, useState} from "react";
 import {ScrollView} from "react-vscrollview";
 import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeL2, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
-import {Column, Row} from "react-vcomponents";
+import {Column, Row, Button} from "react-vcomponents";
 import Moment from "moment";
-import useResizeObserver from "use-resize-observer";
-import {Button} from "react-vcomponents";
+
 import {ShowMessageBox} from "react-vmessagebox";
 import {E} from "js-vextensions";
 import {ColumnData, TableData, TableHeader} from "../@Shared/TableHeader/TableHeader.js";
@@ -59,24 +58,24 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
 
 		const subscriptions = GetSubscriptions(userId);
 
-		const onTableChange = (newTableData: TableData) => {
+		const onTableChange = (newTableData: TableData)=>{
 			this.SetState({tableData: newTableData});
 		};
 
-		const sortedAndFilteredSubscriptions = useMemo(() => {
+		const sortedAndFilteredSubscriptions = useMemo(()=>{
 			let output = subscriptions;
 			if (tableData.columnSort) {
 				switch (tableData.columnSort) {
 					case "level": {
-						output = subscriptions.OrderByDescending(a => [a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a => a).length);
+						output = subscriptions.OrderByDescending(a=>[a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length);
 						break;
 					}
 					case "createdAt": {
-						output = subscriptions.OrderByDescending(a => a.createdAt);
+						output = subscriptions.OrderByDescending(a=>a.createdAt);
 						break;
 					}
 					case "updatedAt": {
-						output = subscriptions.OrderByDescending(a => a.updatedAt);
+						output = subscriptions.OrderByDescending(a=>a.updatedAt);
 						break;
 					}
 					default: {
@@ -100,7 +99,7 @@ export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
 					{sortedAndFilteredSubscriptions.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No Subscriptions</div>}
-					{sortedAndFilteredSubscriptions.map((subscription, index) => {
+					{sortedAndFilteredSubscriptions.map((subscription, index)=>{
 						return <SubscriptionRow key={subscription.id} index={index} last={index == sortedAndFilteredSubscriptions.length - 1} subscription={subscription} />;
 					})}
 				</ScrollView>
@@ -117,14 +116,14 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 		const level = GetSubscriptionLevel(subscription);
 
 		const levelInfo = [[subscription.addChildNode, "Add Child Node"],
-		[subscription.addNodeLink, "Add Node Link"],
-		[subscription.addNodeRevision, "Add Node Revision"],
-		[subscription.deleteNode, "Delete Node"],
-		[subscription.deleteNodeLink, "Delete Node Link"],
-		[subscription.setNodeRating, "Set Node Rating"],
-		].map((entry, index) => {
+			[subscription.addNodeLink, "Add Node Link"],
+			[subscription.addNodeRevision, "Add Node Revision"],
+			[subscription.deleteNode, "Delete Node"],
+			[subscription.deleteNodeLink, "Delete Node Link"],
+			[subscription.setNodeRating, "Set Node Rating"],
+		].map((entry, index)=>{
 			return entry[0] ? entry[1] : null;
-		}).filter(a => a).join("\n");
+		}).filter(a=>a).join("\n");
 
 		let levelText = "";
 		switch (level) {
@@ -164,11 +163,11 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 					</span>
 					<span style={{flex: columns[2].width}}>{Moment(subscription.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
 					<span style={{flex: columns[3].width}}>{Moment(subscription.updatedAt).format("YYYY-MM-DD HH:mm:ss")}</span>
-					<span onClick={() => {
+					<span onClick={()=>{
 						ShowMessageBox({
 							title: `Delete node subscription?`, cancelButton: true,
 							message: `Delete node subscription?`,
-							onOK: () => {
+							onOK: ()=>{
 								RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
 							},
 						});

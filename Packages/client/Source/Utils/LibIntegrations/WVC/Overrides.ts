@@ -16,8 +16,5 @@ VWAF_OverrideExport('OnAccessPath', (path: string)=> {
 // add the definitions for overrides here
 // ==========
 
-declare module "web-vcore" {
-}
-
 // add the implementations/js-code for overrides here
 // ==========

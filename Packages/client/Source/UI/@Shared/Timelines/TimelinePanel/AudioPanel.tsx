@@ -2,9 +2,8 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
 import {StartUpload, Range, E, GetPercentFromXToY, Lerp, SleepAsync, StartDownload, Timer, WaitXThenRun} from "js-vextensions";
-import {Observer, RunInAction, RunInAction_Set, TextPlus, UseSize} from "web-vcore";
+import {Observer, RunInAction, RunInAction_Set, TextPlus, useResizeObserver, UseSize} from "web-vcore";
 import {useEffect, useMemo, useState} from "react";
-import useResizeObserver from "use-resize-observer";
 
 import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";

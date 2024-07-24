@@ -2,17 +2,14 @@ import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun,
 import React from "react";
 import {store} from "Store";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox";
-import useResizeObserver from "use-resize-observer";
 import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
-import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus, LogWarning} from "web-vcore";
-import {Assert, ModifyString, SleepAsync} from "js-vextensions";
-import {Command, GetAsync, RunInAction, UUID} from "mobx-graphlink";
+import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus, LogWarning, useResizeObserver} from "web-vcore";
+import {Assert} from "js-vextensions";
 import moment from "moment";
 import {Button, CheckBox, Column, Pre, Row, Text} from "react-vcomponents";
 import {BaseComponentPlus, UseState} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {gql, useSubscription} from "@apollo/client";
 import {GetOpenMapID} from "../../Store/main.js";
 import {FindPathsFromMapRootsToX, JumpToNode, MapPathResult} from "../@Shared/NavBar/SearchPanel.js";
 
@@ -47,11 +44,6 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 		);
 	}
 }
-
-/*const commandTypesToShow = [
-	AddChildNode,
-	AddNodeRevision,
-] as Array<new(..._)=>Command<any>>;*/
 
 @Observer
 export class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: number, last: boolean, panel: boolean}, {}) {
@@ -146,7 +138,9 @@ export class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, inde
 		};
 
 		return (
-			<Column ref={a=>rootRef(a?.DOM_HTML ?? null)}>
+			<Column
+			ref={a=>rootRef(a?.DOM_HTML ?? null)}
+			>
 				<Row mt={index > 0 ? 10 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
 					<Column sel ml={5} mr={5} p={5} center style={{justifyContent: "center"}}>
 						<Pre>{moment(run.runTime).format("YYYY-MM-DD")}</Pre>
