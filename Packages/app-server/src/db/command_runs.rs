@@ -89,7 +89,7 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
 #[derive(Default)] pub struct SubscriptionShard_CommandRun;
 #[Subscription] impl SubscriptionShard_CommandRun {
 	async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
+		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter, None).await
 	}
 	async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<CommandRun>(ctx, "commandRuns", id).await

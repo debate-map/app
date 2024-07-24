@@ -88,7 +88,7 @@ impl GQLSet<Media> for GQLSet_Media {
 #[derive(Default)] pub struct SubscriptionShard_Media;
 #[Subscription] impl SubscriptionShard_Media {
 	async fn medias<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Media, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Media, GQLSet_Media>(ctx, "medias", filter).await
+		handle_generic_gql_collection_subscription::<Media, GQLSet_Media>(ctx, "medias", filter, None).await
 	}
 	async fn media<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Media>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Media>(ctx, "medias", id).await

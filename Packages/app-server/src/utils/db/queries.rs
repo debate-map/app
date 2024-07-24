@@ -1,11 +1,6 @@
 use deadpool_postgres::{Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use metrics::{counter, histogram};
-use rust_shared::async_graphql::{
-	async_stream::{self, stream},
-	parser::types::Field,
-	Object, OutputType, Positioned, Result,
-};
 use rust_shared::flume::Sender;
 use rust_shared::serde::{de::DeserializeOwned, Deserialize, Serialize};
 use rust_shared::serde_json::{json, Map};
@@ -15,6 +10,14 @@ use rust_shared::{
 	anyhow::{bail, Context, Error},
 	async_graphql, new_mtx, serde_json, to_anyhow,
 	utils::{mtx::mtx::Mtx, type_aliases::RowData},
+};
+use rust_shared::{
+	async_graphql::{
+		async_stream::{self, stream},
+		parser::types::Field,
+		Object, OutputType, Positioned, Result,
+	},
+	utils::general_::extensions::ToOwnedV,
 };
 use std::{
 	any::TypeId,
@@ -78,7 +81,7 @@ where
 
 	mtx.section("2:sort and convert");
 	// sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see live_queries.rs)
-	rows.sort_by_key(|a| a.get::<&str, String>("id"));
+	rows.sort_by_key(|a| a.get::<&str, String>(&"id".o())); // &"...".o() is temp-fix for rust-analyzer bug
 
 	let entries_as_type: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
 	let entries: Vec<RowData> = entries_as_type

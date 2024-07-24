@@ -91,7 +91,7 @@ impl GQLSet<User> for GQLSet_User {
 #[derive(Default)] pub struct SubscriptionShard_User;
 #[Subscription] impl SubscriptionShard_User {
 	async fn users<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter).await
+		handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter, None).await
 	}
 	async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<User>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<User>(ctx, "users", id).await

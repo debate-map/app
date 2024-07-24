@@ -112,7 +112,7 @@ impl GQLSet<Term> for GQLSet_Term {
 #[derive(Default)] pub struct SubscriptionShard_Term;
 #[Subscription] impl SubscriptionShard_Term {
 	async fn terms<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Term, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Term, GQLSet_Term>(ctx, "terms", filter).await
+		handle_generic_gql_collection_subscription::<Term, GQLSet_Term>(ctx, "terms", filter, None).await
 	}
 	async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Term>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Term>(ctx, "terms", id).await

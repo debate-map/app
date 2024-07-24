@@ -67,7 +67,7 @@ impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
 #[derive(Default)] pub struct SubscriptionShard_NodeEdit;
 #[Subscription] impl SubscriptionShard_NodeEdit {
 	async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
+		handle_generic_gql_collection_subscription::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter, None).await
 	}
 	async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNodeEdit>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<MapNodeEdit>(ctx, "mapNodeEdits", id).await

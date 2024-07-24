@@ -56,7 +56,7 @@ impl GQLSet<UserInfo> for GQLSet_UserInfo {
 #[Subscription] impl SubscriptionShard_UserInfo {
 	#[graphql(name = "feedback_userInfos")]
 	async fn feedback_userInfos<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserInfo, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter).await
+		handle_generic_gql_collection_subscription::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter, None).await
 	}
 	#[graphql(name = "feedback_userInfo")]
 	async fn feedback_userInfo<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserInfo>, SubError>> + 'a {

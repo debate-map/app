@@ -97,7 +97,7 @@ impl GQLSet<Timeline> for GQLSet_Timeline {
 #[derive(Default)] pub struct SubscriptionShard_Timeline;
 #[Subscription] impl SubscriptionShard_Timeline {
 	async fn timelines<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Timeline, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter).await
+		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter, None).await
 	}
 	async fn timeline<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Timeline>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Timeline>(ctx, "timelines", id).await

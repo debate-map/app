@@ -56,7 +56,7 @@ impl GQLSet<GlobalData> for GQLSet_GlobalData {
 #[derive(Default)] pub struct SubscriptionShard_GlobalData;
 #[Subscription] impl SubscriptionShard_GlobalData {
 	async fn globalData<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_GlobalData, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter).await
+		handle_generic_gql_collection_subscription::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter, None).await
 	}
 	async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<GlobalData>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<GlobalData>(ctx, "globalData", id).await

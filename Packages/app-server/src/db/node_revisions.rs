@@ -138,7 +138,7 @@ impl GQLSet<NodeRevision> for GQLSet_NodeRevision {
 #[derive(Default)] pub struct SubscriptionShard_NodeRevision;
 #[Subscription] impl SubscriptionShard_NodeRevision {
 	async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRevision, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter).await
+		handle_generic_gql_collection_subscription::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter, None).await
 	}
 	async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRevision>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeRevision>(ctx, "nodeRevisions", id).await

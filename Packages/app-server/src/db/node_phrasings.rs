@@ -144,7 +144,7 @@ impl GQLSet<NodePhrasing> for GQLSet_NodePhrasing {
 #[derive(Default)] pub struct SubscriptionShard_NodePhrasing;
 #[Subscription] impl SubscriptionShard_NodePhrasing {
 	async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodePhrasing, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter).await
+		handle_generic_gql_collection_subscription::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter, None).await
 	}
 	async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodePhrasing>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodePhrasing>(ctx, "nodePhrasings", id).await
