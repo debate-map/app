@@ -152,6 +152,7 @@ export class ServerLink {
 				} else if (msg.type == "complete") {
 					//console.log("Complete:", msg);
 					if (autoCloseSubscription) {
+						//this.ws.removeEventListener("message", listener); // commented; func doesn't exist fsr
 						resolve(lastDataMessage.payload.data);
 					}
 				}

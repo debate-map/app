@@ -42,7 +42,8 @@ export const options = {
 };
 
 export default function() {
-	ExploreMap("PJl7qjF5TBaI-zaLOatK0g", 3); // this map has 1+512 nodes
+	//ExploreMap("PJl7qjF5TBaI-zaLOatK0g", 3); // this map has 1+512 nodes
+	ExploreMap("dqMvGN8MSnqxEJHbYF5BPg", 10);
 }
 async function ExploreMap(mapID, depthToExplore) {
 	const link = new ServerLink({useWS: __ENV.USE_SUBSCRIPTION});
