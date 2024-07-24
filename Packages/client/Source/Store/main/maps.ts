@@ -149,6 +149,7 @@ export class ImportSubtreeDialogState {
 	@O showAutoInsertTools = true;
 	@O autoInsert_interval = 1000;
 	//@O hideFoundEntries = false;
+	@O accessPolicyOverride: string|n;
 
 	@O @ignore selectedImportResources = new Set<ImportResource>();
 	@O @ignore selectFromIndex = -1;

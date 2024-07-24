@@ -3,19 +3,8 @@ import {gql} from "web-vcore/nm/@apollo/client";
 import {Assert, NN} from "web-vcore/nm/js-vextensions.js";
 import {ClassKeys, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";
+import {DMSubtreeData} from "../../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
 
-export class SubtreeData_Server {
-	constructor(data?: Partial<SubtreeData_Server>) {
-		Object.assign(this, data);
-	}
-	nodes?: NodeL1[];
-	nodeLinks?: NodeLink[];
-	nodeRevisions?: NodeRevision[];
-	nodePhrasings?: NodePhrasing[];
-	terms?: Term[];
-	medias?: Media[];
-	nodeTags?: NodeTag[];
-}
 export function GetServerSubtreeData_GQLQuery(rootNodeID: string, maxExportDepth: number, includeKeys: SubtreeIncludeKeys) {
 	const Fields = (fields: string[], fieldSubfieldsStrings: {[key: string]: string} = {})=>{
 		if (fields.length == 0) return "__typename";
@@ -51,8 +40,8 @@ export function GetServerSubtreeData_GQLQuery(rootNodeID: string, maxExportDepth
 		medias: data.medias.ToMap(a=>a.id, a=>a),
 	});
 });*/
-export const ConvertLocalSubtreeDataToServerStructure = CreateAccessor((searchInfo: SubtreeData_Local): SubtreeData_Server=>{
-	return new SubtreeData_Server({
+export const ConvertLocalSubtreeDataToServerStructure = CreateAccessor((searchInfo: SubtreeData_Local): DMSubtreeData=>{
+	return new DMSubtreeData({
 		nodes: Array.from(searchInfo.nodes.values()),
 		nodeLinks: Array.from(searchInfo.nodeLinks.values()),
 		nodeRevisions: Array.from(searchInfo.nodeRevisions.values()),

@@ -1,7 +1,7 @@
-import {SubtreeData_Server} from "UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsHelpers";
 import {ClaimForm, GetNodeTitleFromPhrasingAndForm, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeType, Term} from "dm_common";
 import {ClassKeys} from "web-vcore/nm/mobx-graphlink";
 import {SubtreeIncludeKeys} from "../../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsStructs.js";
+import {DMSubtreeData} from "../JSON/DM/DMSubtreeData.js";
 
 export const csv_basic_includeKeys = new SubtreeIncludeKeys({
 	nodes: ClassKeys<NodeL1>("id", "type", "c_currentRevision"),
@@ -27,7 +27,7 @@ export function CSVCell(text: string, escapeQuotesByDoubling = true) {
 	return result;
 }
 
-export function SubtreeDataToString_CSV_Basic(data: SubtreeData_Server, rootNode: NodeL3, maxExportDepth: number) {
+export function SubtreeDataToString_CSV_Basic(data: DMSubtreeData, rootNode: NodeL3, maxExportDepth: number) {
 	// NOTE: If you add new field-accesses in code below, make sure to update the "includeKeys_final" above to include the new fields.
 	function EnhanceNode(path: string, node: NodeL1, link?: NodeLink|n) {
 		const rev = data.nodeRevisions!.find(a=>a.id == node.c_currentRevision)!;

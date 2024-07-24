@@ -94,7 +94,7 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 				<RowLR mt={3} splitAt={splitAt}>
 					<TextPlus info="The access-policy that is used when you give ratings to nodes (unless you manually override the policy during or after creation).">Node ratings:</TextPlus>
 					<PolicyPicker value={userHidden.extras.defaultAccessPolicy_nodeRatings} onChange={val=>{
-						RunCommand_UpdateUserHidden({id: user.id, updates: {extras: {...userHidden.extras, defaultAccessPolicy_nodeRatings: val}}});
+						RunCommand_UpdateUserHidden({id: user.id, updates: {extras: {...userHidden.extras, defaultAccessPolicy_nodeRatings: val!}}});
 					}}>
 						<PolicyPicker_Button enabled={ownProfile} policyID={userHidden.extras.defaultAccessPolicy_nodeRatings} style={{width: "100%"}}/>
 					</PolicyPicker>
@@ -105,7 +105,7 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 
 						In more detail: ${accessPolicyFallbackInfo}
 					`.AsMultiline(0)}>Generic fallback:</TextPlus>
-					<PolicyPicker value={userHidden.lastAccessPolicy} onChange={val=>RunCommand_UpdateUserHidden({id: user.id, updates: {lastAccessPolicy: val}})}>
+					<PolicyPicker value={userHidden.lastAccessPolicy} onChange={val=>RunCommand_UpdateUserHidden({id: user.id, updates: {lastAccessPolicy: val!}})}>
 						<PolicyPicker_Button enabled={ownProfile} policyID={userHidden?.lastAccessPolicy} style={{width: "100%"}}/>
 					</PolicyPicker>
 				</RowLR>

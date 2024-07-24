@@ -195,7 +195,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 									</RowLR>
 									<RowLR mt={5} splitAt={splitAt}>
 										<Pre>Access policy: </Pre>
-										<PolicyPicker value={newRating_accessPolicyID} onChange={val=>Change(newRating_accessPolicyID = val)}>
+										<PolicyPicker value={newRating_accessPolicyID} onChange={val=>Change(newRating_accessPolicyID = val!)}>
 											<PolicyPicker_Button policyID={newRating_accessPolicy?.id} style={{width: "100%"}}/>
 										</PolicyPicker>
 									</RowLR>
