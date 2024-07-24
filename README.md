@@ -53,6 +53,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend): Backend code for `debatemap.app/monitor`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/main/Packages/monitor-backend#design-goals)). \[Rust]
 * [js-common](https://github.com/debate-map/app/tree/main/Packages/js-common): Code shared between JS packages in repo, mainly holding the JS versions of the DB data-structures. \[TypeScript]
 * [web-vcore](https://github.com/debate-map/app/tree/main/Packages/web-vcore): Some common frontend code; shared between various packages. (both in and out of repo) \[TypeScript]
+* [load-tester](https://github.com/debate-map/app/tree/main/Packages/load-tester): Load/stress testing scripts, to run with k6 on a local DM cluster/instance.
 * [deploy](https://github.com/debate-map/app/tree/main/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
 * [rust-shared](https://github.com/debate-map/app/tree/main/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]
 * [rust-macros](https://github.com/debate-map/app/tree/main/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in) \[Rust]
