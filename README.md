@@ -903,12 +903,23 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 <details><summary><b>[pg-dump] Basic backups using pg_dump (type: logical, focus: local-storage)</b></summary>
 
 To create a backup:
-* 1\) Option 1, using basic script:
-	* 1.1\) Run: `npm start backend.makeDBDump` (has vsc-2 tasks)
+* 1\) Option 1, using `GQLBackupHelper.js` script: (recommended)
+	* 1.1\) Run: `node ./Scripts/DBBackups/GQLBackupHelper.js backup`
 	* 1.2\) A backup dump will be created at: `../Others/@Backups/DBDumps_[local/ovh]/XXX.sql`
-* 2\) Option 2, using DBeaver:
-	* 2.1\) Right-click DB in list. (this assumes you already are connected)
-	* 2.2\) Press Tools->Backup, select "app", press Next, set format to "Tar", and press Start.
+* 2\) Option 2, using basic script:
+	* 2.1\) Run: `npm start backend.makeDBDump` (has vsc-2 tasks)
+	* 2.2\) A backup dump will be created at: `../Others/@Backups/DBDumps_[local/ovh]/XXX.sql`
+* 3\) Option 3, using DBeaver:
+	* 3.1\) Right-click DB in list. (this assumes you already are connected)
+	* 3.2\) Press Tools->Backup, select "app", press Next, set format to "Tar" (optional?), and press Start.
+	* Note: If it errors, saying "aborting because of server version mismatch", then update your local postgres to match, OR use option 4.
+* 4\) Option 4, using pgdump binaries:
+	* 4.1\) Download pgclient binaries for major version on server (eg. as seen in DBeaver error in option 3).
+		* 4.1.1\) For Windows: https://www.enterprisedb.com/download-postgresql-binaries
+	* 4.2\) Ensure k8s proxy to the database pod is active. (`npm start backend.[forward/tiltUp]_local`)
+	* 4.3\) Run the following (as matching DBeaver): `./pg_dump.exe --verbose --host=localhost --port=5220 --username=admin --format=p --file PATH_TO_BACKUP_FILE.sql -n "app" debate-map`
+		* 4.3.1\) You'll also need to provide the password for the `admin` user: https://stackoverflow.com/questions/6405127/how-do-i-specify-a-password-to-psql-non-interactively
+			* 4.3.1.1\) On Windows: `$env:PGPASSWORD="my_password"; ...put rest of command above here...`
 
 To restore a backup:
 * 1\) If the `debate-map` database doesn't exist yet, create it:
