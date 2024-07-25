@@ -62,7 +62,6 @@ class HealthStats {
 	available: number;
 	usePercent: number;
 	mountedOn: string;
-
 }
 
 enum HealthStatsPod {
@@ -92,7 +91,8 @@ const useHealthStats = (adminKey: string, pod: HealthStatsPod)=>{
 	);
 	const healthData: HealthStats[] = dataHealth?.healthStats ?? [];
 
-	const storageHealth = healthData.find(a=>a.mountedOn == "/pgdata")
+	const mountedOn_preferred = pod == HealthStatsPod.pg_instance1 ? "/pgdata" : "/pgbackrest/repo1";
+	const storageHealth = healthData.find(a=>a.mountedOn == mountedOn_preferred)
 		// if no "/pgdata" filesystem was found, fallback to finding the stats for whichever filesystem has the most usage
 		// (for some reason, rancher desktop doesn't seem to mount a separate filesystem for the "/pgdata" directory; it must have some other "fake" filesystem implementation for K8s PVCs)
 		?? healthData.OrderByDescending(a=>a.usePercent).FirstOrX()
@@ -201,11 +201,11 @@ class HealthStatsRow extends BaseComponent<{healthStats: ReturnType<typeof useHe
 		const {healthStats, podDisplayName} = this.props;
 		return (
 			<Row>
-					<Text>Persistent Volume Claim ({podDisplayName}): <span style={{
-						marginLeft: 5,
-						color: healthStats.storageHealthColor,
-					}}>{formatBytes(healthStats.storageHealth.used)} / {formatBytes(healthStats.storageHealth.used + healthStats.storageHealth.available)} ({healthStats.storageHealth.usePercent}%)</span></Text>
-				</Row>
+				<Text>Persistent Volume Claim ({podDisplayName}): <span style={{
+					marginLeft: 5,
+					color: healthStats.storageHealthColor,
+				}}>{formatBytes(healthStats.storageHealth.used)} / {formatBytes(healthStats.storageHealth.used + healthStats.storageHealth.available)} ({healthStats.storageHealth.usePercent}%)</span></Text>
+			</Row>
 		);
 	}
 }
