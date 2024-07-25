@@ -12,11 +12,11 @@ export const GetMedia = CreateAccessor((id: string|n)=>{
 export const GetMedias = CreateAccessor((): Media[]=>{
 	return GetDocs({}, a=>a.medias);
 });
-export const GetMediasByURL = CreateAccessor((url: string): Media[]=>{
+export const GetMediasByURL = CreateAccessor((url: string|n): Media[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp("url", "==", url)],
 		params: {filter: {
-			url: {equalTo: url},
+			url: url && {equalTo: url},
 		}},
 	}, a=>a.medias);
 });
