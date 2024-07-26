@@ -53,7 +53,7 @@ export class VReactMarkdown extends BaseComponent
 
 		// allow caller to reset a component's renderer to its default values, by setting it to undefined
 		for (const [key, value] of Object.entries(components_final).filter(a=>a[1] === undefined)) {
-			delete components_final.components[key];
+			delete components_final[key];
 		}
 
 		if (replacements) {
