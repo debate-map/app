@@ -41,6 +41,7 @@ export class VReactMarkdown extends BaseComponent
 			}),
 
 			// disallow images by default (too easy of a means to vandalize; also, can be used to track user IPs)
+			// (if caller wants to enable images, they can do so by setting components.img to undefined, enabling default renderer)
 			img: (props=>{
 				const {src, alt, title, ...rest} = props;
 				//return <img src={src} alt={alt} title={title} {...rest}/>;
@@ -49,6 +50,11 @@ export class VReactMarkdown extends BaseComponent
 
 			...components,
 		} as any;
+
+		// allow caller to reset a component's renderer to its default values, by setting it to undefined
+		for (const [key, value] of Object.entries(components_final).filter(a=>a[1] === undefined)) {
+			delete components_final.components[key];
+		}
 
 		if (replacements) {
 			const patterns = replacements.VKeys().map((regexStr, index)=>({name: `${index}`, regex: new RegExp(regexStr)}));

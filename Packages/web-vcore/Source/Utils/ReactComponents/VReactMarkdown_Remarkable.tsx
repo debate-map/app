@@ -82,6 +82,7 @@ export class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
 				}),
 
 				// disallow images by default (too easy of a means to vandalize; also, can be used to track user IPs)
+				// (if caller wants to enable images, they can do so by setting rendererOptions.components.img to undefined, enabling default renderer)
 				img: (props=>{
 					const {src, alt, title, ...rest} = props;
 					//return <img src={src} alt={alt} title={title} {...rest}/>;
@@ -106,6 +107,11 @@ export class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
 				},*/
 			},
 		};
+
+		// allow caller to reset a component's renderer to its default values, by setting it to undefined
+		for (const [key, value] of Object.entries(rendererOptions_final.components).filter(a=>a[1] === undefined)) {
+			delete rendererOptions_final.components[key];
+		}
 
 		this.markdown.renderer = new RemarkableReactRenderer(rendererOptions_final);
 	}

@@ -145,9 +145,8 @@ export class CommentNodeUI extends BaseComponent<{map: Map | n, addComment: (com
 		}
 	}
 
-	onUpvoteClick = ()=>{ }
-
-	onDownvoteClick = ()=>{ }
+	onUpvoteClick = ()=>{}
+	onDownvoteClick = ()=>{}
 
 	render() {
 		const {node, isRootNode, isLastNode} = this.props;
@@ -194,10 +193,7 @@ export class CommentNodeUI extends BaseComponent<{map: Map | n, addComment: (com
 							</div>
 						</div>
 						<div style={{overflowWrap: "break-word", background: "rgba(255,255,255,.15)", padding: "2px 5px", borderRadius: "5px"}}>
-							<VReactMarkdown_Remarkable source={nodeRevision?.phrasing.text_base!} className="selectable"
-								rendererOptions={{components: {
-									img: null,
-								}}}/>
+							<VReactMarkdown_Remarkable source={nodeRevision?.phrasing.text_base!} className="selectable"/>
 						</div>
 						<ActionButtons disableReply={disableReply} disableDelete={!!commentNodeError(nodel2!, true)} onUpvoteClick={this.onUpvoteClick} onDownvoteClick={this.onDownvoteClick} onToggleReplyClick={this.onReplyClick} onDeleteClick={()=>this.onDeleteClick(node.id)} onEditClick={()=>this.onEditClick(nodeRevision?.phrasing.text_base!)} currentNodeCreator={node.creator}/>
 						{expand && (
@@ -239,6 +235,10 @@ class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvote
 }
 
 export class CommentInput extends BaseComponent<{inputType: "Comment" | "Reply" | "Edit", onSubmit: () => Promise<void>, onCancel: () => void, value: string, onValueChange: (newVal: string) => void}, {}> {
+	ComponentDidMount() {
+		this.textAreaRef?.DOM_HTML?.focus();
+	}
+	textAreaRef: TextArea|n;
 	render() {
 		const {inputType, onSubmit, onCancel, value, onValueChange} = this.props;
 		const placeholder = `Enter your ${inputType.toLowerCase()}`;
@@ -246,11 +246,7 @@ export class CommentInput extends BaseComponent<{inputType: "Comment" | "Reply" 
 		return (
 			<Row mt={8} style={{borderRadius: "5px", border: "1px solid rgba(0,0,0,.3)"}}>
 				<TextArea p={5} instant value={value} onChange={onValueChange} placeholder={placeholder} autoSize={true}
-					ref={c=>{
-						if (c && inputType != "Comment") {
-							c.DOM_HTML.focus();
-						}
-					}}
+					ref={c=>this.textAreaRef = c}
 					style={{outline: "none", borderWidth: 0, borderRadius: "5px 0 0 5px"}}
 					onKeyDownCapture={e=>{
 						if (e.keyCode == keycode.codes.esc) {
