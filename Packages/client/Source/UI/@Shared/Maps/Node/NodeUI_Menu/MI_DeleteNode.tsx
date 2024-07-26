@@ -3,7 +3,7 @@ import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode, NodeType, GetNodeChildren, NodeL2, GetNodeL2} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_DeleteNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -15,12 +15,13 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
 		const nodeText = GetNodeDisplayText(node, path, map);
 
-		//const command = new DeleteNode(E({mapID, nodeID: node.id}));
-		const error = CheckUserCanDeleteNode(MeID(), node);
+		const topLevelCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
+		const nodeError = CheckUserCanDeleteNode(MeID(), node, {childrenToIgnore: topLevelCommentNodes.map(n=>n.id)});
+
 		return (
 			<VMenuItem text="Delete"
 				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
-				enabled={error == null} title={error}
+				enabled={nodeError == null} title={nodeError}
 				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 
