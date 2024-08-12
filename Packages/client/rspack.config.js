@@ -1,10 +1,20 @@
 const rspack = require("@rspack/core");
 const path = require("path");
 
+const ENV_LONG = process.env.NODE_ENV;
+const ENV = ENV_LONG === "production" ? "prod" : "dev";
+
+const QUICK = process.env.QUICK == "true";
+const PROD = ENV == "prod";
+const DEV = ENV == "dev";
+const TEST = ENV == "test";
+
+const OUTPUT_PATH = path.resolve(__dirname, "./Dist");
+
 /** @type {import('@rspack/core').Configuration} */
 const config = {
   name: "client",
-  mode: "development",
+  mode: PROD && !QUICK ? "production" : "development",
   optimization: {
     moduleIds: "named",
     usedExports: false,
@@ -42,7 +52,7 @@ const config = {
     },
   },
   target: "web",
-  devtool: "source-map",
+  devtool: PROD ? "source-map" : "cheap-source-map",
   resolve: {
     roots: [path.resolve(__dirname, "./Resources")],
     modules: [
@@ -147,7 +157,7 @@ const config = {
   },
   output: {
     filename: "[name].js",
-    path: path.resolve(__dirname, "./Dist"),
+    path: OUTPUT_PATH,
   },
   plugins: [
   	new rspack.HtmlRspackPlugin({
@@ -158,19 +168,43 @@ const config = {
   	}),
   	new rspack.ProgressPlugin({}),
   	new rspack.DefinePlugin({
-      "globalThis.ENV": '"dev"',
-      "globalThis.DEV": "true",
-      "globalThis.PROD": "false",
-      "globalThis.TEST": "false",
-      ENV: '"dev"',
-      DEV: "true",
-      PROD: "false",
-      TEST: "false",
-      NODE_ENV: '"development"',
-      "process.env": {NODE_ENV: '"development"'},
-      __DEV__: "true",
-      __PROD__: "false",
-      __TEST__: "false",
+      // all compile-time instances of these fields get replaced with constants
+      "globalThis.ENV": ENV,
+      "globalThis.DEV": DEV,
+      "globalThis.PROD": PROD,
+      "globalThis.TEST": TEST,
+      // in the root project, the `globalThis.` part may be left out
+      ENV,
+      DEV,
+      PROD,
+      TEST,
+
+      // DON'T EVER USE THESE (use ones above instead -- to be consistent); we only include them in case libraries use them (such as redux)
+      // ==========
+
+      NODE_ENV: ENV_LONG ?? undefined,
+      // this version is needed, for "process.env.XXX" refs from libs we don't care about (else runtime error)
+      "process.env.NODE_ENV": ENV_LONG,
+
+      //"process.env.NODE_ENV": ENV_Long)), // edit: why the above, instead of this?
+      ...{
+        __DEV__: DEV,
+        __PROD__: PROD,
+        __TEST__: TEST,
+      },
+  		//"__COVERAGE__": !argv.watch ? S(TEST) : null,
+  		//"__BASENAME__": S(BASENAME),
+  	}),
+  	new rspack.CopyRspackPlugin({
+      patterns: [
+      	{
+          from: path.resolve(__dirname, "./Resources"),
+          to: OUTPUT_PATH,
+          globOptions: {
+            ignore: ["**/index.html"],
+          },
+      	},
+      ],
   	}),
   ],
 };

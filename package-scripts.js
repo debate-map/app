@@ -42,12 +42,18 @@ Object.assign(scripts, {
 		clean: "cd Packages/client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
 		compile: "cd Packages/client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
+
+		compileRS: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} build`,
+
 		build: {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
 			// 2024-03-18: for venryx, "quick" takes 45s, and "non-quick" takes 75s
 			prod: `cross-env NODE_ENV=production npm start client.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
+
+			prodRS: `cross-env NODE_ENV=production "npm start client.clean &&  npm start monitorClient.compileRS"`,
+
 		},
 		//justDeploy: 'ts-node ./Scripts/Build/Deploy',
 		/*justDeploy: {
@@ -81,12 +87,16 @@ Object.assign(scripts, {
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
 		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
+
+		compileRS: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} build`,
 		build: {
 			default: `cross-env-shell "npm start monitorClient.clean && npm start monitorClient.compile"`,
 			dev: `cross-env NODE_ENV=development npm start monitorClient.build`,
 			// non-quick prod builds are broken atm, so disabled
 			//prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.build`,
+
+			prodRS: `cross-env NODE_ENV=production "npm start client.clean &&  npm start monitorClient.compileRS"`,
 		},
 	},
 });
