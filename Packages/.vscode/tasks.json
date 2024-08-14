@@ -29,7 +29,7 @@
 			"group": "build"
 		},
 		{
-			"label": "#2b rspack",
+			"label": "#2b client.devRS",
 			"type": "shell",
 			"command": "npm start client.devRS",
 			"problemMatcher": [],
@@ -76,6 +76,14 @@
 			"label": "#4 monitorClient.webpack",
 			"type": "shell",
 			"command": "npm start monitorClient.dev",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "#4b monitorClient.devRS",
+			"type": "shell",
+			"command": "npm start monitorClient.devRS",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"

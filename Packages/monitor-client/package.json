@@ -2,14 +2,15 @@
   "name": "dm_monitor-client",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "rspack dev",
     "build": "rspack build",
     "start": "cd ../.. && npx nps"
   },
   "devDependencies": {
-    "@rspack/cli": "^0.7.5",
-    "@rspack/core": "^0.7.5",
+    "@rspack/cli": "1.0.0-beta.4",
+    "@rspack/core": "1.0.0-beta.4",
     "@types/history": "4.7.3",
     "@types/react-list": "0.8.5",
     "commander": "2.19.0",
