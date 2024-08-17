@@ -2,15 +2,15 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import chroma from "chroma-js";
-import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, GetTimelineStepTimeFromStart, Map, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
+import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, GetTimelineStepTimeFromStart, DMap, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
 import {NodeEffect, TimelineStepEffect} from "dm_common/Source/DB/timelineSteps/@TimelineStepEffect";
 import map from "updeep/types/map";
 import {InfoButton, Observer} from "web-vcore";
 import {GetAsync} from "mobx-graphlink";
 import {ShowMessageBox} from "react-vmessagebox";
-import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
-import {Button, CheckBox, Column, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Assert, Clone, E} from "js-vextensions";
+import {Button, CheckBox, Column, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu";
@@ -37,7 +37,7 @@ const GetNodeInfoForStepEffectUI = (nodeEffect: NodeEffect)=>{
 };
 
 @Observer
-export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: TimelineStep, effect: TimelineStepEffect, editing: boolean, index: number}, {detailsOpen: false}) {
+export class StepEffectUI extends BaseComponentPlus({} as {map: DMap, step: TimelineStep, effect: TimelineStepEffect, editing: boolean, index: number}, {detailsOpen: false}) {
 	render() {
 		const {map, step, effect, editing, index} = this.props;
 		const {detailsOpen} = this.state;
@@ -104,7 +104,7 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 }
 
 @Observer
-class EffectUIDetails_General extends BaseComponent<{map: Map, step: TimelineStep, stepEffect: TimelineStepEffect, stepEffectIndex: number, editing: boolean}, {}> {
+class EffectUIDetails_General extends BaseComponent<{map: DMap, step: TimelineStep, stepEffect: TimelineStepEffect, stepEffectIndex: number, editing: boolean}, {}> {
 	render() {
 		const {map, step, stepEffect, stepEffectIndex, editing} = this.props;
 		const playbackCurrentTime = GetPlaybackTime();
@@ -124,7 +124,7 @@ class EffectUIDetails_General extends BaseComponent<{map: Map, step: TimelineSte
 }
 
 @Observer
-class EffectUIDetails_NodeEffect extends BaseComponent<{map: Map, step: TimelineStep, stepEffect: TimelineStepEffect, stepEffectIndex: number, effect: NodeEffect, editing: boolean}, {}> {
+class EffectUIDetails_NodeEffect extends BaseComponent<{map: DMap, step: TimelineStep, stepEffect: TimelineStepEffect, stepEffectIndex: number, effect: NodeEffect, editing: boolean}, {}> {
 	render() {
 		const {map, step, stepEffect, stepEffectIndex, effect, editing} = this.props;
 

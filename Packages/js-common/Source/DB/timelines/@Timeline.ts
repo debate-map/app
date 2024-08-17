@@ -1,5 +1,5 @@
-import {AddSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, Field, MGLClass} from "mobx-graphlink";
+import {CE} from "js-vextensions";
 
 @MGLClass({table: "timelines"})
 export class Timeline {

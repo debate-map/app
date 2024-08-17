@@ -1,8 +1,8 @@
 import {NodeL1, NodeRevision, Map, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
 import {GlobalData} from "dm_common/Dist/DB/globalData/@GlobalData";
 import KnexFunc, {Knex} from "knex";
-import {CE, string} from "web-vcore/nm/js-vextensions.js";
-import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {CE, string} from "js-vextensions";
+import {GenerateUUID, LastUUID} from "mobx-graphlink";
 import {writeFileSync} from "fs";
 
 // todo: probably find a way to make these generated UUIDs pseudo-random, with a consistent seed, so that the UUIDs do not all change whenever the seed-db script is regenerated
@@ -82,6 +82,7 @@ const users = TypeCheckRaw<User & {hidden: UserHidden}>({
 			addToStream: false,
 			id: systemUserID,
 			email: "debatemap@gmail.com",
+			notificationPolicy: "S",
 			providerData: [],
 			extras: {},
 		},

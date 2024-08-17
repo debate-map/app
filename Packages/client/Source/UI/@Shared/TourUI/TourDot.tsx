@@ -4,8 +4,8 @@ import {TourDotClicks} from "Store/main/guide";
 import {SLMode} from "UI/@SL/SL";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {Row} from "web-vcore/nm/react-vcomponents";
-import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Row} from "react-vcomponents";
+import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 
 AddGlobalStyle(`
 	.pulsating-circle {

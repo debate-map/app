@@ -1,5 +1,5 @@
 import {O, wvc_store} from "web-vcore";
-import {makeObservable} from "web-vcore/nm/mobx.js";
+import {makeObservable} from "mobx";
 import {MainState} from "./main.js";
 
 export class RootState {

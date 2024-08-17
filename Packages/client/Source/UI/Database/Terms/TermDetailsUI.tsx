@@ -5,11 +5,11 @@ import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {RunCommand_AddTerm} from "Utils/DB/Command.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
-import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync, observer_mgl} from "web-vcore/nm/mobx-graphlink";
-import {observer} from "web-vcore/nm/mobx-react";
-import {Button, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {DEL, E, GetEntries} from "js-vextensions";
+import {GetAsync, observer_mgl} from "mobx-graphlink";
+import {observer} from "mobx-react";
+import {Button, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
 import {AttachmentsEditorUI} from "./AttachmentsEditorUI.js";

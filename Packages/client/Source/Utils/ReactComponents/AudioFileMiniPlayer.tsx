@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Button, ButtonProps} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {Timer} from "web-vcore/nm/js-vextensions";
+import {Timer} from "js-vextensions";
 
 export class AudioFileMiniPlayer extends BaseComponent<{file: File|n, volume?: number|n, buttonProps: ButtonProps}, {}> {
 	static defaultProps = {volume: 1};

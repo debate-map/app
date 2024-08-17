@@ -2,18 +2,18 @@ import {store} from "Store";
 import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
 import {ES, GetAutoElement, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
-import {GetPercentFromXToY, Lerp, Timer, Vector2, WaitXThenRun, ea} from "web-vcore/nm/js-vextensions.js";
-import {computed, makeObservable, observable} from "web-vcore/nm/mobx.js";
-import {Button, CheckBox, Column, Row, Spinner, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {GetPercentFromXToY, Lerp, Timer, Vector2, WaitXThenRun, ea} from "js-vextensions";
+import {computed, makeObservable, observable} from "mobx";
+import {Button, CheckBox, Column, Row, Spinner, TimeSpanInput} from "react-vcomponents";
+import {BaseComponent, GetDOM, UseCallback} from "react-vextensions";
+import {ScrollSource, ScrollView} from "react-vscrollview";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "@hello-pangea/dnd";
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/OPFS_Step.js";
@@ -85,7 +85,7 @@ class NoVideoPlayer {
 }
 
 @Observer
-export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
+export class StepList extends BaseComponent<{map: DMap, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
 	static instance: StepList|n;
 	constructor(props) {
 		super(props);

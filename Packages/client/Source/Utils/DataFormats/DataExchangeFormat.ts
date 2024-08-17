@@ -1,7 +1,7 @@
 import {NodeLink, NodeL1, NodeRevision, NodeType, systemUserID, CullNodePhrasingToBeEmbedded, NodePhrasing, ChildGroup, AddChildNode} from "dm_common";
 import {GetEntries} from "js-vextensions";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {Command} from "mobx-graphlink";
 
 export enum DataExchangeFormat {
 	json_dm = "json_dm",

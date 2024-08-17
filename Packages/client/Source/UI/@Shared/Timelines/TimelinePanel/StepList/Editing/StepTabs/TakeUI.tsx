@@ -3,19 +3,19 @@ import {ConvertAudioFileUsingVoiceChanger} from "Utils/Bridge/VoiceChanger/Audio
 import {GetTopAudioForStep, ModifyStepMeta, ModifyTakeMeta, TakeMeta} from "Utils/OPFS/Map/OPFS_Step";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {StarsRating} from "Utils/ReactComponents/StarsRating";
-import {Map, TimelineStep} from "dm_common";
+import {DMap, TimelineStep} from "dm_common";
 import React, {useEffect, useState} from "react";
 import {Button, ButtonProps, Column, Pre, Row, Spinner, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {Observer} from "web-vcore";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {E, IsInt, Timer} from "web-vcore/nm/js-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {E, IsInt, Timer} from "js-vextensions";
 import {AudioFileMiniPlayer} from "Utils/ReactComponents/AudioFileMiniPlayer";
 import {GetDurationOfWAVAudioFile} from "Utils/OPFS/AccessorsForFiles";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 
 @Observer
-export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineStep, takeNumber: number}, {}> {
+export class StepAudio_TakeUI extends BaseComponent<{map: DMap, step: TimelineStep, takeNumber: number}, {}> {
 	render() {
 		const {map, step, takeNumber} = this.props;
 		const opfsForMap = OPFS_Map.GetEntry(map.id);

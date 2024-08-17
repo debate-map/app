@@ -1,0 +1,79 @@
+{
+	"compilerOptions": {
+		// general
+		//"sourceMap": true,
+		//"watch": true,
+		//"noEmit": true,
+		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
+
+		// compilation
+		//"target": "ESNext",
+		"target": "ES2018",
+		"lib": [
+			"es6",
+			"es5",
+			"dom"
+		],
+		"jsx": "react",
+		"noImplicitAny": false,
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		//"esModuleInterop": true, // enable this within packages that aren't using webpack for compilation
+		"useDefineForClassFields": true, // needed for mobx @observable
+		// strictness settings
+		//"strict": true, // enables all of the below (other than noImplicitReturns)
+		//"noImplicitAny": true,
+		//"noImplicitThis": true,
+		//"noImplicitReturns": true,
+		"alwaysStrict": true,
+		//"strictBindCallApply": true,
+		"strictNullChecks": true,
+		//"strictFunctionTypes": true,
+		//"strictPropertyInitialization": true,
+
+		// modules/paths
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"composite": true,
+		"rootDir": ".",
+		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules
+		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)
+		// commented these, since it seems like they aren't needed anymore (now that I'm using "nm" structure in web-vcore, and/or using yalc for symlinks)
+		"paths": {
+			"pg": ["../../../node_modules/pg"],
+			"postgraphile": ["../../../node_modules/postgraphile"],
+			"graphile-utils": ["../../../node_modules/graphile-utils"],
+			// from web-vcore
+			// ==========
+			"react": [
+				"../../../node_modules/web-vcore/node_modules/react",
+				"../../../node_modules/react",
+			],
+			// project-specific
+			// ==========
+			"mobx-graphlink": [
+				"../../../node_modules/web-vcore/node_modules/mobx-graphlink",
+				"../../../node_modules/mobx-graphlink",
+			],
+			"mobx-graphlink/*": [
+				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
+				"../../../node_modules/mobx-graphlink/*",
+			],
+		},
+	},
+	// "include": [
+		// these are relative to this file's folder (repo root)
+		//"Typings/**/*.d.ts",
+		//"Packages/client/Source/**/*.ts",
+		//"Packages/client/Source/**/*.tsx",
+		//"Packages/js-common/Source/**/*.ts",
+		//"Packages/js-common/Source/**/*.tsx",
+		// "./Source/**/*.ts",
+		// "./Source/**/*.tsx",
+	// ],
+	/*"exclude": [
+		"Build",
+		"Tests",
+		"node_modules",
+	],*/
+}

@@ -1,11 +1,11 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMap} from "../DB/maps.js";
-import {Map} from "../DB/maps/@Map.js";
+import {DMap} from "../DB/maps/@Map.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-const MTClass = Map;
+const MTClass = DMap;
 type MT = typeof MTClass.prototype;
 const MTName = MTClass.name;
 

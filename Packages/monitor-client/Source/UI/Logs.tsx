@@ -1,9 +1,9 @@
 import React from "react";
 import {store} from "Store";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {GetEntries, ModifyString} from "web-vcore/nm/js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {GetEntries, ModifyString} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {LogGroupsUI} from "./Logs/LogGroupsUI.js";
 import {LogsUI_Realtime} from "./Logs/Realtime.js";
 import {LogsUI_Stored} from "./Logs/Stored.js";

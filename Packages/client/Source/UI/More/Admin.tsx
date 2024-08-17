@@ -1,11 +1,11 @@
-import {Assert, AwaitTree, SleepAsync, E, IsObject, StartDownload} from "web-vcore/nm/js-vextensions.js";
-import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, Row, TextArea, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Assert, AwaitTree, SleepAsync, E, IsObject, StartDownload} from "js-vextensions";
+import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "mobx-graphlink";
+import {Button, Column, Row, TextArea, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {PageContainer, Observer, RunInAction_Set, Link} from "web-vcore";
 import {HasAdminPermissions, MeID, GraphDBShape, GetServerURL} from "dm_common";
-import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
+import {FetchResult, gql} from "@apollo/client";
 import {GetUserInfoFromStoredJWT, GetUserInfoJWTString} from "Utils/AutoRuns/UserInfoCheck.js";
 import {store} from "../../Store/index.js";
 import {apolloClient, GetAppServerURL, GetMonitorURL} from "../../Utils/LibIntegrations/Apollo.js";

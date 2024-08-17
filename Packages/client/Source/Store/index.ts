@@ -1,8 +1,8 @@
-import {configure, makeObservable, onReactionError} from "web-vcore/nm/mobx.js";
+import {configure, makeObservable, onReactionError} from "mobx";
 import {O, wvc_store} from "web-vcore";
-import {ignore} from "web-vcore/nm/mobx-sync.js";
-import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
-import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer.js";
+import {ignore} from "mobx-sync";
+import {Graphlink} from "mobx-graphlink";
+import {immerable, setUseProxies, setAutoFreeze} from "immer";
 import {GraphDBShape} from "dm_common";
 import {MainState} from "./main.js";
 

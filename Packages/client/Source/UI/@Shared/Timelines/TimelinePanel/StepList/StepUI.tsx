@@ -1,11 +1,11 @@
-import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Column, Div, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer, RunInAction} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
+import {E} from "js-vextensions";
+import {VMenuItem, VMenuStub} from "react-vmenu";
+import {runInAction} from "mobx";
 import {store} from "Store";
-import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
+import {DMap, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {StepEditorUI} from "./Editing/StepEditorUI.js";
@@ -14,7 +14,7 @@ import {PositionOptionsEnum} from "./Editing/StepTabs/StepTab_General.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(
-	{} as {index: number, last: boolean, map: Map, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
+	{} as {index: number, last: boolean, map: DMap, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
 	{showStepEffects: false, editorOpen: false},
 ) {
 	constructor(props) {

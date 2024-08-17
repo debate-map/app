@@ -1,10 +1,10 @@
-import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRatingTypesForNode, Map, NodeL2} from "dm_common";
+import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRatingTypesForNode, DMap, NodeL2} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";
-import {Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Pre, Row} from "react-vcomponents";
+import {BaseComponentPlus, GetInnerComp} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./DetailBoxes/Panels/DetailsPanel.js";
 import {OthersPanel} from "./DetailBoxes/Panels/OthersPanel.js";
@@ -12,7 +12,7 @@ import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {NodeBox} from "./NodeBox.js";
 
-type Props = {map: Map, node: NodeL2};
+type Props = {map: DMap, node: NodeL2};
 export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 	innerUI: NodeBox;
 	render() {

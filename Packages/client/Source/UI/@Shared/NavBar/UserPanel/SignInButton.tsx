@@ -1,7 +1,7 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent} from "react-vextensions";
+import {WaitXThenRun} from "js-vextensions";
 import {gql, useQuery, useSubscription} from "@apollo/client";
-import {Button} from "web-vcore/nm/react-vcomponents.js";
+import {Button} from "react-vcomponents";
 import {GetAppServerURL} from "../../../../Utils/LibIntegrations/Apollo.js";
 import {OpenSignInPopup, SignInProvider} from "../UserPanel.js";
 
@@ -86,7 +86,7 @@ type GsiButtonConfiguration = {
 	width?: number; // The button width, in pixels.
 	locale?: string; // If set, then the button language is rendered.
 }
-export const googleClientID = process.env.CLIENT_ID; // supplied by ./Scripts/Config.js
+export const googleClientID = process.env.CLIENT_ID; // supplied by client/rspack.config.js
 export function EnsureGoogleIDAPIReady() {
 	/*if (g.google == null) {
 		console.error("Cannot initialize Google ID api, because its script has not been loaded.");

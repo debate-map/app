@@ -1,5 +1,5 @@
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {emptyArray, CE, eal} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor} from "mobx-graphlink";
+import {emptyArray, CE, eal} from "js-vextensions";
 import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, NodeL1, ChangeType, NodeL3, GetNodeL2, NodeL2} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps.js";
 

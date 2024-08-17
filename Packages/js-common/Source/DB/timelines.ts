@@ -1,4 +1,4 @@
-import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, GetDoc, GetDocs} from "mobx-graphlink";
 import {Timeline} from "./timelines/@Timeline.js";
 
 export const GetTimelines = CreateAccessor((mapID: string): Timeline[]=>{

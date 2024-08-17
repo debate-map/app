@@ -1,4 +1,4 @@
-import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
 import {Assert, Clone, E, emptyArray, GetEntries, GetValues} from "js-vextensions";
 import React, {useState} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -9,12 +9,12 @@ import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
 import {RunCommand_AddNodeTag, RunCommand_DeleteNodeTag, RunCommand_UpdateNodeTag} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetUpdates, HSLA, Observer, RunInAction_Set} from "web-vcore";
-import {Button, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Button, Column, Row, Select, Text, TextInput} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 
 @Observer
-export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {}) {
+export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap|n, node: NodeL3, path: string}, {}) {
 	render() {
 		const {show, node} = this.props;
 		const uiState = store.main.maps.tagsPanel;

@@ -1,4 +1,4 @@
-import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
+import "web-vcore/TSHelpers/js-vextensions_ApplyCETypes.js";
 
 export * from "./CommandMacros/CommandRunMeta.js";
 export * from "./CommandMacros/General.js";

@@ -1,4 +1,4 @@
-import {GetTimelines, GetTimelineStep, GetTimelineSteps, HasAdminPermissions, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GetTimelines, GetTimelineStep, GetTimelineSteps, HasAdminPermissions, DMap, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
@@ -7,10 +7,10 @@ import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {CopyText, ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
-import {E, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {E, GetEntries, StartDownload} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox, Select} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAsync} from "mobx-graphlink";
@@ -20,7 +20,7 @@ import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
 import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
 
 @Observer
-export class Header1 extends BaseComponent<{map: Map}, {}> {
+export class Header1 extends BaseComponent<{map: DMap}, {}> {
 	timelineSelect: DropDown|n;
 	render() {
 		const {map} = this.props;
@@ -103,7 +103,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
+class OptionsDropdown extends BaseComponent<{map: DMap, timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
 	render() {
 		const {map, timeline, steps} = this.props;
 		const uiState = store.main.timelines;

@@ -1,5 +1,5 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {globalMapID} from "../../DB_Constants.js";
 import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
@@ -7,11 +7,11 @@ import {APAction, APTable, PermissionSet} from "../accessPolicies/@PermissionSet
 import {GetMap} from "../maps.js";
 import {GetUser, MeID} from "../users.js";
 import {IsUserCreatorOrAdmin} from "../users/$user.js";
-import {Map} from "./@Map.js";
+import {DMap} from "./@Map.js";
 import {GetToolbarItemsToShow} from "../nodes/$node.js";
 import {NodeL2} from "../nodes/@Node.js";
 
-export function IsUserMap(map: Map) {
+export function IsUserMap(map: DMap) {
 	return map.id != globalMapID;
 }
 
@@ -28,10 +28,10 @@ export const GetMapEditors = CreateAccessor((mapID: string)=>{
 	return GetMapEditorIDs.BIN(mapID).map(id=>GetUser(id));
 });
 
-export function IsNodeToolbarEnabled(map: Map|n) {
+export function IsNodeToolbarEnabled(map: DMap|n) {
 	return map?.extras.defaultNodeToolbarEnabled ?? true;
 }
-export function ShowNodeToolbar(node: NodeL2, path?: string|n, map?: Map|n) {
+export function ShowNodeToolbar(node: NodeL2, path?: string|n, map?: DMap|n) {
 	return GetToolbarItemsToShow(node, path, map).length > 0;
 }
 

@@ -5,13 +5,13 @@ import {RunCommand_TransferNodes} from "Utils/DB/Command.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {ES, InfoButton, Observer} from "web-vcore";
-import {gql} from "web-vcore/nm/@apollo/client";
-import {Clone, GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {Command, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {CheckBox, Column, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {gql} from "@apollo/client";
+import {Clone, GetEntries, GetValues, ModifyString} from "js-vextensions";
+import {Command, observer_mgl} from "mobx-graphlink";
+import {observer} from "mobx-react";
+import {CheckBox, Column, Row, RowLR, Select, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {TransferNodesUIState} from "./TransferNodeDialog/TransferNodeData.js";
 
 export type TransferNodeDialog_SharedProps = {

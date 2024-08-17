@@ -1,5 +1,5 @@
-import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull} from "web-vcore/nm/mobx-graphlink.js";
+import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull} from "mobx-graphlink";
 import {Term} from "./terms/@Term.js";
 import {GetNodeRevision} from "./nodeRevisions.js";
 

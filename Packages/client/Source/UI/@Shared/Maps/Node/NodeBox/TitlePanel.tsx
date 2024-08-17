@@ -1,20 +1,20 @@
-import {Assert, Clone, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Clone, E, WaitXThenRun} from "js-vextensions";
 import keycode from "keycode";
 import _ from "lodash";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {Button, Pre, Row, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {runInAction} from "mobx";
+import {Button, Pre, Row, Text, TextArea} from "react-vcomponents";
+import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "react-vextensions";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, DMap, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA, EB_ShowError, EB_StoreError, DefaultLoadingUI} from "web-vcore";
 import React from "react";
-import {BailError, BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {BailError, BailInfo, GetAsync} from "mobx-graphlink";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
-import {DraggableProvidedDragHandleProps} from "web-vcore/nm/hello-pangea-dnd.js";
+import {DraggableProvidedDragHandleProps} from "@hello-pangea/dnd";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -63,7 +63,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @Observer
 export class TitlePanel extends BaseComponentPlus(
 	{} as {
-		parent: NodeBox, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style,
+		parent: NodeBox, map: DMap|n, node: NodeL3, path: string, indexInNodeList: number, style,
 		dragHandleProps: DraggableProvidedDragHandleProps|n,
 	} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, edit_titleKey: null as TitleKey|n, applyingEdit: false},

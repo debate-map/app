@@ -1,6 +1,6 @@
-import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "web-vcore/nm/mobx-graphlink.js";
-import {Map} from "../maps/@Map.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
+import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "mobx-graphlink";
+import {DMap} from "../maps/@Map.js";
 import {NodeL3} from "./@Node.js";
 import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";
 import {NodeType_Info} from "./@NodeType.js";
@@ -68,7 +68,7 @@ The final ordering-type is determined by the first provided value (ie. not set t
 2) Map setting, in map's Details dropdown (if map has "Allow special" for child-layouts enabled)
 3) Fallback value of "Debate Map standard"
 `.AsMultiline(0);
-export function GetChildLayout_Final(revision: NodeRevision, map?: Map|n): ChildLayout {
+export function GetChildLayout_Final(revision: NodeRevision, map?: DMap|n): ChildLayout {
 	let result = ChildLayout.dmStandard;
 	if (map?.extras.allowSpecialChildLayouts) {
 		if (map.extras.defaultChildLayout) result = map.extras.defaultChildLayout;

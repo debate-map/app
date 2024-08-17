@@ -21,7 +21,7 @@
 			"group": "build"
 		},
 		{
-			"label": "#2 webpack",
+			"label": "#2 client.dev",
 			"type": "shell",
 			"command": "npm start client.dev",
 			"problemMatcher": [],
@@ -32,14 +32,6 @@
 			"label": "## client.build.prod",
 			"type": "shell",
 			"command": "npm start client.build.prod",
-			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build"
-		},
-		{
-			"label": "## client.build.prodQuick",
-			"type": "shell",
-			"command": "npm start client.build.prodQuick",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -65,7 +57,7 @@
 			"group": "build"
 		},
 		{
-			"label": "#4 monitorClient.webpack",
+			"label": "#4 monitorClient.dev",
 			"type": "shell",
 			"command": "npm start monitorClient.dev",
 			"problemMatcher": [],
@@ -73,9 +65,9 @@
 			"group": "build"
 		},
 		{
-			"label": "## monitorClient.build.prodQuick",
+			"label": "## monitorClient.build.prod",
 			"type": "shell",
-			"command": "npm start monitorClient.build.prodQuick",
+			"command": "npm start monitorClient.build.prod",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"

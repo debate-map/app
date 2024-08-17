@@ -1,6 +1,6 @@
 import {TimelineStep, GetTimelineStepTimeFromStart, GetTimelineStepTimesFromStart, GetNodeEffects, GetNode, GetNodeChildren} from "dm_common";
-import {CE, emptyArray_forLoading, Assert} from "web-vcore/nm/js-vextensions";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {CE, emptyArray_forLoading, Assert} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetPlaybackInfo, GetPlaybackTime} from "./Basic.js";
 
 export const IsTimelineStepActive = CreateAccessor((step: TimelineStep|n, timeX?: number|n)=>{

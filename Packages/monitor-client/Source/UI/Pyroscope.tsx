@@ -1,8 +1,8 @@
 import {GetServerURL} from "dm_common";
 import React from "react";
 import {Observer} from "web-vcore";
-import {Column} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Column} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 
 @Observer
 export class PyroscopeUI extends BaseComponent<{}, {}> {

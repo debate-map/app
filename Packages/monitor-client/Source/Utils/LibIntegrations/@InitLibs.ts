@@ -1,8 +1,8 @@
 import {AddWVCSchemas, ExposeModuleExports} from "web-vcore";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {InitApollo} from "./Apollo.js";
-import {InitReactVComponents} from "./ReactVComponents.js";
-import {InitWVC} from "./WVC.js";
+import {AddSchema} from "mobx-graphlink";
+import {InitApollo} from "./Apollo";
+import {InitReactVComponents} from "./ReactVComponents";
+import {InitWVC} from "./WVC";
 
 function ExposeModuleExports_Final() {
 	// expose exports

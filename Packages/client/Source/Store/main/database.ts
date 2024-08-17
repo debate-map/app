@@ -1,7 +1,7 @@
 import {O} from "web-vcore";
-import {AccessorCallPlan, CreateAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink.js";
+import {AccessorCallPlan, CreateAccessor, GetDoc} from "mobx-graphlink";
 import {GetTerms, GetMedias, GraphDBShape, GetUser, GetAccessPolicy, GetTerm, GetMedia} from "dm_common";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {makeObservable} from "mobx";
 
 export class DatabaseState {
 	constructor() { makeObservable(this); }

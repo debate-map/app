@@ -1,6 +1,6 @@
-import chroma from "web-vcore/nm/chroma-js.js";
-import {emptyArray, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, MGLClass, Field, GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import chroma from "chroma-js";
+import {emptyArray, GetValues_ForSchema} from "js-vextensions";
+import {AddSchema, DB, MGLClass, Field, GetDoc, CreateAccessor, GetDocs} from "mobx-graphlink";
 import {ChangeType, MapNodeEdit} from "./mapNodeEdits/@MapNodeEdit.js";
 
 const colorMap = {

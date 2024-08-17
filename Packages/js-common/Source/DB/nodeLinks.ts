@@ -1,5 +1,5 @@
-import {Assert, IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, IsNaN} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
 import {DMCommon_InServer} from "../Utils/General/General.js";
 import {OrderKey} from "../Utils/General/OrderKey.js";
 import {ChildGroup, NodeLink} from "./nodeLinks/@NodeLink.js";

@@ -1,6 +1,6 @@
 import {GraphDBShape} from "dm_common";
-import "web-vcore/nm/mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
-import {Graphlink, SetDefaultGraphRefs, ProvideReactModule} from "web-vcore/nm/mobx-graphlink.js";
+import "mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
+import {Graphlink, SetDefaultGraphRefs, ProvideReactModule} from "mobx-graphlink";
 import React from "react";
 import {GetCookie} from "web-vcore";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";

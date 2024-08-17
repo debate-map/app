@@ -3,17 +3,17 @@ import {observer} from "mobx-react";
 import React, {useContext} from "react";
 import {n} from "react-vcomponents/Dist/@Types.js";
 import {Graph, NodeGroup, FlexNode, GetTreeNodeBaseRect, GetTreeNodeOffset} from "tree-grapher";
-import {Map, TimelineStep} from "dm_common";
+import {DMap, TimelineStep} from "dm_common";
 import {MapState} from "Store/main/maps/mapStates/@MapState";
 import {GetOpenMapID} from "Store/main";
-import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "web-vcore/nm/mobx-graphlink";
+import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "mobx-graphlink";
 import {GetPathsWith1PlusFocusLevelAfterEffects, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph.js";
 import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI.js";
 
 //let ignoreNextZoomChange = false;
 /** This component replaces the node-focusing portion of TimelineStepAffectApplier with a smoother variant of it, when the layout-helper map is loaded. (layout-helper is required for the smoothing) */
-export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapState: MapState, mainGraph: Graph, layoutHelperGraph: Graph|n})=>{
+export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: DMap, mapState: MapState, mainGraph: Graph, layoutHelperGraph: Graph|n})=>{
 	const {map, mapState, mainGraph, layoutHelperGraph} = props;
 	//const zoomLevel = store.zoomLevel;
 	/*if (ignoreNextZoomChange) {
@@ -123,7 +123,7 @@ export function InterpolateRect(rectA: VRect, rectB: VRect, percent: number) {
 	);
 }
 
-export function GetGroupRectsAtKeyframe(map: Map, mainGraph: Graph, layoutHelperGraph: Graph|n, effects: PlaybackEffect[]) {
+export function GetGroupRectsAtKeyframe(map: DMap, mainGraph: Graph, layoutHelperGraph: Graph|n, effects: PlaybackEffect[]) {
 	//return CE([...mainGraph.groupsByPath.entries()]).ToMap(a=>a[0], a=>a[1].InnerUIRect!);
 
 	const nodesVisibleAfterEffects = GetVisiblePathsAfterEffects([map.rootNode], effects);

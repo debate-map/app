@@ -1,7 +1,7 @@
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {Column, Row} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {AddArgumentButton} from "UI/@Shared/Maps/Node/NodeUI/AddArgumentButton.js";
-import {NodeL3, Polarity, Map, ChildGroup, NodeType} from "dm_common";
+import {NodeL3, Polarity, DMap, ChildGroup, NodeType} from "dm_common";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {useCallback} from "react";
 import {Observer} from "web-vcore";
@@ -10,7 +10,7 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeLayoutConstants";
 
 @Observer
-export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
+export class ArgumentsControlBar extends BaseComponentPlus({} as {map: DMap, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {
 		const {map, node, path, treePath, inBelowGroup, group, childBeingAdded} = this.props;
 		// const backgroundColor = GetNodeColor({ type: NodeType.category } as NodeL3);

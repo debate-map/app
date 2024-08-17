@@ -1,8 +1,8 @@
 import {GetAccessPolicies, GetAccessPolicy, GetUsers} from "dm_common";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {Button, ButtonProps, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {E} from "js-vextensions";
+import {Button, ButtonProps, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {ES, Observer, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";

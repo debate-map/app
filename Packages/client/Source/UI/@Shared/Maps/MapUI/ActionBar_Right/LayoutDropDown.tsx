@@ -1,11 +1,11 @@
-import {Button, CheckBox, Column, Text, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, Spinner, ColorPickerBox} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, CheckBox, Column, Text, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, Spinner, ColorPickerBox} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
 import {store} from "Store";
 import {BuildErrorWrapperComp, Chroma, Chroma_Safe, defaultErrorUI, EB_StoreError, Observer, ReactError, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
 import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
-import {GetUser, Map, ChildOrdering, ChildOrdering_infoText} from "dm_common";
+import {GetUser, DMap, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React, {Fragment} from "react";
 import {GetEntries, StartDownload} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
@@ -32,7 +32,7 @@ const ratingPreviewOptions = [
 ];
 
 @Observer
-export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
+export class LayoutDropDown extends BaseComponentPlus({} as {map: DMap}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.maps;

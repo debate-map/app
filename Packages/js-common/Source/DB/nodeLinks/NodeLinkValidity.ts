@@ -1,5 +1,5 @@
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor} from "mobx-graphlink";
+import {GetValues} from "js-vextensions";
 import {globalRootNodeID} from "../../DB_Constants.js";
 import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {APAction, APTable} from "../accessPolicies/@PermissionSet.js";

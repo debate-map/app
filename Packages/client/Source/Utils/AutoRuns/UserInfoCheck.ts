@@ -2,7 +2,7 @@ import {store} from "Store";
 import {AttachUserJWTToWebSocketConnection} from "Utils/LibIntegrations/Apollo";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddNotificationMessage} from "web-vcore";
-import {Timer} from "web-vcore/nm/js-vextensions";
+import {Timer} from "js-vextensions";
 
 type StandardJWTFields = {
 	// header

@@ -1,6 +1,6 @@
 import {Me} from "dm_common";
-import {Clone} from "web-vcore/nm/js-vextensions.js";
-import Raven from "web-vcore/nm/raven-js";
+import {Clone} from "js-vextensions";
+import Raven from "raven-js";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastUser;

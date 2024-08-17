@@ -1,6 +1,6 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {BaseComponentPlus} from "react-vextensions";
+import {VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 import {Observer} from "web-vcore";
 import {ChildGroup, IsUserCreatorOrMod, MeID, GetParentNodeL3, GetNodeDisplayText, UnlinkNode} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";

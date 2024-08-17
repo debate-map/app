@@ -1,4 +1,4 @@
-import {ChildGroup, GetNodeChildrenL3, GetToolbarItemsToShow, GetUser, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType} from "dm_common";
+import {ChildGroup, GetNodeChildrenL3, GetToolbarItemsToShow, GetUser, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, DMap, NodeL3, NodeType} from "dm_common";
 import React, {useCallback} from "react";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {store} from "Store/index.js";
@@ -13,9 +13,9 @@ import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
 import {BailError, BailInfo} from "mobx-graphlink";
-import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
-import {Column, Div} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "js-vextensions";
+import {Column, Div} from "react-vcomponents";
+import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
 import {NodeBox} from "./NodeBox.js";
@@ -43,7 +43,7 @@ class ObservedValues {
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: NodeL3, path: string, treePath: string, forLayoutHelper: boolean, style?,
+		indexInNodeList: number, map: DMap, node: NodeL3, path: string, treePath: string, forLayoutHelper: boolean, style?,
 		inBelowGroup?: boolean,
 		standardWidthInGroup?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void

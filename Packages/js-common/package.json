@@ -3,10 +3,10 @@
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
-	"#main": "./Source/index.ts",
-	"main": "./Dist/index.js",
-	"#module": "./Source/index.ts",
-	"module": "./Dist/index.js",
+	"main": "./Source/index.ts",
+	"#main": "./Dist/index.js",
+	"module": "./Source/index.ts",
+	"#module": "./Dist/index.js",
 	"scripts": {
 		"start": "cd ../.. && npx nps"
 	}

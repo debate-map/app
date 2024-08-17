@@ -1,5 +1,5 @@
-import {GetValues} from "web-vcore/nm/js-vextensions.js";
-import {Command, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {GetValues} from "js-vextensions";
+import {Command, CommandMeta, DBHelper} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AttachmentType} from "../DB/@Shared/Attachments/@Attachment.js";

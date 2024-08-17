@@ -1,19 +1,19 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, DMap, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import React from "react";
 import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
 import {Observer, TextPlus} from "web-vcore";
-import {DEL, GetEntries, ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {DEL, GetEntries, ToNumber} from "js-vextensions";
+import {GetAsync, RunInAction} from "mobx-graphlink";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, Spinner, TextInput} from "react-vcomponents";
+import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./Node/NodeDetailsUI/PermissionsPanel.js";
 
 @Observer
-export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
+export class MapDetailsUI extends DetailsUI_Base<DMap, MapDetailsUI> {
 	render() {
 		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
@@ -165,7 +165,7 @@ export async function ShowAddMapDialog(openMapAfterCreation = true) {
 		return {accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "maps")};
 	});
 
-	let newMap = new Map({
+	let newMap = new DMap({
 		accessPolicy: prep.accessPolicy.id,
 		name: "",
 		editors: [MeID.NN()],

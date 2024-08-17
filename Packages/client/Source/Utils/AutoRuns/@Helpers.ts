@@ -1,6 +1,6 @@
-import {SleepAsync} from "web-vcore/nm/js-vextensions";
-import {autorun, IAutorunOptions, IReactionDisposer, IReactionPublic} from "web-vcore/nm/mobx";
-import {CatchBail} from "web-vcore/nm/mobx-graphlink";
+import {SleepAsync} from "js-vextensions";
+import {autorun, IAutorunOptions, IReactionDisposer, IReactionPublic} from "mobx";
+import {CatchBail} from "mobx-graphlink";
 
 export function AutoRun_HandleBail(view: (r: IReactionPublic)=>any, opts?: IAutorunOptions): IReactionDisposer {
 	return autorun(()=>CatchBail(null, view), opts);

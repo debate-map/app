@@ -1,14 +1,14 @@
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {GetAsync} from "mobx-graphlink";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
-import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeLinks} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, DMap, GetNodeLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "mobx";
+import {FromJSON, ToJSON, E, NN} from "js-vextensions";
 import {RunCommand_DeleteMap, RunCommand_UpdateMap} from "Utils/DB/Command.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
@@ -40,7 +40,7 @@ import {MapDetailsUI} from "../../MapDetailsUI.js";
 }*/
 
 @Observer
-export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: string}> {
+export class DetailsDropDown extends BaseComponent<{map: DMap}, {dataError: string}> {
 	detailsUI: MapDetailsUI|n;
 	// permOptions: PermissionsOptions;
 	render() {

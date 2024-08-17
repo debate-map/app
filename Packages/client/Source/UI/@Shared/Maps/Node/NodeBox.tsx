@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -12,15 +12,15 @@ import {FlashComp} from "ui-debug-kit";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Chroma, DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener, TextPlus} from "web-vcore";
-import chroma, {Color} from "web-vcore/nm/chroma-js.js";
+import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, GetPercentFromXToY, GetValues, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Draggable} from "web-vcore/nm/hello-pangea-dnd.js";
-import ReactDOM from "web-vcore/nm/react-dom.js";
-import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {DEL, DoNothing, E, GetPercentFromXToY, GetValues, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
+import {SlicePath} from "mobx-graphlink";
+import {Draggable} from "@hello-pangea/dnd";
+import ReactDOM from "react-dom";
+import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
 import {Graph, GraphContext, useRef_nodeLeftColumn} from "tree-grapher";
-import {Div, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Div, Row} from "react-vcomponents";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {autorun} from "mobx";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
@@ -57,7 +57,7 @@ import {NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeBox_Props = {
-	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map, forLayoutHelper: boolean, forSubscriptionsPage?: boolean,
+	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: DMap, forLayoutHelper: boolean, forSubscriptionsPage?: boolean,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	childrenShownByNodeExpandButton?: number, usePortalForDetailBoxes?: boolean,
@@ -628,7 +628,7 @@ class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreVa
  * (this is better than putting the access of mapState.playingTimeline_time in NodeBox directly, since that would cause unnecessary processing of other data during each re-render)
  */
 @Observer
-export class FrameRenderSignal extends BaseComponent<{map: Map|n}> {
+export class FrameRenderSignal extends BaseComponent<{map: DMap|n}> {
 	render() {
 		const {map} = this.props;
 		const timelinesState = store.main.timelines;

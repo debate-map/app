@@ -1,4 +1,4 @@
-import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, GetDoc, GetDocs} from "mobx-graphlink";
 
 export const GetNodePhrasings = CreateAccessor((nodeID: string)=>{
 	/* const entryMap = GetData({ collection: true }, 'nodePhrasings');

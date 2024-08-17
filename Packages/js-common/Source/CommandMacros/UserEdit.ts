@@ -1,4 +1,4 @@
-import {Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, dbp} from "mobx-graphlink";
 import {GetUser} from "../DB/users.js";
 
 export function UserEdit(targetClass: typeof Command) {

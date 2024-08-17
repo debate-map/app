@@ -1,14 +1,14 @@
-import {Button, Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {AddGlobalStyle, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Pre, Row} from "react-vcomponents";
+import {AddGlobalStyle, BaseComponentPlus} from "react-vextensions";
 import {GetUpdates, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {E, ToJSON, Clone, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {runInAction} from "mobx";
+import {E, ToJSON, Clone, CE} from "js-vextensions";
+import {GetAsync} from "mobx-graphlink";
 import _ from "lodash";
-import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
+import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, DMap, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
-import {gql} from "web-vcore/nm/@apollo/client";
+import {gql} from "@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 import {SLMode_SFI} from "../../../../../@SL/SL.js";
@@ -21,7 +21,7 @@ AddGlobalStyle(`
 `);
 
 @Observer
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {dataError: null as string|n, saveState: "idle" as "idle" | "saving" | "success" | "error"}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap|n, node: NodeL3, path: string}, {dataError: null as string|n, saveState: "idle" as "idle" | "saving" | "success" | "error"}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;

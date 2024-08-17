@@ -1,6 +1,6 @@
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "mobx-graphlink";
 import {O} from "web-vcore";
-import {makeObservable} from "web-vcore/nm/mobx";
+import {makeObservable} from "mobx";
 
 export class RatingUIState {
 	constructor() { makeObservable(this); }

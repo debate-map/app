@@ -31,6 +31,7 @@
 // 2) Change css of element temporarily, to have `fontFamily` include `AdobeNotDef` as the entry just after your chosen font. (eg. `MyFont, AdobeNotDef`}
 @font-face {
 	font-family: "AdobeNotDef";
-	src: url("/Fonts/AdobeNotDef-Regular.otf") format("opentype");
+	src: /* webpackIgnore: true [works in webpack, but not rspack atm; rspack uses config.externals for now] */
+		url("/Fonts/AdobeNotDef-Regular.otf") format("opentype");
 	//font-display: swap; font-style: normal; font-weight: 500;
 }

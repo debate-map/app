@@ -1,5 +1,5 @@
-import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {MGLClass, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "js-vextensions";
+import {MGLClass, Field} from "mobx-graphlink";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass()

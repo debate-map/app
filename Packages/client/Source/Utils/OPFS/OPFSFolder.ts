@@ -1,7 +1,7 @@
 import {O, RunInAction} from "web-vcore";
 import {ShowMessageBox} from "react-vmessagebox";
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
+import {Assert} from "js-vextensions";
+import {computed, makeObservable, observable} from "mobx";
 import {OPFSDir_DoesChildDirExist, OPFSDir_GetChildren, OPFSDir_GetDirectoryChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
 
 export class OPFSFolder {

@@ -1,7 +1,7 @@
-import {Column, Div} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Column, Div} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {Timeline, GetTimelineStep, TimelineStep} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 

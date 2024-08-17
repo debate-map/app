@@ -1,14 +1,14 @@
-import {DeleteShare, GetShares, Map, MeID, Share} from "dm_common";
-import {GetEntries, VURL, CopyText} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {DeleteShare, GetShares, DMap, MeID, Share} from "dm_common";
+import {GetEntries, VURL, CopyText} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
+import {ScrollView} from "react-vscrollview";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set, GetCurrentURL, InfoButton} from "web-vcore";
-import moment from "web-vcore/nm/moment";
+import moment from "moment";
 import {RunCommand_DeleteShare} from "Utils/DB/Command.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
@@ -22,7 +22,7 @@ export function GetShareLongURL(share: Share) {
 }
 
 @Observer
-export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
+export class ShareDropDown extends BaseComponentPlus({} as {map: DMap}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.shareUI;

@@ -1,5 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions";
-import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "js-vextensions";
+import {DB, Field, MGLClass} from "mobx-graphlink";
 
 /** For a command-run to be visible:
 1) It must be of a command-type that can be public. (hard-coded list in CommandMacros.ts)

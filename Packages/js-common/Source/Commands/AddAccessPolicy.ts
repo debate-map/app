@@ -1,4 +1,4 @@
-import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command, CommandMeta, SimpleSchema, DBHelper} from "mobx-graphlink";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 

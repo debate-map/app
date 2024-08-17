@@ -1,12 +1,12 @@
-import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Button, Column, Row, TextInput, Select, Text, Pre, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
+import {Button, Column, Row, TextInput, Select, Text, Pre, TextArea} from "react-vcomponents";
+import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "js-vextensions";
 import {Fragment} from "react";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ShowMessageBox} from "react-vmessagebox";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern, sourceType_fieldSets, CleanUpdatedSourceChains} from "dm_common";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Validate} from "mobx-graphlink";
 import {ES, VDateTime} from "web-vcore";
-import Moment from "web-vcore/nm/moment";
+import Moment from "moment";
 
 type SharedProps = {enabled: boolean, Change: (..._)=>void};
 

@@ -1,12 +1,12 @@
-import {gql} from "@apollo/client";
+import {gql, useMutation, useQuery} from "@apollo/client";
 import React, {useState} from "react";
 import {store} from "Store";
 import {Observer, P, RunInAction_Set} from "web-vcore";
-import {useMutation, useQuery} from "web-vcore/nm/@apollo/client";
-import {observer} from "web-vcore/nm/mobx-react";
-import {Column, Row, TextInput, Text, CheckBox, Button, TextArea} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+
+import {observer} from "mobx-react";
+import {Column, Row, TextInput, Text, CheckBox, Button, TextArea} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {formatBytes} from "../Utils/UI/General.js";
 
 export class HomeUI extends BaseComponent<{}, {}> {

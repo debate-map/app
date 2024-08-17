@@ -1,4 +1,4 @@
-import {GetMap, GetParentNodeL3, GetParentPath, Map, MapView, NodeL3, NodeType_Info} from "dm_common";
+import {GetMap, GetParentNodeL3, GetParentPath, DMap, MapView, NodeL3, NodeType_Info} from "dm_common";
 import React, {useCallback, useState} from "react";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
@@ -8,10 +8,10 @@ import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
-import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
-import {BaseComponent, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
+import {BaseComponent, FindReact, GetDOM} from "react-vextensions";
+import {VMenuItem, VMenuStub} from "react-vmenu";
+import {ScrollView} from "react-vscrollview";
 import {store} from "Store/index.js";
 import {Padding} from "./MapUIWrapper.js";
 import {ExpandableBox} from "./Node/ExpandableBox.js";
@@ -69,7 +69,7 @@ type Props = {
 	// from wrapper
 	graphInfo: Graph, forLayoutHelper?: boolean,
 	// could recalc these here, but might as well get from wrapper (it handles it already, due to checking if needs to show the wait-messages)
-	map: Map, mapState: MapState, mapView: MapView, rootNode: NodeL3,
+	map: DMap, mapState: MapState, mapView: MapView, rootNode: NodeL3,
 } & HTMLProps<"div">;
 @Observer
 export class MapUI extends BaseComponent<Props, {}> {

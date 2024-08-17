@@ -2,16 +2,16 @@
 //type __ = typeof import("js-vextensions/Helpers/@ApplyCETypes");
 import "./Utils/PreRunners/Start_0.js";
 //import "babel-polyfill";
-import "web-vcore/nm/webpack-runtime-require";
+import "webpack-runtime-require";
 import "./Utils/ClassExtensions/CE_General.js";
 import "./Utils/PreRunners/Start_1.js";
-import "web-vcore/nm/codemirror";
-import "web-vcore/nm/@opt/codemirror_deep_simplescrollbars";
+import "codemirror";
+import "codemirror/addon/scroll/simplescrollbars.js";
 import "./Utils/UI/CodeMirrorConfig.js";
 // needed to fix odd ts issue (where, if first "import" call for library is in wvc, all subsequent imports of it are assumed to be referencing that under-wvc version)
-import "web-vcore/nm/mobx-graphlink.js";
+import "mobx-graphlink";
 
-import {VURL} from "web-vcore/nm/js-vextensions.js";
+import {VURL} from "js-vextensions";
 import {RootState} from "Store";
 
 // startup (non-hot)

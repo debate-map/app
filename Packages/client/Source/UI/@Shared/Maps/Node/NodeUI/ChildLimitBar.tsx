@@ -1,4 +1,4 @@
-import {ChildLayout, GetChildLayout_Final, GetParentNode, Map, NodeL3, NodeType} from "dm_common";
+import {ChildLayout, GetChildLayout_Final, GetParentNode, DMap, NodeL3, NodeType} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -7,14 +7,14 @@ import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Icon, Observer, RunInAction} from "web-vcore";
-import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {Button, Div, Row} from "react-vcomponents";
+import {BaseComponent, GetDOM} from "react-vextensions";
 import {ChildLimitInfo} from "Store/main/maps.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 
 @Observer
-export class ChildLimitBar extends BaseComponent<{map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, childLimitInfo: ChildLimitInfo}, {}> {
+export class ChildLimitBar extends BaseComponent<{map: DMap, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, childLimitInfo: ChildLimitInfo}, {}> {
 	static HEIGHT = 36;
 	render() {
 		const {map, node, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo} = this.props;

@@ -1,4 +1,4 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema} from "mobx-graphlink";
 
 export class EquationAttachment {
 	constructor(data?: Partial<EquationAttachment>) {

@@ -1,5 +1,5 @@
-import {Column, Switch} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Column, Switch} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {Observer, PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
 import React from "react";

@@ -5,8 +5,8 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, GetAnchorNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {ACTSetAnchorNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {RunInAction} from "web-vcore";
-import {Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, NN, Vector2} from "js-vextensions";
+import {GetAsync} from "mobx-graphlink";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 //let lastMapID: string|n;

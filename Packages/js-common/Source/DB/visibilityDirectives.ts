@@ -1,5 +1,5 @@
-/*import {IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink";
+/*import {IsNaN} from "js-vextensions";
+import {CreateAccessor, GetDoc} from "mobx-graphlink";
 import {AccessPolicy} from "./accessPolicies/@AccessPolicy.js";
 import {NodeLink} from "./nodeLinks/@NodeLink.js";
 import {VisibilityDirective} from "./visibilityDirectives/@VisibilityDirective.js";

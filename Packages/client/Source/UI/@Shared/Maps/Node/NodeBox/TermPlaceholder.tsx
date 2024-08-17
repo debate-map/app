@@ -1,8 +1,8 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus} from "react-vextensions";
 import {HSLA, Observer} from "web-vcore";
 import {GetTerm} from "dm_common";
 import {SLMode} from "UI/@SL/SL.js";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
 @Observer

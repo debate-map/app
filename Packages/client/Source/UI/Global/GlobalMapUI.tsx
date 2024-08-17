@@ -1,4 +1,4 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus} from "react-vextensions";
 import {PageContainer, Observer} from "web-vcore";
 import {GetMap, globalMapID} from "dm_common";
 import {MapUIWrapper} from "UI/@Shared/Maps/MapUIWrapper.js";

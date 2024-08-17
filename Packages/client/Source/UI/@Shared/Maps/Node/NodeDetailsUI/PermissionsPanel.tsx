@@ -2,8 +2,8 @@ import {GetAccessPolicy} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {Observer} from "web-vcore";
-import {Button, Pre, RowLR} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {Button, Pre, RowLR} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 @Observer

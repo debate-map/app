@@ -1,7 +1,7 @@
 import {GetOpenMapID} from "Store/main";
 import {GetMap, GetTimeline, GetTimelineSteps, GetTimelineStep, TimelineStep} from "dm_common";
-import {emptyArray} from "web-vcore/nm/js-vextensions";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {emptyArray} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetMapState, GetNodeRevealHighlightTime} from "../$mapState.js";
 import {GetPlaybackVisiblePathRevealTimes} from "./ForEffects.js";
 

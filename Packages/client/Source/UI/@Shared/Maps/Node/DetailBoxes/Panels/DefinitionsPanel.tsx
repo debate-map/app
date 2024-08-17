@@ -1,7 +1,7 @@
-import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Text} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {Link, Observer, RunInAction} from "web-vcore";
-import {NodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
+import {NodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, DMap} from "dm_common";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import React, {Fragment} from "react";
 import {GetSegmentsForTerms} from "../../NodeBox/TitlePanel.js";
@@ -10,7 +10,7 @@ const termsPlaceholder = [];
 
 @Observer
 export class DefinitionsPanel extends BaseComponentPlus(
-	{} as {show: boolean, map: Map|n, node: NodeL2, path: string, hoverTermIDs?: string[]|n, openTermIDs?: string[]|n, onHoverTerm?: (termIDs: string[])=>void, onClickTerm?: (termIDs: string[])=>void},
+	{} as {show: boolean, map: DMap|n, node: NodeL2, path: string, hoverTermIDs?: string[]|n, openTermIDs?: string[]|n, onHoverTerm?: (termIDs: string[])=>void, onClickTerm?: (termIDs: string[])=>void},
 	{/* localHoverTerm: Term, localClickTerm: Term */},
 ) {
 	render() {

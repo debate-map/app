@@ -1,5 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "js-vextensions";
+import {DB, Field, MGLClass} from "mobx-graphlink";
 import {ChildOrdering} from "../nodeRatings.js";
 import {ChildLayout} from "../nodes/@NodeRevision.js";
 
@@ -9,9 +9,10 @@ import {ChildLayout} from "../nodes/@NodeRevision.js";
 	global = "global",
 }*/
 
+// note: DMap = DebateMap (using just "Map" causes ambiguity for vscode's auto-import logic, and causes SWC's minifier to rename the class to `Map1`)
 @MGLClass({table: "maps", schemaDeps: ["NodeRevision"]})
-export class Map {
-	constructor(initialData: {name: string} & Partial<Map>) {
+export class DMap {
+	constructor(initialData: {name: string} & Partial<DMap>) {
 		CE(this).VSet(initialData);
 		// this.createdAt = Date.now();
 		/*if (!("requireMapEditorsCanEdit" in initialData)) {

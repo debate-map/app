@@ -1,9 +1,9 @@
-import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "js-vextensions";
+import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {MediaAttachment, GetMedia, GetMediasByURL, HasModPermissions, MeID, GetUser, Media, AttachmentTarget} from "dm_common";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Validate} from "mobx-graphlink";
 import {Link, Observer, InfoButton} from "web-vcore";
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";

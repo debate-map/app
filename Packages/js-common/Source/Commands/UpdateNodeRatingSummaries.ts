@@ -1,4 +1,4 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
 import {NodeL1, RatingSummary} from "../DB/nodes/@Node.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";

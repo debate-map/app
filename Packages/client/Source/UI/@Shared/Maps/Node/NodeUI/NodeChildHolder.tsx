@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, DMap, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -11,10 +11,10 @@ import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
-import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
-import {Column} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "@hello-pangea/dnd";
+import {Column} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
@@ -22,7 +22,7 @@ import {ChildLimitBar} from "./ChildLimitBar.js";
 import {GetMeasurementInfoForNode} from "./NodeMeasurer.js";
 
 type Props = {
-	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, showEvenIfParentNotExpanded: boolean, group: ChildGroup,
+	map: DMap, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, showEvenIfParentNotExpanded: boolean, group: ChildGroup,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 	forLayoutHelper: boolean,

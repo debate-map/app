@@ -1,6 +1,6 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, CreateAccessor, GetDocs, NoID, Validate, AddSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {observable} from "web-vcore/nm/mobx.js";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray, GetValues} from "js-vextensions";
+import {GetDoc, CreateAccessor, GetDocs, NoID, Validate, AddSchema} from "mobx-graphlink";
+import {observable} from "mobx";
 import {GetRatingTypeInfo, NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
@@ -11,7 +11,7 @@ import {NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
-import {ChildGroup, Map, NodeRevision} from "../DB.js";
+import {ChildGroup, DMap, NodeRevision} from "../DB.js";
 
 export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
 	const node = GetNode(nodeID);
@@ -107,7 +107,7 @@ The final ordering-type is determined by the first provided value (ie. not set t
 
 Note: If children have identical ordering values (eg. by votes, but neither has votes), then they're sub-sorted by manual-ordering data.
 `.AsMultiline(0);
-export function GetChildOrdering_Final(parentNode: NodeL2, childGroup: ChildGroup, map?: Map, userOverride?: ChildOrdering) {
+export function GetChildOrdering_Final(parentNode: NodeL2, childGroup: ChildGroup, map?: DMap, userOverride?: ChildOrdering) {
 	let result = parentNode.type == NodeType.argument && childGroup == ChildGroup.generic ? ChildOrdering.manual : ChildOrdering.votes;
 	if (map?.extras.defaultChildOrdering) result = map.extras.defaultChildOrdering;
 	if (parentNode.current.displayDetails?.childOrdering) result = parentNode.current.displayDetails.childOrdering;

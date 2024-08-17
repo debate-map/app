@@ -1,5 +1,5 @@
-import {Assert, VURL, ModifyString, ATS, ToInt} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, VURL, ModifyString, ATS, ToInt} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";

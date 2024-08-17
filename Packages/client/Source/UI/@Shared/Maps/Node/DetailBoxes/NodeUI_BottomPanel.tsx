@@ -1,15 +1,15 @@
-import {Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
+import {DMap, NodeL3, NodeType, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, ES, Observer, RunInAction} from "web-vcore";
-import chroma from "web-vcore/nm/chroma-js.js";
+import chroma from "chroma-js";
 //import classNames from "classnames";
-import {GetValues, NN} from "web-vcore/nm/js-vextensions.js";
-import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import ReactDOM from "web-vcore/nm/react-dom.js";
-import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {GetValues, NN} from "js-vextensions";
+import {BailInfo, SlicePath} from "mobx-graphlink";
+import ReactDOM from "react-dom";
+import {BaseComponentPlus, UseEffect} from "react-vextensions";
 import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
@@ -28,7 +28,7 @@ export const nodeBottomPanel_minWidth = 600;
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
-		map: Map|n, node: NodeL3, path: string, parent: NodeL3|n,
+		map: DMap|n, node: NodeL3, path: string, parent: NodeL3|n,
 		width: number|string|n,
 		minWidth: number|n, // is this still needed?
 		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,

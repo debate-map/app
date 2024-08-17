@@ -1,7 +1,7 @@
 import {Media, NodeL1, NodeLink, NodePhrasing, NodeRevision, Term} from "dm_common";
 import {makeObservable} from "mobx";
 import {O} from "web-vcore";
-import {ClassKeys} from "web-vcore/nm/mobx-graphlink.js";
+import {ClassKeys} from "mobx-graphlink";
 
 export enum SubtreeOperation {
 	export = "export",

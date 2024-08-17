@@ -5,8 +5,8 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker";
 import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command";
 import {ES, Observer, Slider} from "web-vcore";
-import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Select, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {RatingsPanel_Old} from "./RatingsPanel_Old";
 
 type RatingsPanel_Props = {node: NodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};

@@ -4,10 +4,10 @@ import {SubtreeDataToString_CSV_Quotes, csv_quotes_includeKeys} from "Utils/Data
 import {DataExchangeFormat, DataExchangeFormat_entries_supportedBySubtreeExporter} from "Utils/DataFormats/DataExchangeFormat.js";
 import React from "react";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {Clone, ModifyString, StartDownload} from "web-vcore/nm/js-vextensions.js";
-import {GetSchemaJSON, TableNameToDocSchemaName} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, CheckBox, Column, Row, RowLR, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Clone, ModifyString, StartDownload} from "js-vextensions";
+import {GetSchemaJSON, TableNameToDocSchemaName} from "mobx-graphlink";
+import {Button, CheckBox, Column, Row, RowLR, Select, Text, TextArea} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {MI_SharedProps} from "../../NodeUI_Menu.js";
 import {useSubtreeRetrievalQueryOrAccessors} from "../MI_SubtreeOps.js";
 import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";

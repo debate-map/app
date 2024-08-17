@@ -1,12 +1,12 @@
-import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, Assert} from "web-vcore/nm/js-vextensions.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions.js";
+import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, Assert} from "js-vextensions";
+import {runInAction} from "mobx";
+import {Column, Row, Select} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {NodeL1, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeLink, GetAccessPolicy, Map, NodeL2} from "dm_common";
-import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
+import {NodeL1, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeLink, GetAccessPolicy, DMap, NodeL2} from "dm_common";
+import {AssertValidate, Validate} from "mobx-graphlink";
 import React from "react";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
@@ -17,7 +17,7 @@ import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 import {SLMode_SFI} from "../../../@SL/SL.js";
 
 type Props = {
-	map: Map|n, parent: NodeL3|n,
+	map: DMap|n, parent: NodeL3|n,
 	baseData: NodeL1,
 	baseRevisionData: NodeRevision,
 	baseLinkData: NodeLink|n,

@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
 export class GuidePanel extends BaseComponent<{}, {}> {

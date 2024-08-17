@@ -1,13 +1,13 @@
-import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput, TimeSpanInput, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput, TimeSpanInput, Text} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {GetUpdates, InfoButton} from "web-vcore";
 import {Timeline} from "dm_common";
 import React from "react";
 import {RunCommand_UpdateTimeline} from "Utils/DB/Command";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI";
 
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {

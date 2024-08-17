@@ -1,9 +1,9 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "web-vcore/nm/js-vextensions.js";
-import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "web-vcore/nm/mobx-graphlink.js";
-import Moment from "web-vcore/nm/moment";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "js-vextensions";
+import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "mobx-graphlink";
+import Moment from "moment";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
-import {Map} from "../maps/@Map.js";
+import {DMap} from "../maps/@Map.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
 import {GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
@@ -376,7 +376,7 @@ export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|un
 });
 
 /** Level-3 function to obtain node's display-text; gets the final display-text for a node. (doesn't include equation explanation, quote sources, etc., since those are obtained and displayed elsewhere) */
-export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixTextHandling = true): string=>{
+export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: DMap|n, form?: ClaimForm, allowPrefixTextHandling = true): string=>{
 	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
 	let resultTitle = rawTitle || missingMessage;
 
@@ -497,10 +497,10 @@ export const IsPremiseOfArgument = CreateAccessor((node: NodeL1, parent: NodeL1|
 	return node.type == NodeType.claim && parent.type == NodeType.argument;
 });
 
-export function GetToolbarItemsToTryToShow(map?: Map|n) {
+export function GetToolbarItemsToTryToShow(map?: DMap|n) {
 	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "prefix"}, {panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
 }
-export function GetToolbarItemsToShow(node: NodeL2, path?: string|n, map?: Map|n) {
+export function GetToolbarItemsToShow(node: NodeL2, path?: string|n, map?: DMap|n) {
 	if (!IsNodeToolbarEnabled(map)) return [];
 
 	let itemsToTryToShow = GetToolbarItemsToTryToShow(map);

@@ -1,8 +1,8 @@
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "react-vscrollview";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, PageContainer, Observer, SubNavBarButton, SubNavBar} from "web-vcore";
 import React from "react";
-import {Switch} from "web-vcore/nm/react-vcomponents";
+import {Switch} from "react-vcomponents";
 import {StreamUI} from "./Social/StreamUI";
 import {store} from "../Store/index.js";
 

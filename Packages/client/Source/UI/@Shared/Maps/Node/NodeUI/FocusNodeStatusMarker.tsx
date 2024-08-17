@@ -1,4 +1,4 @@
-import {GetNodeEffects, GetTimelineSteps, IsNodeEffectEmpty, Map, NodeEffect, NodeL3, TimelineStep, TimelineStepEffect} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsNodeEffectEmpty, DMap, NodeEffect, NodeL3, TimelineStep, TimelineStepEffect} from "dm_common";
 import {Clone, E, Vector2} from "js-vextensions";
 import React from "react";
 import {GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
@@ -6,13 +6,13 @@ import {GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange} from "Store/mai
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {Observer} from "web-vcore";
-import {Button, Column, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {ShowVMenu, VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Button, Column, Row, Spinner, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ShowVMenu, VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 
 @Observer
-export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3, path: string}, {}> {
+export class FocusNodeStatusMarker extends BaseComponent<{map: DMap, node: NodeL3, path: string}, {}> {
 	render() {
 		const {map, node, path} = this.props;
 

@@ -1,6 +1,6 @@
 import {GetNode, GetNodeChildren, GetNodeEffects, GetTimelineStepTimesFromStart, GetTimelineSteps, TimelineStep, TimelineStepEffect} from "dm_common";
-import {Assert, CE, emptyArray, emptyArray_forLoading, emptyObj} from "web-vcore/nm/js-vextensions";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {Assert, CE, emptyArray, emptyArray_forLoading, emptyObj} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetPlaybackInfo, GetPlaybackTime} from "./Basic.js";
 
 export class PlaybackEffect extends TimelineStepEffect {

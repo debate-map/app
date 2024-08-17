@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {VReactMarkdown, PageContainer} from "web-vcore";
 import {slackInviteLink} from "UI/More/Links.js";
 
@@ -24,7 +24,7 @@ On a personal level, I've become very passionate about the project, and I plan t
 There are *many* features and outreach ideas that I have planned; a small number of these can be seen on the [feedback page](/feedback).
 
 Anyway, I hope all of you reading this are interested in it as well! It will need a healthy community to expand and become relevant/useful to the general public;
-I'm confident that it will someday become an invaluable tool for bringing clarity and efficiency to online discussions, so I'll do my best to faithfully work on it until then. 
+I'm confident that it will someday become an invaluable tool for bringing clarity and efficiency to online discussions, so I'll do my best to faithfully work on it until then.1
 `;
 
 @SimpleShouldUpdate

@@ -1,11 +1,11 @@
-import {Button, Column, Row, Switch, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, Switch, Text} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import React, {useState} from "react";
 import gql from "graphql-tag";
-import {useMutation, useSubscription} from "web-vcore/nm/@apollo/client.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {useMutation, useSubscription} from "@apollo/client";
+import {ShowMessageBox} from "react-vmessagebox";
 
 export class MigrationLogEntry {
 	text: string;

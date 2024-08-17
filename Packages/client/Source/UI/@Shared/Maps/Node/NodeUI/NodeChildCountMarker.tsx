@@ -1,17 +1,17 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus} from "react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/Node/NodeUI.js";
-import {E, emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {E, emptyArray} from "js-vextensions";
 import React from "react";
 import {Column} from "react-vcomponents";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
-import {ChangeType, Map} from "dm_common";
+import {ChangeType, DMap} from "dm_common";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits";
 import {Observer} from "web-vcore";
 import {SLMode} from "UI/@SL/SL.js";
 import {NodeChangesMarker} from "./NodeChangesMarker.js";
 
 @Observer
-export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {map: Map, path: string, childCount: number, childrenLoading: boolean, textOutline?: string}, {}) {
+export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {map: DMap, path: string, childCount: number, childrenLoading: boolean, textOutline?: string}, {}) {
 	render() {
 		const {map, path, childCount, childrenLoading, textOutline} = this.props;
 		if (childCount == 0 && !childrenLoading) return null;

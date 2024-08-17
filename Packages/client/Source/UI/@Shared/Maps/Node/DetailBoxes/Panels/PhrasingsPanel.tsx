@@ -1,12 +1,12 @@
-import {Button, Column, Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Pre, Row, Select} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {InfoButton, Observer} from "web-vcore";
-import {NodeL2, GetNodePhrasings, NodePhrasing, NodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, NodeType, Map, GetAccessPolicy, CanAddPhrasing, NodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
-import {GetEntries} from "web-vcore/nm/js-vextensions";
+import {NodeL2, GetNodePhrasings, NodePhrasing, NodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, NodeType, DMap, GetAccessPolicy, CanAddPhrasing, NodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
+import {GetEntries} from "js-vextensions";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
-import {BailIfNull, GetDoc} from "web-vcore/nm/mobx-graphlink";
+import {BailIfNull, GetDoc} from "mobx-graphlink";
 import {ShowAddPhrasingDialog} from "../../../../../Database/Phrasings/PhrasingDetailsUI.js";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel.js";
 import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeBox/TitlePanel.js";
@@ -14,7 +14,7 @@ import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeBox/TitlePan
 const Phrasing_FakeID = "FAKE";
 
 @Observer
-export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map: Map|n, node: NodeL3, path: string}, {selectedPhrasingType: NodePhrasingType.standard, selectedPhrasingID: null as string|n}) {
+export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map: DMap|n, node: NodeL3, path: string}, {selectedPhrasingType: NodePhrasingType.standard, selectedPhrasingID: null as string|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		const {selectedPhrasingType, selectedPhrasingID} = this.state;
@@ -66,7 +66,7 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 }
 
 @Observer
-export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: NodeL3, map: Map|n, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
+export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: NodeL3, map: DMap|n, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
 	render() {
 		const {phrasing, node, map, index, selected, toggleSelected} = this.props;
 		const termsToSearchFor = (phrasing.terms?.map(attachment=>{
@@ -104,7 +104,7 @@ export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: No
 	}
 }
 
-class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasing, node: NodeL3, map: Map|n}, {}) {
+class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasing, node: NodeL3, map: DMap|n}, {}) {
 	render() {
 		const {phrasing, node, map} = this.props;
 		const backgroundColor = GetNodeColor({type: NodeType.category} as any);

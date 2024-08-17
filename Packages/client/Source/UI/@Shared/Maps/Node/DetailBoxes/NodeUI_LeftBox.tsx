@@ -1,15 +1,15 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, Map, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, DMap, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {Chroma, DefaultLoadingUI, Observer} from "web-vcore";
-import chroma from "web-vcore/nm/chroma-js.js";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import ReactDOM from "web-vcore/nm/react-dom.js";
-import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, cssHelper, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import chroma from "chroma-js";
+import {E} from "js-vextensions";
+import {BailInfo, SlicePath} from "mobx-graphlink";
+import ReactDOM from "react-dom";
+import {Button, Span} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, cssHelper, UseEffect} from "react-vextensions";
 import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
@@ -18,7 +18,7 @@ import {SLMode_SFI} from "../../../../@SL/SL.js";
 export const NodeUI_LeftBox_width = 130;
 
 type Props = {
-	map: Map|n, path: string, node: NodeL3,
+	map: DMap|n, path: string, node: NodeL3,
 	panelsPosition?: "left" | "below", local_nodeView?: NodeView|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
@@ -176,7 +176,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 }
 
 type PanelButton_Props = {
-	map: Map|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
+	map: DMap|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
 	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
 };
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {

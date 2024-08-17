@@ -1,14 +1,14 @@
-import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map, Me} from "dm_common";
+import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, DMap, Me} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
-import {E, ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {Button, Text, Column, Row, Select, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {E, ToNumber} from "js-vextensions";
+import {Button, Text, Column, Row, Select, TextInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, UseCallback} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import Moment from "moment";
 import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, SLMode_Main, SLMode_Climate, SLMode_GAD, GetMapNamePrefixFilterKey, namePrefixesForMapsToShowOnlyInAssociatedSkin} from "./@SL/SL";
 import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
@@ -176,7 +176,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 	}
 }
 
-function filterMaps(maps: Map[], tableData: TableData) {
+function filterMaps(maps: DMap[], tableData: TableData) {
 	let output = maps.slice();
 	if (tableData.columnSort) {
 		switch (tableData.columnSort) {

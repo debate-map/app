@@ -3,11 +3,11 @@ import React, {useState} from "react";
 import {store} from "Store";
 import {LogGroup} from "Store/main/logs/LogGroup";
 import {Observer} from "web-vcore";
-import {useSubscription} from "web-vcore/nm/@apollo/client.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {useSubscription} from "@apollo/client";
+import {observer} from "mobx-react";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {ScrollView} from "react-vscrollview";
 import {LogEntryUI} from "./LogEntryUI.js";
 import {LogGroupsUI} from "./LogGroupsUI.js";
 

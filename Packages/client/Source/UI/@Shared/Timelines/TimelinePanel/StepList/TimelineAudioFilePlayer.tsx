@@ -1,16 +1,15 @@
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {GetTimelineStepTimesFromStart, Map, Timeline, TimelineStep} from "dm_common";
+import {GetTimelineStepTimesFromStart, DMap, Timeline, TimelineStep} from "dm_common";
 import {useEffect, useMemo, useState} from "react";
 import {Row} from "react-vcomponents";
-import WaveSurfer from "wavesurfer.js";
 import {Observer} from "web-vcore";
-import {Assert, GetPercentFromXToY, Lerp} from "web-vcore/nm/js-vextensions";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Assert, GetPercentFromXToY, Lerp} from "js-vextensions";
+import {BaseComponent} from "react-vextensions";
 
 @Observer
-export class TimelineAudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline, steps: TimelineStep[], audioFile: File, playSpeedGetter: ()=>number, isPlayingGetter: ()=>boolean, timeGetter: ()=>number}, {}> {
+export class TimelineAudioFilePlayer extends BaseComponent<{map: DMap, timeline: Timeline, steps: TimelineStep[], audioFile: File, playSpeedGetter: ()=>number, isPlayingGetter: ()=>boolean, timeGetter: ()=>number}, {}> {
 	audioEl: HTMLAudioElement|n;
 
 	render() {

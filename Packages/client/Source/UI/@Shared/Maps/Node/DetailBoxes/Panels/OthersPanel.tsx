@@ -1,19 +1,19 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {RunCommand_UpdateNodeLink, RunCommand_UpdateNode} from "Utils/DB/Command.js";
 import {Observer} from "web-vcore";
-import {Assert, E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Assert, E, GetEntries, ModifyString} from "js-vextensions";
+import {SlicePath} from "mobx-graphlink";
+import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TextInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
 import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap|n, node: NodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;

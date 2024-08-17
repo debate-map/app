@@ -4,15 +4,15 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
 import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
-import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
-import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "js-vextensions";
+import {RunInAction} from "mobx-graphlink";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "@hello-pangea/dnd";
+import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM} from "react-vextensions";
+import {ShowVMenu, VMenuItem, VMenuStub} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {StepTab} from "Store/main/maps/mapStates/@MapState.js";
 import React, {useState} from "react";
@@ -27,8 +27,8 @@ WaitXThenRun(0, () => {
 	document.body.appendChild(portal);
 }); */
 
-export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
-export type StepEditorUI_SharedProps = {map: Map, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
+export type StepEditorUIProps = {index: number, map: DMap, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
+export type StepEditorUI_SharedProps = {map: DMap, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
 
 export async function AddTimelineStep_Simple(timelineID: string, steps: TimelineStep[], insertIndex: number) {
 	if (MeID() == null) return ShowSignInPopup();

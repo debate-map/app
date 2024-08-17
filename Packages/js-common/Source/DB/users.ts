@@ -1,4 +1,4 @@
-import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
 import {User} from "./users/@User.js";
 
 export const MeID = CreateAccessor({ctx: 1}, function(): string|n {

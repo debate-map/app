@@ -1,8 +1,8 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {BaseComponentPlus} from "react-vextensions";
+import {VMenuItem} from "react-vmenu";
+import {ShowMessageBox} from "react-vmessagebox";
 import {Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E} from "js-vextensions";
 import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_DeleteNode} from "Utils/DB/Command.js";

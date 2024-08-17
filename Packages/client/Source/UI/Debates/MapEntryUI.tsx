@@ -1,18 +1,18 @@
-import {VURL, E} from "web-vcore/nm/js-vextensions.js";
-import Moment from "web-vcore/nm/moment";
-import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VURL, E} from "js-vextensions";
+import Moment from "moment";
+import {Column, Div, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, GetMapNamePrefixFilterKey} from "UI/@SL/SL.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {GetUser, Map} from "dm_common";
+import {runInAction} from "mobx";
+import {GetUser, DMap} from "dm_common";
 import {columnWidths} from "UI/Debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 
 @Observer
-export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
+export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: DMap}, {}) {
 	render() {
 		const {index, last, map} = this.props;
 		const creator = map && GetUser(map.creator);

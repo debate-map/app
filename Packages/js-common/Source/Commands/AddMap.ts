@@ -1,8 +1,8 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {E} from "js-vextensions";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, UUID} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {Map} from "../DB/maps/@Map.js";
+import {DMap} from "../DB/maps/@Map.js";
 import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
@@ -15,11 +15,11 @@ import {GetFinalAccessPolicyForNewEntry} from "../DB.js";
 @UserEdit
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
-		$map: {$ref: "Map"},
+		$map: {$ref: "DMap"},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {$ref: "UUID"}}),
 })
-export class AddMap extends Command<{map: Map}, {id: UUID}> {
+export class AddMap extends Command<{map: DMap}, {id: UUID}> {
 	sub_addNode: AddNode;
 	Validate() {
 		const {map} = this.payload;
@@ -43,7 +43,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
 
 		map.rootNode = this.sub_addNode.payload.node.id;
-		AssertValidate("Map", map, "Map invalid");
+		AssertValidate("DMap", map, "Map invalid");
 
 		this.returnData = {id: map.id};
 	}
