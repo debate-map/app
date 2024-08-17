@@ -75,6 +75,7 @@ pub enum ChildGroup {
 	#[graphql(name = "generic")] generic,
 	#[graphql(name = "truth")] truth,
 	#[graphql(name = "relevance")] relevance,
+	#[graphql(name = "comment")] comment,
 	// testing
 	#[graphql(name = "neutrality")] neutrality,
 	#[graphql(name = "freeform")] freeform,

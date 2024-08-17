@@ -135,6 +135,7 @@ enum AddChildDialogTab {
 	Claim,
 }
 export async function ShowAddChildDialog(parentPath: string, config: NewChildConfig, userID: string, mapID: string|n) {
+	console.log(parentPath, config, userID, mapID);
 	const helper = new AddChildHelper({parentPath, config, title: "", userID, mapID});
 	const prep = await GetAsync(()=>{
 		helper.Prepare();

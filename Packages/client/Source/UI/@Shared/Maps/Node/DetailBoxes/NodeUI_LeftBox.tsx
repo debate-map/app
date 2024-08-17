@@ -14,9 +14,7 @@ import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 import {SLMode_SFI} from "../../../../@SL/SL.js";
-
 export const NodeUI_LeftBox_width = 130;
-
 type Props = {
 	map: DMap|n, path: string, node: NodeL3,
 	panelsPosition?: "left" | "below", local_nodeView?: NodeView|n,
@@ -159,6 +157,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 						text={`Details${IsUserCreatorOrMod(MeID(), node) ? " (edit)" : ""}`}/>
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>}
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="tags" text="Tags" lastButtonInSeries={SLMode_SFI}/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="comments" text="Comments" lastButtonInSeries={SLMode_SFI}/>
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="others" text="Others" lastButtonInSeries={true}/>}
 					{/*<Button text="..."
 						style={{
@@ -222,3 +221,4 @@ class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 		);
 	}
 }
+

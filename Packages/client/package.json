@@ -22,6 +22,7 @@
     "dm_common": "workspace:*",
     "katex": "^0.9.0",
     "keycode": "^2.1.8",
+    "minidenticons": "^4.2.1",
     "react": "16.9.0",
     "react-color": "^2.14.1",
     "react-katex": "^2.0.2",

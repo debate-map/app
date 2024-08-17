@@ -31,8 +31,7 @@ class ObservedValues {
 		Object.assign(this, data);
 	}
 	innerUIHeight = 0;
-	childrensHeight = 0;
-	height = 0;
+	childrensHeight = 0; height = 0;
 }
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
@@ -313,7 +312,6 @@ export class NodeUI extends BaseComponentPlus(
 		this.lastObservedValues = obs;
 	};
 }
-
 export enum LimitBarPos {
 	above = "above",
 	below = "below",

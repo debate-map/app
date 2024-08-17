@@ -64,33 +64,54 @@ export class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
 	markdown: Remarkable;
 	InitMarkdown(props) {
 		let {extraInfo, markdownOptions, rendererOptions} = props;
-		markdownOptions = markdownOptions || {html: true};
+		markdownOptions = markdownOptions || {};
 		this.markdown = new Remarkable(markdownOptions);
 
-		const rendererOptions_final = {...rendererOptions};
-		rendererOptions_final.components = {...rendererOptions_final.components};
-		if (rendererOptions_final.components.a == null) {
-			rendererOptions_final.components.a = (props=>{
-				let {href, target, ...rest} = props;
-				const toURL = VURL.Parse(href);
-				if (target == "") target = null; // normalize falsy target
-				if (target == null && toURL.domain != GetCurrentURL().domain) {
-					target = "_blank";
-				}
-				return <Link {...FilterOutUnrecognizedProps(rest, "a")} to={href} target={target}/>;
-			});
+		const rendererOptions_final = {
+			...rendererOptions,
+			components: {
+				// modify links to open in new tab, if they're to external sites
+				a: (props=>{
+					let {href, target, ...rest} = props;
+					const toURL = VURL.Parse(href);
+					if (target == "") target = null; // normalize falsy target
+					if (target == null && toURL.domain != GetCurrentURL().domain) {
+						target = "_blank";
+					}
+					return <Link {...FilterOutUnrecognizedProps(rest, "a")} to={href} target={target}/>;
+				}),
+
+				// disallow images by default (too easy of a means to vandalize; also, can be used to track user IPs)
+				// (if caller wants to enable images, they can do so by setting rendererOptions.components.img to undefined, enabling default renderer)
+				img: (props=>{
+					const {src, alt, title, ...rest} = props;
+					//return <img src={src} alt={alt} title={title} {...rest}/>;
+					return null;
+				}),
+
+				/*htmlblock: (props=>{
+					let {content} = props;
+					return <div dangerouslySetInnerHTML={{__html: content}}/>;
+				},
+				htmltag: (props=>{
+					let {content} = props;
+					return <span dangerouslySetInnerHTML={{__html: content}}/>;
+				}),*/
+
+				...rendererOptions?.components,
+
+				/*tokens: {
+					htmlblock: "htmlblock",
+					htmltag: "htmltag",
+					...rendererOptions?.components?.tokens,
+				},*/
+			},
+		};
+
+		// allow caller to reset a component's renderer to its default values, by setting it to undefined
+		for (const [key, value] of Object.entries(rendererOptions_final.components).filter(a=>a[1] === undefined)) {
+			delete rendererOptions_final.components[key];
 		}
-		/*if (rendererOptions_final.components.htmlblock == null) rendererOptions_final.components.htmlblock = (props=> {
-			let {content} = props;
-			return <div dangerouslySetInnerHTML={{__html: content}}/>;
-		});
-		if (rendererOptions_final.components.htmltag == null) rendererOptions_final.components.htmltag = (props=> {
-			let {content} = props;
-			return <span dangerouslySetInnerHTML={{__html: content}}/>;
-		});
-		rendererOptions_final.tokens = {...rendererOptions_final.tokens};
-		if (rendererOptions_final.tokens.htmlblock == null) rendererOptions_final.tokens.htmlblock = "htmlblock";
-		if (rendererOptions_final.tokens.htmltag == null) rendererOptions_final.tokens.htmltag = "htmltag";*/
 
 		this.markdown.renderer = new RemarkableReactRenderer(rendererOptions_final);
 	}
