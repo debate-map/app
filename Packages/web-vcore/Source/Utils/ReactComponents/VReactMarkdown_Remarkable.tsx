@@ -81,7 +81,7 @@ export class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
 					return <Link {...FilterOutUnrecognizedProps(rest, "a")} to={href} target={target}/>;
 				}),
 
-				// disallow images by default (too easy of a means to vandalize; also, can be used to track user IPs)
+				// disallow images by default (too easy of a means to vandalize; also, could be used to track user IPs)
 				// (if caller wants to enable images, they can do so by setting rendererOptions.components.img to undefined, enabling default renderer)
 				img: (props=>{
 					const {src, alt, title, ...rest} = props;

@@ -203,7 +203,7 @@ export class NodeUI extends BaseComponentPlus(
 		}
 
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
-		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow;
+		const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
 
 		const playback = GetPlaybackInfo();
 		const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;

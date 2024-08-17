@@ -178,7 +178,8 @@ const config /*: Configuration*/ = {
 		app: [path.resolve(__dirname, "./Source/Main.ts")],
 	},
 	output: {
-		filename: "[name].js",
+		//filename: "[name].js?[contenthash]", // commented; doesn't work currently
+		filename: "[name].[contenthash].js", // add hash for cache-busting (easier than ensuring web-server + cdn caching is set up consistently/correctly)
 		path: OUTPUT_PATH,
 	},
 	plugins: [

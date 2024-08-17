@@ -12,9 +12,10 @@ import {ShowVMenu, VMenuItem} from "react-vmenu";
 import {Vector2} from "js-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import Tooltip from "rc-tooltip";
-import {GetAsync} from "mobx-graphlink";
+import {CatchBail} from "mobx-graphlink";
 import keycode from "keycode/index.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
+import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
 const MinidenticonImg = ({username, saturation, lightness, ...props})=>{
 	const svgURI = useMemo(()=>`data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(username, saturation, lightness))}`, [username, saturation, lightness]);
@@ -37,8 +38,13 @@ export class CommentsPanel extends BaseComponentPlus({} as {show: boolean, map?:
 		const rootCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
 		const nodeAccessPolicyID = (map?.nodeAccessPolicy) ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
 		const [value, updateValue] = useState("");
+		const userID = MeID();
 
 		const addComment = async(comment: string, parentNodeID: string)=>{
+			if (userID == null) {
+				ShowSignInPopup();
+				return false;
+			}
 			const commentNode = new NodeL1({
 				type: NodeType.comment,
 				accessPolicy: nodeAccessPolicyID,
@@ -57,6 +63,7 @@ export class CommentsPanel extends BaseComponentPlus({} as {show: boolean, map?:
 				link: nodeLink,
 				mapID: map ? map.id : null,
 			});
+			return true;
 		};
 
 		return (
@@ -67,21 +74,20 @@ export class CommentsPanel extends BaseComponentPlus({} as {show: boolean, map?:
 				}
 				<CommentInput inputType={"Comment"} value={value}
 					onSubmit={async()=>{
-						await addComment(value, node.id);
-						// TODO: Add some sort of loading on the comment button that indicates it's going out(as the addComment returns a promise)
-						updateValue("");
-					}} onCancel={()=>{
-						updateValue("");
-					}} onValueChange={newVal=>{
-						updateValue(newVal);
-					}}/>
+						// TODO: Add some sort of loading on the comment button that indicates it's going out (as the addComment returns a promise)
+						const success = await addComment(value, node.id);
+						// only clear the comment input if the comment is successfully added
+						if (success) updateValue("");
+					}}
+					onCancel={()=>updateValue("")}
+					onValueChange={newVal=>updateValue(newVal)}/>
 			</ScrollView>
 		);
 	}
 }
 
 @Observer
-export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (comment: string, parentNodeID: string) => Promise<void>, node: NodeL1, isRootNode: boolean, isLastNode: boolean},
+export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (comment: string, parentNodeID: string)=>Promise<boolean>, node: NodeL1, isRootNode: boolean, isLastNode: boolean},
 	{expand: boolean, value: string, inputType: "Reply" | "Edit", disableReply: boolean}> {
 
 	constructor(props) {
@@ -112,8 +118,8 @@ export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (co
 			await RunCommand_DeleteNodeRevision({id: oldNodeRevisionID});
 			this.clearAndCloseInput();
 		} else if (this.state.inputType === "Reply") {
-			await this.props.addComment(this.state.value, this.props.node.id);
-			this.clearAndCloseInput();
+			const success = await this.props.addComment(this.state.value, this.props.node.id);
+			if (success) this.clearAndCloseInput();
 		}
 	};
 
@@ -167,6 +173,9 @@ export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (co
 				}
 			}
 		};
+		// use CatchBail, so that comment-node's ui can display even before all deletion-checks are done (while that info is loading, it shows as undeleteable)
+		const deleteError = CatchBail("Still loading...", ()=>commentNodeError(nodel2, isRootNode));
+		const canDelete = deleteError == null;
 
 		return (
 			<div style={{display: "flex", marginTop: "12px"}}>
@@ -190,7 +199,7 @@ export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (co
 						<div style={{overflowWrap: "break-word", background: "rgba(255,255,255,.15)", padding: "2px 5px", borderRadius: "5px"}}>
 							<VReactMarkdown_Remarkable source={nodeRevision?.phrasing.text_base!} className="selectable"/>
 						</div>
-						<ActionButtons disableReply={disableReply} disableDelete={!!commentNodeError(nodel2!, true)} onUpvoteClick={this.onUpvoteClick} onDownvoteClick={this.onDownvoteClick} onToggleReplyClick={this.onReplyClick} onDeleteClick={()=>this.onDeleteClick(node.id)} onEditClick={()=>this.onEditClick(nodeRevision?.phrasing.text_base!)} currentNodeCreator={node.creator}/>
+						<ActionButtons disableReply={disableReply} disableDelete={!canDelete} onUpvoteClick={this.onUpvoteClick} onDownvoteClick={this.onDownvoteClick} onToggleReplyClick={this.onReplyClick} onDeleteClick={()=>this.onDeleteClick(node.id)} onEditClick={()=>this.onEditClick(nodeRevision?.phrasing.text_base!)} currentNodeCreator={node.creator}/>
 						{expand && (
 							<CommentInput inputType={inputType} value={value} onSubmit={()=>this.handleSubmit(node.id, nodeRevision?.id)} onCancel={this.clearAndCloseInput} onValueChange={this.updateValue}/>
 						)}
@@ -202,7 +211,7 @@ export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (co
 	}
 }
 
-class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvoteClick: () => void, onToggleReplyClick: () => void, onDeleteClick: () => void, onEditClick: () => void, currentNodeCreator: string, disableDelete?: boolean, disableReply?: boolean}, {}> {
+class ActionButtons extends BaseComponent<{onUpvoteClick: ()=>void, onDownvoteClick: ()=>void, onToggleReplyClick: ()=>void, onDeleteClick: ()=>void, onEditClick: ()=>void, currentNodeCreator: string, disableDelete?: boolean, disableReply?: boolean}, {}> {
 	render() {
 		const {onUpvoteClick, onDownvoteClick, onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator, disableDelete, disableReply} = this.props;
 		const buttonStyle = {fontSize: "12px", color: "white", height: "20px"};
@@ -229,7 +238,7 @@ class ActionButtons extends BaseComponent<{onUpvoteClick: () => void, onDownvote
 	}
 }
 
-export class CommentInput extends BaseComponent<{inputType: "Comment" | "Reply" | "Edit", onSubmit: () => Promise<void>, onCancel: () => void, value: string, onValueChange: (newVal: string) => void}, {}> {
+export class CommentInput extends BaseComponent<{inputType: "Comment" | "Reply" | "Edit", onSubmit: ()=>Promise<void>, onCancel: ()=>void, value: string, onValueChange: (newVal: string)=>void}, {}> {
 	ComponentDidMount() {
 		this.textAreaRef?.DOM_HTML?.focus();
 	}
