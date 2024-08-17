@@ -2,7 +2,7 @@ import {E, ObjectCE} from "js-vextensions";
 import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "mobx-graphlink";
 import {ChildGroup, ClaimForm, NodeLink, Polarity} from "../DB/nodeLinks/@NodeLink.js";
 import {GetMap} from "../DB/maps.js";
-import {Map} from "../DB/maps/@Map.js";
+import {DMap} from "../DB/maps/@Map.js";
 import {GetHighestLexoRankUnderParent, GetNodeLinks} from "../DB/nodeLinks.js";
 import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
@@ -92,7 +92,7 @@ export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parentToTra
 	//defaultPayload: {createWrapperArg: true},
 })
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
-	map_data: Map|n;
+	map_data: DMap|n;
 	node_data: NodeL1;
 	newParent_data: NodeL1;
 	orderKeyForOuterNode: string;

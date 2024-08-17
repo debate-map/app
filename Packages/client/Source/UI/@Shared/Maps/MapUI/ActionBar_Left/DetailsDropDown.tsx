@@ -3,7 +3,7 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
-import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeLinks} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, DMap, GetNodeLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
@@ -40,7 +40,7 @@ import {MapDetailsUI} from "../../MapDetailsUI.js";
 }*/
 
 @Observer
-export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: string}> {
+export class DetailsDropDown extends BaseComponent<{map: DMap}, {dataError: string}> {
 	detailsUI: MapDetailsUI|n;
 	// permOptions: PermissionsOptions;
 	render() {

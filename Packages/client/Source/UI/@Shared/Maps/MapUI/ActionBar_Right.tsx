@@ -6,7 +6,7 @@ import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
 import {runInAction} from "mobx";
 import {Observer, HSLA, RunInAction, RunInAction_Set} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {Map, ChildOrdering} from "dm_common";
+import {DMap, ChildOrdering} from "dm_common";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
@@ -16,7 +16,7 @@ import {MapUI} from "../MapUI.js";
 import {actionBarHeight} from "./ActionBar_Left.js";
 
 @Observer
-export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
+export class ActionBar_Right extends BaseComponentPlus({} as {map: DMap, subNavBarWidth: number}, {}) {
 	render() {
 		const {map, subNavBarWidth} = this.props;
 		const mapState = GetMapState.NN(map.id);

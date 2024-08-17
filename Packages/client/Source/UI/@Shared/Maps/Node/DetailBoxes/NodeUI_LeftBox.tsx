@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, Map, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, DMap, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -18,7 +18,7 @@ import {SLMode_SFI} from "../../../../@SL/SL.js";
 export const NodeUI_LeftBox_width = 130;
 
 type Props = {
-	map: Map|n, path: string, node: NodeL3,
+	map: DMap|n, path: string, node: NodeL3,
 	panelsPosition?: "left" | "below", local_nodeView?: NodeView|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
@@ -176,7 +176,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 }
 
 type PanelButton_Props = {
-	map: Map|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
+	map: DMap|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
 	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
 };
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {

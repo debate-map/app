@@ -2,7 +2,7 @@ import {store} from "Store";
 import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
 import {ES, GetAutoElement, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
@@ -85,7 +85,7 @@ class NoVideoPlayer {
 }
 
 @Observer
-export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
+export class StepList extends BaseComponent<{map: DMap, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
 	static instance: StepList|n;
 	constructor(props) {
 		super(props);

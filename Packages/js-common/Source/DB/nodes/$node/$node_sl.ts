@@ -1,6 +1,6 @@
 import {CreateAccessor} from "mobx-graphlink";
 import {GetNodeChildrenL3, GetParentNode} from "../../nodes.js";
-import {Map} from "../../maps/@Map.js";
+import {DMap} from "../../maps/@Map.js";
 import {NodeL2} from "../@Node.js";
 import {ChildLayout, GetChildLayout_Final} from "../@NodeRevision.js";
 import {NodeType} from "../@NodeType.js";
@@ -73,7 +73,7 @@ export function GetExtractedPrefixTextInfo_Base(title: string) {
 	return {matchStr, symbolPrefix, bracketedText, regularText, regularTextWithSymbol};
 }
 /** Note: This function may return prefix-text-extraction contents, even if (in one case) it isn't ultimately shown. (specifically, if extraction would go into toolbar, but that item is disabled) */
-export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm) {
+export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: DMap|n, form?: ClaimForm) {
 	const childLayout = GetChildLayout_Final(node.current, map);
 	const shouldExtract = ShouldExtractPrefixText(childLayout);
 	if (!shouldExtract) return null;

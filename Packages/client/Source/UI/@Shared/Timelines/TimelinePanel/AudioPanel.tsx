@@ -7,7 +7,7 @@ import {useEffect, useMemo, useState} from "react";
 
 import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {GetTimelineSteps, Map, Timeline} from "dm_common";
+import {GetTimelineSteps, DMap, Timeline} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
@@ -35,7 +35,7 @@ class ParseData_Text {
 }
 
 @Observer
-export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}> {
+export class AudioPanel extends BaseComponent<{map: DMap, timeline: Timeline}, {}> {
 	wavesurferRoot: HTMLDivElement|n;
 	render() {
 		const {map, timeline} = this.props;

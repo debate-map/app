@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, ClaimForm, NodeL3, Polarity, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me, GetValidNewChildConfigsUnderParent, GetDisplayTextForNewChildConfig} from "dm_common";
+import {ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, ClaimForm, NodeL3, Polarity, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, DMap, GetChildLayout_Final, GetNodeDisplayText, Me, GetValidNewChildConfigsUnderParent, GetDisplayTextForNewChildConfig} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
@@ -35,7 +35,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?:
 	}
 }
 
-type Props = {map?: Map, node: NodeL3, path: string};
+type Props = {map?: DMap, node: NodeL3, path: string};
 export type MI_SharedProps = Props & {mapID: string|n, copiedNode: NodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps

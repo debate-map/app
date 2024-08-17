@@ -1,4 +1,4 @@
-import {GetMap, GetParentNodeL3, GetParentPath, Map, MapView, NodeL3, NodeType_Info} from "dm_common";
+import {GetMap, GetParentNodeL3, GetParentPath, DMap, MapView, NodeL3, NodeType_Info} from "dm_common";
 import React, {useCallback, useState} from "react";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
@@ -69,7 +69,7 @@ type Props = {
 	// from wrapper
 	graphInfo: Graph, forLayoutHelper?: boolean,
 	// could recalc these here, but might as well get from wrapper (it handles it already, due to checking if needs to show the wait-messages)
-	map: Map, mapState: MapState, mapView: MapView, rootNode: NodeL3,
+	map: DMap, mapState: MapState, mapView: MapView, rootNode: NodeL3,
 } & HTMLProps<"div">;
 @Observer
 export class MapUI extends BaseComponent<Props, {}> {

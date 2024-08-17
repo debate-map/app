@@ -1,8 +1,8 @@
 import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "js-vextensions";
 import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
-import {Map} from "./maps/@Map.js";
+import {DMap} from "./maps/@Map.js";
 
-export const GetMaps = CreateAccessor((orderByEdits = false): Map[]=>{
+export const GetMaps = CreateAccessor((orderByEdits = false): DMap[]=>{
 	/* const mapsMap = GetData({ collection: true }, 'maps');
 	return CachedTransform('GetMaps', [], mapsMap, () => (mapsMap ? mapsMap.VValues(true) : [])); */
 	/*const mapsMap = GetDocs({}, a=>a.maps);

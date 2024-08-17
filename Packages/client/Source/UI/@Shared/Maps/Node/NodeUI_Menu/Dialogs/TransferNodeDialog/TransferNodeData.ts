@@ -1,4 +1,4 @@
-import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
+import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, TransferNodesPayload, TransferType, DMap, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
 import {Command} from "mobx-graphlink";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
@@ -9,7 +9,7 @@ export class TransferNodesUIState {
 	destinationChildGroup: ChildGroup;
 }
 
-export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, transferNodePath: string, newParent: NodeL3, outerChildGroup: ChildGroup|n, transferType: TransferType) {
+export function GetTransferNodesInitialData(map: DMap|n, transferNode: NodeL3, transferNodePath: string, newParent: NodeL3, outerChildGroup: ChildGroup|n, transferType: TransferType) {
 	const oldParentID = GetParentNodeID(transferNodePath);
 	if (oldParentID == null || transferNode.link == null) return [null, null] as const; // parentless not supported yet
 

@@ -11,7 +11,7 @@ import {NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
-import {ChildGroup, Map, NodeRevision} from "../DB.js";
+import {ChildGroup, DMap, NodeRevision} from "../DB.js";
 
 export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
 	const node = GetNode(nodeID);
@@ -107,7 +107,7 @@ The final ordering-type is determined by the first provided value (ie. not set t
 
 Note: If children have identical ordering values (eg. by votes, but neither has votes), then they're sub-sorted by manual-ordering data.
 `.AsMultiline(0);
-export function GetChildOrdering_Final(parentNode: NodeL2, childGroup: ChildGroup, map?: Map, userOverride?: ChildOrdering) {
+export function GetChildOrdering_Final(parentNode: NodeL2, childGroup: ChildGroup, map?: DMap, userOverride?: ChildOrdering) {
 	let result = parentNode.type == NodeType.argument && childGroup == ChildGroup.generic ? ChildOrdering.manual : ChildOrdering.votes;
 	if (map?.extras.defaultChildOrdering) result = map.extras.defaultChildOrdering;
 	if (parentNode.current.displayDetails?.childOrdering) result = parentNode.current.displayDetails.childOrdering;

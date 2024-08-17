@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -57,7 +57,7 @@ import {NodeNotificationControl} from "./NodeBox/NodeNotificationControl.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeBox_Props = {
-	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map, forLayoutHelper: boolean, forSubscriptionsPage?: boolean,
+	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: DMap, forLayoutHelper: boolean, forSubscriptionsPage?: boolean,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	childrenShownByNodeExpandButton?: number, usePortalForDetailBoxes?: boolean,
@@ -628,7 +628,7 @@ class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreVa
  * (this is better than putting the access of mapState.playingTimeline_time in NodeBox directly, since that would cause unnecessary processing of other data during each re-render)
  */
 @Observer
-export class FrameRenderSignal extends BaseComponent<{map: Map|n}> {
+export class FrameRenderSignal extends BaseComponent<{map: DMap|n}> {
 	render() {
 		const {map} = this.props;
 		const timelinesState = store.main.timelines;

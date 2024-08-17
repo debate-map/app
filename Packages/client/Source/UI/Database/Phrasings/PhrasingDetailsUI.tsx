@@ -4,7 +4,7 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "react-
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, Map, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
+import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, DMap, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
@@ -16,7 +16,7 @@ import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
 type Props = {
 	baseData: NodePhrasing_Embedded & {id?: string},
-	map: Map|n, node: NodeL3, // node properties are used to constrain what phrasing options are available
+	map: DMap|n, node: NodeL3, // node properties are used to constrain what phrasing options are available
 	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: NodePhrasing, error: string)=>void,
 	embeddedInNodeRevision?: boolean,
 };
@@ -206,7 +206,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 	}
 }
 
-export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType, map: Map|n) {
+export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType, map: DMap|n) {
 	let newEntry = new NodePhrasing({
 		node: node.id,
 		type,

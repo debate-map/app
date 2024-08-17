@@ -1,4 +1,4 @@
-import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShouldRatingTypeBeReversed, ShowNodeToolbar} from "dm_common";
+import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, DMap, NodeL3, NodeRatingType, NodeType, Polarity, ShouldRatingTypeBeReversed, ShowNodeToolbar} from "dm_common";
 import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";

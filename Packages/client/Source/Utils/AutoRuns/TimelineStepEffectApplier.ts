@@ -9,7 +9,7 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "react-vextensions";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "mobx-graphlink";
-import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, Map, GetNodeEffects, NodeView} from "dm_common";
+import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, DMap, GetNodeEffects, NodeView} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetPathsWith1PlusFocusLevelAfterEffects, GetPlaybackEffects, GetPlaybackEffectsReached, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
@@ -63,7 +63,7 @@ AutoRun_HandleBail(()=>{
 }, {name: "TimelineStepEffectApplier"});
 
 let ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible = [] as string[];
-function ApplyEffectsOfType_show_hide_setExpandedTo(map: Map, effectsReached: PlaybackEffect[], effectIndex: number) {
+function ApplyEffectsOfType_show_hide_setExpandedTo(map: DMap, effectsReached: PlaybackEffect[], effectIndex: number) {
 	const pathsVisibleAtThisPoint = GetVisiblePathsAfterEffects([map.rootNode], effectsReached);
 	if (pathsVisibleAtThisPoint == ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible) return;
 	ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible = pathsVisibleAtThisPoint;

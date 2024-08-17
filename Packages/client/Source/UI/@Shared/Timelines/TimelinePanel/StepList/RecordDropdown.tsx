@@ -2,7 +2,7 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart, GetTimeline} from "dm_common";
+import {DMap, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart, GetTimeline} from "dm_common";
 import {Assert, CopyText, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {AddNotificationMessage, Observer, RunInAction_Set, TextPlus} from "web-vcore";

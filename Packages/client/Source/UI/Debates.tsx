@@ -1,4 +1,4 @@
-import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map, Me} from "dm_common";
+import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, DMap, Me} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
@@ -176,7 +176,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 	}
 }
 
-function filterMaps(maps: Map[], tableData: TableData) {
+function filterMaps(maps: DMap[], tableData: TableData) {
 	let output = maps.slice();
 	if (tableData.columnSort) {
 		switch (tableData.columnSort) {

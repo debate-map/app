@@ -1,4 +1,4 @@
-import {GetTimelines, GetTimelineStep, GetTimelineSteps, HasAdminPermissions, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GetTimelines, GetTimelineStep, GetTimelineSteps, HasAdminPermissions, DMap, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
@@ -20,7 +20,7 @@ import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
 import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
 
 @Observer
-export class Header1 extends BaseComponent<{map: Map}, {}> {
+export class Header1 extends BaseComponent<{map: DMap}, {}> {
 	timelineSelect: DropDown|n;
 	render() {
 		const {map} = this.props;
@@ -103,7 +103,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
+class OptionsDropdown extends BaseComponent<{map: DMap, timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
 	render() {
 		const {map, timeline, steps} = this.props;
 		const uiState = store.main.timelines;

@@ -1,4 +1,4 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
 import {makeObservable, observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
 import {ignore, version} from "mobx-sync";
@@ -279,7 +279,7 @@ export class ChildLimitInfo {
 		return this.HaveShowMoreButtonEnabled() || this.HaveShowLessButtonEnabled();
 	}
 }
-export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map: Map, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
+export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map: DMap, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
 	// if the map's root node, show all children
 	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);

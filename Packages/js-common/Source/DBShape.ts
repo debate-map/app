@@ -2,7 +2,7 @@ import {Collection} from "mobx-graphlink";
 import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {MapNodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
-import {Map} from "./DB/maps/@Map.js";
+import {DMap} from "./DB/maps/@Map.js";
 import {Media} from "./DB/media/@Media.js";
 import {NodeLink} from "./DB/nodeLinks/@NodeLink.js";
 import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
@@ -43,7 +43,7 @@ export class GraphDBShape {
 	accessPolicies = DefineCollection(AccessPolicy);
 	commandRuns = DefineCollection(CommandRun);
 	medias = DefineCollection(Media);
-	maps = DefineCollection(Map);
+	maps = DefineCollection(DMap);
 	mapNodeEdits = DefineCollection(MapNodeEdit);
 	nodes = DefineCollection(NodeL1);
 	//nodeExtras = DefineCollection(any);

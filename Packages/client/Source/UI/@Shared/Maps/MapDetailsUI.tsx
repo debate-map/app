@@ -1,4 +1,4 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, DMap, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import React from "react";
 import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
@@ -13,7 +13,7 @@ import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./Node/NodeDetailsUI/PermissionsPanel.js";
 
 @Observer
-export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
+export class MapDetailsUI extends DetailsUI_Base<DMap, MapDetailsUI> {
 	render() {
 		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
@@ -165,7 +165,7 @@ export async function ShowAddMapDialog(openMapAfterCreation = true) {
 		return {accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "maps")};
 	});
 
-	let newMap = new Map({
+	let newMap = new DMap({
 		accessPolicy: prep.accessPolicy.id,
 		name: "",
 		editors: [MeID.NN()],

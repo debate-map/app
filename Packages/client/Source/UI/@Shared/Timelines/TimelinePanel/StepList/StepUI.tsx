@@ -5,7 +5,7 @@ import {E} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {runInAction} from "mobx";
 import {store} from "Store";
-import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
+import {DMap, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {StepEditorUI} from "./Editing/StepEditorUI.js";
@@ -14,7 +14,7 @@ import {PositionOptionsEnum} from "./Editing/StepTabs/StepTab_General.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(
-	{} as {index: number, last: boolean, map: Map, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
+	{} as {index: number, last: boolean, map: DMap, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
 	{showStepEffects: false, editorOpen: false},
 ) {
 	constructor(props) {

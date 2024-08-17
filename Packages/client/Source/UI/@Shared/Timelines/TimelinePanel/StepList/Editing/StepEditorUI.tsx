@@ -4,7 +4,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
 import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "js-vextensions";
 import {RunInAction} from "mobx-graphlink";
@@ -27,8 +27,8 @@ WaitXThenRun(0, () => {
 	document.body.appendChild(portal);
 }); */
 
-export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
-export type StepEditorUI_SharedProps = {map: Map, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
+export type StepEditorUIProps = {index: number, map: DMap, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
+export type StepEditorUI_SharedProps = {map: DMap, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
 
 export async function AddTimelineStep_Simple(timelineID: string, steps: TimelineStep[], insertIndex: number) {
 	if (MeID() == null) return ShowSignInPopup();

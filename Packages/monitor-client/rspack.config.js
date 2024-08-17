@@ -24,6 +24,20 @@ const config /*: Configuration*/ = {
 		moduleIds: "named",
 		usedExports: false,
 		concatenateModules: false,
+		mangleExports: false,
+		minimizer: [
+			new rspack.SwcJsMinimizerRspackPlugin({
+				minimizerOptions: {
+					// todo: switch back to this more precisely-tuned mangling, once swc's minifier applies it correctly (it ignores the keep_classnames subfield)
+					/*mangle: {
+						keep_classnames: true,
+						reserved: ["makeObservable", "observer"],
+					},*/
+					mangle: false,
+				},
+			}),
+			new rspack.LightningCssMinimizerRspackPlugin({}),
+		],
 	},
 	devServer: {
 		devMiddleware: {
@@ -171,7 +185,7 @@ const config /*: Configuration*/ = {
 			template: "./Source/index.html",
 			filename: "index.html",
 			inject: "body",
-			minify: false,
+			publicPath: "/monitor/", // ensure app.js is always requested from the "/monitor/" path
 		}),
 		new rspack.ProgressPlugin({}),
 		new rspack.DefinePlugin({

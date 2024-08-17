@@ -5,7 +5,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry, NewChildConfig, GetDisplayTextForNewChildConfig} from "dm_common";
+import {NodeType, NodeLink, DMap, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry, NewChildConfig, GetDisplayTextForNewChildConfig} from "dm_common";
 import {BailError, CatchBail, GetAsync, observer_mgl} from "mobx-graphlink";
 import {observer} from "mobx-react";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
@@ -74,7 +74,7 @@ export class AddChildHelper {
 	}
 
 	mapID: string|n;
-	map: Map|n;
+	map: DMap|n;
 	node_parentPath: string;
 	// get Node_Parent() { return GetNodeL3(this.node_parentPath); }
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }

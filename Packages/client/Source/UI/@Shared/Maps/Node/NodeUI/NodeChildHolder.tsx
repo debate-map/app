@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, DMap, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -22,7 +22,7 @@ import {ChildLimitBar} from "./ChildLimitBar.js";
 import {GetMeasurementInfoForNode} from "./NodeMeasurer.js";
 
 type Props = {
-	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, showEvenIfParentNotExpanded: boolean, group: ChildGroup,
+	map: DMap, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, showEvenIfParentNotExpanded: boolean, group: ChildGroup,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 	forLayoutHelper: boolean,

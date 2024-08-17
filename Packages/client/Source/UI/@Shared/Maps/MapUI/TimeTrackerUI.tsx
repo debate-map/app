@@ -2,7 +2,7 @@ import {store} from "Store";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetTalkTimeSummaryAtTimeX} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel";
-import {GetTimelineSteps, Map} from "dm_common";
+import {GetTimelineSteps, DMap} from "dm_common";
 import {Observer} from "web-vcore";
 import {E} from "js-vextensions";
 import {Row} from "react-vcomponents";
@@ -13,7 +13,7 @@ const secondsToMMSS = (seconds: number)=>{
 };
 
 @Observer
-export class TimeTrackerUI extends BaseComponent<{map: Map}, {}> {
+export class TimeTrackerUI extends BaseComponent<{map: DMap}, {}> {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.timelines;

@@ -1,4 +1,4 @@
-import {DeleteShare, GetShares, Map, MeID, Share} from "dm_common";
+import {DeleteShare, GetShares, DMap, MeID, Share} from "dm_common";
 import {GetEntries, VURL, CopyText} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
@@ -22,7 +22,7 @@ export function GetShareLongURL(share: Share) {
 }
 
 @Observer
-export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
+export class ShareDropDown extends BaseComponentPlus({} as {map: DMap}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.shareUI;

@@ -6,13 +6,13 @@ import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, GetMapNamePrefixFilterK
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "mobx";
-import {GetUser, Map} from "dm_common";
+import {GetUser, DMap} from "dm_common";
 import {columnWidths} from "UI/Debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 
 @Observer
-export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
+export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: DMap}, {}) {
 	render() {
 		const {index, last, map} = this.props;
 		const creator = map && GetUser(map.creator);

@@ -3,7 +3,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetMap} from "../DB/maps.js";
-import {Map} from "../DB/maps/@Map.js";
+import {DMap} from "../DB/maps/@Map.js";
 import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
@@ -15,7 +15,7 @@ import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 	}),
 })
 export class DeleteMap extends Command<{id: string}, {}> {
-	oldData: Map;
+	oldData: DMap;
 	userMapInfoSets: UserMapInfoSet[];
 	sub_deleteNode: DeleteNode;
 	nodeEdits: MapNodeEdit[];

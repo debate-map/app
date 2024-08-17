@@ -5,7 +5,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
-import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm_common";
+import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, DMap} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_UpdateMap} from "Utils/DB/Command";
@@ -14,7 +14,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 export const userIDPlaceholder = "[user-id placeholder]";
 
 @Observer
-export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
+export class PeopleDropDown extends BaseComponent<{map: DMap}, {}> {
 	render() {
 		const {map} = this.props;
 		//const editors = GetMapEditors(map.id).filter(a=>a);

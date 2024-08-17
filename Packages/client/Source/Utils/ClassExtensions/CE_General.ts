@@ -8,7 +8,7 @@ import chroma from "chroma-js";
 // ==========
 
 // require("./CE_Object");
-import "./CE_Object";
+import "./CE_Object.js";
 import {ObjectCES, CE} from "js-vextensions";
 import {ObservableMap} from "mobx";
 

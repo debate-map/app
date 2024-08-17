@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -13,7 +13,7 @@ import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap|n, node: NodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;

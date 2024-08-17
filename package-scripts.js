@@ -19,7 +19,15 @@ Object.assign(scripts, {
 	client: {
 		tsc:         `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		tsc_noWatch: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build`,
-		dev: {
+		//tscWatch: `./node_modules/.bin/tsc-watch.cmd --onSuccess "node ./Scripts/Build/OnSuccess.js"`,
+		cypress: {
+			open: "cd Packages/client && cypress open",
+			run: "cd Packages/client && cypress run",
+		},
+		clean: "cd Packages/client && shx rm -rf Dist",
+
+		// webpack (old)
+		devWP: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("dev"),
 			staticServe: GetServeCommand(), // same as above, except with NODE_ENV=null (for static-serving of files in Dist folder)
@@ -34,37 +42,22 @@ Object.assign(scripts, {
 			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
 			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
 		},
-		devRS: `cd Packages/client && ${pathToNPMBin("rspack", 2)} serve`,
-		cypress: {
-			open: "cd Packages/client && cypress open",
-			run: "cd Packages/client && cypress run",
-		},
-		clean: "cd Packages/client && shx rm -rf Dist",
-		//compile: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
-		compile: "cd Packages/client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
-		compileRS: `cd Packages/client && ${pathToNPMBin("rspack", 2)} build`,
-
-		build: {
-			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
-			dev: `cross-env NODE_ENV=development npm start client.build`,
+		//compileWP: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
+		compileWP: "cd Packages/client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
+		buildWP: {
+			default: `cross-env-shell "npm start client.clean && npm start client.compileWP"`,
+			dev: `cross-env NODE_ENV=development npm start client.buildWP`,
 			// 2024-03-18: for venryx, "quick" takes 45s, and "non-quick" takes 75s
-			prod: `cross-env NODE_ENV=production npm start client.build`,
-			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
-
-			prodRS: `cross-env NODE_ENV=production "npm start client.clean &&  npm start client.compileRS"`,
+			prod: `cross-env NODE_ENV=production npm start client.buildWP`,
+			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.buildWP`,
 		},
-		//justDeploy: 'ts-node ./Scripts/Build/Deploy',
-		/*justDeploy: {
-			dev: "TODO",
-			prod: "TODO",
-		},
-		deploy: {
-			dev: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true "npm start client.build && npm start client.just-deploy.dev"`,
-			prod: `cross-env-shell NODE_ENV=production "npm start client.build && npm start client.just-deploy.prod"`,
-			prodQuick: `cross-env-shell NODE_ENV=production QUICK=true "npm start client.build && npm start client.just-deploy.prod"`,
-		},*/
 
-		//tscWatch: `./node_modules/.bin/tsc-watch.cmd --onSuccess "node ./Scripts/Build/OnSuccess.js"`,
+		// rspack (new)
+		dev: `cd Packages/client && ${pathToNPMBin("rspack", 2)} serve`,
+		compile: `cd Packages/client && ${pathToNPMBin("rspack", 2)} build`,
+		build: {
+			prod: `cross-env NODE_ENV=production "npm start client.clean &&  npm start client.compile"`,
+		},
 	},
 	jsCommon: {
 		// helps for spotting typescript errors in the "Packages/js-common" (client.dev script can work too, but it's nice to have one just for errors in "common")
@@ -77,24 +70,28 @@ Object.assign(scripts, {
 	monitorClient: {
 		tsc:         `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		tsc_noWatch: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build`,
-		dev: {
+		clean: "cd Packages/monitor-client && shx rm -rf Dist",
+
+		// webpack (old)
+		devWP: {
 			default: GetServeCommand("dev", "monitor-client"),
 			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
 		},
-		devRS: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} serve`,
-		clean: "cd Packages/monitor-client && shx rm -rf Dist",
-		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
-		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
-		compileRS: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} build`,
-
-		build: {
-			default: `cross-env-shell "npm start monitorClient.clean && npm start monitorClient.compile"`,
-			dev: `cross-env NODE_ENV=development npm start monitorClient.build`,
+		//compileWP: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
+		compileWP: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
+		buildWP: {
+			default: `cross-env-shell "npm start monitorClient.clean && npm start monitorClient.compileWP"`,
+			dev: `cross-env NODE_ENV=development npm start monitorClient.buildWP`,
 			// non-quick prod builds are broken atm, so disabled
-			//prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
-			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.build`,
+			//prod: `cross-env NODE_ENV=production npm start monitorClient.buildWP`,
+			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.buildWP`,
+		},
 
-			prodRS: `cross-env NODE_ENV=production "npm start monitorClient.clean &&  npm start monitorClient.compileRS"`,
+		// rspack (new)
+		dev: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} serve`,
+		compile: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} build`,
+		build: {
+			prod: `cross-env NODE_ENV=production "npm start monitorClient.clean &&  npm start monitorClient.compile"`,
 		},
 	},
 });
@@ -555,7 +552,7 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null, p
 		Object.assign(env, {
 			PAGER: "less",
 			LESS: "-iMSx4 -FXR",
-			LESSCHARSET:"utf-8",
+			LESSCHARSET: "utf-8",
 			TERM: "xterm-256color",
 		});
 	}

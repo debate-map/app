@@ -4,11 +4,11 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates, Observer} from "web-vcore";
 import {E} from "js-vextensions";
-import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, Map, NodeL3} from "dm_common";
+import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, DMap, NodeL3} from "dm_common";
 import {RunCommand_DeleteNodePhrasing, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command";
 
 @Observer
-export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {map: Map|n, node: NodeL3, phrasing: NodePhrasing}, {dataError: null as string|n}) {
+export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {map: DMap|n, node: NodeL3, phrasing: NodePhrasing}, {dataError: null as string|n}) {
 	detailsUI: PhrasingDetailsUI;
 	render() {
 		const {map, node, phrasing} = this.props;

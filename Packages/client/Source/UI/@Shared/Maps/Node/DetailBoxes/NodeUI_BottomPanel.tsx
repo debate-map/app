@@ -1,4 +1,4 @@
-import {Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
+import {DMap, NodeL3, NodeType, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -28,7 +28,7 @@ export const nodeBottomPanel_minWidth = 600;
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
-		map: Map|n, node: NodeL3, path: string, parent: NodeL3|n,
+		map: DMap|n, node: NodeL3, path: string, parent: NodeL3|n,
 		width: number|string|n,
 		minWidth: number|n, // is this still needed?
 		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,

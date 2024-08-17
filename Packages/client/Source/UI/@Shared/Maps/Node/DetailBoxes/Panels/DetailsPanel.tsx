@@ -6,7 +6,7 @@ import {runInAction} from "mobx";
 import {E, ToJSON, Clone, CE} from "js-vextensions";
 import {GetAsync} from "mobx-graphlink";
 import _ from "lodash";
-import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
+import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, DMap, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
@@ -21,7 +21,7 @@ AddGlobalStyle(`
 `);
 
 @Observer
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {dataError: null as string|n, saveState: "idle" as "idle" | "saving" | "success" | "error"}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap|n, node: NodeL3, path: string}, {dataError: null as string|n, saveState: "idle" as "idle" | "saving" | "success" | "error"}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;
