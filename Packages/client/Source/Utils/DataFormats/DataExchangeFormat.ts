@@ -5,6 +5,7 @@ import {Command} from "mobx-graphlink";
 
 export enum DataExchangeFormat {
 	json_dm = "json_dm",
+	json_dm_fs = "json_dm_fs",
 	json_cg = "json_cg",
 	csv_basic = "csv_basic",
 	csv_quotes = "csv_quotes",
@@ -17,6 +18,7 @@ export enum DataExchangeFormat {
 }
 export const DataExchangeFormat_entries = GetEntries(DataExchangeFormat, val=>{
 	if (val == DataExchangeFormat.json_dm) return "JSON (debate-map)";
+	if (val == DataExchangeFormat.json_dm_fs) return "JSON (debate-map, old)";
 	if (val == DataExchangeFormat.json_cg) return "JSON (claim-gen)";
 	if (val == DataExchangeFormat.csv_basic) return "CSV (basic)";
 	if (val == DataExchangeFormat.csv_quotes) return "CSV (quotes)";
@@ -26,6 +28,7 @@ export const DataExchangeFormat_entries = GetEntries(DataExchangeFormat, val=>{
 export const DataExchangeFormat_entries_supportedBySubtreeImporter = DataExchangeFormat_entries.filter(a=>{
 	return [
 		DataExchangeFormat.json_dm,
+		DataExchangeFormat.json_dm_fs,
 		DataExchangeFormat.json_cg,
 		DataExchangeFormat.csv_sl,
 	].includes(a.value);

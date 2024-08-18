@@ -290,7 +290,7 @@ class StyleRuleUI extends BaseComponent<StyleRuleUI_Props, {}> {
 					<Column ml={30}>
 						{rule.if_accessPolicyDoesNotMatch.policyIDs.map((policyID, index)=>{
 							return <Row mt={5} key={index}>
-								<PolicyPicker value={policyID} onChange={val=>ChangeIfBlock(()=>rule.if_accessPolicyDoesNotMatch.policyIDs[index] = val)}>
+								<PolicyPicker value={policyID} onChange={val=>ChangeIfBlock(()=>rule.if_accessPolicyDoesNotMatch.policyIDs[index] = val!)}>
 									{text=><Button text={text} style={{width: "100%"}}/>}
 								</PolicyPicker>
 								<Button ml={5} text="X" onClick={()=>rule.if_accessPolicyDoesNotMatch.policyIDs.RemoveAt(index)}/>

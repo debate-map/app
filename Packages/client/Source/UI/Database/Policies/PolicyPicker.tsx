@@ -26,11 +26,15 @@ export class PolicyPicker_Button extends BaseComponent<{enabled?: boolean, polic
 }
 
 @Observer
-export class PolicyPicker extends BaseComponent<{value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}> {
+export class PolicyPicker extends BaseComponent<{value: string|n, onChange: (value: string|n)=>any, allowClear?: boolean, textForNull?: string, containerStyle?: any}, {}> {
+	static defaultProps = {textForNull: "(no policy)"};
 	dropDown: DropDown|n;
 	render() {
-		const {value, onChange, containerStyle, children} = this.props;
-		const policies = GetAccessPolicies().OrderBy(a=>a.name.toLowerCase());
+		const {value, onChange, allowClear, textForNull, containerStyle, children} = this.props;
+		const policies_raw = GetAccessPolicies().OrderBy(a=>a.name.toLowerCase());
+		const policy_options: {name: string, id: string|n}[] = allowClear
+			? [{name: textForNull!, id: null as string|n}].concat(policies_raw)
+			: policies_raw;
 		return (
 			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
 				<DropDownTrigger>{
@@ -49,7 +53,7 @@ export class PolicyPicker extends BaseComponent<{value: string|n, onChange: (val
 								position: "relative", maxHeight: 500,
 								background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
 							}}>
-								{policies.map((policy, index)=>(
+								{policy_options.map((policy, index)=>(
 									<Column key={index} p="5px 10px"
 										style={E(
 											{

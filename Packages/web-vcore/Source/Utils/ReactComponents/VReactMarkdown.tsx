@@ -21,23 +21,40 @@ export class VReactMarkdown extends BaseComponent
 		const containerProps_final = {...containerProps};
 		containerProps_final.style = E(containerProps_final.style, style);
 
-		const components_final = {...components} as any;
-		components_final.link = components_final.link || (props=>{
-			let {href, target, ...rest} = props;
-			const toURL = VURL.Parse(href);
-			const sameDomain = toURL.domain == GetCurrentURL().domain;
+		const components_final = {
+			// modify links to open in new tab, if they're to external sites
+			link: (props=>{
+				let {href, target, ...rest} = props;
+				const toURL = VURL.Parse(href);
+				const sameDomain = toURL.domain == GetCurrentURL().domain;
 
-			if (target == "") target = null; // normalize falsy target
-			if (target == null && sameDomain) {
-				target = "_blank";
-			}
+				if (target == "") target = null; // normalize falsy target
+				if (target == null && sameDomain) {
+					target = "_blank";
+				}
 
-			if (sameDomain) {
-				const actionFunc = manager.GetLoadActionFuncForURL(toURL);
-				return <Link {...FilterOutUnrecognizedProps(rest, "a")} actionFunc={actionFunc} target={target}/>;
-			}
-			return <Link {...FilterOutUnrecognizedProps(rest, "a")} to={href} target={target}/>;
-		});
+				if (sameDomain) {
+					const actionFunc = manager.GetLoadActionFuncForURL(toURL);
+					return <Link {...FilterOutUnrecognizedProps(rest, "a")} actionFunc={actionFunc} target={target}/>;
+				}
+				return <Link {...FilterOutUnrecognizedProps(rest, "a")} to={href} target={target}/>;
+			}),
+
+			// disallow images by default (too easy of a means to vandalize; also, could be used to track user IPs)
+			// (if caller wants to enable images, they can do so by setting components.img to undefined, enabling default renderer)
+			img: (props=>{
+				const {src, alt, title, ...rest} = props;
+				//return <img src={src} alt={alt} title={title} {...rest}/>;
+				return null;
+			}),
+
+			...components,
+		} as any;
+
+		// allow caller to reset a component's renderer to its default values, by setting it to undefined
+		for (const [key, value] of Object.entries(components_final).filter(a=>a[1] === undefined)) {
+			delete components_final[key];
+		}
 
 		if (replacements) {
 			const patterns = replacements.VKeys().map((regexStr, index)=>({name: `${index}`, regex: new RegExp(regexStr)}));

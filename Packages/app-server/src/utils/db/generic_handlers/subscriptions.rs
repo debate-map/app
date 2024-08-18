@@ -2,7 +2,7 @@ use deadpool_postgres::Pool;
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
 use metrics::{counter, histogram};
 use rust_shared::async_graphql::{
-	async_stream::{self, stream},
+	async_stream::{self, stream, AsyncStream},
 	parser::types::Field,
 	Object, OutputType, Positioned, Result,
 };
@@ -194,18 +194,24 @@ pub async fn handle_generic_gql_doc_subscription_base<'a, T: 'static + UsesRLS +
 	result
 }
 
+pub struct GQLSubOpts {
+	pub filter_checker: fn(&QueryFilter) -> Result<(), &'static str>,
+}
+
 pub async fn handle_generic_gql_collection_subscription<'a, T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Clone, GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync>(
-	ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>,
+	ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>, opts: Option<GQLSubOpts>,
 ) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
+	//) -> Stream_WithDropListener<'a, Result<GQLSetVariant, SubError>> {
 	let app_state = get_app_state_from_gql_ctx(ctx).clone();
 	let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx).await.unwrap_or_else(|_| None);
 	let lq_storage = app_state.live_queries.clone();
 	let table_name = table_name.to_owned();
-	handle_generic_gql_collection_subscription_base(lq_storage, jwt_data, table_name, filter_json).await
+	handle_generic_gql_collection_subscription_base(lq_storage, jwt_data, table_name, filter_json, opts).await
 }
 pub async fn handle_generic_gql_collection_subscription_base<'a, T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Clone, GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync>(
-	lq_storage: LQStorageArc, jwt_data: Option<UserJWTData>, table_name: String, filter_json: Option<FilterInput>,
+	lq_storage: LQStorageArc, jwt_data: Option<UserJWTData>, table_name: String, filter_json: Option<FilterInput>, opts: Option<GQLSubOpts>,
 ) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
+	//) -> Stream_WithDropListener<'a, Result<GQLSetVariant, SubError>> {
 	let result = tokio::spawn(async move {
 		let table_name = &table_name; // is this actually needed?
 
@@ -225,6 +231,13 @@ pub async fn handle_generic_gql_collection_subscription_base<'a, T: 'static + Us
 			Ok(a) => a,
 			Err(err) => return stream_for_error(err),
 		};
+		if let Some(opts) = opts {
+			match (opts.filter_checker)(&filter) {
+				Ok(_) => {},
+				Err(err) => return stream_for_error(Error::msg(err)),
+			}
+		}
+
 		//let filter = QueryFilter::from_filter_input_opt(&filter_json).unwrap();
 		let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
 			let lq_key = LQKey::new(table_name.o(), filter.o());

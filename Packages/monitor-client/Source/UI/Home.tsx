@@ -35,19 +35,6 @@ query($adminKey: String!) {
 }
 `;
 
-export const HEALTH_STATS_QUERY = gql`
-query($adminKey: String!) {
-	healthStats(adminKey: $adminKey) {
-		filesystem,
-		blocks1K,
-		used,
-		available,
-		usePercent,
-		mountedOn,
-	}
-}
-`;
-
 class BasicInfo {
 	static empty() {
 		return new BasicInfo().VSet({
@@ -75,8 +62,53 @@ class HealthStats {
 	available: number;
 	usePercent: number;
 	mountedOn: string;
-
 }
+
+enum HealthStatsPod {
+	pg_instance1 = "pg_instance1",
+	pg_repo_host_0 = "pg_repo_host_0",
+}
+const useHealthStats = (adminKey: string, pod: HealthStatsPod)=>{
+	const {data: dataHealth, loading: loadingHealth, refetch: refetchHealth} = useQuery(
+		gql`
+			query($adminKey: String!, $pod: HealthStatsPod!) {
+				healthStats(adminKey: $adminKey, pod: $pod) {
+					filesystem,
+					blocks1K,
+					used,
+					available,
+					usePercent,
+					mountedOn,
+				}
+			}
+		`,
+		{
+			variables: {adminKey, pod},
+			// not sure if these are needed
+			fetchPolicy: "no-cache",
+			nextFetchPolicy: "no-cache",
+		},
+	);
+	const healthData: HealthStats[] = dataHealth?.healthStats ?? [];
+
+	const mountedOn_preferred = pod == HealthStatsPod.pg_instance1 ? "/pgdata" : "/pgbackrest/repo1";
+	const storageHealth = healthData.find(a=>a.mountedOn == mountedOn_preferred)
+		// if no "/pgdata" filesystem was found, fallback to finding the stats for whichever filesystem has the most usage
+		// (for some reason, rancher desktop doesn't seem to mount a separate filesystem for the "/pgdata" directory; it must have some other "fake" filesystem implementation for K8s PVCs)
+		?? healthData.OrderByDescending(a=>a.usePercent).FirstOrX()
+		?? HealthStats.empty();
+
+	let storageHealthColor = "";
+	if (storageHealth.usePercent >= 90) {
+		storageHealthColor = "#dc3545";
+	} else if (storageHealth.usePercent >= 70) {
+		storageHealthColor = "#ffc107";
+	} else {
+		storageHealthColor = "#28a745";
+	}
+
+	return {storageHealth, storageHealthColor, refetchHealth};
+};
 
 // see Requests.ts for why we can't use the comp-approach
 /*@Observer
@@ -96,28 +128,8 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 	});
 	const basicInfo: BasicInfo = data?.basicInfo ?? BasicInfo.empty();
 
-	const {data: dataHealth, loading: loadingHealth, refetch: refetchHealth} = useQuery(HEALTH_STATS_QUERY, {
-		variables: {adminKey},
-		// not sure if these are needed
-		fetchPolicy: "no-cache",
-		nextFetchPolicy: "no-cache",
-	});
-	const healthData: HealthStats[] = dataHealth?.healthStats ?? [];
-
-	const storageHealth = healthData.find(a=>a.mountedOn == "/pgdata")
-		// if no "/pgdata" filesystem was found, fallback to finding the stats for whichever filesystem has the most usage
-		// (for some reason, rancher desktop doesn't seem to mount a separate filesystem for the "/pgdata" directory; it must have some other "fake" filesystem implementation for K8s PVCs)
-		?? healthData.OrderByDescending(a=>a.usePercent).FirstOrX()
-		?? HealthStats.empty();
-
-	let storageHealthColor = "";
-	if (storageHealth.usePercent >= 90) {
-		storageHealthColor = "#dc3545";
-	} else if (storageHealth.usePercent >= 70) {
-		storageHealthColor = "#ffc107";
-	} else {
-		storageHealthColor = "#28a745";
-	}
+	const healthStats_db_instance = useHealthStats(adminKey, HealthStatsPod.pg_instance1);
+	const healthStats_db_repo = useHealthStats(adminKey, HealthStatsPod.pg_repo_host_0);
 
 	const [showKey, setShowKey] = useState(false);
 	return (
@@ -172,17 +184,28 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 			<Row mt={5}>
 				<Text>Basic Health Stats</Text>
 				<Button ml={5} text="Refresh" onClick={()=>{
-					refetchHealth();
+					healthStats_db_instance.refetchHealth();
+					healthStats_db_repo.refetchHealth();
 				}}/>
 			</Row>
 			<Column ml={10}>
-				<Row>
-					<Text>Persistent Volume Claim: <span style={{
-						marginLeft: 5,
-						color: storageHealthColor,
-					}}>{formatBytes(storageHealth.used)} / {formatBytes(storageHealth.available)} ({storageHealth.usePercent}%)</span></Text>
-				</Row>
+				<HealthStatsRow healthStats={healthStats_db_instance} podDisplayName="db instance"/>
+				<HealthStatsRow healthStats={healthStats_db_repo} podDisplayName="db repo"/>
 			</Column>
 		</Column>
 	);
 });
+
+class HealthStatsRow extends BaseComponent<{healthStats: ReturnType<typeof useHealthStats>, podDisplayName: string}, {}> {
+	render() {
+		const {healthStats, podDisplayName} = this.props;
+		return (
+			<Row>
+				<Text>Persistent Volume Claim ({podDisplayName}): <span style={{
+					marginLeft: 5,
+					color: healthStats.storageHealthColor,
+				}}>{formatBytes(healthStats.storageHealth.used)} / {formatBytes(healthStats.storageHealth.used + healthStats.storageHealth.available)} ({healthStats.storageHealth.usePercent}%)</span></Text>
+			</Row>
+		);
+	}
+}

@@ -1,7 +1,7 @@
 use futures::executor::block_on;
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
 use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
-use rust_shared::async_graphql::{self, async_stream, scalar, EmptySubscription, InputObject, Object, OutputType, Result, Schema, SimpleObject, Subscription, ID};
+use rust_shared::async_graphql::{self, async_stream, scalar, EmptySubscription, Enum, InputObject, Object, OutputType, Result, Schema, SimpleObject, Subscription, ID};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::hyper::{Method, Request};
 use rust_shared::itertools::Itertools;
@@ -176,18 +176,30 @@ impl QueryShard_General {
 		Ok(QueryLokiResult { logEntries: log_entries })
 	}
 
-	async fn healthStats(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<DfRecord>, GQLError> {
+	async fn healthStats(&self, _ctx: &async_graphql::Context<'_>, admin_key: String, pod: HealthStatsPod) -> Result<Vec<DfRecord>, GQLError> {
 		ensure_admin_key_is_correct(admin_key, true)?;
 
-		let target_pod =
-			get_k8s_pod_basic_infos("postgres-operator", true).await.context("Failed to retrieve basic-info of the k8s pods.")?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;
-		let container = "database";
-		let df_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "df", vec![], true).await.context("Failed to run pg_dump command in PG pod.")?;
+		let target_pod = match pod {
+			HealthStatsPod::pg_instance1 => get_k8s_pod_basic_infos("postgres-operator", true).await.context("Failed to retrieve basic-info of the k8s pods.")?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?,
+			HealthStatsPod::pg_repo_host_0 => "debate-map-repo-host-0".o(),
+		};
+		let container = match pod {
+			HealthStatsPod::pg_instance1 => "database",
+			HealthStatsPod::pg_repo_host_0 => "pgbackrest",
+		};
+		// pass "--block-size=1" to get sizes in bytes (not kibibytes, which is the default)
+		let df_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "df", vec!["--block-size=1".o()], true).await.context(format!("Failed to run df command in pod:{pod:?}"))?;
 
 		let df = df_output.lines().skip(1).filter_map(|line| line.parse().ok()).collect();
 
 		Ok(df)
 	}
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub enum HealthStatsPod {
+	#[graphql(name = "pg_instance1")] pg_instance1,
+	#[graphql(name = "pg_repo_host_0")] pg_repo_host_0,
 }
 
 #[derive(InputObject, Deserialize)]

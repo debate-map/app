@@ -15,7 +15,7 @@ pub mod access_policies_ {
 pub mod commands {
 	pub mod _shared {
 		pub mod add_node;
-		pub mod increment_edit_counts;
+		pub mod increment_edits;
 		pub mod jsonb_utils;
 		pub mod rating_processor;
 		pub mod record_command_run;

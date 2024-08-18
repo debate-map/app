@@ -166,7 +166,7 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 		}
 	}
 
-	// exclude any mirror-child which is an extension of (ie. wider/weaker than) another child (that is, if it's the Y of an "X is extended by Y" tag, between children) 
+	// exclude any mirror-child which is an extension of (ie. wider/weaker than) another child (that is, if it's the Y of an "X is extended by Y" tag, between children)
 	result = result.filter(child=>{
 		const childTagComps = GetNodeTagComps(child.id, true, tagsToIgnore);
 		const extensionOfAnotherMirrorChild = CE(childTagComps).Any(comp=>{
@@ -233,9 +233,13 @@ export function GetChildGroup(childType: NodeType, parentType: NodeType|n) {
 }
 
 // sync:rs[assert_user_can_delete_node]
-export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[], forRecursiveCommentsDelete? : boolean})=>{
+	const skipPermCheck = (node.type == NodeType.comment) && subcommandInfo?.forRecursiveCommentsDelete;
 	const baseText = `Cannot delete node #${node.id}, since `;
-	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
+	if (!skipPermCheck) {
+	    if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
+	}
+
 	const parentLinks = GetNodeLinks(undefined, node.id);
 	if (parentLinks.map(a=>a.parent).Exclude(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;

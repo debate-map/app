@@ -1,8 +1,8 @@
-import {SubtreeData_Server} from "UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsHelpers";
 import {ClaimForm, GetNodeTitleFromPhrasingAndForm, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeType, QuoteAttachment, Source, Term} from "dm_common";
 import {ClassKeys} from "mobx-graphlink";
 import {CSVCell} from "./CSV_Basic";
 import {SubtreeIncludeKeys} from "../../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsStructs.js";
+import {DMSubtreeData} from "../JSON/DM/DMSubtreeData.js";
 
 export const csv_quotes_includeKeys = new SubtreeIncludeKeys({
 	nodes: ClassKeys<NodeL1>("c_currentRevision"),
@@ -13,7 +13,7 @@ export const csv_quotes_includeKeys = new SubtreeIncludeKeys({
 	medias: ClassKeys<Media>(),
 });
 
-export function SubtreeDataToString_CSV_Quotes(data: SubtreeData_Server, rootNode: NodeL3, maxExportDepth: number) {
+export function SubtreeDataToString_CSV_Quotes(data: DMSubtreeData, rootNode: NodeL3, maxExportDepth: number) {
 	// NOTE: If you add new field-accesses in code below, make sure to update the "includeKeys_final" above to include the new fields.
 	const csvLines = [] as string[];
 	csvLines.push(["Node text", "Quote text", "Quote source url"].join(",")); // headers

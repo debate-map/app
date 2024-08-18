@@ -9,8 +9,8 @@ use crate::{
 	utils::db::accessors::AccessorContext,
 };
 
-pub async fn increment_edit_counts_if_valid(ctx: &AccessorContext<'_>, user: Option<&User>, map_id: Option<String>, is_root: bool) -> Result<(), Error> {
-	if !is_root {
+pub async fn increment_edits_if_valid(ctx: &AccessorContext<'_>, user: Option<&User>, map_id: Option<String>, is_root: bool, caller_wants_increment: Option<bool>) -> Result<(), Error> {
+	if !is_root || !caller_wants_increment.unwrap_or(true) {
 		return Ok(());
 	}
 	if let Some(user) = user {

@@ -120,7 +120,7 @@ impl GQLSet<UserHidden> for GQLSet_UserHidden {
 #[derive(Default)] pub struct SubscriptionShard_UserHidden;
 #[Subscription] impl SubscriptionShard_UserHidden {
 	async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
+		handle_generic_gql_collection_subscription::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter, None).await
 	}
 	async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserHidden>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<UserHidden>(ctx, "userHiddens", id).await

@@ -13,9 +13,10 @@ import {ExportRetrievalMethod} from "../../../../../Store/main/maps.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {SubtreeOpsUI_Export_Left, SubtreeOpsUI_Export_Right} from "./Dialogs/SubtreeOpsUI_Export.js";
 import {SubtreeOpsUI_SetAccessPolicy_Left, SubtreeOpsUI_SetAccessPolicy_Right} from "./Dialogs/SubtreeOpsUI_SetAccessPolicy.js";
-import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server} from "./Dialogs/SubtreeOpsHelpers.js";
+import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData} from "./Dialogs/SubtreeOpsHelpers.js";
 import {SubtreeIncludeKeys, SubtreeOperation} from "./Dialogs/SubtreeOpsStructs.js";
 import {SubtreeOpsUI_Delete_Left, SubtreeOpsUI_Delete_Right} from "./Dialogs/SubtreeOpsUI_Delete.js";
+import {DMSubtreeData} from "../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
 
 @Observer
 export class MI_SubtreeOps extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -113,7 +114,7 @@ export function useSubtreeRetrievalQueryOrAccessors(rootNode: NodeL3, rootNodePa
 		nextFetchPolicy: "no-cache",
 	});
 
-	let subtreeData: SubtreeData_Server|n;
+	let subtreeData: DMSubtreeData|n;
 	if (retrievalActive) {
 		if (retrievalMethod == ExportRetrievalMethod.server) {
 			subtreeData = queryData?.subtree;

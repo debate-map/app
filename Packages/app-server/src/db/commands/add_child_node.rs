@@ -16,7 +16,7 @@ use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use crate::db::commands::_shared::increment_edits::increment_edits_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::commands::add_subscription::{self, add_or_update_subscription, AddSubscriptionInput, AddSubscriptionInputBuilder};
@@ -52,6 +52,7 @@ pub struct AddChildNodeInput {
 	pub node: NodeInput,
 	pub revision: NodeRevisionInput,
 	pub link: NodeLinkInput,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug, Serialize)]
@@ -70,7 +71,7 @@ pub struct AddChildNodeExtras {
 }
 
 pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, extras: AddChildNodeExtras) -> Result<AddChildNodeResult, Error> {
-	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
+	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_, incrementEdits } = input.clone();
 
 	let parent = get_node(ctx, &parentID).await?;
 	assert_user_can_add_child(ctx, actor, &parent).await?; // defensive
@@ -90,8 +91,6 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
 
 	let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
-
 	let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
 	if user_hiddens.notificationPolicy == "S" {
 		let subscription = AddSubscriptionInputBuilder::new(add_node_link_result.id.clone()).with_add_child_node(true).with_add_child_node(true).with_add_node_link(true).with_add_node_revision(true).with_delete_node(true).with_delete_node_link(true).with_set_node_rating(true).build();
@@ -102,6 +101,8 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
 
 		add_or_update_subscription(ctx, actor, false, subscription, Default::default()).await?;
 	}
+
+	increment_edits_if_valid(ctx, Some(actor), mapID.clone(), is_root, incrementEdits).await?;
 
 	let result = AddChildNodeResult { nodeID: add_node_result.nodeID, revisionID: add_node_result.revisionID, linkID: add_node_link_result.id, doneAt: time_since_epoch_ms_i64() };
 	if !extras.avoid_recording_command_run {

@@ -75,6 +75,7 @@ pub enum ChildGroup {
 	#[graphql(name = "generic")] generic,
 	#[graphql(name = "truth")] truth,
 	#[graphql(name = "relevance")] relevance,
+	#[graphql(name = "comment")] comment,
 	// testing
 	#[graphql(name = "neutrality")] neutrality,
 	#[graphql(name = "freeform")] freeform,
@@ -176,7 +177,7 @@ impl GQLSet<NodeLink> for GQLSet_NodeLink {
 #[derive(Default)] pub struct SubscriptionShard_NodeLink;
 #[Subscription] impl SubscriptionShard_NodeLink {
 	async fn nodeLinks<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeLink, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter).await
+		handle_generic_gql_collection_subscription::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter, None).await
 	}
 	async fn nodeLink<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeLink>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeLink>(ctx, "nodeLinks", id).await

@@ -5,10 +5,10 @@ import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
 import {DataExchangeFormat, DataExchangeFormat_entries_supportedBySubtreeImporter, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
 import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Node.js";
-import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
+import {GetResourcesInImportSubtree as GetResourcesInImportSubtree_JsonDmFs} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {AddNotificationMessage, ES, InfoButton, O, Observer, RunInAction_Set, UseWindowEventListener} from "web-vcore";
+import {AddNotificationMessage, ES, InfoButton, O, Observer, P, RunInAction_Set, UseWindowEventListener} from "web-vcore";
 import {gql} from "@apollo/client";
 import {E, FromJSON, GetEntries, ModifyString, SleepAsync, Timer} from "js-vextensions";
 import {makeObservable} from "mobx";
@@ -29,6 +29,9 @@ import {CG_Debate, CG_Node} from "Utils/DataFormats/JSON/ClaimGen/DataModel.js";
 import {GetResourcesInImportSubtree_CG} from "Utils/DataFormats/JSON/ClaimGen/ImportHelpers.js";
 import {CommandEntry, RunCommandBatch, RunCommandBatchResult} from "Utils/DB/RunCommandBatch.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
+import {DMSubtreeData} from "../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
+import {GetResourcesInImportSubtree_JsonDm} from "../../../../../Utils/DataFormats/JSON/DM/DMImportHelpers.js";
+import {PolicyPicker, PolicyPicker_Button} from "../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportResource> {
@@ -112,7 +115,8 @@ class ImportSubtreeUI extends BaseComponent<
 		// left panel
 		sourceText: string,
 		sourceText_parseError: string|n,
-		forJSONDM_subtreeData: FS_NodeL3|n,
+		forJSONDM_subtreeData: DMSubtreeData|n,
+		forJSONDMFS_subtreeData: FS_NodeL3|n,
 		forJSONCG_subtreeData: CG_Debate|n,
 		forCSVSL_subtreeData: CSV_SL_Row[]|n,
 
@@ -139,7 +143,7 @@ class ImportSubtreeUI extends BaseComponent<
 	render() {
 		const {mapID, map, node, path, controller} = this.props;
 		const {
-			sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process,
+			sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONDMFS_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process,
 			importSelected, selectedIRs_nodeAndRev_atImportStart,
 			serverImportInProgress, serverImport_commandsCompleted,
 			leftTab, rightTab, showLeftPanel,
@@ -154,11 +158,20 @@ class ImportSubtreeUI extends BaseComponent<
 		let resources: ImportResource[] = [];
 		if (process) {
 			if (uiState.sourceType == DataExchangeFormat.json_dm && forJSONDM_subtreeData != null) {
-				resources = GetResourcesInImportSubtree(forJSONDM_subtreeData);
+				resources = GetResourcesInImportSubtree_JsonDm(forJSONDM_subtreeData, node);
+			} else if (uiState.sourceType == DataExchangeFormat.json_dm_fs && forJSONDMFS_subtreeData != null) {
+				resources = GetResourcesInImportSubtree_JsonDmFs(forJSONDMFS_subtreeData);
 			} else if (uiState.sourceType == DataExchangeFormat.json_cg && forJSONCG_subtreeData != null) {
 				resources = GetResourcesInImportSubtree_CG(importContext, forJSONCG_subtreeData);
 			} else if (uiState.sourceType == DataExchangeFormat.csv_sl && forCSVSL_subtreeData != null) {
 				resources = GetResourcesInImportSubtree_CSV_SL(forCSVSL_subtreeData);
+			}
+			if (uiState.accessPolicyOverride != null) {
+				for (const resource of resources) {
+					if (resource instanceof IR_NodeAndRevision) {
+						resource.node.accessPolicy = uiState.accessPolicyOverride;
+					}
+				}
 			}
 		}
 		this.Stash({resources});
@@ -190,6 +203,17 @@ class ImportSubtreeUI extends BaseComponent<
 						<>
 							<Row>
 								{uiState.sourceType == DataExchangeFormat.json_dm &&
+								<Row center style={{flex: 1}}>
+									<Text>Subtree JSON:</Text>
+									<InfoButton ml={5} text={`
+										Obtain this subtree-json by:
+										1) Right-click the node you want to export, and press "Advanced -> Export subtree".
+										2) Choose your export options (probably enable all fields of nodes, nodeRevisions, and nodeLinks), then save to file.
+										3) Open the file, copy all text, and paste it into this subtree-json text area.
+										Note: Currently this can only import the nodes, nodeRevisions, and nodeLinks data.
+									`.AsMultiline(0)}/>
+								</Row>}
+								{uiState.sourceType == DataExchangeFormat.json_dm_fs &&
 								<Row center style={{flex: 1}}>
 									<Text>Subtree JSON:</Text>
 									<InfoButton ml={5} text={`
@@ -235,13 +259,24 @@ class ImportSubtreeUI extends BaseComponent<
 									const newState = {sourceText: newSourceText} as ExtractState<ImportSubtreeUI>;
 
 									if (uiState.sourceType == DataExchangeFormat.json_dm) {
-										let subtreeData_new: FS_NodeL3|n = null;
+										let subtreeData_new: DMSubtreeData|n = null;
 										try {
-											subtreeData_new = FromJSON(newSourceText) as FS_NodeL3;
+											subtreeData_new = FromJSON(newSourceText) as DMSubtreeData;
 											newState.forJSONDM_subtreeData = subtreeData_new;
 											newState.sourceText_parseError = null;
 										} catch (err) {
 											newState.forJSONDM_subtreeData = null;
+											newState.sourceText_parseError = err;
+										}
+										this.SetState(newState);
+									} else if (uiState.sourceType == DataExchangeFormat.json_dm_fs) {
+										let subtreeData_new: FS_NodeL3|n = null;
+										try {
+											subtreeData_new = FromJSON(newSourceText) as FS_NodeL3;
+											newState.forJSONDMFS_subtreeData = subtreeData_new;
+											newState.sourceText_parseError = null;
+										} catch (err) {
+											newState.forJSONDMFS_subtreeData = null;
 											newState.sourceText_parseError = err;
 										}
 										this.SetState(newState);
@@ -313,8 +348,8 @@ class ImportSubtreeUI extends BaseComponent<
 										serverImportInProgress && ` [${this.state.serverImport_commandsCompleted}/${resources.length}]`,
 									].filter(a=>a).join("")}
 									enabled={
-										// atm only the resource-extraction code for the json-cg format adds the "insertPath_parentResourceLocalID" field needed for server-side tree-importing
-										resources.length > 0 && uiState.sourceType == DataExchangeFormat.json_cg &&
+										// atm only the resource-extraction code for the json-dm and json-cg formats adds the "insertPath_parentResourceLocalID" field needed for server-side tree-importing
+										resources.length > 0 && uiState.sourceType.IsOneOf(DataExchangeFormat.json_dm, DataExchangeFormat.json_cg) &&
 										!this.nodeCreationTimer.Enabled && !serverImportInProgress
 									}
 									onClick={async()=>{
@@ -362,6 +397,10 @@ class ImportSubtreeUI extends BaseComponent<
 									{/*<Text ml={5}>Batch:</Text>
 									<Spinner ml={5} value={uiState.autoInsert_batchSize} onChange={val=>RunInAction_Set(this, ()=>uiState.autoInsert_batchSize = val)}/>*/}
 								</>}
+								<Text ml={10}>Policy override:</Text>
+								<PolicyPicker allowClear={true} textForNull="(use original policy id)" value={uiState.accessPolicyOverride} onChange={val=>RunInAction_Set(this, ()=>uiState.accessPolicyOverride = val)}>
+									<PolicyPicker_Button ml={5} policyID={uiState.accessPolicyOverride} idTrimLength={3} enabled={!serverImportInProgress} style={{padding: "3px 10px"}}/>
+								</PolicyPicker>
 							</Row>
 							<ScrollView>
 								<ReactList type="variable" length={resources.length}

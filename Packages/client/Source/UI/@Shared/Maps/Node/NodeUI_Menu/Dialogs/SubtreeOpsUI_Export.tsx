@@ -26,19 +26,13 @@ export class SubtreeOpsUI_Export_Left extends BaseComponentPlus(
 	{} as {} & MI_SharedProps,
 	{
 		tab: ExportSubtreeUI_MidTab.Nodes,
-		includeKeys: new SubtreeIncludeKeys(),
 	},
 ) {
 	render() {
 		let {} = this.props;
-		const {tab, includeKeys} = this.state;
+		const {tab} = this.state;
 		const dialogState = store.main.maps.subtreeOperationsDialog;
-
-		let includeKeys_final = Clone(includeKeys);
-		// for the export formats below, we only need a specific subset of the data
-		if (dialogState.targetFormat == DataExchangeFormat.csv_basic) includeKeys_final = csv_basic_includeKeys;
-		else if (dialogState.targetFormat == DataExchangeFormat.csv_quotes) includeKeys_final = csv_quotes_includeKeys;
-
+		const includeKeys = dialogState.export_includeKeys;
 		return (
 			<>
 				<RowLR mt={5} splitAt={splitAt}>
@@ -64,7 +58,9 @@ export class SubtreeOpsUI_Export_Left extends BaseComponentPlus(
 								{fieldNames.map(fieldName=>{
 									return (
 										<CheckBox key={fieldName} text={fieldName} value={includeKeys[tableName].includes(fieldName)} onChange={val=>{
-											includeKeys[tableName] = fieldNames.filter(a=>(a == fieldName ? val : fieldNames_oldEnabled.includes(a)));
+											RunInAction_Set(this, ()=>{
+												includeKeys[tableName] = fieldNames.filter(a=>(a == fieldName ? val : fieldNames_oldEnabled.includes(a)));
+											});
 											this.Update();
 										}}/>
 									);
@@ -84,7 +80,12 @@ export class SubtreeOpsUI_Export_Right extends BaseComponent<{} & MI_SharedProps
 		const {mapID, node: rootNode, path: rootNodePath} = this.props;
 		const {retrievalActive} = this.state;
 		const dialogState = store.main.maps.subtreeOperationsDialog;
-		const includeKeys = dialogState.export_includeKeys;
+
+		const includeKeys_userSet = dialogState.export_includeKeys;
+		let includeKeys = Clone(includeKeys_userSet);
+		// for the export formats below, we only need a specific subset of the data (selector ui also not shown for these formats)
+		if (dialogState.targetFormat == DataExchangeFormat.csv_basic) includeKeys = csv_basic_includeKeys;
+		else if (dialogState.targetFormat == DataExchangeFormat.csv_quotes) includeKeys = csv_quotes_includeKeys;
 
 		const {subtreeData} = useSubtreeRetrievalQueryOrAccessors(rootNode, rootNodePath, includeKeys, dialogState.retrievalMethod, dialogState.maxExportDepth, retrievalActive);
 

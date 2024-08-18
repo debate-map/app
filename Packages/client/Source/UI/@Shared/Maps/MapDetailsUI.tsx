@@ -56,7 +56,7 @@ export class MapDetailsUI extends DetailsUI_Base<DMap, MapDetailsUI> {
 				</RowLR>*/}
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Access policy: </Pre>
-					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val)}>
+					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val!)}>
 						{text=><Button enabled={enabled} text={text} style={{width: "100%"}}/>}
 					</PolicyPicker>
 				</RowLR>
@@ -150,7 +150,7 @@ export class MapDetailsUI extends DetailsUI_Base<DMap, MapDetailsUI> {
 						</RowLR> */}
 					<RowLR mt={5} splitAt={splitAt}>
 						<TextPlus info="Note that this only applies for new nodes created in this map. (ie. if you change this setting, you must manually update the access-policies of existing nodes)">Node access policy:</TextPlus>
-						<PolicyPicker value={newData.nodeAccessPolicy} onChange={val=>Change(newData.nodeAccessPolicy = val)}>
+						<PolicyPicker value={newData.nodeAccessPolicy} onChange={val=>Change(newData.nodeAccessPolicy = val!)}>
 							<Button enabled={enabled} text={nodeAccessPolicy ? `${nodeAccessPolicy.name} (id: ${nodeAccessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
 						</PolicyPicker>
 					</RowLR>

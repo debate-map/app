@@ -28,7 +28,7 @@ use rust_shared::{
 	serde_json, tokio,
 	utils::type_aliases::JSONValue,
 };
-use tracing::{error, warn};
+use tracing::{error, info, warn};
 
 use crate::utils::type_aliases::{ABReceiver, ABSender};
 
@@ -103,6 +103,20 @@ async fn write(mut sender: SplitSink<WebSocket, Message>) {
 			Ok(a) => a,
 			Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
 		};
+
+		// log metadata about entry (for debugging)
+		/*let base_str = "Sending message to monitor-backend:";
+		match &next_msg {
+			Message_ASToMB::LogEntryAdded { entry: _entry } => {
+				//info!("{} LogEntryAdded. @message:{}", base_str, entry.message) // logging this would cause a loop
+			},
+			Message_ASToMB::MtxEntryDone { mtx } => {
+				info!("{} MtxEntryDone. @id:{}", base_str, mtx.id)
+			},
+			Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries, watchers_count, deleting } => {
+				info!("{} LQInstanceUpdated. @table:{} @filter:{} @lastEntries:{} @watchers:{} @deleting:{}", base_str, table_name, filter, last_entries.len(), watchers_count, deleting)
+			},
+		}*/
 
 		//let next_entry_as_str = serde_json::to_string(&next_entry).unwrap_or_else(|_| "[failed to serialize LogEntry...]".to_string());
 		let next_entry_as_str = serde_json::to_string(&next_msg).unwrap_or_else(|_| "[failed to serialize Message_ASToMB...]".to_string());

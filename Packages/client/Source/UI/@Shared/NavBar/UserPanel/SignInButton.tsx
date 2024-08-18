@@ -86,7 +86,7 @@ type GsiButtonConfiguration = {
 	width?: number; // The button width, in pixels.
 	locale?: string; // If set, then the button language is rendered.
 }
-export const googleClientID = process.env.CLIENT_ID; // supplied by ./Scripts/Config.js
+export const googleClientID = process.env.CLIENT_ID; // supplied by client/rspack.config.js
 export function EnsureGoogleIDAPIReady() {
 	/*if (g.google == null) {
 		console.error("Cannot initialize Google ID api, because its script has not been loaded.");

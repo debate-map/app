@@ -47,7 +47,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: D
 					accessPolicyButton={
 						<PolicyPicker containerStyle={{flex: "none"}} value={node.accessPolicy} onChange={async val=>{
 							//new UpdateNodeAccessPolicy({nodeID: node.id, accessPolicy: val}).RunOnServer();
-							await RunCommand_UpdateNode({id: node.id, updates: {accessPolicy: val}});
+							await RunCommand_UpdateNode({id: node.id, updates: {accessPolicy: val!}});
 						}}>
 							{/*<Button ml={5} enabled={creatorOrMod} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>*/}
 							<Button ml={5} p="3px 7px" enabled={creatorOrMod} text="Change" style={{width: "100%"}}/>

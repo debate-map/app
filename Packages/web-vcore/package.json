@@ -106,7 +106,7 @@
 		"lodash": "^4.17.15",
 		"mini-css-extract-plugin": "^1.6.0",
 		"mobx": "6.3.13",
-		"mobx-graphlink": "0.0.47",
+		"mobx-graphlink": "0.0.48",
 		"mobx-react": "7.6.0",
 		"mobx-sync": "3.0.0",
 		"mobx-utils": "^6.0.6",

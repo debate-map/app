@@ -17,7 +17,6 @@ use rust_shared::{anyhow, async_graphql, serde_json, to_anyhow, to_sub_err, GQLE
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::commands::delete_node::delete_node;
@@ -108,7 +107,7 @@ pub async fn run_command_batch<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 				command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
 			} else if let Some(command_input) = &command.deleteNode {
 				let command_input_final = command_input.clone();
-				let result = delete_node(&ctx, &actor, false, command_input_final, DeleteNodeExtras { as_part_of_map_delete: false }).await.map_err(to_sub_err)?;
+				let result = delete_node(&ctx, &actor, false, command_input_final, DeleteNodeExtras { for_map_delete: false }).await.map_err(to_sub_err)?;
 				command_results.push(serde_json::to_value(result).map_err(to_sub_err)?);
 			} else if let Some(command_input) = &command.deleteNodeLink {
 				let command_input_final = command_input.clone();

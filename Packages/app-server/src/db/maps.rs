@@ -99,7 +99,7 @@ impl GQLSet<Map> for GQLSet_Map {
 #[derive(Default)] pub struct SubscriptionShard_Map;
 #[Subscription] impl SubscriptionShard_Map {
 	async fn maps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Map, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Map, GQLSet_Map>(ctx, "maps", filter).await
+		handle_generic_gql_collection_subscription::<Map, GQLSet_Map>(ctx, "maps", filter, None).await
 	}
 	async fn map<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Map>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Map>(ctx, "maps", id).await

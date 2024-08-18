@@ -34,7 +34,6 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::super::_shared::add_node::add_node;
-use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
 
 //wrap_slow_macros!{
@@ -169,6 +168,7 @@ pub fn clone_map_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User, _is_
 pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User, map_id: &'a str, old_node: Node, new_node: Node, nodes_warned_s1: FSender<String>) -> impl Stream<Item = Result<String, Error>> + 'a {
 	let base_stream = async_stream::stream! {
 		//let rev = get_node_revision(ctx, node.c_currentRevision.as_str()).await?;
+		let incrementEdits = Some(false);
 
 		let links = get_node_links(ctx, Some(old_node.id.as_str()), None).await?;
 		for link in links {
@@ -231,7 +231,8 @@ pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 								seriesAnchor: grandchild_link.seriesAnchor,
 								seriesEnd: grandchild_link.seriesEnd,
 								polarity: grandchild_link.polarity,
-							}
+							},
+							incrementEdits,
 						};
 						let add_node_result = add_child_node(ctx, actor, false, add_child_input, AddChildNodeExtras { avoid_recording_command_run: true }).await?;
 						yield Ok(add_node_result.nodeID.clone());
@@ -253,6 +254,7 @@ pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 				node: child.clone().into_input(true),
 				revision: child_rev.into_input(false),
 				link: link.into_input(false),
+				incrementEdits,
 			};
 			let add_child_result = add_child_node(ctx, actor, false, add_child_input, AddChildNodeExtras { avoid_recording_command_run: true }).await?;
 			yield Ok(add_child_result.nodeID.clone());

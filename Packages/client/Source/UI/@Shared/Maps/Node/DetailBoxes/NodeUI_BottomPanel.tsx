@@ -21,6 +21,7 @@ import {OthersPanel} from "./Panels/OthersPanel.js";
 import {PhrasingsPanel} from "./Panels/PhrasingsPanel.js";
 import {RatingsPanel} from "./Panels/RatingsPanel.js";
 import {TagsPanel} from "./Panels/TagsPanel.js";
+import {CommentsPanel} from "./Panels/CommentsPanel.js";
 
 //export const nodeBottomPanel_minWidth = 550;
 export const nodeBottomPanel_minWidth = 600;
@@ -149,6 +150,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("details", show=><DetailsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("history", show=><HistoryPanel {...{show, map, node, path}}/>)}
+				{renderPanel("comments", show=><CommentsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("others", show=><OthersPanel {...{show, map, node, path}}/>)}
 			</div>,
 			nodeDetailBoxesLayer_container,
@@ -156,3 +158,4 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 	}
 	definitionsPanel: DefinitionsPanel|n;
 }
+

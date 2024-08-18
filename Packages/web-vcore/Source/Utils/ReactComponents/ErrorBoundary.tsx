@@ -32,11 +32,11 @@ export const defaultErrorUI = (props: ErrorUIProps)=>{
 	const {error, style} = props;
 	return (
 		<ScrollView style={E({height: "100%", maxHeight: "100px"}, style)}>
-			{/*<Text>An error has occured in the UI-rendering code.</Text>
+			{/*<Text>An error has occurred in the UI-rendering code.</Text>
 			<TextArea value={error}/>
 			<TextArea value={errorInfo.componentStack}/>
 			<TextArea value={ToJSON(errorInfo)}/>*/}
-			<TextArea autoSize={true} value={`An error has occured in the UI-rendering code.\n\n${error.message}\n${error.info.componentStack}`}/>
+			<TextArea autoSize={true} value={`An error has occurred in the UI-rendering code.\n\n${error.message}\n${error.info.componentStack}`}/>
 		</ScrollView>
 	);
 };

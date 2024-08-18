@@ -173,7 +173,7 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
 #[derive(Default)] pub struct SubscriptionShard_NodeRating;
 #[Subscription] impl SubscriptionShard_NodeRating {
 	async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
+		handle_generic_gql_collection_subscription::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter, None).await
 	}
 	async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRating>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeRating>(ctx, "nodeRatings", id).await

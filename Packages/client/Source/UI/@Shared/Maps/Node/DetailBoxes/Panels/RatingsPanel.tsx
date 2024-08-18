@@ -80,7 +80,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 						}}/>
 						<Text ml={10} mr={5}>Access-policy:</Text>
 						<PolicyPicker containerStyle={{flex: null}} value={myRating_raw.accessPolicy} onChange={policyID=>{
-							SetRating(myRating_displayVal, policyID);
+							SetRating(myRating_displayVal, policyID!);
 						}}>
 							<PolicyPicker_Button policyID={myRating_raw.accessPolicy} idTrimLength={3} style={{padding: "3px 10px"}}/>
 						</PolicyPicker>

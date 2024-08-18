@@ -66,7 +66,7 @@ impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
 #[derive(Default)] pub struct SubscriptionShard_AccessPolicy;
 #[Subscription] impl SubscriptionShard_AccessPolicy {
 	async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
+		handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter, None).await
 	}
 	async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<AccessPolicy>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<AccessPolicy>(ctx, "accessPolicies", id).await

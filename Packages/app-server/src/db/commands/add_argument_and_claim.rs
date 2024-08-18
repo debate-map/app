@@ -27,7 +27,7 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::add_node::add_node;
-use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
+use super::_shared::increment_edits::increment_edits_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 
 wrap_slow_macros! {
@@ -49,6 +49,7 @@ pub struct AddArgumentAndClaimInput {
 	pub claimNode: NodeInput,
 	pub claimRevision: NodeRevisionInput,
 	pub claimLink: NodeLinkInput,
+	pub incrementEdits: Option<bool>,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -65,13 +66,13 @@ pub struct AddArgumentAndClaimResult {
 }
 
 pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddArgumentAndClaimInput, _extras: NoExtras) -> Result<AddArgumentAndClaimResult, Error> {
-	let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink } = input;
+	let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink, incrementEdits } = input;
 
-	let add_argument_result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: argumentParentID.clone(), node: argumentNode.clone(), revision: argumentRevision.clone(), link: argumentLink.clone() }, Default::default()).await?;
+	#[rustfmt::skip]
+	let add_argument_result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: argumentParentID.clone(), node: argumentNode.clone(), revision: argumentRevision.clone(), link: argumentLink.clone(), incrementEdits: Some(false) }, Default::default() ).await?;
+	let add_claim_result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: add_argument_result.nodeID.clone(), node: claimNode, revision: claimRevision, link: claimLink, incrementEdits: Some(false) }, Default::default()).await?;
 
-	let add_claim_result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: add_argument_result.nodeID.clone(), node: claimNode, revision: claimRevision, link: claimLink }, Default::default()).await?;
-
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+	increment_edits_if_valid(&ctx, Some(actor), mapID, is_root, incrementEdits).await?;
 
 	Ok(AddArgumentAndClaimResult {
 		argumentNodeID: add_argument_result.nodeID,

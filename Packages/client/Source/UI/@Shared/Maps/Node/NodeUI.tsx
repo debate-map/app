@@ -31,8 +31,7 @@ class ObservedValues {
 		Object.assign(this, data);
 	}
 	innerUIHeight = 0;
-	childrensHeight = 0;
-	height = 0;
+	childrensHeight = 0; height = 0;
 }
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
@@ -204,7 +203,7 @@ export class NodeUI extends BaseComponentPlus(
 		}
 
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
-		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow;
+		const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
 
 		const playback = GetPlaybackInfo();
 		const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;
@@ -313,7 +312,6 @@ export class NodeUI extends BaseComponentPlus(
 		this.lastObservedValues = obs;
 	};
 }
-
 export enum LimitBarPos {
 	above = "above",
 	below = "below",

@@ -129,7 +129,7 @@ impl GQLSet<TimelineStep> for GQLSet_TimelineStep {
 #[derive(Default)] pub struct SubscriptionShard_TimelineStep;
 #[Subscription] impl SubscriptionShard_TimelineStep {
 	async fn timelineSteps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_TimelineStep, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter).await
+		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter, None).await
 	}
 	async fn timelineStep<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<TimelineStep>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<TimelineStep>(ctx, "timelineSteps", id).await

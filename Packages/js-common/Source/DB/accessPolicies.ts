@@ -9,7 +9,9 @@ import {DBCollection} from "../DBShape.js";
 export const GetAccessPolicies = CreateAccessor((creatorID?: string)=>{
 	return GetDocs({
 		//queryOps: [new WhereOp("name", "==", name)],
-		params: {filter: {creator: {equalTo: creatorID}}},
+		params: {filter: {
+			creator: creatorID && {equalTo: creatorID},
+		}},
 	}, a=>a.accessPolicies);
 });
 export const GetAccessPolicy = CreateAccessor((id: string|n)=>{

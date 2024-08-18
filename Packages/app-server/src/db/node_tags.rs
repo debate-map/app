@@ -201,7 +201,7 @@ impl GQLSet<NodeTag> for GQLSet_NodeTag {
 #[derive(Default)] pub struct SubscriptionShard_NodeTag;
 #[Subscription] impl SubscriptionShard_NodeTag {
 	async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeTag, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeTag, GQLSet_NodeTag>(ctx, "nodeTags", filter).await
+		handle_generic_gql_collection_subscription::<NodeTag, GQLSet_NodeTag>(ctx, "nodeTags", filter, None).await
 	}
 	async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeTag>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeTag>(ctx, "nodeTags", id).await

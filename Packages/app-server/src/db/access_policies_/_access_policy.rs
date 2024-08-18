@@ -11,6 +11,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::Client;
 use rust_shared::tokio_postgres::Row;
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, serde, serde_json, SubError};
 
@@ -53,7 +54,7 @@ impl AccessPolicy {
 impl From<Row> for AccessPolicy {
 	fn from(row: Row) -> Self {
 		Self {
-			id: ID::from(&row.get::<_, String>("id")),
+			id: ID::from(&row.get::<&str, String>(&"id".o())), // &"...".o() is temp-fix for rust-analyzer bug
 			creator: row.get("creator"),
 			createdAt: row.get("createdAt"),
 			name: row.get("name"),

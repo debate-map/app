@@ -83,7 +83,7 @@ impl GQLSet<Share> for GQLSet_Share {
 #[derive(Default)] pub struct SubscriptionShard_Share;
 #[Subscription] impl SubscriptionShard_Share {
 	async fn shares<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Share, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Share, GQLSet_Share>(ctx, "shares", filter).await
+		handle_generic_gql_collection_subscription::<Share, GQLSet_Share>(ctx, "shares", filter, None).await
 	}
 	async fn share<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Share>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Share>(ctx, "shares", id).await
