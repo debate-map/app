@@ -21,6 +21,7 @@ const require = createRequire(import.meta.url);
 
 /**
  * @param {BuildConfigOptions} options
+ * @returns {RspackConfig}
  **/
 export const buildConfig = options=>{
 	/** @type {Partial<BuildConfigOptions>} */
@@ -49,11 +50,7 @@ export const buildConfig = options=>{
 	const DEV = ENV == "dev";
 	const TEST = false; //ENV == "test";
 
-	// Uncomment the jsdoc comment below ONLY when working on the config in this file. (for type-checking)
-	// The rest of the time, keep it commented ("// " before it), so that upstream config allows ctrl+click jumping to fields in this base config.
-	// /** @type {RspackConfig} */
-
-	const result = /** @type {const} */ ({
+	return {
 		mode: PROD && !QUICK ? "production" : "development",
 		target: "web",
 		devtool: PROD ? "source-map" : "cheap-source-map",
@@ -258,16 +255,7 @@ export const buildConfig = options=>{
 				})) ?? [],
 			}),
 		],
-	});
-
-	// we use the type-cast and type-assertion below to ensure that the structure above is still a valid RspackConfig structure
-	// (see comment in TypeHelpers.ts for more info)
-	const result_deepWriteable = toDeepWriteable(result);
-	/** @type {RspackConfig} */
-	// Note: If this type-assertion fails, uncomment the jsdoc comment just above the "const result = ..." line, for localized type-checking.
-	const result_typeCheck = result_deepWriteable;
-
-	return result_deepWriteable;
+	};
 };
 
 // helper functions
@@ -278,29 +266,19 @@ function S(obj) {
 	return JSON.stringify(obj);
 }
 
-/** @type {<T>(input: T)=>DeepWriteable<T>} */
-const toDeepWriteable = obj=>{
-	return /** @type {any} */ (obj);
-};
-
-/*#*
- * NN stands for "non-null".
- * This is a helper function to enable easier modification of deep-paths, which rspack configs may leave null, but we know is non-null.
+/**
+ * NN stands for "non-null". This is a helper function to enable easier modification of deep-paths that are
+ * 	nullable in the RspackConfig type, but which we know are non-null because they're always set in the base rspack.js.
  * @type {<T>(obj: T)=>NonNullable<T>}
-*#/
-/*export function NN(obj) {
+*/
+export function NN(obj) {
 	if (obj == null) throw new Error(`Project rspack.config.js tried to modify a field that is null in base config.`);
 	return obj;
-}*/
+}
 
 // type helpers
 // ==========
 
 /**
 @typedef {import('@rspack/core').Configuration} RspackConfig
-*/
-
-/**
-@template T
-@typedef {import('./TypeHelpers.ts').DeepWriteable<T>} DeepWriteable<T>
 */

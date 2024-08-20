@@ -1,6 +1,6 @@
 // @ts-check
 
-import {buildConfig} from "web-vcore/Scripts/RsPack/rspack.js";
+import {buildConfig, NN} from "web-vcore/Scripts/RsPack/rspack.js";
 import path from "path";
 import {fileURLToPath} from "node:url";
 
@@ -14,7 +14,7 @@ const config = buildConfig({
 	entryFile: path.resolve(__dirname, "./Source/Main.ts"),
 	dotEnvFile: path.resolve(__dirname, "../../.env"),
 });
-config.resolve["alias"] = {
+NN(config.resolve).alias = {
 	"wavesurfer.js": path.resolve(__dirname, "../../node_modules/wavesurfer.js/dist/wavesurfer.js"),
 };
 export default config;
