@@ -56,7 +56,7 @@ Object.assign(scripts, {
 		dev: `cd Packages/client && ${pathToNPMBin("rspack", 2)} serve`,
 		compile: `cd Packages/client && ${pathToNPMBin("rspack", 2)} build`,
 		build: {
-			prod: `cross-env NODE_ENV=production "npm start client.clean &&  npm start client.compile"`,
+			prod: `cross-env-shell NODE_ENV=production "npm start client.clean && npm start client.compile"`,
 		},
 	},
 	jsCommon: {
@@ -91,7 +91,7 @@ Object.assign(scripts, {
 		dev: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} serve`,
 		compile: `cd Packages/monitor-client && ${pathToNPMBin("rspack", 2)} build`,
 		build: {
-			prod: `cross-env NODE_ENV=production "npm start monitorClient.clean &&  npm start monitorClient.compile"`,
+			prod: `cross-env-shell NODE_ENV=production "npm start monitorClient.clean && npm start monitorClient.compile"`,
 		},
 	},
 });

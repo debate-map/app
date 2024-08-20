@@ -102,7 +102,6 @@ export class NotificationNavBarPanelButton extends BaseComponent<{}, {}> {
 				position: "relative",
 			}}>
 				<NavBarPanelButton onClick={()=>{
-					console.log("clicked notifications button");
 					if (mapState) {
 						mapState.subscriptionPaintMode = false;
 					}
