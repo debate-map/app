@@ -5,9 +5,8 @@ import {FetchResult, gql} from "@apollo/client";
 // standardized add/update/delete commands
 // ==========
 
-function CreateFunc_RunCommand_AddX<ResultShape = {id: string}, T = any>(classConstructor: new(..._)=>T, entryFieldName: string) {
+function CreateFunc_RunCommand_AddX<ResultShape = {id: string}, T = any>(classConstructor: new(..._)=>T, entryFieldName: string, className = classConstructor.name) {
 	return async function(entry: T) {
-		const className = classConstructor.name;
 		const inputFields = {[entryFieldName]: entry};
 		const result = await apolloClient.mutate({
 			mutation: gql`
@@ -20,9 +19,8 @@ function CreateFunc_RunCommand_AddX<ResultShape = {id: string}, T = any>(classCo
 		return result.data[`add${className}`] as ResultShape;
 	};
 }
-function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T) {
+function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, className = classConstructor.name) {
 	return async function(inputFields: {id: string}) {
-		const className = classConstructor.name;
 		const result = await apolloClient.mutate({
 			mutation: gql`
 				mutation($input: Delete${className}Input!) {
@@ -34,9 +32,8 @@ function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstruct
 		return result.data[`delete${className}`] as ResultShape;
 	};
 }
-function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, classNameAsStr_override?: string) {
+function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, className = classConstructor.name) {
 	return async function(inputFields: {id: string, updates: Partial<T>}) {
-		const className = classNameAsStr_override ?? classConstructor.name;
 		const result = await apolloClient.mutate({
 			mutation: gql`
 				mutation($input: Update${className}Input!) {
@@ -50,7 +47,7 @@ function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstruct
 }
 
 export const RunCommand_AddAccessPolicy = CreateFunc_RunCommand_AddX(AccessPolicy, "policy");
-export const RunCommand_AddMap = CreateFunc_RunCommand_AddX(DMap, "map");
+export const RunCommand_AddMap = CreateFunc_RunCommand_AddX(DMap, "map", "Map");
 export const RunCommand_AddMedia = CreateFunc_RunCommand_AddX(Media, "media");
 export const RunCommand_AddNodeLink = CreateFunc_RunCommand_AddX(NodeLink, "link");
 export const RunCommand_AddNodePhrasing = CreateFunc_RunCommand_AddX(NodePhrasing, "phrasing");
@@ -61,7 +58,7 @@ export const RunCommand_AddTimeline = CreateFunc_RunCommand_AddX(Timeline, "time
 export const RunCommand_AddTimelineStep = CreateFunc_RunCommand_AddX(TimelineStep, "step");
 
 export const RunCommand_DeleteAccessPolicy = CreateFunc_RunCommand_DeleteX(AccessPolicy);
-export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(DMap);
+export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(DMap, "Map");
 export const RunCommand_DeleteMedia = CreateFunc_RunCommand_DeleteX(Media);
 export const RunCommand_DeleteNodeLink = CreateFunc_RunCommand_DeleteX(NodeLink);
 export const RunCommand_DeleteNodePhrasing = CreateFunc_RunCommand_DeleteX(NodePhrasing);
@@ -72,7 +69,7 @@ export const RunCommand_DeleteTimeline = CreateFunc_RunCommand_DeleteX(Timeline)
 export const RunCommand_DeleteTimelineStep = CreateFunc_RunCommand_DeleteX(TimelineStep);
 
 export const RunCommand_UpdateAccessPolicy = CreateFunc_RunCommand_UpdateX(AccessPolicy);
-export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(DMap);
+export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(DMap, "Map");
 export const RunCommand_UpdateMedia = CreateFunc_RunCommand_UpdateX(Media);
 export const RunCommand_UpdateNodeLink = CreateFunc_RunCommand_UpdateX(NodeLink);
 export const RunCommand_UpdateNodePhrasing = CreateFunc_RunCommand_UpdateX(NodePhrasing);
