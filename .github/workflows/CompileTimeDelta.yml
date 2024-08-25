@@ -1,0 +1,41 @@
+name: Save cargo build timing information
+
+on: [push, pull_request]
+
+jobs:
+  linux-ubuntu:
+    name: Add build timing information to another repository
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+
+    # regarding the caching of build files, for now i've decided we are building fresh
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: debate-map
+      - name: Build Timing
+        working-directory: debate-map
+        run: cargo build --package app-server --timings
+
+      - name: Checkout compile timings repo
+        uses: actions/checkout@v4
+        with:
+          repository: rishadbaniya/compile-timings # TODO: change this to debate-map/compile-timings after testing is done
+          path : compile-timings
+          token : ${{ secrets.PAT }}
+
+      - name: Copy timing file (with timestamp) to target repository
+        run: |
+          mkdir -p compile-timings/timings
+          mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/
+
+      - name: Commit and push changes
+        working-directory: compile-timings
+        run: |
+          git config user.name "compile-timings[bot]" # TODO: change the username and email here after testing
+          git config user.email rbdroid01@gmail.com
+          git add timings
+          git commit -m "ci: add build timing information for app-server"
+          git push
