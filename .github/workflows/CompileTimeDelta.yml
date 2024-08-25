@@ -22,7 +22,7 @@ jobs:
       - name: Checkout compile timings repo
         uses: actions/checkout@v4
         with:
-          repository: rishadbaniya/compile-timings # TODO: change this to debate-map/compile-timings after testing is done
+          repository: debate-map/compile-timings
           path : compile-timings
           token : ${{ secrets.PAT }}
 
@@ -34,8 +34,8 @@ jobs:
       - name: Commit and push changes
         working-directory: compile-timings
         run: |
-          git config user.name "compile-timings[bot]" # TODO: change the username and email here after testing
-          git config user.email rbdroid01@gmail.com
+          git config user.name "compile-timings[bot]"
+          git config user.email debatemap@gmail.com
           git add timings
           git commit -m "ci: add build timing information for app-server"
           git push
