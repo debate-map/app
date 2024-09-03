@@ -1,4 +1,4 @@
-import {AddSchema, Field, MGLClass} from "mobx-graphlink";
+import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
 import {CE} from "js-vextensions";
 import {MarkerForNonScalarField, PickOnly} from "../../Utils/General/General.js";
 import {NodeEffect, TimelineStepEffect} from "./@TimelineStepEffect.js";
@@ -17,6 +17,10 @@ export class TimelineStep {
 
 	@Field({type: "string"}) // should "{opt: true}" be added?
 	orderKey: string;
+
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({type: "string"}, {opt: true})
+	creator: string;
 
 	/*@Field({type: "string"})
 	title: string;*/
@@ -38,6 +42,10 @@ export class TimelineStep {
 
 	/*@Field({items: {$ref: "NodeReveal"}, ...MarkerForNonScalarField()})
 	nodeReveals: NodeReveal[];*/
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 
 	@Field({$ref: "TimelineStep_Extras"})
 	extras = new TimelineStep_Extras();

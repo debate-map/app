@@ -60,6 +60,10 @@ export class NodePhrasing {
 	@Field({items: {$ref: TermAttachment.name}, ...MarkerForNonScalarField()})
 	terms: TermAttachment[] = [];
 
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
+
 	// for web phrasings
 	// ==========
 

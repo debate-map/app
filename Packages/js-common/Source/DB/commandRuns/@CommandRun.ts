@@ -47,4 +47,8 @@ export class CommandRun {
 	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	c_involvedNodes: string[];
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }
