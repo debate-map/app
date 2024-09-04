@@ -1,8 +1,8 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {NodeL1} from "../DB/nodes/@Node.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -17,7 +17,7 @@ export class UpdateNodeAccessPolicy extends Command<{nodeID: string, accessPolic
 	Validate() {
 		const {nodeID, accessPolicy} = this.payload;
 		const node = this.oldNodeData = GetNode.NN(nodeID);
-		AssertUserCanModify(this, this.oldNodeData);
+		AssertV(PERMISSIONS.Node.Modify(this.userInfo.id, this.oldNodeData));
 
 		this.newNodeData = {...this.oldNodeData, accessPolicy};
 		AssertValidate("NodeL1", this.newNodeData, "New node-data invalid");

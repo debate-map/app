@@ -28,7 +28,6 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		// we want the newest ones listed first
 		revisions = revisions.OrderByDescending(a=>a.createdAt);
 
-		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		const {css} = cssHelper(this);
 		return (
 			<Column style={{position: "relative", maxHeight: 300, display: show ? "flex" : "none"}}>

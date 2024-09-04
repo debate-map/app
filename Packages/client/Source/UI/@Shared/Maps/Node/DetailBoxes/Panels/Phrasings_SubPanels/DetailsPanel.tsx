@@ -4,7 +4,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates, Observer} from "web-vcore";
 import {E} from "js-vextensions";
-import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, DMap, NodeL3} from "dm_common";
+import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, DMap, NodeL3, PERMISSIONS} from "dm_common";
 import {RunCommand_DeleteNodePhrasing, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command";
 
 @Observer
@@ -15,7 +15,7 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {map: DMap|n
 		const {dataError} = this.state;
 		const creator = GetUser(phrasing.creator);
 
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), phrasing);
+		const creatorOrMod = PERMISSIONS.NodePhrasing.Access(MeID(), phrasing);
 		return (
 			<Column style={{position: "relative", width: "100%"}}>
 				<PhrasingDetailsUI ref={c=>this.detailsUI = c!}

@@ -2,7 +2,7 @@ import {store} from "Store";
 import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, Timeline, TimelineStep} from "dm_common";
+import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, Timeline, TimelineStep, PERMISSIONS} from "dm_common";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
 import {ES, GetAutoElement, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
@@ -293,7 +293,7 @@ export class StepList extends BaseComponent<{map: DMap, timeline: Timeline}, {},
 
 		const audioFiles = timeline ? GetAudioFilesActiveForTimeline(map.id, timeline.id) : [];
 
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
+		const creatorOrMod = PERMISSIONS.Timeline.Modify(MeID(), timeline);
 		this.Stash({steps, creatorOrMod});
 
 		const [messageAreaRef, {height: messageAreaHeight}] = UseSize(); // todo: maybe switch this to use `useResizeObserver()`, so reacts to [css/window]-only height changes

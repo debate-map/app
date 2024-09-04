@@ -77,10 +77,6 @@ export class NodeL1 {
 	@Field({$ref: "Node_Extras"})
 	extras = new Node_Extras();
 
-	static canAddChild(self: NodeL1, actor: User) {
-		//if (!can_access(actor, self)) { return false; }
-		return IsUserCreatorOrMod(actor.id, self) || DoesPolicyAllowX(actor.id, self.accessPolicy, APTable.nodes, APAction.addChild);
-	}
 }
 AddSchema("Node_Partial", ["NodeL1"], ()=>{
 	const schema = GetSchemaJSON_Cloned("NodeL1");

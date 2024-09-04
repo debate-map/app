@@ -5,7 +5,7 @@ import {E} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {runInAction} from "mobx";
 import {store} from "Store";
-import {DMap, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
+import {DMap, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects, PERMISSIONS} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {StepEditorUI} from "./Editing/StepEditorUI.js";
@@ -110,7 +110,7 @@ export class StepUI extends BaseComponentPlus(
 							})}
 						</Column>}
 					</Column>}
-					{IsUserCreatorOrMod(MeID(), timeline) &&
+					{PERMISSIONS.Timeline.Modify(MeID(), timeline) &&
 					<VMenuStub /*preOpen={e=>!e.handled}*/>
 						<VMenuItem text={editorOpen ? "Close editor" : "Edit"} style={liveSkin.Style_VMenuItem()}
 							onClick={e=>{

@@ -1,8 +1,8 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
+import {AssertValidate, Command, AssertV, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 const MTClass = AccessPolicy;
 type MT = typeof MTClass.prototype;
@@ -21,7 +21,7 @@ export class UpdateAccessPolicy extends Command<{id: string, updates: Partial<MT
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetAccessPolicy.NN(id);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.AccessPolicy.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

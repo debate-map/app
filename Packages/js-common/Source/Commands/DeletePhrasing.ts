@@ -1,8 +1,8 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -15,7 +15,7 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetNodePhrasing.NN(id);
-		AssertUserCanDelete(this, this.oldData);
+		AssertV(PERMISSIONS.NodePhrasing.Delete(this.userInfo.id, this.oldData));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

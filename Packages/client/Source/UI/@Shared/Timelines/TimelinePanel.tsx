@@ -4,7 +4,7 @@ import {store} from "Store";
 import {GetSelectedTimeline, GetMapState, GetShowTimelineDetails} from "Store/main/maps/mapStates/$mapState.js";
 import {runInAction} from "mobx";
 import {Observer, RunInAction} from "web-vcore";
-import {IsUserCreatorOrMod, DMap, MeID} from "dm_common";
+import {IsUserCreatorOrMod, DMap, MeID, PERMISSIONS} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Header1} from "./TimelinePanel/Header1.js";
@@ -20,7 +20,7 @@ export class TimelinePanel extends BaseComponent<{map: DMap}, {}> {
 		const {map} = this.props;
 		const uiState = store.main.timelines;
 		const timeline = GetSelectedTimeline(map.id);
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
+		const creatorOrMod = PERMISSIONS.Timeline.Modify(MeID(), timeline);
 		const showTimelineDetails = GetShowTimelineDetails(map.id);
 
 		return (

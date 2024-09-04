@@ -1,7 +1,6 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {GetShare, Share} from "../DB.js";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
+import {GetShare, PERMISSIONS, Share} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -14,7 +13,7 @@ export class DeleteShare extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetShare.NN(id);
-		AssertUserCanDelete(this, this.oldData);
+		AssertV(PERMISSIONS.Share.Delete(this.userInfo.id, this.oldData));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

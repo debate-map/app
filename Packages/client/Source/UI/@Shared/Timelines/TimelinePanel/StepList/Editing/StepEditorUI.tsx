@@ -4,7 +4,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, DMap, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod, PERMISSIONS} from "dm_common";
 import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "js-vextensions";
 import {RunInAction} from "mobx-graphlink";
@@ -70,7 +70,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		const {index, map, timeline, step, nextStep, dragInfo} = this.props;
 		const {placeholderRect} = this.state;
 		//const step = GetTimelineStep(stepID);
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
+		const creatorOrMod = PERMISSIONS.Timeline.Modify(MeID(), timeline);
 		const timelinesUIState = store.main.timelines;
 		const nodeEffects = GetNodeEffects(step);
 

@@ -1,4 +1,4 @@
-import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsUserCreatorOrMod, MeID, Polarity, UpdateLink, OrderKey} from "dm_common";
+import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsUserCreatorOrMod, MeID, Polarity, UpdateLink, OrderKey, PERMISSIONS} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -56,7 +56,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 
 		return (
 			<VMenuItem text={`Move ${direction}`} style={liveSkin.Style_VMenuItem()}
-				enabled={Boolean(node.link && IsUserCreatorOrMod(MeID(), node.link) && orderingParent_childOrdering == ChildOrdering.manual && newOrderKey != null)}
+				enabled={Boolean(node.link && PERMISSIONS.NodeLink.Modify(MeID(), node.link) && orderingParent_childOrdering == ChildOrdering.manual && newOrderKey != null)}
 				//title={error ? `Error calculating new order-key: ${error}` : undefined}
 				onClick={async e=>{
 					if (e.button != 0) return;

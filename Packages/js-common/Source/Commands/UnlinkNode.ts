@@ -7,6 +7,7 @@ import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {IsRootNode} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
 import {IsUserCreatorOrMod} from "../DB/users/$user.js";
+import {PERMISSIONS} from "../DB.js";
 
 // todo: add full-fledged checking to ensure that nodes are never orphaned by move commands (probably use parents recursion to find at least one map root)
 
@@ -36,7 +37,7 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 		const oldData = GetNodeL2.NN(childID);
 
 		const baseText = `Cannot unlink node #${oldData.id}, since `;
-		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
+		AssertV(PERMISSIONS.Node.Modify(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
 		AssertV(this.allowOrphaning || childParents.length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
 		AssertV(!IsRootNode(oldData), `${baseText}it's the root-node of a map.`);
 		//AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);

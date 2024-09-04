@@ -1,5 +1,5 @@
-import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, Term, TermType, UpdateTerm} from "dm_common";
-import {useEffect} from "react";
+import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, PERMISSIONS, Term, TermType, UpdateTerm} from "dm_common";
+import React, {useEffect} from "react";
 import {store} from "Store";
 import {GetSelectedTerm, GetSelectedTermID} from "Store/main/database";
 import {ES, GetUpdates, Observer, RunInAction, chroma_maxDarken} from "web-vcore";
@@ -22,8 +22,9 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 		const userID = MeID();
 		const terms = GetTerms();
 		const selectedTerm = GetSelectedTerm();
-		const permissions = GetUserPermissionGroups(userID);
-		const creatorOrMod = selectedTerm != null && IsUserCreatorOrMod(userID, selectedTerm);
+
+		const permissionsModify = selectedTerm != null && PERMISSIONS.Term.Modify(userID, selectedTerm);
+		const permissionsDelete = selectedTerm != null && PERMISSIONS.Term.Delete(userID, selectedTerm);
 
 		// whenever selectedTerm changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
 		useEffect(()=>{
@@ -69,7 +70,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 									{GetFullNameP(selectedTerm)}
 								</Text>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
-								{creatorOrMod &&
+								{permissionsModify &&
 									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null && selectedTerm_newDataError == null}
 										onClick={async e=>{
 											Assert(selectedTerm); // nn: button would be disabled otherwise
@@ -78,7 +79,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 											await RunCommand_UpdateTerm({id: selectedTerm.id, updates});
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
-								{creatorOrMod &&
+								{permissionsDelete &&
 									<Button text="Delete term" ml={10} enabled={selectedTerm != null}
 										onClick={async e=>{
 											Assert(selectedTerm); // nn: button would be disabled otherwise
@@ -94,7 +95,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 							</Div>
 						</Row>
 						{selectedTerm
-							? <TermDetailsUI baseData={selectedTerm} phase={creatorOrMod ? "edit" : "view"} style={{padding: 10}}
+							? <TermDetailsUI baseData={selectedTerm} phase={permissionsModify ? "edit" : "view"} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedTerm_newData: data, selectedTerm_newDataError: error})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>

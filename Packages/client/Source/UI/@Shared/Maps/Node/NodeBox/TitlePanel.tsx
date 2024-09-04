@@ -6,7 +6,7 @@ import {Button, Pre, Row, Text, TextArea} from "react-vcomponents";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "react-vextensions";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, DMap, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, DMap, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch, PERMISSIONS} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA, EB_ShowError, EB_StoreError, DefaultLoadingUI} from "web-vcore";
 import React from "react";
 import {BailError, BailInfo, GetAsync} from "mobx-graphlink";
@@ -73,7 +73,7 @@ export class TitlePanel extends BaseComponentPlus(
 		// ignore double-clicks on arguments (their text is determined automatically, so setting a custom value for the text field is just confusing)
 		if (node.type == NodeType.argument) return;
 
-		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
+		/*
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
 		const titleAttachment = GetTitleIntegratedAttachment(node.current);
@@ -83,7 +83,7 @@ export class TitlePanel extends BaseComponentPlus(
 				titleInfo: GetNodeRawTitleAndSuch(node, path),
 			};
 		});
-		if (IsUserCreatorOrMod(MeID(), node) && titleAttachment?.equation == null) {
+		if (PERMISSIONS.Node.Modify(MeID(), node) && titleAttachment?.equation == null) {
 			this.SetState({editing: true, edit_newTitle: titleInfo.rawTitle, edit_titleKey: titleInfo.usedField});
 		}
 	};

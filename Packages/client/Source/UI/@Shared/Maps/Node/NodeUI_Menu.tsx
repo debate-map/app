@@ -191,7 +191,7 @@ export class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.main.search.findNode_resultPaths = [];
 							});
 						}}/>}
-				{/*IsUserCreatorOrMod(userID, node) && !forChildHolderBox && map?.extras.allowSpecialChildLayouts &&
+				{/* !forChildHolderBox && map?.extras.allowSpecialChildLayouts &&
 					<VMenuItem text={`Toggle children layout (${childLayout} -> ${InvertChildLayout(childLayout)})`} style={styles.vMenuItem}
 						onClick={async e=>{
 							const newRevision = Clone(node.current) as NodeRevision;

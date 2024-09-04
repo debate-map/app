@@ -1,8 +1,7 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {GetMedia} from "../DB.js";
+import {GetMedia, PERMISSIONS} from "../DB.js";
 import {Media} from "../DB/media/@Media.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 const MTClass = Media;
 type MT = typeof MTClass.prototype;
@@ -21,7 +20,7 @@ export class UpdateMedia extends Command<{id: string, updates: Partial<Media>}, 
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetMedia.NN(id);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.Media.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow, GetNodeSubscription, Subscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -64,7 +64,6 @@ export type NodeBox_Props = {
 } & {dragInfo?: DragInfo};
 
 /* @MakeDraggable(({ node, path, indexInNodeList }: TitlePanelProps) => {
-	if (!IsUserCreatorOrMod(MeID(), node)) return null;
 	if (!path.includes('/')) return null; // don't make draggable if root-node of map
 	return {
 		type: 'NodeL1',
@@ -566,7 +565,7 @@ export class NodeBox extends BaseComponentPlus(
 
 		const GetDNDProps = ()=>{
 			if (forLayoutHelper) return null; // don't make draggable if part of layout-helper map (just extra overhead; and glitches atm, probably cause `forLayoutHelper` val isn't in DraggableInfo struct)
-			if (!IsUserCreatorOrMod(MeID(), node)) return null;
+			if (!PERMISSIONS.Node.Modify(MeID(), node)) return null;
 			if (!path.includes("/")) return null; // don't make draggable if root-node of map
 			return {
 				type: "NodeL1",

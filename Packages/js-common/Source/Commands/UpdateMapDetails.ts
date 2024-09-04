@@ -1,9 +1,9 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, AssertV, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMap} from "../DB/maps.js";
 import {DMap} from "../DB/maps/@Map.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 const MTClass = DMap;
 type MT = typeof MTClass.prototype;
@@ -26,7 +26,7 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<MT>}
 	Validate() {
 		const {id: mapID, updates: mapUpdates} = this.payload;
 		this.oldData = GetMap.NN(mapID);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.Map.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...mapUpdates};
 		this.newData.editedAt = Date.now();
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);

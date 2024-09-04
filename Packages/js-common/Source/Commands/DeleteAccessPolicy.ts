@@ -1,9 +1,9 @@
-import {Command, CommandMeta, DBHelper, dbp, GetDocs, SimpleSchema} from "mobx-graphlink";
+import {Command, CommandMeta, DBHelper, dbp, GetDocs, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -17,7 +17,7 @@ export class DeleteAccessPolicy extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetAccessPolicy(id)!;
-		AssertUserCanDelete(this, this.oldData);
+		AssertV(PERMISSIONS.AccessPolicy.Delete(this.userInfo.id, this.oldData));
 		this.userHiddensWithPolicyAsLastUsed = GetDocs({
 			params: {filter: {
 				lastAccessPolicy: {equalTo: id},
