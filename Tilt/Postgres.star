@@ -40,20 +40,16 @@ def Start_Postgres(g):
 		"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
 	}))
 	if gcsKeyFileContents == gcsMissingMessage:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="omit")
-	else:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="reduceIndent")
+		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_whenGCSOn", "___ConditionalIncludeBlock1_Ender_whenGCSOn", action="omit")
 
 	# enableRestoreForProd = True
 	# enableRestore = enableRestoreForProd if PROD else False
 	if g["DEV"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="omit")
+		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="keep", mustFind=False)
+		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForProd", "___ConditionalIncludeBlock1_Ender_restoreForProd", action="omit", mustFind=False)
 	elif g["PROD"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="reduceIndent")
+		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="omit", mustFind=False)
+		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForProd", "___ConditionalIncludeBlock1_Ender_restoreForProd", action="keep", mustFind=False)
 
 	k8s_yaml(blob(postgresYaml))
 

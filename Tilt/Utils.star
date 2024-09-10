@@ -19,18 +19,23 @@ def ReadFileWithReplacements(filePath, replacements):
 	fileBlob = ReplaceInBlob(fileBlob, replacements)
 	return fileBlob
 
-def ModifyLineRange(string, startMarker, endMarker, action):
-	lines = string.split("\n")
+def ModifyLineRange(inputStr, startMarker, endMarker, action, mustFind=True):
+	lines = inputStr.split("\n")
 	lines_new = []
+	foundStartMarker = False
+	foundEndMarker = False
+
 	inBlock = False
 	for line in lines:
 		if startMarker in line:
 			inBlock = True
+			foundStartMarker = True
 			# always keep the marker lines (so can chain them)
 			lines_new.append(line)
 			continue
 		if endMarker in line:
 			inBlock = False
+			foundEndMarker = True
 			# always keep the marker lines (so can chain them)
 			lines_new.append(line)
 			continue
@@ -41,10 +46,17 @@ def ModifyLineRange(string, startMarker, endMarker, action):
 				pass
 			elif action == "reduceIndent":
 				lines_new.append(line[2:]) # each "indent" is 2 spaces
+			elif action == "keep":
+				lines_new.append(line) # just keep line as-is
 			else:
 				fail("Error: ModifyLineRange was called, but action is invalid: " + action)
 		else:
 			lines_new.append(line)
+	if mustFind and (not foundStartMarker or not foundEndMarker):
+		fail("Error: ModifyLineRange was called, but start-marker or end-marker not found! @startMarker:{}{} @endMarker:{}{}".format(
+			startMarker, "" if foundStartMarker else "[not found]",
+			endMarker, "" if foundEndMarker else "[not found]"
+		))
 	return "\n".join(lines_new)
 
 def Base64Encode(strToEncode):
