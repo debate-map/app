@@ -178,23 +178,21 @@ users:
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster. # venryx: ie. for restoring backups (recommended approach atm)
 dataSource_DISABLED: # rename "dataSource_DISABLED" -> "dataSource" AND uncomment the relevant section below, to enable the backup-restoration config (see dm-readme module [pgbackrest-restore])
-  ___ConditionalIncludeBlock1_Start_restoreForDev: ""
-  # intentionally empty atm
-  ___ConditionalIncludeBlock1_Ender_restoreForDev: ""
-  ___ConditionalIncludeBlock1_Start_restoreForProd: ""
-  # postgresCluster:
-  #   clusterName: debate-map
-  #   repoName: repo2
-  #   options:
-  #   # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
-  #   # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
-  #   - --set 20221218-030022F_20221220-031024D
-  #   - --type=immediate
-  #   #- --target-action=promote
-  #   # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
-  #   # - --type=time
-  #   # - --target="2021-09-01 07:42:06+00"
-  ___ConditionalIncludeBlock1_Ender_restoreForProd: ""
+  postgresCluster___INCLUDE_IF_devCluster:
+    # intentionally empty atm
+  postgresCluster___INCLUDE_IF_prodCluster:
+    # postgresCluster:
+    #   clusterName: debate-map
+    #   repoName: repo2
+    #   options:
+    #   # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
+    #   # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+    #   - --set 20221218-030022F_20221220-031024D
+    #   - --type=immediate
+    #   #- --target-action=promote
+    #   # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
+    #   # - --type=time
+    #   # - --target="2021-09-01 07:42:06+00"
 
 # customTLSSecret references a Secret that contains the relevant information for
 # bringing external TLS artifacts to a PostgreSQL cluster. This provides the
@@ -333,8 +331,8 @@ pgBackRestConfig:
     schedules:
       # at 3am, each Saturday (cron schedule syntax: https://crontab.guru)
       full: "0 0 * * 6"
-      ___ConditionalIncludeBlock1_Start_whenGCSOn: ""
   - name: repo2
+    ___INCLUDE_PARENT_IF_gcsOn: true
     gcs:
       bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_name"
     schedules:
@@ -342,15 +340,14 @@ pgBackRestConfig:
       full: "0 3 * * 0"
       # at 3:10am, each day (cron schedule syntax: https://crontab.guru)
       differential: "10 3 * * *"
-  configuration:
+  configuration___INCLUDE_IF_gcsOn:
   - secret:
       name: debate-map-pgbackrest-secret
   # configuration for the next manual backup to be triggered (see deploy/pg-backups guide-module for more info)
-  manual:
+  manual___INCLUDE_IF_gcsOn:
     repoName: repo2
     options:
     - --type=full
-  ___ConditionalIncludeBlock1_Ender_whenGCSOn: ""
 
   # configuration for the next restore to be triggered # commented; now set using the restoreDBBackup_prep script
   # restore:

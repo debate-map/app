@@ -5,7 +5,7 @@
 load('./@Extensions/helm_remote.star', 'helm_remote')
 load('ext://helm_resource', 'helm_resource', 'helm_repo')
 # custom tilt files
-load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', 'GetDateTime')
+load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'ApplyKeyBasedExclusions', 'Base64Encode', 'GetDateTime')
 load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddResourceNamesBatch_IfValid', 'NEXT_k8s_resource_batch', 'k8s_yaml_grouped', 'CreateNamespace', 'CreateNamespaces')
 
 # main
@@ -39,17 +39,19 @@ def Start_Postgres(g):
 		"TILT_PLACEHOLDER:bucket_uniformPrivate_name": g["bucket_uniformPrivate_name"],
 		"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
 	}))
-	if gcsKeyFileContents == gcsMissingMessage:
-		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_whenGCSOn", "___ConditionalIncludeBlock1_Ender_whenGCSOn", action="omit")
+	postgresYaml = ApplyKeyBasedExclusions(postgresYaml, flags={"devCluster": g["DEV"], "prodCluster": g["PROD"], "gcsOn": gcsKeyFileContents != gcsMissingMessage})
 
-	# enableRestoreForProd = True
-	# enableRestore = enableRestoreForProd if PROD else False
-	if g["DEV"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="keep", mustFind=False)
-		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForProd", "___ConditionalIncludeBlock1_Ender_restoreForProd", action="omit", mustFind=False)
-	elif g["PROD"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="omit", mustFind=False)
-		postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Start_restoreForProd", "___ConditionalIncludeBlock1_Ender_restoreForProd", action="keep", mustFind=False)
+	# if gcsKeyFileContents == gcsMissingMessage:
+	# 	postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Begin_whenGCSOn", "___ConditionalIncludeBlock1_Ender_whenGCSOn", action="omit")
+
+	# # enableRestoreForProd = True
+	# # enableRestore = enableRestoreForProd if PROD else False
+	# if g["DEV"]:
+	# 	postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Begin_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="reduceIndent", mustFind=False)
+	# 	postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock2_Begin_restoreForProd", "___ConditionalIncludeBlock2_Ender_restoreForProd", action="omit", mustFind=False)
+	# elif g["PROD"]:
+	# 	postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock1_Begin_restoreForDev", "___ConditionalIncludeBlock1_Ender_restoreForDev", action="omit", mustFind=False)
+	# 	postgresYaml = ModifyLineRange(postgresYaml, "___ConditionalIncludeBlock2_Begin_restoreForProd", "___ConditionalIncludeBlock2_Ender_restoreForProd", action="reduceIndent", mustFind=False)
 
 	k8s_yaml(blob(postgresYaml))
 
