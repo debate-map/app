@@ -309,10 +309,8 @@ pgBackRestConfig:
   repoHost:
     dedicated: {}
   global:
-    # v-added
-    # for now, we just want to get the repo-pvc cleared out, so set retention (in the in-cluster "repo1" backup pvc) to only 1 full backup
-    # (this will let the old full-backup at PVC recreation become "expired", letting all the WAL files between then and the new full-backup get removed)
-    repo1-retention-full: "1"
+    # retain only three backups (so 2-3 weeks) within the in-cluster "repo1" backup pvc
+    repo1-retention-full: "3"
     repo1-retention-full-type: count
 
     # set path to save backups within the target google-cloud-storage bucket
@@ -330,7 +328,7 @@ pgBackRestConfig:
     # (pgbackrest's standard config only expires WAL segments older than the last full backup, and that will only happen once at pgo init unless you set a schedule here!)
     schedules:
       # at 3am, each Saturday (cron schedule syntax: https://crontab.guru)
-      full: "0 0 * * 6"
+      full: "0 3 * * 6"
   - name: repo2
     ___INCLUDE_PARENT_IF_gcsOn: true
     gcs:

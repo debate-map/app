@@ -64,7 +64,6 @@ def ModifyLineRange(inputStr, startMarker, endMarker, action, mustFind=True):
 def ApplyKeyBasedExclusions(inputStr, flags):
 	objects = decode_yaml_stream(inputStr)
 	for i, obj in enumerate(objects):
-		#print("obj:", obj, type(obj))
 		objects[i] = ApplyKeyBasedExclusions_OnObj(obj, flags)
 	return str(encode_yaml_stream(objects))
 signifierToExcludeSelf = {"___EXCLUDE_SELF___": True}
@@ -83,8 +82,6 @@ def ApplyKeyBasedExclusions_OnMap(inputMap, flags):
 			inputMap.pop(key)
 			continue
 		inputMap[key] = value
-
-		#print("key:", key)
 
 		if "___INCLUDE_IF_" in key:
 			realKey, flag = key.split("___INCLUDE_IF_")
