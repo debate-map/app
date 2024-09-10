@@ -31,7 +31,7 @@ export const buildConfig = options=>{
 		resourceDirs: [
 			path.resolve(options.rootDir, "./Resources"),
 		],
-		outputDir: path.resolve(options.rootDir, "./Dist"),
+		outputDir: path.resolve(options.rootDir, RSPACK_IN_DEV_SERVER_MODE() ? "./DevOutput" : "./Dist"),
 	};
 	/** @type {BuildConfigOptions} */
 	const opt = {
@@ -43,9 +43,10 @@ export const buildConfig = options=>{
 	require("dotenv").config({path: opt.dotEnvFile});
 
 	// read some vars from the environment variables
+	function RSPACK_IN_DEV_SERVER_MODE() { return process.env.WEBPACK_SERVE == "true"; } // rspack re-uses this env-var name apparently
+	const QUICK = process.env.QUICK == "true";
 	const ENV_LONG = process.env.NODE_ENV;
 	const ENV = ENV_LONG === "production" ? "prod" : "dev";
-	const QUICK = process.env.QUICK == "true";
 	const PROD = ENV == "prod";
 	const DEV = ENV == "dev";
 	const TEST = false; //ENV == "test";

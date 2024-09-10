@@ -9,6 +9,7 @@
 /.git-rewrite
 /Source/BakedConfig_Dev.ts
 /Source/BakedConfig_Prod.ts
+/DevOutput
 /Dist
 /Source_JS
 /Tools/Webpack Profiling/Stats.json

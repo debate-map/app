@@ -124,10 +124,10 @@ if PROD:
 	if len(os.getenv("CLIENT_SECRET", "")) < 20:
 		fail("Invalid CLIENT_SECRET env-var value (should be at least 20 chars long): " + os.getenv("CLIENT_SECRET"))
 
-if not os.path.exists("../Packages/client/Dist/app.js"):
-	fail("File \"./Packages/client/Dist/app.js\" not found. Please build the client first, by running: `npm start client.tsc_noWatch && npm start client.build.prodQuick` (step 1 of readme's \"run-backend-local\" module)")
-if not os.path.exists("../Packages/monitor-client/Dist/app.js"):
-	fail("File \"./Packages/monitor-client/Dist/app.js\" not found. Please build the monitor client first, by running: `npm start monitorClient.tsc_noWatch && npm start monitorClient.build.prodQuick` (step 1 of readme's \"run-backend-local\" module)")
+if not os.path.exists("../Packages/client/Dist/index.html"):
+	fail("File \"./Packages/client/Dist/index.html\" not found. Please build the client first, by running: `npm start client.build.prod` (step 1 of readme's \"run-backend-local\" module)")
+if not os.path.exists("../Packages/monitor-client/Dist/index.html"):
+	fail("File \"./Packages/monitor-client/Dist/index.html\" not found. Please build the monitor client first, by running: `npm start monitorClient.build.prod` (step 1 of readme's \"run-backend-local\" module)")
 
 # start specifying resources (to be deployed to k8s soon)
 # ==========
