@@ -70,7 +70,7 @@ export const GetResourcesInArgument_CG = CreateAccessor((context: ImportContext,
 	const argumentResource = NewNodeResource(context, argument, NodeType.claim, path_indexes, path_titles, parentResource, ChildGroup.freeform);
 	result.push(argumentResource);
 
-	for (const [i, evidence] of (argument.evidence ?? []).entries()) {
+	for (const [i, evidence] of (argument.evidence ?? argument.sources ?? []).entries()) {
 		result.push(NewNodeResource(context, evidence, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(evidence)), argumentResource, ChildGroup.truth));
 	}
 

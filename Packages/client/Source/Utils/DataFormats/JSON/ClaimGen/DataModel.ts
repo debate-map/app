@@ -1,4 +1,4 @@
-import {Attachment, AttachmentType, DescriptionAttachment, QuoteAttachment, Source, SourceChain, SourceType} from "dm_common";
+import {Attachment, AttachmentType, DescriptionAttachment, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType} from "dm_common";
 import {IsString} from "js-vextensions";
 
 export type CG_RefURLOrQuoteOld = string | CG_QuoteOld;
@@ -25,7 +25,10 @@ export abstract class CG_Node {
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
 	static GetTitle_Main(node: CG_Node): string {
 		const d = node as any;
-		const result_raw = d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ?? d.argument ?? d.original_example ?? (d.quote ? `"${d.quote}"` : null);
+		const result_raw =
+			d.name ?? (d.questionText ?? d.question) ?? d.position ?? d.category ?? d.claim ??
+			d.argument ?? d.original_example ?? d.example ?? d.text ??
+			(d.quote ? `"${d.quote}"` : null);
 		const result = (result_raw ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 		return result.length ? result : null;
 	}
@@ -78,16 +81,25 @@ export abstract class CG_Node {
 		if (CG_Evidence.is(node)) {
 			const evidence = node as CG_Evidence;
 			if (evidence.url) {
-				result.push(new Attachment({
-					quote: new QuoteAttachment({
-						content: evidence.quote,
-						sourceChains: evidence.url != null ? [
-							new SourceChain([
-								new Source({type: SourceType.webpage, link: evidence.url}),
-							]),
-						] : [],
-					}),
-				}));
+				const sourceChains = evidence.url != null ? [
+					new SourceChain([
+						new Source({type: SourceType.webpage, link: evidence.url}),
+					]),
+				] : [];
+				if (evidence.text) {
+					result.push(new Attachment({
+						references: new ReferencesAttachment({
+							sourceChains,
+						}),
+					}));
+				} else if (evidence.quote) {
+					result.push(new Attachment({
+						quote: new QuoteAttachment({
+							content: evidence.quote,
+							sourceChains,
+						}),
+					}));
+				}
 			}
 			if (evidence.reasoning) {
 				result.push(new Attachment({
@@ -150,17 +162,23 @@ export class CG_Argument extends CG_Node {
 	argument?: string;
 
 	// when in "examples" collection
-	original_example?: string;
-	evidence?: CG_Evidence[];
+	original_example?: string; // <v6
+	example?: string; // v6(a)
+	text?: string; // v6(b)
+	evidence?: CG_Evidence[]; // <v6
+	sources?: CG_Evidence[]; // v6
 }
 
+// could also be called "CG_Source" since this structure can be under a "sources" field
 export class CG_Evidence extends CG_Node {
+	text: string; // v6 (the custom)
 	quote: string;
 	url: string;
 	stance: "supports" | "refutes";
 	reasoning: string;
+	score: number; // v6? anyway not actually used atm
 
 	static is(node: CG_Node) {
-		return (node as any).stance != null;
+		return (node as any).stance != null || (node as any).score != null;
 	}
 }
