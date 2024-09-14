@@ -111,7 +111,10 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 	});
 	if (CG_Evidence.is(data)) {
 		const evidence = data as CG_Evidence;
-		link.polarity = evidence.stance == "supports" ? Polarity.supporting : Polarity.opposing;
+		link.polarity =
+			evidence.stance == "supports" ? Polarity.supporting :
+			evidence.stance == "refutes" ? Polarity.opposing :
+			Polarity.supporting;
 	}
 
 	const mainTitle = CG_Node.GetTitle_Main(data);
