@@ -86,6 +86,13 @@ impl QueryShard_Subscription {
 	async fn subscription(&self, ctx: &Context<'_>, id: String) -> Result<Option<Subscription>, GQLError> {
 		handle_generic_gql_doc_query(ctx, "subscriptions", id).await
 	}
+
+	async fn subscriptions_paginated(&self, ctx: &Context<'_>, take: i32, skip: Option<i32>) -> Result<Vec<Subscription>, GQLError> {
+		let take = take;
+		let skip = skip.unwrap_or(0);
+
+		handle_generic_gql_paginated_query(ctx, "subscriptions").await
+	}
 }
 
 #[derive(Default)]

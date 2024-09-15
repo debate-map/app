@@ -27,7 +27,7 @@ use std::{
 	task::{Poll, Waker},
 	time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
-use tracing::error;
+use tracing::{error, info};
 
 use super::super::{
 	filter::{FilterInput, QueryFilter},
@@ -63,6 +63,8 @@ pub async fn get_db_entries_base<'a, T: From<Row> + Serialize>(ctx: &AccessorCon
 		let (sql_text, params) = sql.into_query_args()?;
 		let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
 
+		info!("Final query: {}", &sql_text);
+
 		let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
 		let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
 
@@ -97,5 +99,7 @@ pub async fn handle_generic_gql_doc_query<T: From<Row> + Serialize>(gql_ctx: &as
         "id": {"equalTo": id}
     }))).await?)
 }
+
+pub async fn handle_generic_gql_paginated_query<T: From<Row> + Serialize>(gql_ctx: &async_graphql::Context<'_>, table_name: &str, filter: Option<FilterInput>) -> Result<Vec<T>, GQLError> {}
 
 //macro_rules! standard_table_endpoints { ... }
