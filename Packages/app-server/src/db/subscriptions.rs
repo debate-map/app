@@ -14,7 +14,7 @@ use tracing::info;
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::filter::{FilterOp, QueryFilter};
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query, handle_generic_gql_paginated_query};
 use crate::utils::db::generic_handlers::subscriptions::GQLSubOpts;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -22,6 +22,7 @@ use crate::utils::db::{
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
 };
 
+use super::_general::{QueryPaginationFilter, QueryPaginationResult};
 use super::commands::_command::{CanNullOrOmit, CanOmit};
 
 pub async fn get_subscription(ctx: &AccessorContext<'_>, id: &str) -> Result<Subscription, Error> {
@@ -87,11 +88,8 @@ impl QueryShard_Subscription {
 		handle_generic_gql_doc_query(ctx, "subscriptions", id).await
 	}
 
-	async fn subscriptions_paginated(&self, ctx: &Context<'_>, take: i32, skip: Option<i32>) -> Result<Vec<Subscription>, GQLError> {
-		let take = take;
-		let skip = skip.unwrap_or(0);
-
-		handle_generic_gql_paginated_query(ctx, "subscriptions").await
+	async fn subscriptions_paginated(&self, ctx: &Context<'_>, limit: i64, after: Option<i64>) -> Result<QueryPaginationResult<Subscription>, GQLError> {
+		handle_generic_gql_paginated_query(ctx, "subscriptions", QueryPaginationFilter { limit: Some(limit), after, order_by: Some("updatedAt".to_owned()), order_desc: Some(false) }).await
 	}
 }
 

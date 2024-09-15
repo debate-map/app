@@ -76,27 +76,8 @@ where
 		_ => SQLFragment::merge(vec![SQLFragment::lit(" WHERE "), filters_sql]),
 	};
 
-	let order_sql = if let Some(order) = &filter.order_field {
-		let order_desc = filter.order_desc.unwrap_or(false);
-		SQLFragment::merge(vec![SQLFragment::lit(" ORDER BY "), SQLFragment::new("$I", vec![Box::new(SQLIdent::new(order.clone())?)]), SQLFragment::lit(if order_desc { " DESC" } else { "" })])
-	} else {
-		SQLFragment::lit("")
-	};
-
-	let limit_sql = if let Some(limit) = filter.take {
-		SQLFragment::merge(vec![SQLFragment::lit(" LIMIT "), SQLFragment::value(limit)])
-	} else {
-		SQLFragment::lit("")
-	};
-
-	let offset_sql = if let Some(offset) = filter.skip {
-		SQLFragment::merge(vec![SQLFragment::lit(" OFFSET "), SQLFragment::value(offset)])
-	} else {
-		SQLFragment::lit("")
-	};
-
 	info!("Running where clause. @table:{table_name} @where:{where_sql} @filter:{filter:?}");
-	let final_query = SQLFragment::merge(vec![SQLFragment::new("SELECT * FROM $I", vec![Box::new(SQLIdent::new(table_name.clone())?)]), where_sql, order_sql, limit_sql, offset_sql]);
+	let final_query = SQLFragment::merge(vec![SQLFragment::new("SELECT * FROM $I", vec![Box::new(SQLIdent::new(table_name.clone())?)]), where_sql]);
 
 	let mut rows = query_func(final_query).await.with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql_str}"))?;
 

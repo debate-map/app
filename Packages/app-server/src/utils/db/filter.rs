@@ -4,7 +4,7 @@ use super::{
 	sql_param::SQLParamBoxed,
 };
 use crate::{store::live_queries_::lq_param::LQParam, utils::general::general::match_cond_to_iter};
-use rust_shared::async_graphql;
+use rust_shared::async_graphql::{self, OutputType, SimpleObject};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::rust_macros::{unchanged, wrap_slow_macros};
@@ -35,17 +35,12 @@ wrap_slow_macros! {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueryFilter {
 	pub field_filters: IndexMap<String, FieldFilter>,
-	pub take: Option<i64>,
-	pub skip: Option<i64>,
-	pub order_field: Option<String>,
-	pub order_desc: Option<bool>,
 }
-
 }
 
 impl QueryFilter {
 	pub fn empty() -> Self {
-		Self { field_filters: IndexMap::new(), take: None, skip: None, order_field: None, order_desc: None }
+		Self { field_filters: IndexMap::new() }
 	}
 	// example filter: Some(Object({"id": Object({"equalTo": String("t5gRdPS9TW6HrTKS2l2IaZ")})}))
 	pub fn from_filter_input_opt(input: &Option<FilterInput>) -> Result<QueryFilter, Error> {
@@ -56,30 +51,9 @@ impl QueryFilter {
 		}
 	}
 	pub fn from_filter_input(input: &FilterInput) -> Result<QueryFilter, Error> {
-		let mut result = QueryFilter { field_filters: IndexMap::new(), take: None, skip: None, order_desc: None, order_field: None };
+		let mut result = QueryFilter { field_filters: IndexMap::new() };
 
 		for (field_name, field_filters_json) in input.as_object().ok_or_else(|| anyhow!("Filter root-structure was not an object!"))?.iter() {
-			if field_name.as_str() == "take" {
-				result.take = field_filters_json.as_i64();
-				continue;
-			}
-
-			if field_name.as_str() == "skip" {
-				result.skip = field_filters_json.as_i64();
-				continue;
-			}
-
-			if field_name.as_str() == "order" {
-				let order_field = field_filters_json.as_str().ok_or_else(|| anyhow!("Order field was not a string!"))?;
-				// split by whitespace, and take the first part, which is the field name (the rest is the direction)
-				let mut order_field_parts = order_field.split_whitespace();
-				let order_field = order_field_parts.next().ok_or_else(|| anyhow!("Order field was empty!"))?;
-				let order_desc = order_field_parts.next().map(|a| a == "desc").unwrap_or(false);
-				result.order_field = Some(order_field.to_owned());
-				result.order_desc = Some(order_desc);
-				continue;
-			}
-
 			let mut field_filter = FieldFilter::default();
 			//if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
 			for (op_json, op_val_json) in field_filters_json.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
@@ -159,7 +133,7 @@ impl Clone for QueryFilter {
 			field_filters.insert(key.clone(), value.clone());
 		}
 		Self { field_filters }*/
-		Self { field_filters: self.field_filters.clone(), take: self.take, skip: self.skip, order_field: self.order_field.clone(), order_desc: self.order_desc }
+		Self { field_filters: self.field_filters.clone() }
 	}
 }
 impl Display for QueryFilter {

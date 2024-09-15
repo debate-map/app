@@ -1,11 +1,6 @@
 use deadpool_postgres::{Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use metrics::{counter, histogram};
-use rust_shared::async_graphql::{
-	async_stream::{self, stream},
-	parser::types::Field,
-	Object, OutputType, Positioned, Result,
-};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::serde::{de::DeserializeOwned, Deserialize, Serialize};
 use rust_shared::serde_json::{json, Map};
@@ -19,6 +14,14 @@ use rust_shared::{
 	flume, new_mtx, serde_json, to_sub_err, tokio,
 	utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV, type_aliases::JSONValue},
 	GQLError,
+};
+use rust_shared::{
+	async_graphql::{
+		async_stream::{self, stream},
+		parser::types::Field,
+		Object, OutputType, Positioned, Result,
+	},
+	to_anyhow,
 };
 use std::{
 	any::TypeId,
@@ -36,6 +39,9 @@ use super::super::{
 		rls_policies::UsesRLS,
 	},
 };
+use crate::db::_general::{QueryPaginationFilter, QueryPaginationResult};
+use crate::db::general::subtree_collector::params;
+use crate::utils::db::sql_param::SQLParamBoxed;
 use crate::{
 	db::{commands::_command::ToSqlWrapper, general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx},
 	store::{
@@ -62,8 +68,6 @@ pub async fn get_db_entries_base<'a, T: From<Row> + Serialize>(ctx: &AccessorCon
 	let query_func = |mut sql: SQLFragment| async move {
 		let (sql_text, params) = sql.into_query_args()?;
 		let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
-
-		info!("Final query: {}", &sql_text);
 
 		let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
 		let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
@@ -100,6 +104,56 @@ pub async fn handle_generic_gql_doc_query<T: From<Row> + Serialize>(gql_ctx: &as
     }))).await?)
 }
 
-pub async fn handle_generic_gql_paginated_query<T: From<Row> + Serialize>(gql_ctx: &async_graphql::Context<'_>, table_name: &str, filter: Option<FilterInput>) -> Result<Vec<T>, GQLError> {}
+pub async fn handle_generic_gql_paginated_query<T: From<Row> + Serialize + OutputType>(gql_ctx: &async_graphql::Context<'_>, table_name: &str, pagination: QueryPaginationFilter) -> Result<QueryPaginationResult<T>, GQLError> {
+	let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+	let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+
+	new_mtx!(mtx, "1:get entries", None);
+
+	let debug_info_str = format!("@table_name:{} @pagination:{:?}", table_name, &pagination);
+
+	let mut sql_text = format!("SELECT * FROM {}", table_name);
+
+	let mut paramIdx = 1;
+	let mut sqlParamsBoxed: Vec<SQLParamBoxed> = vec![];
+	if let Some(order_by) = pagination.order_by {
+		// sqlParamsBoxed.push(Box::new(order_by));
+		let order_direction = if pagination.order_desc.unwrap_or(false) { "DESC" } else { "ASC" };
+		// possible SQL injection here, we need to make sure the user cannot access the order_by field directly
+		sql_text.push_str(&format!(" ORDER BY \"{0}\" {1}", order_by, order_direction));
+		// paramIdx += 1;
+	}
+	if let Some(after) = pagination.after {
+		sqlParamsBoxed.push(Box::new(after));
+		sql_text.push_str(&format!(" OFFSET ${} ", paramIdx));
+		paramIdx += 1;
+	}
+	if let Some(limit) = pagination.limit {
+		sqlParamsBoxed.push(Box::new(limit));
+		sql_text.push_str(&format!(" LIMIT ${} ", paramIdx));
+	}
+
+	let params_wrapped: Vec<ToSqlWrapper> = sqlParamsBoxed.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+	let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
+	info!("SQL text for paginated query. @sql_text:{} @params:{:?}", &sql_text, params_as_refs);
+
+	let rows: Vec<Row> = ctx
+		.tx
+		.query_raw(&sql_text, params_as_refs)
+		.map_err(|err| anyhow!("Got error while running query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str))
+		.await?
+		.try_collect()
+		.await
+		.map_err(|err| anyhow!("Got error while collecting results of db-query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str))?;
+
+	let total_count: Vec<Row> = ctx.tx.query_raw(&format!("SELECT COUNT(*) FROM {}", table_name), params(&[])).await?.try_collect().await?;
+	mtx.section("2:convert");
+
+	let entries_as_type: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
+	let count: i64 = total_count.get(0).ok_or(anyhow!("No rows"))?.try_get(0)?;
+
+	Ok(QueryPaginationResult { data: entries_as_type, total_count: count })
+}
 
 //macro_rules! standard_table_endpoints { ... }
