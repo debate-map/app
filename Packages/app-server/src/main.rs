@@ -71,7 +71,7 @@ async fn main() {
 	let agent = set_up_globals_linux();
 	#[cfg(unix)]
 	let agent_running = agent.start().unwrap();
-	println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
+	println!("Setup of globals completed"); // have one regular print-line, in case logger has issues
 
 	let app_state = AppState::new_in_arc();
 

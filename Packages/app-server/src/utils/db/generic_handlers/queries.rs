@@ -41,6 +41,7 @@ use super::super::{
 };
 use crate::db::_general::{QueryPaginationFilter, QueryPaginationResult};
 use crate::db::general::subtree_collector::params;
+use crate::utils::db::sql_ident::SQLIdent;
 use crate::utils::db::sql_param::SQLParamBoxed;
 use crate::{
 	db::{commands::_command::ToSqlWrapper, general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx},
@@ -104,50 +105,75 @@ pub async fn handle_generic_gql_doc_query<T: From<Row> + Serialize>(gql_ctx: &as
     }))).await?)
 }
 
-pub async fn handle_generic_gql_paginated_query<T: From<Row> + Serialize + OutputType>(gql_ctx: &async_graphql::Context<'_>, table_name: &str, pagination: QueryPaginationFilter) -> Result<QueryPaginationResult<T>, GQLError> {
+pub async fn handle_generic_gql_paginated_query<T: From<Row> + Serialize + OutputType>(gql_ctx: &async_graphql::Context<'_>, table_name: &str, pagination: QueryPaginationFilter, filter: Option<FilterInput>) -> Result<QueryPaginationResult<T>, GQLError> {
 	let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 	let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
+	let filter = QueryFilter::from_filter_input_opt(&filter)?;
+
 	new_mtx!(mtx, "1:get entries", None);
 
-	let debug_info_str = format!("@table_name:{} @pagination:{:?}", table_name, &pagination);
+	let filters_sql = filter.get_sql_for_application().with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
+	mtx.current_section.extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
 
-	let mut sql_text = format!("SELECT * FROM {}", table_name);
+	let where_sql = match filters_sql.sql_text.len() {
+		0..=2 => SQLFragment::lit(""),
+		_ => SQLFragment::merge(vec![SQLFragment::lit(" WHERE "), filters_sql]),
+	};
 
-	let mut paramIdx = 1;
-	let mut sqlParamsBoxed: Vec<SQLParamBoxed> = vec![];
+	let mut fragments = vec![SQLFragment::new("SELECT * FROM $I", vec![Box::new(SQLIdent::new(table_name.to_string())?)]), where_sql.clone()];
+	let count_fragments = vec![SQLFragment::new("SELECT COUNT(*) FROM $I", vec![Box::new(SQLIdent::new(table_name.to_string())?)]), where_sql];
+
 	if let Some(order_by) = pagination.order_by {
-		// sqlParamsBoxed.push(Box::new(order_by));
-		let order_direction = if pagination.order_desc.unwrap_or(false) { "DESC" } else { "ASC" };
-		// possible SQL injection here, we need to make sure the user cannot access the order_by field directly
-		sql_text.push_str(&format!(" ORDER BY \"{0}\" {1}", order_by, order_direction));
-		// paramIdx += 1;
+		if pagination.order_desc.unwrap_or(false) {
+			fragments.push(SQLFragment::new(" ORDER BY $I DESC", vec![Box::new(SQLIdent::new(order_by)?)]));
+		} else {
+			fragments.push(SQLFragment::new(" ORDER BY $I", vec![Box::new(SQLIdent::new(order_by)?)]));
+		}
 	}
 	if let Some(after) = pagination.after {
-		sqlParamsBoxed.push(Box::new(after));
-		sql_text.push_str(&format!(" OFFSET ${} ", paramIdx));
-		paramIdx += 1;
+		fragments.push(SQLFragment::new(" OFFSET $V ", vec![Box::new(after)]));
 	}
 	if let Some(limit) = pagination.limit {
-		sqlParamsBoxed.push(Box::new(limit));
-		sql_text.push_str(&format!(" LIMIT ${} ", paramIdx));
+		fragments.push(SQLFragment::new(" LIMIT $V ", vec![Box::new(limit)]));
 	}
 
-	let params_wrapped: Vec<ToSqlWrapper> = sqlParamsBoxed.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+	let mut query: SQLFragment = SQLFragment::merge(fragments);
+	let query_str = query.to_string();
+
+	let (sql_text, sql_params) = query.into_query_args()?;
+	let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &sql_params);
+
+	let params_wrapped: Vec<ToSqlWrapper> = sql_params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
 	let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
 
-	info!("SQL text for paginated query. @sql_text:{} @params:{:?}", &sql_text, params_as_refs);
+	// info!("SQL text for paginated query. @sql_text:{} @params:{:?}", &sql_text, params_as_refs);
 
 	let rows: Vec<Row> = ctx
 		.tx
 		.query_raw(&sql_text, params_as_refs)
-		.map_err(|err| anyhow!("Got error while running query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str))
+		.map_err(|err| anyhow!("Got error while running query, for getting db-entries. @query: {} \n @error:{}\n{}", query_str, err.to_string(), &debug_info_str))
 		.await?
 		.try_collect()
 		.await
 		.map_err(|err| anyhow!("Got error while collecting results of db-query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str))?;
 
-	let total_count: Vec<Row> = ctx.tx.query_raw(&format!("SELECT COUNT(*) FROM {}", table_name), params(&[])).await?.try_collect().await?;
+	let mut count_query: SQLFragment = SQLFragment::merge(count_fragments);
+	let (sql_text, sql_params) = count_query.into_query_args()?;
+	let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &sql_params);
+
+	let params_wrapped: Vec<ToSqlWrapper> = sql_params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+	let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
+	let total_count: Vec<Row> = ctx
+		.tx
+		.query_raw(&sql_text, params_as_refs)
+		.map_err(|err| anyhow!("Got error while running query, for getting db-entries. @query: {} \n @error:{}\n{}", query_str, err.to_string(), &debug_info_str))
+		.await?
+		.try_collect()
+		.await
+		.map_err(|err| anyhow!("Got error while collecting results of db-query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str))?;
+
 	mtx.section("2:convert");
 
 	let entries_as_type: Vec<T> = rows.into_iter().map(|r| r.into()).collect();

@@ -73,7 +73,8 @@ impl QueryShard_General {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize, SimpleObject)]
+// Do not Add SimpleObject to this struct, as it's not meant to be directly exposed to the API.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct QueryPaginationFilter {
 	pub limit: Option<i64>,
 	pub after: Option<i64>,

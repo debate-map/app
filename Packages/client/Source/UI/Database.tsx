@@ -7,7 +7,7 @@ import {MediasUI} from "./Database/MediasUI.js";
 import {TermsUI} from "./Database/TermsUI.js";
 import {UsersUI} from "./Database/Users.js";
 import {PoliciesUI} from "./Database/PoliciesUI.js";
-import {SubscriptionsUI} from "./Database/SubscriptionsUI.js";
+import {SubscriptionsPaginatedUI} from "./Database/SubscriptionsPaginatedUI.js";
 
 @Observer
 export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {
@@ -21,14 +21,14 @@ export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {
 					<SubNavBarButton page={page} subpage="terms" text="Terms" /* actionIfAlreadyActive={() => new ACTTermSelect({ id: null })} *//>
 					<SubNavBarButton page={page} subpage="media" text="Media" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
 					<SubNavBarButton page={page} subpage="policies" text="Policies"/>
-					{/*<SubNavBarButton page={page} subpage="subscriptions" text="Subscriptions"/>*/}
+					<SubNavBarButton page={page} subpage="subscriptions" text="Subscriptions"/>
 				</SubNavBar>
 				<Switch>
 					<UsersUI/>
 					{currentSubpage == "terms" && <TermsUI/>}
 					{currentSubpage == "media" && <MediasUI/>}
 					{currentSubpage == "policies" && <PoliciesUI/>}
-					{/*currentSubpage == "subscriptions" && <SubscriptionsUI/>*/}
+					{currentSubpage == "subscriptions" && <SubscriptionsPaginatedUI/>}
 				</Switch>
 			</>
 		);

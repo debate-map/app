@@ -1,4 +1,3 @@
-import chroma from "chroma-js";
 import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
 
 @MGLClass({table: "subscriptions"})
