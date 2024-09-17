@@ -100,8 +100,6 @@ export class SubscriptionsPaginatedUI extends BaseComponentPlus({} as {}, {
 			console.error("Error in SubscriptionsPaginatedUI:", error);
 		}
 
-		console.log("SubscriptionsPaginatedUI", data);
-
 		const onTableChange = (newTableData: TableData)=>{
 			this.SetState({tableData: newTableData});
 		};
