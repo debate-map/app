@@ -66,7 +66,7 @@ function GetDepsToConsolidate() {
 	];
 }
 
-const bufferedLogs = [];
+/*const bufferedLogs = [];
 function BufferLog(message) {
 	bufferedLogs.push(message);
 }
@@ -74,7 +74,7 @@ function PrintBufferedLogs() {
 	for (const log of bufferedLogs) {
 		console.log(log);
 	}
-}
+}*/
 
 Start();
 function Start() {
@@ -85,18 +85,26 @@ function Start() {
 	/** @type {Map<string, string>} */
 	const outerPkg_wvcManagedResolutions = new Map();
 	for (const depName of GetDepsToConsolidate()) {
-		const depVersion = wvcPkg.dependencies[depName];
-		if (depVersion == null) {
-			BufferLog(`Dependency not found in web-vcore/package.json: ${depName}`);
-			continue;
-		}
-		const exactVersionRegex = /^[\d.]+$/;
-		if (depVersion.match(exactVersionRegex) == null) {
-			BufferLog(`Dependency version is not exact ("${depVersion}"); skipping: ${depName}`);
-			continue;
+		const versionIsExact = version=>version.match(/^[\d.]+$/) != null;
+
+		const depVersion_wvc = wvcPkg.dependencies[depName];
+		if (depVersion_wvc == null) {
+			console.log(`Dependency version not specified in web-vcore/package.json, for package-to-consolidate: ${depName}`);
+		} else if (!versionIsExact(depVersion_wvc)) {
+			console.log(`Dependency version specified in web-vcore/package.json ("${depVersion_wvc}") is invalid (must be exact), for package-to-consolidate: ${depName}`);
+		} else {
+			outerPkg_wvcManagedResolutions.set(depName, depVersion_wvc);
 		}
 
-		outerPkg_wvcManagedResolutions.set(depName, depVersion);
+		// if user provided a version override (in "resolutions_wvcOverrides" field of their package.json), use that instead
+		const depVersion_override = outerPkg_old.resolutions_wvcOverrides?.[depName];
+		if (depVersion_override == null) {
+			// do nothing; user has no need to specify overrides
+		} else if (!versionIsExact(depVersion_override)) {
+			console.log(`Dependency version specified in user project's package.json ("${depVersion_override}") is invalid (must be exact), for package-to-consolidate: ${depName}`);
+		} else {
+			outerPkg_wvcManagedResolutions.set(depName, depVersion_override);
+		}
 	}
 
 	// keep a consistent order for the wvc-managed entries in "resolutions" (all at start, alphabetically sorted)
@@ -116,7 +124,7 @@ function Start() {
 	}
 
 	// wait to print these buffered logs until we're sure we're actually going to make changes (too noisy to be worth including unless an actual dependency version-change was made)
-	PrintBufferedLogs();
+	//PrintBufferedLogs();
 	writeFileSync(outerPkg_path, JSON.stringify(outerPkg_new, null, 2));
 	console.log("Yarn pre-install (web-vcore): Outer project's package.json was updated.");
 }
