@@ -5,14 +5,13 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DMap, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart, GetTimeline} from "dm_common";
 import {Assert, CopyText, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
-import {AddNotificationMessage, Observer, RunInAction_Set, TextPlus} from "web-vcore";
+import {AddNotificationMessage, Observer, RunInAction_Set, TextPlus, TimeToString} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {FastScrollModeCheckbox, ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
-import {TimeToString} from "Utils/UI/General.js";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
 import {ShowMessageBox} from "react-vmessagebox";
 import {OPFSDir_GetFileChildren} from "Utils/OPFS/ElectronOPFS.js";
@@ -66,7 +65,7 @@ export class RecordDropdown extends BaseComponent<{}, {forcedRerenders: number}>
 					<Row>
 						<Text>Render folder:</Text>
 						<TextInput ml={5} value={uiState.renderFolderName} onChange={val=>RunInAction_Set(this, ()=>uiState.renderFolderName = val)}/>
-						<Button ml={5} p="5px 10px" text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), true))}/>
+						<Button ml={5} p="5px 10px" text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), {fileNameSafe: true}))}/>
 						<Button ml={5} p="5px 10px" text="Go" onClick={()=>desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: ["Maps", map!.id, "Renders", uiState.renderFolderName]})}/>
 					</Row>
 					<Row>

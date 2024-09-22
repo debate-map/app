@@ -7,15 +7,6 @@ import {BailError} from "mobx-graphlink";
 // expose katex on window, for use by $node.ts (in js-common's shared-code, when running on client)
 G({katex});
 
-export function TimeToString(time: number, makeFileNameSafe: boolean) {
-	return DateToString(new Date(time), makeFileNameSafe);
-}
-export function DateToString(date: Date, makeFileNameSafe: boolean) {
-	let result = date.toLocaleString("sv"); // ex: 2021-12-10 19:18:52
-	if (makeFileNameSafe) result = result.replace(/[ :]/g, "-"); // ex: 2021-12-10-19-18-52
-	return result;
-}
-
 export function MarkHandled(event: React.SyntheticEvent) {
 	event.preventDefault();
 	event.nativeEvent["handled"] = true;

@@ -4,9 +4,8 @@ import {BaseComponent} from "react-vextensions";
 import {TimelineStep, DMap} from "dm_common";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {store} from "Store";
-import {Observer, RunInAction} from "web-vcore";
+import {DateToString, Observer, RunInAction} from "web-vcore";
 import {Clone, StartDownload} from "js-vextensions";
-import {DateToString} from "Utils/UI/General";
 import {StepEditorUI_SharedProps} from "../StepEditorUI";
 import {StepAudio_TakeUI} from "./TakeUI";
 
@@ -70,7 +69,7 @@ export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRe
 						<Button ml={5} mdIcon="delete" onClick={()=>this.ClearRecording()}/>
 						<Button ml={5} mdIcon="download" onClick={()=>{
 							const ext = GuessAudioFileExtensionFromMimeType(this.recorder?.mimeType ?? "");
-							StartDownload(this.audioChunks_asBlob!, `StepAudioTake_${step.id.slice(0, 3)}_${DateToString(new Date(), true)}.${ext}`);
+							StartDownload(this.audioChunks_asBlob!, `StepAudioTake_${step.id.slice(0, 3)}_${DateToString(new Date(), {fileNameSafe: true})}.${ext}`);
 						}}/>
 						<Button ml={5} mdIcon="ray-start-arrow" title="Save to file-system as new take." onClick={async()=>{
 							const opfsForStep = opfsForMap.GetStepFolder(step.id);

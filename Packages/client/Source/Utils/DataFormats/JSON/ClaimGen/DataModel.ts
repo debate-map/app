@@ -14,11 +14,21 @@ export class CG_Quote {
 	extras?: Object; // eg. {claimMiner: {id: "123"}}
 }
 
+// "source" entries are supposed to be imported as just attachments on the node itself (atm, always as Quote attachments)
+// v6+?
+// Note: Is this supposed to simply be a replacement of the CG_Quote structure? Dunno... (my guess is CG_Quote was claimminer's export-model, but CG_Source is claimgen's take on it)
+export class CG_Source {
+	text: string;
+	url: string;
+	score: number;
+}
+
 export abstract class CG_Node {
 	id?: string; // deprecated, and ignored (and console.warn is called if input json uses this; new approach is to use extras.TOOL_NAMESPACE.id)
 	narrative?: string;
 	reference_urls?: CG_RefURLOrQuoteOld[];
 	quotes?: CG_Quote[];
+	sources?: CG_Source[]; // v6
 	extras?: Object; // eg. {claimMiner: {id: "123"}}
 
 	//abstract GetTitle(): string;
@@ -78,6 +88,21 @@ export abstract class CG_Node {
 			}));
 		}
 
+		// not sure yet if sources are just the "new quotes", or something different/extra (see comment on CG_Source class for more thoughts)
+		// so for now, do a separate loop to add them
+		for (const source of node.sources ?? []) {
+			result.push(new Attachment({
+				quote: new QuoteAttachment({
+					content: source.text,
+					sourceChains: source.url != null ? [
+						new SourceChain([
+							{type: SourceType.webpage, link: source.url},
+						]),
+					] : [],
+				}),
+			}));
+		}
+
 		if (CG_Evidence.is(node)) {
 			const evidence = node as CG_Evidence;
 			if (evidence.url) {
@@ -86,20 +111,19 @@ export abstract class CG_Node {
 						new Source({type: SourceType.webpage, link: evidence.url}),
 					]),
 				] : [];
-				if (evidence.text) {
+				/*if (evidence.text) {
 					result.push(new Attachment({
 						references: new ReferencesAttachment({
 							sourceChains,
 						}),
 					}));
-				} else if (evidence.quote) {
-					result.push(new Attachment({
-						quote: new QuoteAttachment({
-							content: evidence.quote,
-							sourceChains,
-						}),
-					}));
-				}
+				} else if (evidence.quote) {*/
+				result.push(new Attachment({
+					quote: new QuoteAttachment({
+						content: evidence.quote,
+						sourceChains,
+					}),
+				}));
 			}
 			if (evidence.reasoning) {
 				result.push(new Attachment({
@@ -165,18 +189,15 @@ export class CG_Argument extends CG_Node {
 	original_example?: string; // <v6
 	example?: string; // v6(a)
 	text?: string; // v6(b)
-	evidence?: CG_Evidence[]; // <v6
-	sources?: CG_Evidence[]; // v6
+	evidence?: CG_Evidence[]; // <v6? [maybe not deprecated, ie. maybe can occur alongside sources]
 }
 
-// could also be called "CG_Source" since this structure can be under a "sources" field
+// "evidence" entries are supposed to be imported as separate nodes (eg. since supports/refutes needs a link-polarity to distinguish)
 export class CG_Evidence extends CG_Node {
-	text: string; // v6 (the custom)
 	quote: string;
 	url: string;
 	stance: "supports" | "refutes";
 	reasoning: string;
-	score: number; // v6? anyway not actually used atm
 
 	static is(node: CG_Node) {
 		return (node as any).stance != null || (node as any).score != null;

@@ -6,7 +6,7 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {CopyText, ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
+import {CopyText, ES, Observer, RunInAction, RunInAction_Set, TimeToString} from "web-vcore";
 import {E, GetEntries, StartDownload} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox, Select} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
@@ -14,7 +14,6 @@ import {ScrollView} from "react-vscrollview";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAsync} from "mobx-graphlink";
-import {DateToString, TimeToString} from "Utils/UI/General";
 import {StepTab} from "Store/main/maps/mapStates/@MapState";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
 import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
@@ -126,7 +125,7 @@ class OptionsDropdown extends BaseComponent<{map: DMap, timeline: Timeline|n, st
 					<Button mt={3} text="Export timeline data" title="Exports the data of the timeline, and all of its steps, to a json file." onClick={async()=>{
 						const data = {timeline, steps};
 						const json = JSON.stringify(data, null, "\t");
-						StartDownload(json, `TimelineExport_${TimeToString(Date.now(), true)}_ForTimeline_${timeline?.id}.json`);
+						StartDownload(json, `TimelineExport_${TimeToString(Date.now(), {fileNameSafe: true})}_ForTimeline_${timeline?.id}.json`);
 					}}/>
 					<Row mt={3}>
 						<Text>Audio input:</Text>

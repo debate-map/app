@@ -167,6 +167,17 @@ export function WaitXThenRun_Deduped(host: any, key: string, delayInMS: number, 
 	return true;
 }
 
+export function TimeToString(time: number, options?: {date?: boolean|0|1, fileNameSafe?: boolean|0|1}) {
+	return DateToString(new Date(time), options);
+}
+export function DateToString(date: Date, options?: {date?: boolean|0|1, fileNameSafe?: boolean|0|1}) {
+	const opt = {date: true, fileNameSafe: false, ...options};
+	let result = date.toLocaleString("sv"); // ex: 2021-12-10 19:18:52
+	if (!opt.date) result = result.split(" ")[1]; // ex: 19:18:52
+	if (opt.fileNameSafe) result = result.replace(/[ :]/g, "-"); // ex: 2021-12-10-19-18-52
+	return result;
+}
+
 /** Wrapper around chroma that tries to detect the input-type right away, to avoid chroma's default error-throwing-based discovery approach. */
 export function Chroma(input: string | number | number[] | chroma.Color, colorSpace?: keyof ColorSpaces): chroma.Color {
 	if (typeof input == "string") {
