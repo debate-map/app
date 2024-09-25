@@ -1,6 +1,6 @@
 import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
-import {ES, Link, Observer, PageContainer, TextPlus, useResizeObserver} from "web-vcore";
-import {useEffect, useMemo, useState} from "react";
+import {ES, GetSize_Method, Link, Observer, PageContainer, TextPlus, useResizeObserver, UseSize} from "web-vcore";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {ScrollView} from "react-vscrollview";
 import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeL2, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row, Button} from "react-vcomponents";
@@ -24,19 +24,19 @@ const columns: ColumnData[] = [{
 	label: "Level",
 	width: 0.15,
 	allowFilter: false,
-	allowSort: false, // Temporarily disabled, since it's not implemented yet
+	allowSort: false,
 }, {
 	key: "createdAt" as const,
 	label: "Created At",
 	width: 0.15,
 	allowFilter: false,
-	allowSort: false, // Temporarily disabled, since it's not implemented yet
+	allowSort: true,
 }, {
 	key: "updatedAt" as const,
 	label: "Updated At",
 	width: 0.15,
 	allowFilter: false,
-	allowSort: false, // Temporarily disabled, since it's not implemented yet
+	allowSort: true,
 }, {
 	key: "actions" as const,
 	label: "Actions",
@@ -47,8 +47,8 @@ const columns: ColumnData[] = [{
 ];
 
 const SUBSCRIPTIONS_PAGINATED = gql`
-query($limit: Int!, $after: Int, $filter: JSON) {
-	subscriptionsPaginated(limit: $limit, after: $after, filter: $filter) {
+query($limit: Int!, $after: Int, $orderBy: String, $orderDesc: Boolean, $filter: JSON) {
+	subscriptionsPaginated(limit: $limit, after: $after, orderBy: $orderBy, orderDesc: $orderDesc ,filter: $filter) {
 		data {
 			id,
 			user,
@@ -91,13 +91,29 @@ export class SubscriptionsPaginatedUI extends BaseComponentPlus({} as {}, {
 				totalCount: number,
 			}
 		}>(SUBSCRIPTIONS_PAGINATED, {
-			variables: {limit: rowsPerPage, after: page * rowsPerPage, filter: {user: {equalTo: userId}}},
+			variables: {
+				limit: rowsPerPage,
+				after: page * rowsPerPage,
+				orderDesc: tableData.columnSortDirection == "desc",
+				orderBy: tableData.columnSort,
+				filter: {user: {equalTo: userId}},
+			},
 			fetchPolicy: "no-cache",
 			nextFetchPolicy: "no-cache",
+
 		});
 
-		if (error) {
+		if (!loading && error) {
+
 			console.error("Error in SubscriptionsPaginatedUI:", error);
+
+		}
+
+		// HACK: for some reason sometimes the data is undefined, even though loading is false
+		// it seems like a bug comming from apollo client or react-apollo hooks
+		// so we refetch the data if it's undefined, works well for now
+		if (data === undefined && error === undefined) {
+			refetch();
 		}
 
 		const onTableChange = (newTableData: TableData)=>{
@@ -109,53 +125,22 @@ export class SubscriptionsPaginatedUI extends BaseComponentPlus({} as {}, {
 			refetch();
 		};
 
-		// const sortedAndFilteredSubscriptions = subscriptions.data;
-
-		// const sortedAndFilteredSubscriptions = useMemo(()=>{
-		// 	let output = subscriptions;
-		// 	if (tableData.columnSort) {
-		// 		switch (tableData.columnSort) {
-		// 			case "level": {
-		// 				output = subscriptions.OrderByDescending(a=>[a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length);
-		// 				break;
-		// 			}
-		// 			case "createdAt": {
-		// 				output = subscriptions.OrderByDescending(a=>a.createdAt);
-		// 				break;
-		// 			}
-		// 			case "updatedAt": {
-		// 				output = subscriptions.OrderByDescending(a=>a.updatedAt);
-		// 				break;
-		// 			}
-		// 			default: {
-		// 				console.warn(`Unknown columnSort: ${tableData.columnSort}`);
-		// 				break;
-		// 			}
-		// 		}
-		// 	}
-
-		// 	if (tableData.columnSortDirection == "desc") {
-		// 		output = sortedAndFilteredSubscriptions.reverse();
-		// 	}
-
-		// 	return output;
-		// }, [subscriptions, tableData.columnSort, tableData.columnSortDirection]);
-
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
 				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData} />
 				{loading && <div style={{textAlign: "center", fontSize: 18, padding: "20px 0"}}>Loading...</div>}
-				{!loading &&
+				{data != null && !loading && error == null && data.subscriptionsPaginated != null &&
 					<ScrollView style={ES({flex: 1})} contentStyle={ES({
 						borderRadius: "0px",
 						flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
 					})}>
-						{data?.subscriptionsPaginated?.data.length == 0 && <div style={{textAlign: "center", fontSize: 18, padding: "20px 0"}}>No Subscriptions</div>}
-						{data?.subscriptionsPaginated?.data.map((subscription, index)=>{
-							return <SubscriptionRow onDelete={()=>refetch()} key={subscription.id} index={index} last={index == data?.subscriptionsPaginated?.data.length - 1} subscription={subscription} />;
+						{data.subscriptionsPaginated.data.length == 0 && <div style={{textAlign: "center", fontSize: 18, padding: "20px 0"}}>No Subscriptions</div>}
+						{data.subscriptionsPaginated.data.map((subscription, index)=>{
+							return <SubscriptionRow onDelete={()=>refetch()} key={subscription.id} index={index} last={index == data.subscriptionsPaginated.data.length - 1} subscription={subscription} />;
 						})}
 					</ScrollView>
 				}
+
 				<TableFooter rowsPerPage={rowsPerPage} totalRows={data?.subscriptionsPaginated?.totalCount ?? 0} page={page} onPageChange={onPageChange} />
 			</PageContainer>
 		);
@@ -195,7 +180,9 @@ export class SubscriptionRow extends BaseComponent<{ index: number, last: boolea
 		const nodeL2 = GetNodeL2(subscription.node);
 		const nodeFinal = nodeL2 ? AsNodeL3(nodeL2, null) : null;
 
-		const {ref, width = -1, height = -1} = useResizeObserver();
+		const [ref, {width}] = UseSize({
+			method: GetSize_Method.BoundingClientRect,
+		});
 
 		return (
 			<Column p="7px 10px" style={css(
@@ -204,7 +191,7 @@ export class SubscriptionRow extends BaseComponent<{ index: number, last: boolea
 				<Row style={{
 					display: "flex", flexDirection: "row", alignItems: "center",
 				}}>
-					<span ref={ref} style={{flex: columns[0].width, paddingRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
+					<span ref={c=>c && ref(c)} style={{flex: columns[0].width, marginRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
 						{nodeFinal != null &&
 							<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false} forSubscriptionsPage={true}
 								backgroundFillPercentOverride={100} width={width}

@@ -87,8 +87,12 @@ impl QueryShard_Subscription {
 	async fn subscription(&self, ctx: &Context<'_>, id: String) -> Result<Option<Subscription>, GQLError> {
 		handle_generic_gql_doc_query(ctx, "subscriptions", id).await
 	}
-	async fn subscriptions_paginated(&self, ctx: &Context<'_>, limit: i64, after: Option<i64>, filter: Option<FilterInput>) -> Result<QueryPaginationResult<Subscription>, GQLError> {
-		handle_generic_gql_paginated_query(ctx, "subscriptions", QueryPaginationFilter { limit: Some(limit), after, order_by: Some("updatedAt".to_owned()), order_desc: Some(false) }, filter).await
+	async fn subscriptions_paginated(&self, ctx: &Context<'_>, limit: i64, after: Option<i64>, order_by: Option<String>, order_desc: Option<bool>, filter: Option<FilterInput>) -> Result<QueryPaginationResult<Subscription>, GQLError> {
+		let order_by = match order_by {
+			Some(order) if order == "createdAt" => Some("createdAt".to_owned()),
+			_ => Some("updatedAt".to_owned()),
+		};
+		handle_generic_gql_paginated_query(ctx, "subscriptions", QueryPaginationFilter { limit: Some(limit), after, order_by, order_desc }, filter).await
 	}
 }
 
