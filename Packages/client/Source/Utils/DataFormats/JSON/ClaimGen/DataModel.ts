@@ -200,6 +200,6 @@ export class CG_Evidence extends CG_Node {
 	reasoning: string;
 
 	static is(node: CG_Node) {
-		return (node as any).stance != null || (node as any).score != null;
+		return (node as any).stance != null;
 	}
 }

@@ -90,6 +90,6 @@ export function HandleError(error: Error, recordWithSentry = true, extraInfo = {
 
 	if (manager.PostHandleError) manager.PostHandleError(error, errorStr);
 }
-export function SendErrorToSentry(error: Error, extraInfo = {}) {
-	Raven.captureException(error, {extra: extraInfo});
+export function SendErrorToSentry(error: Error, extraInfo = {}, sentryOpts = {} as Raven.RavenOptions) {
+	Raven.captureException(error, {extra: extraInfo, ...sentryOpts});
 }

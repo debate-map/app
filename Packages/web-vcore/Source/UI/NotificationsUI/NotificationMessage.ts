@@ -1,6 +1,5 @@
 import {Global} from "js-vextensions";
 import {RunInAction} from "mobx-graphlink";
-import {manager} from "../../Manager.js";
 import {g} from "../../PrivateExports.js";
 import {wvc_store} from "../../Store/WVCStore.js";
 
