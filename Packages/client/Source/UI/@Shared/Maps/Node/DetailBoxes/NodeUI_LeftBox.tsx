@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, DMap, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, DMap, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType, PERMISSIONS} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -154,7 +154,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>}
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>}
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="details"
-						text={`Details${IsUserCreatorOrMod(MeID(), node) ? " (edit)" : ""}`}/>
+						text={`Details${PERMISSIONS.Node.Modify(MeID(), node) ? " (edit)" : ""}`}/>
 					{!SLMode_SFI && <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>}
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="tags" text="Tags" lastButtonInSeries={SLMode_SFI}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="comments" text="Comments" lastButtonInSeries={SLMode_SFI}/>
@@ -221,4 +221,3 @@ class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 		);
 	}
 }
-

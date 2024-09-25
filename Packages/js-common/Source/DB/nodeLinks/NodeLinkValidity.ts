@@ -1,7 +1,7 @@
 import {CreateAccessor} from "mobx-graphlink";
 import {GetValues} from "js-vextensions";
 import {globalRootNodeID} from "../../DB_Constants.js";
-import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
+import {DoesPolicyAllowX, PERMISSIONS} from "../@Shared/TablePermissions.js";
 import {APAction, APTable} from "../accessPolicies/@PermissionSet.js";
 import {GetNodeLinks} from "../nodeLinks.js";
 import {NodeL1, NodeL2} from "../nodes/@Node.js";
@@ -138,7 +138,7 @@ export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildID:
 	if (parent == null) return "Parent data not found.";
 	//if (!) { return "Parent node's permission policy does not grant you the ability to add children."; }
 	const guessedCanAddChild = actor
-		? NodeL1.canAddChild(parent, actor) // if can add child
+		? PERMISSIONS.Node.AddChild(actor.id, parent) // if can add child
 		: DoesPolicyAllowX(null, parent.accessPolicy, APTable.nodes, APAction.addChild); // or probably can
 	if (!guessedCanAddChild) { return "Parent node's permission policy does not grant you the ability to add children."; }
 

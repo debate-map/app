@@ -3,7 +3,6 @@ import {Assert, emptyArray_forLoading} from "js-vextensions";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 import {DeleteNodeRating} from "./DeleteNodeRating.js";
 import {UpdateNodeRatingSummaries} from "./UpdateNodeRatingSummaries.js";
 
@@ -23,9 +22,12 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 		//Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		const subs_deleteOldRatings_new = [] as DeleteNodeRating[];
 		for (const [i, oldRating] of oldRatings.entries()) {
-			this.IntegrateSubcommand(()=>this.subs_deleteOldRatings[i], c=>subs_deleteOldRatings_new[i] = c,
+			this.IntegrateSubcommand(
+				()=>this.subs_deleteOldRatings[i],
+				c=>subs_deleteOldRatings_new[i] = c,
 				new DeleteNodeRating({id: oldRating.id}),
-				a=>a.oldData = oldRating);
+				a=>a.oldData = oldRating,
+			);
 		}
 		this.subs_deleteOldRatings = subs_deleteOldRatings_new;
 

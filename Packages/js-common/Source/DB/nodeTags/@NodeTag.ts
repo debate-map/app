@@ -56,6 +56,10 @@ export class NodeTag {
 	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_CloneHistory", ...MarkerForNonScalarField()}, {opt: true})
 	cloneHistory?: TagComp_CloneHistory;
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }
 export function MaybeCloneAndRetargetNodeTag(tag: NodeTag, cloneType: NodeTagCloneType, oldNodeID: string, newNodeID: string): NodeTag|n {
 	const tagCloneLevel = [NodeTagCloneType.minimal, NodeTagCloneType.basics].indexOf(cloneType);

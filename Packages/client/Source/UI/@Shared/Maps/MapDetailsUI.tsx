@@ -1,4 +1,4 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, DMap, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, DMap, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import React from "react";
 import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
@@ -18,8 +18,6 @@ export class MapDetailsUI extends DetailsUI_Base<DMap, MapDetailsUI> {
 		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
 		const {Change, creating, enabled} = this.helpers;
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), newData);
-		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
 		const splitAt = 160;

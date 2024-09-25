@@ -8,6 +8,7 @@ import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.j
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@NodeTag.js";
 import {CanGetBasicPermissions, IsUserCreatorOrMod} from "./users/$user.js";
 import {ChildGroup, Polarity} from "./nodeLinks/@NodeLink.js";
+import {PERMISSIONS} from "../DB.js";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);
@@ -237,7 +238,7 @@ export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: No
 	const skipPermCheck = (node.type == NodeType.comment) && subcommandInfo?.forRecursiveCommentsDelete;
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!skipPermCheck) {
-	    if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
+	    if (!PERMISSIONS.Node.Delete(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	}
 
 	const parentLinks = GetNodeLinks(undefined, node.id);
@@ -256,7 +257,7 @@ export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: No
 
 export const ForCut_GetError = CreateAccessor((userID: string|n, node: NodeL2)=>{
 	const baseText = `Cannot unlink node #${node.id}, since `;
-	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
+	if (!PERMISSIONS.Node.Modify(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
 	//if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;

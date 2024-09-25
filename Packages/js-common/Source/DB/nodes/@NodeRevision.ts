@@ -191,6 +191,10 @@ export class NodeRevision {
 	@DB((t, n)=>t.jsonb(n))
 	@Field({items: {$ref: "Attachment"}, ...MarkerForNonScalarField()})
 	attachments: Attachment[] = [];
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }
 AddSchema("NodeRevision_Partial", ["NodeRevision"], ()=>{
 	const schema = GetSchemaJSON_Cloned("NodeRevision");

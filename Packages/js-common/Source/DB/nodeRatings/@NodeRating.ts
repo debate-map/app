@@ -35,5 +35,9 @@ export class NodeRating {
 	@DB((t, n)=>t.float(n))
 	@Field({type: "number"})
 	value: number; // range: 0-100
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }
 export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy">;

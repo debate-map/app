@@ -20,7 +20,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: DMap, subNavBa
 	render() {
 		const {map, subNavBarWidth, backOnly} = this.props;
 		const userID = MeID();
-		IsUserCreatorOrMod(userID, map);
+
 		const timelinePanelOpen = GetTimelinePanelOpen(map.id);
 
 		const Button_Final = SLMode ? Button_SL : Button;

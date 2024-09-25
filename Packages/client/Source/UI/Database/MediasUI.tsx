@@ -7,7 +7,7 @@ import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
 import {Observer, GetUpdates, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {runInAction} from "mobx";
 import {Assert, E} from "js-vextensions";
-import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
+import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia, PERMISSIONS} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_DeleteMedia, RunCommand_UpdateMedia} from "Utils/DB/Command.js";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
@@ -22,8 +22,8 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 		const userID = MeID();
 		const medias = GetMedias();
 		const selectedMedia = GetSelectedMedia();
-		const permissions = GetUserPermissionGroups(userID);
-		const creatorOrMod = selectedMedia != null && IsUserCreatorOrMod(userID, selectedMedia);
+		const permissionsModify = selectedMedia != null && PERMISSIONS.Media.Modify(userID, selectedMedia);
+		const permissionsDelete = selectedMedia != null && PERMISSIONS.Media.Delete(userID, selectedMedia);
 
 		// whenever selectedMedia changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
 		UseEffect(()=>{
@@ -68,7 +68,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 									{selectedMedia.name}
 								</Text>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
-								{creatorOrMod &&
+								{permissionsModify &&
 									<Button ml="auto" text="Save details" enabled={selectedMedia_newData != null && selectedMedia_newDataError == null}
 										onClick={async e=>{
 											Assert(selectedMedia); // nn: button would be disabled otherwise
@@ -77,7 +77,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 											await RunCommand_UpdateMedia({id: selectedMedia.id, updates});
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
-								{creatorOrMod &&
+								{permissionsDelete &&
 									<Button text="Delete media" ml={10} enabled={selectedMedia != null} onClick={async e=>{
 										Assert(selectedMedia); // nn: button would be disabled otherwise
 										ShowMessageBox({
@@ -92,7 +92,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 							</Div>
 						</Row>
 						{selectedMedia
-							? <MediaDetailsUI baseData={selectedMedia} phase={creatorOrMod ? "edit" : "view"} style={{padding: 10}}
+							? <MediaDetailsUI baseData={selectedMedia} phase={permissionsModify ? "edit" : "view"} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedMedia_newData: data, selectedMedia_newDataError: error})}/>
 							: <div style={{padding: 10}}>No media selected.</div>}
 					</Column>

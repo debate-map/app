@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
@@ -6,7 +6,7 @@ import {GetMap} from "../DB/maps.js";
 import {DMap} from "../DB/maps/@Map.js";
 import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
 import {DeleteNode} from "./DeleteNode.js";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -22,7 +22,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMap.NN(id);
-		AssertUserCanDelete(this, this.oldData);
+		AssertV(PERMISSIONS.Map.Delete(this.userInfo.id, this.oldData));
 		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
 		this.IntegrateSubcommand(()=>this.sub_deleteNode, null, ()=>new DeleteNode({mapID: id, nodeID: this.oldData.rootNode}), a=>a.asPartOfMapDelete = true);

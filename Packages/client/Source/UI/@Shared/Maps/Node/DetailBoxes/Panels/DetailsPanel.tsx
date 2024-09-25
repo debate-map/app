@@ -6,7 +6,7 @@ import {runInAction} from "mobx";
 import {E, ToJSON, Clone, CE} from "js-vextensions";
 import {GetAsync} from "mobx-graphlink";
 import _ from "lodash";
-import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, DMap, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
+import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, DMap, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput, PERMISSIONS} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
@@ -36,9 +36,8 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		// if parent-node not loaded yet, don't render yet
 		if (/*!isSubnode &&*/ path.includes("/") && parentNode == null) return null;
 
-		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		//const canEdit = CanSubmitRevisions(MeID(), node.id);
-		const canEdit = IsUserCreatorOrMod(MeID(), node); // temp
+		const canEdit = PERMISSIONS.Node.Modify(MeID(), node);
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = c} map={map} parent={parentNode}

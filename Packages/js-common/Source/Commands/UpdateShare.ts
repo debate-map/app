@@ -1,8 +1,7 @@
 import {CE} from "js-vextensions";
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {GetShare, Share} from "../DB.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {GetShare, PERMISSIONS, Share} from "../DB.js";
 
 type MainType = Share;
 const MTName = "Share";
@@ -25,7 +24,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetShare.NN(id);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.Share.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

@@ -18,7 +18,6 @@
 // 		const {map} = this.props;
 // 		const userID = MeID();
 // 		const layers = GetLayers();
-// 		const creatorOrMod = IsUserCreatorOrMod(userID, map);
 // 		return (
 // 			<DropDown>
 // 				<DropDownTrigger><Button ml={5} text="Layers"/></DropDownTrigger>
@@ -83,7 +82,6 @@
 // 		// const creator = GetUser({if: layer}, layer.creator); // todo
 // 		const creator = GetUser(layer ? layer.creator : null);
 // 		const userLayerState = GetUserLayerStateForMap(userID, map.id, layer.id);
-// 		const creatorOrMod = IsUserCreatorOrMod(userID, map);
 // 		const deleteLayerError = ForDeleteLayer_GetError(userID, layer);
 // 		return (
 // 			<Column p="7px 10px" style={E(

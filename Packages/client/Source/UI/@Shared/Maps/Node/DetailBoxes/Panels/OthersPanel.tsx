@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1, PERMISSIONS, GetNode} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -23,12 +23,11 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: D
 		const _ = GetUserPermissionGroups(userID);
 		//const creator = GetUser(node.creator);
 		// viewers: GetNodeViewers(node.id),
-		const creatorOrMod = IsUserCreatorOrMod(userID, node);
-		const accessPolicy = GetAccessPolicy(node.accessPolicy);
+		const creatorOrMod = PERMISSIONS.Node.Modify(MeID(), node);
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = SlicePath(path, 1) as string;
-		const parentCreatorOrMod = IsUserCreatorOrMod(userID, parent);
+		const parentCreatorOrMod = PERMISSIONS.Node.Modify(MeID(), GetNode(parent?.id));
 
 		let nodeArgOrParentSPArg_info: {node: NodeL3, path: string, creatorOrMod: boolean}|n;
 		if (node.type == NodeType.argument) nodeArgOrParentSPArg_info = {node, path, creatorOrMod};

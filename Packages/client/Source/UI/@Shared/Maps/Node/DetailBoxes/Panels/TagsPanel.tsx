@@ -1,4 +1,4 @@
-import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, DMap, NodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag, PERMISSIONS} from "dm_common";
 import {Assert, Clone, E, emptyArray, GetEntries, GetValues} from "js-vextensions";
 import React, {useState} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -178,7 +178,7 @@ class TagRow extends BaseComponentPlus({} as {node: NodeL3, tag: NodeTag, index:
 			`.AsMultiline(0);
 		}
 
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), tag);
+		const creatorOrMod = PERMISSIONS.NodeTag.Modify(MeID(), tag);
 		return (
 			<Column mt={5} style={{background: HSLA(0, 0, 0, .3), padding: 5, borderRadius: 5}}>
 				{/*<Text>Type: {compClass.displayName}</Text>*/}

@@ -3,7 +3,7 @@ import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {Observer} from "web-vcore";
 import {E} from "js-vextensions";
-import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode, NodeType, GetNodeChildren, NodeL2, GetNodeL2} from "dm_common";
+import {MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode, NodeType, GetNodeChildren, NodeL2, GetNodeL2, PERMISSIONS} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_DeleteNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -12,7 +12,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
 		const {map, mapID, node, path} = this.props;
-		if (!IsUserCreatorOrMod(MeID(), node)) return null;
+		if (!PERMISSIONS.Node.Delete(MeID(), node)) return null;
 		const nodeText = GetNodeDisplayText(node, path, map);
 
 		const topLevelCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);

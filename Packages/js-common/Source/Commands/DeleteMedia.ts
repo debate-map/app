@@ -1,8 +1,7 @@
-import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "mobx-graphlink";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {GetMedia} from "../DB.js";
+import {GetMedia, PERMISSIONS} from "../DB.js";
 import {Media} from "../DB/media/@Media.js";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 @CommandMeta({
@@ -15,7 +14,7 @@ export class DeleteMedia extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMedia(id);
-		AssertUserCanDelete(this, this.oldData);
+		AssertV(PERMISSIONS.Media.Delete(this.userInfo.id, this.oldData));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

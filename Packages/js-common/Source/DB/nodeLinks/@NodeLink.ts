@@ -104,6 +104,10 @@ export class NodeLink {
 	@Field({$ref: "NodeType"}, {opt: true})
 	c_childType?: NodeType; // derived from "nodes" table
 
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
+
 	// runtime only
 	declare _mirrorLink?: boolean;
 }

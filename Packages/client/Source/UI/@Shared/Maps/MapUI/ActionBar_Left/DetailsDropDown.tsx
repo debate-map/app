@@ -3,7 +3,7 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
-import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, DMap, GetNodeLinks} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, DMap, GetNodeLinks, PERMISSIONS} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
@@ -48,7 +48,8 @@ export class DetailsDropDown extends BaseComponent<{map: DMap}, {dataError: stri
 		const {dataError} = this.state;
 
 		const Button_Final = SLMode ? Button_SL : Button;
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
+
+		const creatorOrMod = PERMISSIONS.Map.Modify(MeID(), map);
 
 		const setMapFeaturedCommand = new SetMapFeatured({id: map.id, featured: !map.featured}); // kept atm just for permission-checking
 

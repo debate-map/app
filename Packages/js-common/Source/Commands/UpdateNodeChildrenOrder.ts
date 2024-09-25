@@ -23,7 +23,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 		AssertUserCanModify(this, this.oldNodeData);
 
 		const changeableForNonAdmins = IsPrivateNode(node) || IsMultiPremiseArgument(node);
-		const changeable_final = (IsUserCreatorOrMod(this.userInfo.id, node) && changeableForNonAdmins) || HasAdminPermissions(this.userInfo.id);
+		const changeable_final = (this.userInfo.id, node) && changeableForNonAdmins) || HasAdminPermissions(this.userInfo.id);
 		AssertV(changeable_final, "You don't have permission to change this node's children-order.");
 		
 		this.newNodeData = {...this.oldNodeData, childrenOrder};

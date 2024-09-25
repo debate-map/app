@@ -35,4 +35,8 @@ export class MapNodeEdit {
 	@DB((t, n)=>t.text(n))
 	@Field({$ref: "ChangeType"})
 	type: ChangeType;
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }

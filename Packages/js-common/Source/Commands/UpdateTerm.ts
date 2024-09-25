@@ -1,8 +1,8 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetTerm} from "../DB/terms.js";
 import {Term} from "../DB/terms/@Term.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 const MTClass = Term;
 type MT = typeof MTClass.prototype;
@@ -21,7 +21,7 @@ export class UpdateTerm extends Command<{id: string, updates: Partial<MT>}, {}> 
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetTerm.NN(id);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.Term.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

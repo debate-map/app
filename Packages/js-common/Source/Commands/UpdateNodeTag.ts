@@ -1,9 +1,9 @@
 import {CE} from "js-vextensions";
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "mobx-graphlink";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema, AssertV} from "mobx-graphlink";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
 import {NodeTag, TagComp_keys} from "../DB/nodeTags/@NodeTag.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {PERMISSIONS} from "../DB.js";
 
 type MainType = NodeTag;
 const MTName = "NodeTag";
@@ -27,7 +27,7 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetNodeTag.NN(id);
-		AssertUserCanModify(this, this.oldData);
+		AssertV(PERMISSIONS.NodeTag.Modify(this.userInfo.id, this.oldData));
 
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);

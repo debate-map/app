@@ -5,7 +5,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
-import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, DMap} from "dm_common";
+import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, DMap, PERMISSIONS} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_UpdateMap} from "Utils/DB/Command";
@@ -21,7 +21,7 @@ export class PeopleDropDown extends BaseComponent<{map: DMap}, {}> {
 		const editors = GetMapEditors(map.id);
 
 		const Button_Final = SLMode ? Button_SL : Button;
-		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
+		const creatorOrMod = PERMISSIONS.Map.Modify(MeID(), map);
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="People"/></DropDownTrigger>
