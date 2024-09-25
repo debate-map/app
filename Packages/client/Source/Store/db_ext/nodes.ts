@@ -4,10 +4,9 @@ import {GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapS
 import {GetPlaybackVisiblePaths} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {SLMode} from "UI/@SL/SL";
 import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeType, Polarity} from "dm_common";
-import {Assert} from "js-vextensions";
-import {Chroma_Safe, HSLA} from "web-vcore";
+import {Assert, CE} from "js-vextensions";
+import {AssertUnreachable, Chroma_Safe, HSLA} from "web-vcore";
 import chroma from "chroma-js";
-import {CE} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
 
 export const nodeLightBackground = false;
@@ -22,19 +21,7 @@ export function FixColor(color: chroma.Color) {
 export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "background" | "connector" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
 
-	/*if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
-	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,35%,35%)");
-	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
-	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,10%,50%)");
-	else if (node.type == NodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,25%,25%)");
-		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,40%,25%)");
-		else result = Chroma_Safe("hsl(210,15%,24%)");
-	} else {
-		Assert(false);
-	}*/
-
-	if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,10%,24%)");
+	if (node.type == NodeType.category || node.type == NodeType.comment) result = Chroma_Safe("hsl(210,10%,24%)");
 	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,30%,35%)");
 	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
 	//else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
@@ -43,23 +30,9 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,27%,32%)");
 		else result = node.type == NodeType.claim ? result = Chroma_Safe("hsl(210,7%,45%)") : Chroma_Safe("hsl(210,10%,24%)");
 	} else {
-		Assert(false);
+		AssertUnreachable(node.type);
 	}
 	result = FixColor(result);
-
-	/*if (nodeLightBackground) {
-		if (node.type == NodeType.category) result = chroma("hsl(210,30%,70%)");
-		else if (node.type == NodeType.package) result = chroma("hsl(195,40%,70%)");
-		else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
-		//else if (node.type == NodeType.claim) result = chroma("hsl(208,40%,70%)");
-		else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,10%,60%)");
-		else if (node.type == NodeType.argument) {
-			if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,20%,70%)");
-			else result = chroma("hsl(0,25%,70%)");
-		} else {
-			Assert(false);
-		}
-	}*/
 
 	/*if (type == "background") {
 		result = GetNodeBackgroundColorFromRawColor(result);

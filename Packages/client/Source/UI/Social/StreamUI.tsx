@@ -3,7 +3,7 @@ import React from "react";
 import {store} from "Store";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox";
 import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
-import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus, LogWarning, useResizeObserver} from "web-vcore";
+import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus, LogWarning, useResizeObserver, AssertUnreachable} from "web-vcore";
 import {Assert} from "js-vextensions";
 import moment from "moment";
 import {Button, CheckBox, Column, Pre, Row, Text} from "react-vcomponents";
@@ -117,7 +117,7 @@ export class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, inde
 				</>;
 			}
 		} else {
-			Assert(false, "Server returned command-runs that did not match the types requested.");
+			AssertUnreachable(run.commandName, "Server returned command-runs that did not match the types requested.");
 		}
 
 		const openMapID = GetOpenMapID();

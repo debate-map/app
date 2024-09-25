@@ -1,5 +1,6 @@
 import {Assert} from "js-vextensions";
 import {MGLClass, Field} from "mobx-graphlink";
+import {AssertUnreachable} from "web-vcore";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass()
@@ -64,7 +65,7 @@ export class PermissionSetForType {
 		if (action == APAction.addChild) { return (self.addChild?.minApprovals ?? -1) != -1; }
 		if (action == APAction.addPhrasing) { return (self.addPhrasing?.minApprovals ?? -1) != -1; }
 		if (action == APAction.vote) { return (self.vote?.minApprovals ?? -1) != -1; }
-		Assert(false, `Invalid action: ${action}`);
+		AssertUnreachable(action, `Invalid action: ${action}`);
 	}
 }
 

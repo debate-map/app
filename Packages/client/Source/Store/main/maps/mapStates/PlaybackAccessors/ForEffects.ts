@@ -1,6 +1,7 @@
 import {GetNode, GetNodeChildren, GetNodeEffects, GetTimelineStepTimesFromStart, GetTimelineSteps, TimelineStep, TimelineStepEffect} from "dm_common";
 import {Assert, CE, emptyArray, emptyArray_forLoading, emptyObj} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
+import {AssertUnreachable} from "web-vcore";
 import {GetPlaybackInfo, GetPlaybackTime} from "./Basic.js";
 
 export class PlaybackEffect extends TimelineStepEffect {
@@ -174,7 +175,7 @@ export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsReveal
 	return visiblePathsAtEnd.ToMapObj(path=>path, path=>{
 		if (baseOn == "first reveal") return states.pathRevealTimes_first[path];
 		if (baseOn == "last fresh reveal") return states.pathRevealTimes_lastFresh[path];
-		Assert(false, "Invalid baseOn value.");
+		AssertUnreachable(baseOn);
 	});
 });
 export const GetVisiblePathsAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[])=>{

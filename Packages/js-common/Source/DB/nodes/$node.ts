@@ -1,6 +1,7 @@
 import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A, AssertWarn} from "js-vextensions";
 import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "mobx-graphlink";
 import Moment from "moment";
+import {AssertUnreachable} from "web-vcore";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {DMap} from "../maps/@Map.js";
@@ -91,7 +92,10 @@ export function GetRatingTypesForNode(node: NodeL2): RatingTypeInfo[] {
 		// return [{type: "strength", main: true}, {type: "impact", main: true}];
 		return [{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}];
 	}
-	Assert(false);
+	if (node.type == NodeType.comment) {
+		return [];
+	}
+	AssertUnreachable(node.type);
 }
 export const GetMainRatingType = CreateAccessor((node: NodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;

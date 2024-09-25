@@ -1,4 +1,5 @@
 import {Assert, IsString, ObjectCE} from "js-vextensions";
+import {AssertUnreachable} from "../General/General.js";
 
 export type Size = {width: number, height: number};
 export enum GetSize_Method {
@@ -46,7 +47,7 @@ export function GetSize(el: HTMLElement, method = GetSize_Method.ClientSize, cus
 					+ sc("margin", margin.h) + sc("scrollBar", scrollBar.h) + sc("posAbsDescendants", posAbsDescendants.h),
 		};
 	} else {
-		Assert(false, "Invalid method.");
+		AssertUnreachable(method);
 	}
 	return size;
 }

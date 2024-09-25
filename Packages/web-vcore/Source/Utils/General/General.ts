@@ -219,3 +219,8 @@ export function Chroma_Safe(input: string | number | number[] | chroma.Color, fa
 		return chroma(fallbackInput);
 	}
 }
+
+// todo: probably move to js-vextensions
+export function AssertUnreachable(x: never, customMessage?: string): never {
+	Assert(false, customMessage ?? `Encountered a value outside of the known, valid set. Unexpected value was: ${x}`);
+}

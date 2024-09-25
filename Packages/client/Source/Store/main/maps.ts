@@ -3,7 +3,7 @@ import {makeObservable, observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
 import {ignore, version} from "mobx-sync";
 import {store} from "Store";
-import {O, StoreAction} from "web-vcore";
+import {AssertUnreachable, O, StoreAction} from "web-vcore";
 import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "js-vextensions";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -87,7 +87,7 @@ export class NodeStyleRule {
 		if (this.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch) {
 			return node.accessPolicy && !this.if_accessPolicyDoesNotMatch.policyIDs.includes(node.accessPolicy);
 		}
-		Assert(false, `Invalid if-type for style-rule:${this.ifType}`);
+		AssertUnreachable(this.ifType);
 	}
 }
 
