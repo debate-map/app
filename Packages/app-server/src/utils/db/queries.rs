@@ -75,8 +75,10 @@ where
 		0..=2 => SQLFragment::lit(""),
 		_ => SQLFragment::merge(vec![SQLFragment::lit(" WHERE "), filters_sql]),
 	};
+
 	info!("Running where clause. @table:{table_name} @where:{where_sql} @filter:{filter:?}");
 	let final_query = SQLFragment::merge(vec![SQLFragment::new("SELECT * FROM $I", vec![Box::new(SQLIdent::new(table_name.clone())?)]), where_sql]);
+
 	let mut rows = query_func(final_query).await.with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql_str}"))?;
 
 	mtx.section("2:sort and convert");

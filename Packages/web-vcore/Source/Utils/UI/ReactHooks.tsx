@@ -90,11 +90,13 @@ export function useResizeObserver() {
 	const [height, setHeight] = UseState(-1);
 
 	const observer = new ResizeObserver(entries=>{
-		for (const entry of entries) {
-			const {width, height} = entry.contentRect;
-			setWidth(width);
-			setHeight(height);
-		}
+		requestAnimationFrame(()=>{
+			for (const entry of entries) {
+				const {width, height} = entry.contentRect;
+				setWidth(width);
+				setHeight(height);
+			}
+		});
 	});
 
 	React.useEffect(()=>{

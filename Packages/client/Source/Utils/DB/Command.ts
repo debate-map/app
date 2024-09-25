@@ -216,13 +216,13 @@ export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInp
 export async function RunCommand_AddSubscriptionWithLevel({node, level}: {node: string, level: SubscriptionLevel}) {
 	switch (level) {
 		case SubscriptionLevel.None:
-			RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			await RunCommand_AddSubscription({node, addChildNode: false, addNodeLink: false, addNodeRevision: false, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
 		case SubscriptionLevel.Partial:
-			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
+			await RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: false, addNodeRevision: true, deleteNode: false, deleteNodeLink: false, setNodeRating: false});
 			break;
 		case SubscriptionLevel.All:
-			RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: true, addNodeRevision: true, deleteNode: true, deleteNodeLink: true, setNodeRating: true});
+			await RunCommand_AddSubscription({node, addChildNode: true, addNodeLink: true, addNodeRevision: true, deleteNode: true, deleteNodeLink: true, setNodeRating: true});
 			break;
 		default:
 			throw new Error(`Unknown subscription level: ${level}`);

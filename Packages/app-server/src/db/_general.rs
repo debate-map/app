@@ -49,6 +49,12 @@ pub fn ensure_trusted_operator_passkey_is_correct(passkey: String, log_message_i
 	Ok(())
 }
 
+#[derive(Debug, Serialize, Deserialize, SimpleObject)]
+pub struct QueryPaginationResult<T: OutputType> {
+	pub data: Vec<T>,
+	pub total_count: i64,
+}
+
 wrap_slow_macros! {
 
 // queries
@@ -66,6 +72,17 @@ impl QueryShard_General {
 		""
 	}
 }
+
+// Do not Add SimpleObject to this struct, as it's not meant to be directly exposed to the API.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QueryPaginationFilter {
+	pub limit: Option<i64>,
+	pub after: Option<i64>,
+	pub order_by: Option<String>,
+	pub order_desc: Option<bool>,
+}
+
+
 
 // mutations
 // ==========

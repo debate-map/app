@@ -4,7 +4,7 @@ use super::{
 	sql_param::SQLParamBoxed,
 };
 use crate::{store::live_queries_::lq_param::LQParam, utils::general::general::match_cond_to_iter};
-use rust_shared::async_graphql;
+use rust_shared::async_graphql::{self, OutputType, SimpleObject};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::rust_macros::{unchanged, wrap_slow_macros};
@@ -36,7 +36,6 @@ wrap_slow_macros! {
 pub struct QueryFilter {
 	pub field_filters: IndexMap<String, FieldFilter>,
 }
-
 }
 
 impl QueryFilter {

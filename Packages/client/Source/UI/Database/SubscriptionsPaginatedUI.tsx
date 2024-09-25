@@ -1,13 +1,14 @@
 import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
-import {ES, Link, Observer, PageContainer, TextPlus, useResizeObserver} from "web-vcore";
-import {useEffect, useMemo, useState} from "react";
+import {ES, GetSize_Method, Link, Observer, PageContainer, TextPlus, useResizeObserver, UseSize} from "web-vcore";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {ScrollView} from "react-vscrollview";
 import {AsNodeL2, AsNodeL3, GetAccessPolicy, GetNode, GetNodeL2, GetNodeRevision, GetSubscriptionLevel, GetSubscriptions, MeID, Subscription} from "dm_common";
 import {Column, Row, Button} from "react-vcomponents";
 import Moment from "moment";
-
+import {gql, useQuery} from "@apollo/client";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ColumnData, TableData, TableHeader} from "../@Shared/TableHeader/TableHeader.js";
+import {TableFooter} from "../@Shared/TableFooter/TableFooter.js";
 import {liveSkin} from "../../Utils/Styles/SkinManager.js";
 import {NodeBox} from "../@Shared/Maps/Node/NodeBox.js";
 import {RunCommand_AddSubscriptionWithLevel} from "../../Utils/DB/Command.js";
@@ -23,7 +24,7 @@ const columns: ColumnData[] = [{
 	label: "Level",
 	width: 0.15,
 	allowFilter: false,
-	allowSort: true,
+	allowSort: false,
 }, {
 	key: "createdAt" as const,
 	label: "Created At",
@@ -45,72 +46,111 @@ const columns: ColumnData[] = [{
 },
 ];
 
+const SUBSCRIPTIONS_PAGINATED = gql`
+query($limit: Int!, $after: Int, $orderBy: String, $orderDesc: Boolean, $filter: JSON) {
+	subscriptionsPaginated(limit: $limit, after: $after, orderBy: $orderBy, orderDesc: $orderDesc ,filter: $filter) {
+		data {
+			id,
+			user,
+			node,
+			addChildNode,
+			deleteNode,
+			addNodeLink,
+			deleteNodeLink,
+			addNodeRevision,
+			setNodeRating,
+			createdAt,
+			updatedAt
+		},
+		totalCount
+	}
+}
+`;
+
 @Observer
-export class SubscriptionsUI extends BaseComponentPlus({} as {}, {
+export class SubscriptionsPaginatedUI extends BaseComponentPlus({} as {}, {
 	tableData: {columnSort: "", columnSortDirection: "", filters: []} as TableData,
+	page: 0,
 }) {
 
 	render() {
-		const {tableData} = this.state;
+		const {tableData, page} = this.state;
+
+		const rowsPerPage = 10;
 
 		const userId = MeID();
 
-		const subscriptions = GetSubscriptions(userId);
+		// const subscriptions = {
+		// 	data: [] as Subscription[],
+		// 	totalCount: 30,
+		// }; // GetSubscriptions(userId);
+
+		const {data, loading, error, refetch} = useQuery<{
+			subscriptionsPaginated: {
+				data: Subscription[],
+				totalCount: number,
+			}
+		}>(SUBSCRIPTIONS_PAGINATED, {
+			variables: {
+				limit: rowsPerPage,
+				after: page * rowsPerPage,
+				orderDesc: tableData.columnSortDirection == "desc",
+				orderBy: tableData.columnSort,
+				filter: {user: {equalTo: userId}},
+			},
+			fetchPolicy: "no-cache",
+			nextFetchPolicy: "no-cache",
+
+		});
+
+		if (!loading && error) {
+
+			console.error("Error in SubscriptionsPaginatedUI:", error);
+
+		}
+
+		// HACK: for some reason sometimes the data is undefined, even though loading is false
+		// it seems like a bug comming from apollo client or react-apollo hooks
+		// so we refetch the data if it's undefined, works well for now
+		if (data === undefined && error === undefined) {
+			refetch();
+		}
 
 		const onTableChange = (newTableData: TableData)=>{
 			this.SetState({tableData: newTableData});
 		};
 
-		const sortedAndFilteredSubscriptions = useMemo(()=>{
-			let output = subscriptions;
-			if (tableData.columnSort) {
-				switch (tableData.columnSort) {
-					case "level": {
-						output = subscriptions.OrderByDescending(a=>[a.addChildNode, a.addNodeLink, a.addNodeRevision, a.deleteNode, a.deleteNodeLink, a.setNodeRating].filter(a=>a).length);
-						break;
-					}
-					case "createdAt": {
-						output = subscriptions.OrderByDescending(a=>a.createdAt);
-						break;
-					}
-					case "updatedAt": {
-						output = subscriptions.OrderByDescending(a=>a.updatedAt);
-						break;
-					}
-					default: {
-						console.warn(`Unknown columnSort: ${tableData.columnSort}`);
-						break;
-					}
-				}
-			}
-
-			if (tableData.columnSortDirection == "desc") {
-				output = sortedAndFilteredSubscriptions.reverse();
-			}
-
-			return output;
-		}, [subscriptions, tableData.columnSort, tableData.columnSortDirection]);
+		const onPageChange = (newPage: number)=>{
+			this.SetState({page: newPage});
+			refetch();
+		};
 
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
 				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData} />
-				<ScrollView style={ES({flex: 1})} contentStyle={ES({
-					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
-				})}>
-					{sortedAndFilteredSubscriptions.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No Subscriptions</div>}
-					{sortedAndFilteredSubscriptions.map((subscription, index)=>{
-						return <SubscriptionRow key={subscription.id} index={index} last={index == sortedAndFilteredSubscriptions.length - 1} subscription={subscription} />;
-					})}
-				</ScrollView>
+				{loading && <div style={{textAlign: "center", fontSize: 18, padding: "20px 0"}}>Loading...</div>}
+				{data != null && !loading && error == null && data.subscriptionsPaginated != null &&
+					<ScrollView style={ES({flex: 1})} contentStyle={ES({
+						borderRadius: "0px",
+						flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
+					})}>
+						{data.subscriptionsPaginated.data.length == 0 && <div style={{textAlign: "center", fontSize: 18, padding: "20px 0"}}>No Subscriptions</div>}
+						{data.subscriptionsPaginated.data.map((subscription, index)=>{
+							return <SubscriptionRow onDelete={()=>refetch()} key={subscription.id} index={index} last={index == data.subscriptionsPaginated.data.length - 1} subscription={subscription} />;
+						})}
+					</ScrollView>
+				}
+
+				<TableFooter rowsPerPage={rowsPerPage} totalRows={data?.subscriptionsPaginated?.totalCount ?? 0} page={page} onPageChange={onPageChange} />
 			</PageContainer>
 		);
 	}
 }
 
 @Observer
-export class SubscriptionRow extends BaseComponent<{index: number, last: boolean, subscription: Subscription}, {}> {
+export class SubscriptionRow extends BaseComponent<{ index: number, last: boolean, subscription: Subscription, onDelete: () => void }, {}> {
 	render() {
-		const {index, last, subscription} = this.props;
+		const {index, last, subscription, onDelete} = this.props;
 
 		const level = GetSubscriptionLevel(subscription);
 
@@ -140,17 +180,18 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 		const nodeL2 = GetNodeL2(subscription.node);
 		const nodeFinal = nodeL2 ? AsNodeL3(nodeL2, null) : null;
 
-		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
+		const [ref, {width}] = UseSize({
+			method: GetSize_Method.BoundingClientRect,
+		});
 
 		return (
 			<Column p="7px 10px" style={css(
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
-				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row style={{
 					display: "flex", flexDirection: "row", alignItems: "center",
 				}}>
-					<span ref={rootRef} style={{flex: columns[0].width, paddingRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
+					<span ref={c=>c && ref(c)} style={{flex: columns[0].width, marginRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
 						{nodeFinal != null &&
 							<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false} forSubscriptionsPage={true}
 								backgroundFillPercentOverride={100} width={width}
@@ -166,8 +207,9 @@ export class SubscriptionRow extends BaseComponent<{index: number, last: boolean
 						ShowMessageBox({
 							title: `Delete node subscription?`, cancelButton: true,
 							message: `Delete node subscription?`,
-							onOK: ()=>{
-								RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
+							onOK: async()=>{
+								await RunCommand_AddSubscriptionWithLevel({node: subscription.node, level: "none"});
+								onDelete();
 							},
 						});
 					}} style={{
