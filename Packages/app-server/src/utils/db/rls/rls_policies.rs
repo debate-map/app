@@ -160,7 +160,7 @@ impl UsesRLS for UserHidden {
 }
 impl UsesRLS for CommandRun {
 	fn can_access_cached(&self, user_id: Option<&str>) -> bool {
-		is_user_admin(user_id)
+		is_user_admin_or_creator(user_id, &self.actor)
 			|| (
 				// public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
 				self.public_base && do_policies_allow_access(user_id, &self.c_accessPolicyTargets)

@@ -120,7 +120,7 @@ DO $$ BEGIN
 	DROP POLICY IF EXISTS "commandRuns_rls" ON app."commandRuns";
 	CREATE POLICY "commandRuns_rls" ON app."commandRuns" AS PERMISSIVE FOR ALL USING (
 		--current_setting('app.current_user_admin') = 'true'
-		(SELECT is_user_admin('@me')) OR (SELECT (
+		(SELECT is_user_admin('@me')) OR (SELECT is_user_creator('@me', actor)) OR (SELECT (
 			-- public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
 			(SELECT public_base = true)
 			AND (SELECT do_policies_allow_access('@me', "c_accessPolicyTargets"))

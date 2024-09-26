@@ -193,7 +193,7 @@ const CanAccessUserHidden = (user_id: string|n, user: User)=>{
 const CanModifyUserHidden = (user_id: string|n, user: User)=>CanAccessUserHidden(user_id, user) && user.id === user_id;
 
 const CanAccessCommandRun = (user_id: string|n, commandRun: CommandRun)=>{
-	return HasAdminPermissions(user_id) || (commandRun.public_base && DoPoliciesAllowX(user_id, commandRun.c_accessPolicyTargets, APAction.access));
+	return IsUserCreatorOrAdmin(user_id, {creator: commandRun.actor}) || (commandRun.public_base && DoPoliciesAllowX(user_id, commandRun.c_accessPolicyTargets, APAction.access));
 };
 const CanAccessSubscription = (user_id: string|n, subscription: Subscription)=>{
 	return IsUserCreatorOrAdmin(user_id, {creator: subscription.user});
