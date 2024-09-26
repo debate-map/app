@@ -71,13 +71,14 @@
     "uplot-vplugins": "0.0.7",
     "webpack-runtime-require": "2.0.0",
     "@types/node": "20.0.0",
-    "mathjs": "1.0.0",
-    "tslib": "2.3.0",
-    "zen-observable-ts": "1.1.0",
-    "postgraphile": "4.12.2",
     "graphile-utils": "4.12.2",
     "graphile-build": "4.12.2",
-    "graphile-build-pg": "4.12.2"
+    "graphile-build-pg": "4.12.2",
+    "mathjs": "1.0.0",
+    "postgraphile": "4.12.2",
+    "tslib": "2.3.0",
+    "webpack": "5.95.0",
+    "zen-observable-ts": "1.1.0"
   },
   "dependencies": {
     "chalk": "^4.1.1",
