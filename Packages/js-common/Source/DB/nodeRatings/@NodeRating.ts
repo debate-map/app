@@ -40,4 +40,4 @@ export class NodeRating {
 	@Field({items: {type: "string"}})
 	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }
-export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy">;
+export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy" | "c_accessPolicyTargets">;

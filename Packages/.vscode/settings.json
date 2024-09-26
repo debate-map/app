@@ -16,12 +16,5 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "explicit"
 	},
-	// fixes eslint's plugin/config imports (alternative: https://github.com/microsoft/rushstack/tree/master/stack/eslint-patch)
-	/*"eslint.workingDirectories": [
-		//"./client"
-		".."
-	],*/
-	"eslint.options.resolvePluginsRelativeTo": "../node_modules/web-vcore",
-	"eslint.nodePath": "../node_modules/web-vcore",
 	"git.openRepositoryInParentFolders": "always",
 }

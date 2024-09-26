@@ -16,24 +16,7 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "explicit"
 	},
-	// fixes eslint's plugin/config imports (alternative: https://github.com/microsoft/rushstack/tree/master/stack/eslint-patch)
-	"eslint.options.resolvePluginsRelativeTo": "./node_modules/web-vcore",
-	"eslint.nodePath": "./node_modules/web-vcore",
 	"autoHide.autoHideSideBar": true,
-	/*"eslint.workingDirectories": [
-		{
-		  "directory": "./packages/client",
-		  "changeProcessCWD": true
-		},
-		{
-		  "directory": "./packages/common",
-		  "changeProcessCWD": true
-		},
-		{
-		  "directory": "./packages/server",
-		  "changeProcessCWD": true
-		},
-	],*/
 
 	"[rust]": {
 		"editor.defaultFormatter": "rust-lang.rust-analyzer",

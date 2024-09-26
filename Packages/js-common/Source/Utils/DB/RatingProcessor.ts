@@ -9,7 +9,7 @@ import {ArgumentType} from "../../DB/nodes/@NodeRevision.js";
 import {ClaimForm} from "../../DB/nodeLinks/@NodeLink.js";
 
 // sync:rs
-export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, premises: NodeL1[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, premises: NodeL1[], userID: string, useAverageForMissing = false): NodeRating_MaybePseudo|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 

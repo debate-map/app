@@ -1,4 +1,5 @@
-const {writeFileSync} = require("fs");
+const {existsSync, writeFileSync} = require("fs");
+const paths = require("path");
 const wvcPkg = require("../../package.json");
 
 // This script below finds the versions of each web-vcore subdependency (in web-vcore/package.json), and updates the package.json of the calling project to include those versions in the "resolutions" field of its package.json.
@@ -36,6 +37,7 @@ function GetDepsToConsolidate() {
 		],
 		// written by self (separate category, because consolidations for these should always be fine/good, since we know the different versions will be compatible anyway -- or at least easily modifiable to be so)
 		...[
+			//"eslint-config-vbase", // commented; not needed, since eslint-config-vbase is only used by web-vcore itself
 			//"graphql-forum",
 			"js-vextensions",
 			"mobx-graphlink",
@@ -78,8 +80,18 @@ function PrintBufferedLogs() {
 
 Start();
 function Start() {
+	let userProjectRoot = process.cwd();
+	while (!existsSync(`${userProjectRoot}/yarn.lock`)) {
+		const oldVal = userProjectRoot;
+		userProjectRoot = paths.normalize(`${userProjectRoot}/..`);
+		if (userProjectRoot == oldVal) {
+			console.log(`Yarn pre-install (web-vcore): Could not find yarn.lock file in directory, or any parent directory; skipping execution.`);
+			return;
+		}
+	}
+
 	//const outerPkg_path = "../../../../package.json";
-	const outerPkg_path = `${process.cwd()}/package.json`;
+	const outerPkg_path = `${userProjectRoot}/package.json`;
 	const outerPkg_old = require(outerPkg_path); // eslint-disable-line
 
 	/** @type {Map<string, string>} */
@@ -109,7 +121,7 @@ function Start() {
 
 	// keep a consistent order for the wvc-managed entries in "resolutions" (all at start, alphabetically sorted)
 	const outerPkg_wvcManagedResolutions_sorted = new Map([...outerPkg_wvcManagedResolutions.entries()].sort((a, b)=>a[0].localeCompare(b[0])));
-	const outerPkg_unmanagedResolutions = Object.entries(outerPkg_old.resolutions).filter(a=>!outerPkg_wvcManagedResolutions.has(a[0]));
+	const outerPkg_unmanagedResolutions = Object.entries(outerPkg_old.resolutions ?? {}).filter(a=>!outerPkg_wvcManagedResolutions.has(a[0]));
 	const outerPkg_newResolutions = Object.fromEntries([
 		...outerPkg_wvcManagedResolutions_sorted,
 		...outerPkg_unmanagedResolutions,
