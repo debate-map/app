@@ -101,8 +101,7 @@ ALTER TABLE app."mapNodeEdits" ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
 	DROP POLICY IF EXISTS "mapNodeEdits_rls" ON app."mapNodeEdits";
 	CREATE POLICY "mapNodeEdits_rls" ON app."mapNodeEdits" AS PERMISSIVE FOR ALL USING (
-		--is_user_admin_or_creator('@me', creator) OR do_policies_allow_access('@me', "c_accessPolicyTargets") -- has no "creator" field (maybe should change that...)
-		--is_user_admin('@me') OR do_policies_allow_access('@me', "c_accessPolicyTargets")
+		-- Note: The lack of an "is_user_creator" check is fine; the creator does not need to see entries in this table from themselves.
 		(SELECT is_user_admin('@me')) OR (SELECT do_policies_allow_access('@me', "c_accessPolicyTargets"))
 	);
 END $$;
@@ -119,9 +118,8 @@ ALTER TABLE app."commandRuns" ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
 	DROP POLICY IF EXISTS "commandRuns_rls" ON app."commandRuns";
 	CREATE POLICY "commandRuns_rls" ON app."commandRuns" AS PERMISSIVE FOR ALL USING (
-		--current_setting('app.current_user_admin') = 'true'
 		(SELECT is_user_admin('@me')) OR (SELECT is_user_creator('@me', actor)) OR (SELECT (
-			-- public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
+			-- public_base = true, iff the user has "addToStream" enabled (see record_command_run.rs)
 			(SELECT public_base = true)
 			AND (SELECT do_policies_allow_access('@me', "c_accessPolicyTargets"))
 		))
