@@ -629,7 +629,14 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
 			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
-	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
+	* 2.3\) Option 3, run locally by using the command `npm start app_server.run` which sets the required env variables and runs cargo run
+	* 2.3\) Option 4, run with the debugger using vscode,
+		* 2.3.1\) The CodeLLDB extension for vscode must be installed
+		* 2.3.2\) Generate the necessary `.env.local` file by running `npm start db.local_secrets`
+		* 2.3.3\) Run the debuggerby going to the debugging menu and select "Debug App Server" to Run and Debug
+	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database 
+	migration (see: [#db-migrate](#db-migrate)).
+	* Note: Currently there is no way to send requests from the frontend Client to the backend server using options 3 and 4, however they still may be useful for debugging by going to `http://localhost:5110/gql-playground` to test out requests
 * 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the graphql playground page at `localhost:5100/app-server/gql-playground`).
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)

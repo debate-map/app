@@ -2,6 +2,22 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+            "name": "Debug App Server",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "build",
+					"-p",
+					"app-server",
+                ],
+            },
+			"envFile": "${workspaceFolder}/Packages/app-server/.env.local",
+	
+			"args": [],
+            "cwd": "${workspaceFolder}",
+        },
+		{
 			"name": "server.run (debug)",
 			"type": "node",
 			"request": "launch",

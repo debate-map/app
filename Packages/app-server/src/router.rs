@@ -104,6 +104,6 @@ pub async fn start_router(app_state: AppStateArc) {
 	let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
 	let listener = TcpListener::bind(&addr).await.unwrap();
 	let server_fut = axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>());
-	info!("App-server launched. @env:{:?} @logical_cpus:{} @physical_cpus:{}", k8s_env(), num_cpus::get(), num_cpus::get_physical());
+	info!("App-server launched on {}. @env:{:?} @logical_cpus:{} @physical_cpus:{}", addr ,k8s_env(), num_cpus::get(), num_cpus::get_physical());
 	server_fut.await.unwrap();
 }
