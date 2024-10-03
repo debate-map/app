@@ -81,7 +81,6 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 
 	const permittedAppServerPortOverrides = ["5110"];
 	if (serverPod == "app-server" && permittedAppServerPortOverrides.includes(claimedClientURL_appServerPort)) {
-		console.log("Test1:", claimedClientURL_appServerPort);
 		serverURL.port = claimedClientURL_appServerPort;
 	}
 

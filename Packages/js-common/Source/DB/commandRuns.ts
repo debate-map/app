@@ -4,7 +4,6 @@ import {CommandRun} from "./commandRuns/@CommandRun.js";
 import {MeID} from "./users.js";
 
 export const GetCommandRuns = CreateAccessor((commandTypes?: string[], actorID?: string, showAll?: boolean)=>{
-	//console.log("Test1:", MeID());
 	// temp; when user-info not yet loaded, don't make db-request for command-runs table
 	//		(it has RLS policies that give incomplete results if caller's user-id is null, and currently mobx-graphlink doesn't know how/when to refresh this once user-info is available)
 	//if (MeID() == null) return emptyArray_forLoading;
