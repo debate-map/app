@@ -39,6 +39,17 @@ use crate::{
 	utils::{axum_logging_layer::print_request_response, db::accessors::AccessorContext, general::data_anchor::DataAnchorFor1},
 };
 
+pub fn in_debugger() -> bool {
+	std::env::var("DEBUGGER").unwrap_or_default() == "LLDB"
+}
+
+pub fn route_path(path: &str) -> String {
+	let running_outside_of_k8s = in_debugger();
+	let prefix = if running_outside_of_k8s { "/app-server" } else { "" };
+	assert!(path.starts_with("/"));
+	format!("{}{}", prefix, path)
+}
+
 pub fn get_cors_layer() -> CorsLayer {
 	// ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
 	CorsLayer::new()
@@ -58,7 +69,7 @@ pub fn get_cors_layer() -> CorsLayer {
 pub async fn start_router(app_state: AppStateArc) {
 	let app = Router::new()
 		.route(
-			"/",
+			&route_path("/"),
 			get(|| async {
 				Html(
 					r#"
@@ -69,7 +80,7 @@ pub async fn start_router(app_state: AppStateArc) {
 			}),
 		)
 		.route(
-			"/basic-info",
+			&route_path("/basic-info"),
 			get(|ConnectInfo(addr): ConnectInfo<SocketAddr>| async move {
 				if !is_addr_from_pod(&addr) {
 					return http_response_of_bad_gateway_for_non_pod_caller("/monitor-backend-link", &addr);
@@ -85,7 +96,7 @@ pub async fn start_router(app_state: AppStateArc) {
 				Response::builder().body(res_json.to_string()).unwrap().into_response()
 			}),
 		)
-		.route("/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
+		.route(&route_path("/monitor-backend-link"), get(monitor_backend_link_handle_ws_upgrade));
 
 	//let (client, connection) = pgclient::create_client(false).await;
 	let app = gql::extend_router(app, app_state.clone()).await;
@@ -104,6 +115,6 @@ pub async fn start_router(app_state: AppStateArc) {
 	let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
 	let listener = TcpListener::bind(&addr).await.unwrap();
 	let server_fut = axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>());
-	info!("App-server launched on {}. @env:{:?} @logical_cpus:{} @physical_cpus:{}", addr ,k8s_env(), num_cpus::get(), num_cpus::get_physical());
+	info!("App-server launched on {}. @env:{:?} @logical_cpus:{} @physical_cpus:{}", addr, k8s_env(), num_cpus::get(), num_cpus::get_physical());
 	server_fut.await.unwrap();
 }

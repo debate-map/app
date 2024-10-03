@@ -10,13 +10,13 @@ import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
 import {onError} from "@apollo/client/link/error/index.js";
 import {VoidCache} from "./Apollo/VoidCache.js";
 
-export function GetPageOrigin_WithWebpackToK8sRetargeting() {
-	let pageOrigin_targetingK8sCluster = window.location.origin;
+export function GetPageUrl_WithWebpackToK8sRetargeting() {
+	const newUrl = new URL(window.location.href);
 	// if on localhost, but one of the webpack ports, change the port to target the k8s entry-point (webpack knows nothing of the app-server)
-	if (window.location.hostname == "localhost" && (window.location.port == "5101" || window.location.port == "5131")) {
-		pageOrigin_targetingK8sCluster = `${window.location.protocol}//${window.location.hostname}:5100`;
+	if (newUrl.hostname == "localhost" && (newUrl.port == "5101" || newUrl.port == "5131")) {
+		newUrl.port = "5100";
 	}
-	return pageOrigin_targetingK8sCluster;
+	return newUrl.href;
 }
 
 export function GetWebServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options) {
@@ -24,7 +24,7 @@ export function GetWebServerURL(subpath: string, preferredServerOrigin?: string,
 	return GetServerURL("web-server", subpath, opts);
 }
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageUrl_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
 	// if we're trying to connect to the prod app-server, be consistent and just always use the OVH origin domain (we want to avoid reaching the Cloudflare proxy limit for websocket connections)
 	if (DB == "prod") {
 		return `https://9m2x1z.nodes.c1.or1.k8s.ovh.us/app-server/${subpath.slice(1)}`;
@@ -32,7 +32,7 @@ export function GetAppServerURL(subpath: string, preferredServerOrigin?: string,
 	return GetServerURL("app-server", subpath, opts);
 }
 export function GetMonitorURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageUrl_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
 	return GetServerURL("monitor", subpath, opts);
 }
 

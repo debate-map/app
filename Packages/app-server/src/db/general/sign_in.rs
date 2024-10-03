@@ -42,6 +42,7 @@ use crate::db::general::sign_in_::google::{store_user_data_for_google_sign_in, G
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{get_user_hidden, get_user_hiddens, UserHidden};
 use crate::db::users::{get_user, PermissionGroups, User};
+use crate::router::route_path;
 use crate::store::storage::{get_app_state_from_gql_ctx, AppStateArc, SignInMsg};
 use crate::utils::db::accessors::{get_db_entries, AccessorContext};
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
@@ -71,7 +72,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
 }
 
 pub async fn extend_router(app: Router) -> Router {
-	let result = app.route("/auth/google/callback", get(auth_google_callback));
+	let result = app.route(&route_path("/auth/google/callback"), get(auth_google_callback));
 	result
 }
 

@@ -153,7 +153,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "app-server"
+name = "app_server"
 version = "0.1.0"
 dependencies = [
  "async-broadcast",
@@ -173,7 +173,7 @@ dependencies = [
  "oauth2",
  "pyroscope",
  "pyroscope_pprofrs",
- "rust-shared",
+ "rust_shared",
  "serde",
  "slab",
  "thiserror",
@@ -2158,7 +2158,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "monitor-backend"
+name = "monitor_backend"
 version = "0.1.0"
 dependencies = [
  "async-broadcast",
@@ -2171,7 +2171,7 @@ dependencies = [
  "futures-util",
  "indexmap 1.9.3",
  "lazy_static",
- "rust-shared",
+ "rust_shared",
  "serde",
  "slab",
  "tracing",
@@ -3037,7 +3037,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-macros"
+name = "rust_macros"
 version = "0.0.1"
 dependencies = [
  "async-graphql",
@@ -3048,7 +3048,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-shared"
+name = "rust_shared"
 version = "0.0.1"
 dependencies = [
  "anyhow",
@@ -3061,7 +3061,7 @@ dependencies = [
  "chrono",
  "flume",
  "futures",
- "http 1.1.0",
+ "http 0.2.9",
  "http-body-util",
  "hyper 1.2.0",
  "hyper-rustls 0.26.0",
@@ -3075,7 +3075,7 @@ dependencies = [
  "postgres-protocol",
  "regex",
  "reqwest 0.11.25 (git+https://github.com/seanmonstar/reqwest.git?rev=2c11ef000b151c2eebeed2c18a7b81042220c6b0)",
- "rust-macros",
+ "rust_macros",
  "rustls 0.22.2",
  "rustls-pemfile 2.1.1",
  "sentry",
@@ -4420,18 +4420,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d958d035c4438e28c70e4321a2911302f10135ce78a9c7834c0cab4123d06a2"
 
 [[package]]
-name = "web-server"
-version = "0.1.0"
-dependencies = [
- "log",
- "rust-shared",
- "serde",
- "static-web-server",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "web-sys"
 version = "0.3.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4439,6 +4427,18 @@ checksum = "c060b319f29dd25724f09a2ba1418f142f539b2be99fbf4d2d5a8f7330afb8eb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "web_server"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "rust_shared",
+ "serde",
+ "static-web-server",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

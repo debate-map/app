@@ -1,5 +1,5 @@
 [package]
-name = "rust-shared"
+name = "rust_shared"
 version = "0.0.1"
 edition = "2021"
 publish = false
@@ -85,7 +85,7 @@ tokio-tungstenite = {version = "0.21.0", features = ["rustls-tls-native-roots"]}
 rustls-pemfile = "2.1.1"
 pin-project-lite = "*"
 
-rust-macros = { path = "../rust-macros" }
+rust_macros = { path = "../rust-macros" }
 
 # sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
 # ==========

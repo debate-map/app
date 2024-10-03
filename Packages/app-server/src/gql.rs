@@ -78,6 +78,7 @@ use crate::db::timeline_steps::{QueryShard_TimelineStep, SubscriptionShard_Timel
 use crate::db::timelines::{QueryShard_Timeline, SubscriptionShard_Timeline};
 use crate::db::user_hiddens::{QueryShard_UserHidden, SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, SubscriptionShard_User};
+use crate::router::route_path;
 use crate::store::live_queries::LQStorageArc;
 use crate::store::storage::AppStateArc;
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
@@ -297,10 +298,10 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
 	//let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
 	let result = app
-		.route("/graphiql", get(graphiql))
-		.route("/gql-playground", get(graphql_playground))
+		.route(&route_path("/graphiql"), get(graphiql))
+		.route(&route_path("/gql-playground"), get(graphql_playground))
 		.route(
-			GRAPHQL_PATH_INTERNAL,
+			&route_path(GRAPHQL_PATH_INTERNAL),
 			// approach 1 (using standard routing functions)
 			//on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)
 			get(graphql_websocket_handler).post(handle_gql_query_or_mutation), // approach 2 (custom first-layer service-function)

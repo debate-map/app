@@ -18,12 +18,11 @@ use rust_shared::{
 		type_aliases::{FReceiver, FSender},
 	},
 };
-use std::{alloc::System, backtrace::Backtrace, panic};
+use std::{alloc::System, backtrace::Backtrace, env, panic};
 use tracing::{error, info};
 
 use crate::{
-	links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND,
-	utils::general::{data_anchor::DataAnchorFor1, logging::set_up_logging, mem_alloc::Trallocator},
+	links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND, router::in_debugger, utils::general::{data_anchor::DataAnchorFor1, logging::set_up_logging, mem_alloc::Trallocator}
 };
 
 #[global_allocator]
@@ -39,7 +38,12 @@ pub fn set_up_globals() -> Option<ClientInitGuard> {
 
 		//let stacktrace = Backtrace::capture();
 		let stacktrace = Backtrace::force_capture();
-		let stacktrace_str_simplified = simplify_backtrace_str(stacktrace.to_string(), true);
+		// temp fix: when using the LLDB debugger, we have to avoid using simplify_backtrace_str, as it causes a (hard to understand) error atm
+		let stacktrace_str_simplified = if in_debugger() {
+			stacktrace.to_string()
+		} else {
+			simplify_backtrace_str(stacktrace.to_string(), true)
+		};
 
 		error!("Panic stack-trace:\n==========\n{}", stacktrace_str_simplified);
 		std::process::abort();

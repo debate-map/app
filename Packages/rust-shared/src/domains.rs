@@ -83,6 +83,7 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_O
 		false
 	};
 	let claimed_client_url_trusted = if should_trust_claimed_client_url { claimed_client_url.clone() } else { None };
+	let claimed_client_url_app_server_port = claimed_client_url_trusted.as_ref().map(|a| a.query_pairs().find(|b| b.0 == "appServerPort").map(|c| c.1.into_owned())).flatten().unwrap_or("5100".o()); // 5100 is the standard local-k8s entry-point
 
 	let mut server_url: Url;
 
@@ -119,6 +120,11 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_O
 			server_url.set_port(Some(if backend_is_remote { 5250 } else { 5150 })).unwrap();
 		},
 		_ => {},
+	}
+
+	let permitted_app_server_port_overrides = ["5110"];
+	if server_pod == ServerPod::AppServer && permitted_app_server_port_overrides.contains(&claimed_client_url_app_server_port.as_str()) {
+		server_url.set_port(Some(claimed_client_url_app_server_port.parse().unwrap())).unwrap();
 	}
 
 	// section 3: set path
