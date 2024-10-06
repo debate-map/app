@@ -9,7 +9,6 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
 
-    # regarding the caching of build files, for now i've decided we are building fresh
     steps:
       - name: Checkout main repo
         uses: actions/checkout@v4
@@ -29,16 +28,7 @@ jobs:
       - name: Create required directories & copy raw timing file (with the timestamp in it's name) to target repository's timings/raw_html directory
         run: |
           mkdir -p compile-timings/timings/raw_html
-          mkdir -p compile-timings/timings/build_metadatas/
-          mkdir -p compile-timings/timings/build_units/
           mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/raw_html
-
-      - name: Extract compile timing information from any new raw build timing html file that's not in tracker.json and add them to build_metadatas & build_units
-        working-directory: compile-timings
-        run: |
-          NEW_BUILD_HTML_FILE=$(ls -t timings/raw_html/ | head -n1)
-          cd compile_timing_extractor
-          cargo run -- --input-file ../timings/raw_html/$NEW_BUILD_HTML_FILE --tracker-file ../timings/tracker.json --metadata-dir ../timings/build_metadatas --units-data-dir ../timings/build_units
 
       - name: Commit and push changes
         working-directory: compile-timings
@@ -47,5 +37,5 @@ jobs:
           git config user.email debatemap@gmail.com
           git add timings
           NEW_BUILD_HTML_FILE=$(ls -t timings/raw_html/ | head -n1)
-          git commit -m "ci: add build timing html file $NEW_BUILD_HTML_FILE and it's extracted json files"
+          git commit -m "ci: add build timing html file $NEW_BUILD_HTML_FILE"
           git push
