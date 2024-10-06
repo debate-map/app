@@ -26,10 +26,18 @@ jobs:
           path : compile-timings
           token : ${{ secrets.PAT }}
 
-      - name: Copy timing file (with timestamp) to target repository
+      - name: Create required directories & copy raw timing file (with the timestamp in it's name) to target repository's timings/raw_html directory
         run: |
-          mkdir -p compile-timings/timings
-          mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/
+          mkdir -p compile-timings/timings/raw_html
+          mkdir -p compile-timings/timings/build_metadatas/
+          mkdir -p compile-timings/timings/build_units/
+          mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/raw_html
+
+      #- name: Extract compile timing information from any new raw build timing html file that's not in tracker.json and add them to build_metadatas & build_units
+        #working-directory: debate-map/compile-timings/compile-timings-extractor
+        #run: |
+          ##mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/
+          #cargo run -- --input-file ../timings/cargo-timing-20240825T213151Z.html --tracker-file ./tracker.json --metadata-dir ./hey --units-data-dir ./hehe
 
       - name: Commit and push changes
         working-directory: compile-timings
