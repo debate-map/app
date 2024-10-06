@@ -45,5 +45,6 @@ jobs:
           git config user.name "compile-timings[bot]"
           git config user.email debatemap@gmail.com
           git add timings
-          git commit -m "ci: add build timing information for app-server"
+          NEW_BUILD_HTML_FILE=$(ls -t timings/raw_html/ | head -n1)
+          git commit -m "ci: add build timing html file $NEW_BUILD_HTML_FILE and it's extracted json files"
           git push
