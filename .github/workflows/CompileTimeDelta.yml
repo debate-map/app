@@ -33,11 +33,11 @@ jobs:
           mkdir -p compile-timings/timings/build_units/
           mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/raw_html
 
-      #- name: Extract compile timing information from any new raw build timing html file that's not in tracker.json and add them to build_metadatas & build_units
-        #working-directory: debate-map/compile-timings/compile-timings-extractor
-        #run: |
-          ##mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/
-          #cargo run -- --input-file ../timings/cargo-timing-20240825T213151Z.html --tracker-file ./tracker.json --metadata-dir ./hey --units-data-dir ./hehe
+      - name: Extract compile timing information from any new raw build timing html file that's not in tracker.json and add them to build_metadatas & build_units
+        working-directory: compile-timings/compile-timings-extractor
+        run: |
+          NEW_BUILD_HTML_FILE=$(ls -t ../timings/raw_html/ | head -n1)
+          cargo run -- --input-file ../timings/raw_html/$NEW_BUILD_HTML_FILE --tracker-file ../timings/tracker.json --metadata-dir ../timings/build_metadatas --units-data-dir ../timings/build_units
 
       - name: Commit and push changes
         working-directory: compile-timings
