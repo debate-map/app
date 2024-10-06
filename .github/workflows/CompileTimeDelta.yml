@@ -27,15 +27,15 @@ jobs:
 
       - name: Create required directories & copy raw timing file (with the timestamp in it's name) to target repository's timings/raw_html directory
         run: |
-          mkdir -p compile-timings/timings/raw_html
-          mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/timings/raw_html
+          mkdir -p compile-timings/docs/timings/raw_html
+          mv debate-map/target/cargo-timings/cargo-timing-* compile-timings/docs/timings/raw_html
 
       - name: Commit and push changes
         working-directory: compile-timings
         run: |
           git config user.name "compile-timings[bot]"
           git config user.email debatemap@gmail.com
-          git add timings
-          NEW_BUILD_HTML_FILE=$(ls -t timings/raw_html/ | head -n1)
+          git add docs/timings/raw_html
+          NEW_BUILD_HTML_FILE=$(ls -t docs/timings/raw_html/ | head -n1)
           git commit -m "ci: add build timing html file $NEW_BUILD_HTML_FILE"
           git push
