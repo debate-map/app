@@ -51,7 +51,7 @@ def Start_App(g):
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": CopyFromPath("monitor-backend"),
+			"copy_from_path": CopyFromPath("monitor_backend"),
 		},
 	)
 	imageURL_webServer = g["registryURL"] + '/dm-web-server-' + ENV
@@ -62,7 +62,7 @@ def Start_App(g):
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": CopyFromPath("web-server"),
+			"copy_from_path": CopyFromPath("web_server"),
 		},
 	)
 	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + ENV
@@ -73,7 +73,7 @@ def Start_App(g):
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": CopyFromPath("app-server"),
+			"copy_from_path": CopyFromPath("app_server"),
 		},
 	)
 

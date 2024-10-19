@@ -54,11 +54,12 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	result.push(claimResource);
 
 	const args = [] as CG_Argument[];
-	if (claim.argument) args.push({argument: claim.argument} as CG_Argument);
-	if (claim.arguments) args.push(...claim.arguments.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
-	if (claim.examples) args.push(...claim.examples.map(a=>(IsString(a) ? {argument: a} : a)) as CG_Argument[]);
-	const counterClaimStrings = [...(claim.counter_claims ?? []), ...(claim.counter_claim ? [claim.counter_claim] : [])];
-	args.push(...counterClaimStrings.map(str=>({argument: str} as CG_Argument)));
+	const wrapArg = (arg: string | CG_Argument)=>IsString(arg) ? {argument: arg} as CG_Argument : arg;
+	if (claim.argument) args.push(wrapArg(claim.argument));
+	if (claim.arguments) args.push(...claim.arguments.map(wrapArg));
+	if (claim.examples) args.push(...claim.examples.map(wrapArg));
+	if (claim.counter_claims) args.push(...claim.counter_claims.map(wrapArg));
+	if (claim.counter_claim) args.push(wrapArg(claim.counter_claim));
 	for (const [i, argument] of args.entries()) {
 		result.push(...GetResourcesInArgument_CG(context, argument, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(argument)), claimResource));
 	}
