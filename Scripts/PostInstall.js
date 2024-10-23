@@ -1,6 +1,6 @@
 const fs = require("fs");
 const pathMod = require("path");
-const globby = require("globby");
+//const globby = require("globby");
 
 // needed to fix issue with ESM-imports in NodeJS; see here for more info: https://github.com/nodejs/node/issues/34515
 // (alternative to using patch-package, which is more of a hassle, due to patch-creation being difficult for yarn)

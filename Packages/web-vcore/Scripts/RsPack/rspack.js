@@ -1,6 +1,7 @@
 // @ts-check
 
 import rspack /*, {Configuration}*/ from "@rspack/core";
+import fs from "fs";
 import path from "path";
 import {createRequire} from "node:module";
 
@@ -107,7 +108,9 @@ export const buildConfig = options=>{
 			},
 			tsConfig: {
 				configFile: path.resolve(opt.rootDir, "./tsconfig.json"),
-				references: [path.resolve(opt.rootDir, "../../tsconfig.base.json")],
+				references: [
+					path.resolve(opt.rootDir, "../../tsconfig.base.json")
+				].filter(fs.existsSync), // filter, since not all projects use the "./Packages/X" (monorepo) structure
 			},
 		},
 		module: {
