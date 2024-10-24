@@ -11,7 +11,7 @@ export class CG_QuoteOld {
 export class CG_Quote {
 	quote: string;
 	source: Source;
-	extras?: Object; // eg. {claimMiner: {id: "123"}}
+	extras?: object; // eg. {claimMiner: {id: "123"}}
 }
 
 // "source" entries are supposed to be imported as just attachments on the node itself (atm, always as Quote attachments)
@@ -29,7 +29,7 @@ export abstract class CG_Node {
 	reference_urls?: CG_RefURLOrQuoteOld[];
 	quotes?: CG_Quote[];
 	sources?: CG_Source[]; // v6
-	extras?: Object; // eg. {claimMiner: {id: "123"}}
+	extras?: object; // eg. {claimMiner: {id: "123"}}
 
 	//abstract GetTitle(): string;
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
@@ -178,6 +178,9 @@ export class CG_Claim extends CG_Node {
 	// v5
 	examples?: (string | CG_Argument)[];
 	counter_claims?: string[];
+
+	// v7+
+	atomic_claims?: (string | CG_AtomicClaim)[];
 }
 
 // the distinction between "argument" and "example" is a bit unclear to me in the claimgen model; merging them atm
@@ -202,4 +205,9 @@ export class CG_Evidence extends CG_Node {
 	static is(node: CG_Node) {
 		return (node as any).stance != null;
 	}
+}
+
+// v7+
+export class CG_AtomicClaim extends CG_Node {
+	text?: string;
 }

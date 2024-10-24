@@ -3,7 +3,7 @@ import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ArgumentType, Attachment, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodeLink, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, OrderKey, Polarity, systemUserID} from "dm_common";
 import {Assert, IsString} from "js-vextensions";
 import {AddNotificationMessage} from "web-vcore";
-import {CG_Argument, CG_Category, CG_Claim, CG_Debate, CG_Evidence, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
+import {CG_Argument, CG_AtomicClaim, CG_Category, CG_Claim, CG_Debate, CG_Evidence, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
 
 export class ImportContext {
 	mapID: string;
@@ -48,9 +48,15 @@ export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext,
 });
 export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, claim: CG_Claim, path_indexes: number[], path_titles: string[], parentResource: ImportResource)=>{
 	const result = [] as ImportResource[];
+
+	// calc premises first, as this changes the node's type
+	const premises = [] as CG_AtomicClaim[];
+	if (claim.atomic_claims) premises.push(...claim.atomic_claims.map(a=>(IsString(a) ? {text: a} : a)) as CG_AtomicClaim[]);
+
 	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
 	//const claimResource = NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question);
-	const claimResource = NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, parentResource);
+	const childGroupForClaim = premises.length ? ChildGroup.freeform : ChildGroup.generic; // if it has premises, node must be inserted into "freeform" group (since parent will often be category, which normally doesn't allow argument children)
+	const claimResource = NewNodeResource(context, claim, premises.length ? NodeType.argument : NodeType.claim, path_indexes, path_titles, parentResource, childGroupForClaim);
 	result.push(claimResource);
 
 	const args = [] as CG_Argument[];
@@ -61,6 +67,10 @@ export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, cl
 	args.push(...counterClaimStrings.map(str=>({argument: str} as CG_Argument)));
 	for (const [i, argument] of args.entries()) {
 		result.push(...GetResourcesInArgument_CG(context, argument, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(argument)), claimResource));
+	}
+
+	for (const [i, premise] of premises.entries()) {
+		result.push(NewNodeResource(context, premise, NodeType.claim, path_indexes.concat(args.length + i), path_titles.concat(CG_Node.GetTitle_Main(premise)), claimResource));
 	}
 
 	return result;
@@ -115,6 +125,10 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 			evidence.stance == "supports" ? Polarity.supporting :
 			evidence.stance == "refutes" ? Polarity.opposing :
 			Polarity.supporting;
+	}
+	// atm this case only happens for multi-premise arguments (added through atomic_claims), so just always doing polarity:supporting works fine for now
+	else if (nodeType == NodeType.argument) {
+		link.polarity = Polarity.supporting;
 	}
 
 	const mainTitle = CG_Node.GetTitle_Main(data);

@@ -39,10 +39,11 @@ export class HomeUI2_SLMain extends BaseComponent<{}, {}> {
 			<PageContainer scrollable={true} style={{flex: null, margin: 0, justifyContent: "center"}} innerStyle={{flex: "0 1 865px", borderRadius: 0, background: null, padding: 0}}>
 				<Row style={{margin: "50px 10px 20px 10px", boxSizing: "border-box"}}>
 					<article style={{
-						flex: "0 0 55%", padding: "180px 50px 40px 50px",
+						flex: "0 0 55%", padding: "40px 50px",
 						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", color: "#eee", textAlign: "justify", fontSize: 17,
-						backgroundColor: "#1C3749", backgroundImage: "url(/Images/@SL/Main/Home_LeftBox.png)", backgroundPosition: "center 80px", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+						backgroundColor: "#1C3749",
 					}}>
+						<img src="/Images/@SL/Main/Home_LeftBox.png" style={{width: "100%"}}/>
 						<VReactMarkdown source={pageText} className='selectable'/>
 					</article>
 					<div style={{
