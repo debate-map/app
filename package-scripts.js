@@ -16,6 +16,26 @@ Object.assign(scripts, {
 });
 
 Object.assign(scripts, {
+	app_server: {
+		run: Dynamic(()=> {
+			const port = 5120;
+			const secret = GetK8sPGUserAdminSecretData("dm-local");
+			const envVarsCommand = SetEnvVarsCmd({
+				DB_PORT: port,
+				DB_USER: "admin",
+				DB_PASSWORD: `${secret.GetField("password").toString()}`,
+				DB_ADDR: "localhost",
+				DB_NAME: "debate-map",
+
+				ENVIRONMENT: 'dev'
+			});
+			return `${envVarsCommand} cd Packages/app-server && cargo run`;
+		}),
+	},
+
+});
+
+Object.assign(scripts, {
 	client: {
 		tsc:         `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		tsc_noWatch: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build`,
@@ -579,11 +599,21 @@ Object.assign(scripts, {
 		local_secrets: Dynamic(()=>{
 			// we only care about local context data here, so no need to pass context to GetK8sPGUserAdminSecretData
 			const secret = GetK8sPGUserAdminSecretData("dm-local");
-			console.log("--- Local Secrets ---");
-			console.log("PORT:", 5120);
-			console.log("DATABASE:", "debate-map");
-			console.log("USER:", "admin");
-			console.log("PASSWORD:", secret.GetField("password").toString());
+			let output = "";
+			output += `DB_PORT=5120\n`;
+			output += `DB_USER=admin\n`;
+			output += `DB_PASSWORD=${secret.GetField("password").toString()}\n`;
+			output += `DB_ADDR=localhost\n`;
+			output += `DB_NAME=debate-map\n`;
+			output += 'ENVIRONMENT="dev"\n';
+
+			// save to file
+			const filePath = `./Packages/app-server/.env.local`;
+			fs.writeFileSync(
+				filePath,
+				output,
+			);
+			console.log(`INFO: written to file: ${filePath}`);
 		}),
 
 		// db init/seed commands (using psql to run standard .sql files)

@@ -177,7 +177,7 @@ export class CG_Claim extends CG_Node {
 
 	// v5
 	examples?: (string | CG_Argument)[];
-	counter_claims?: string[];
+	counter_claims?: (string | CG_Argument)[];
 
 	// v7+
 	atomic_claims?: (string | CG_AtomicClaim)[];

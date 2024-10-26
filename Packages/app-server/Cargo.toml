@@ -1,5 +1,5 @@
 [package]
-name = "app-server"
+name = "app_server"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -42,8 +42,8 @@ slab = "0.4.2"
 futures-util = "0.3.0"
 futures-timer = "3.0.2"
 
-#rust-macros = { path = "../rust-macros" }
-rust-shared = { path = "../rust-shared" }
+#rust_macros = { path = "../rust-macros" }
+rust_shared = { path = "../rust-shared" }
 
 # sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
 # ==========

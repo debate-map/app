@@ -41,6 +41,7 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 		? !opts.restrictToRecognizedHosts || domainConstants.recognizedWebServerHosts.includes(claimedClientURL.host) || domainConstants.onServerAndDev
 		: false;
 	const claimedClientURL_trusted = shouldTrustClaimedClientURL ? claimedClientURL : null;
+	const claimedClientURL_appServerPort = claimedClientURL_trusted?.searchParams.get("appServerPort") ?? "5100"; // 5100 is the standard local-k8s entry-point
 
 	let serverURL: URL;
 
@@ -56,7 +57,7 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
 		const guessedToBeLocal = opts.forceLocalhost || domainConstants.onServerAndDev;
 		if (guessedToBeLocal) {
-			serverURL = new URL("http://localhost:5100"); // standard local-k8s entry-point
+			serverURL = new URL(`http://localhost:5100`);
 		} else {
 			serverURL = new URL(`https://${domainConstants.prodDomain}`);
 		}
@@ -76,6 +77,11 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 	} else if (serverPod == "pyroscope") {
 		serverURL.hostname = "localhost";
 		serverURL.port = backendIsRemote ? "5250" : "5150";
+	}
+
+	const permittedAppServerPortOverrides = ["5110"];
+	if (serverPod == "app-server" && permittedAppServerPortOverrides.includes(claimedClientURL_appServerPort)) {
+		serverURL.port = claimedClientURL_appServerPort;
 	}
 
 	// section 3: set path

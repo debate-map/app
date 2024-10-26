@@ -11,7 +11,7 @@ use rust_shared::serde;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::Client;
-use rust_shared::utils::_k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos, get_or_create_k8s_secret, try_get_k8s_secret};
+use rust_shared::utils::_k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos, get_k8s_service_account_token, get_or_create_k8s_secret, try_get_k8s_secret};
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::k8s::cert_handling::get_reqwest_client_with_k8s_certs;
@@ -260,7 +260,7 @@ pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {
 
 pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
 	info!("Beginning request to restart the app-server.");
-	let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+	let token = get_k8s_service_account_token()?;
 	let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
 	let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 

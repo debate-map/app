@@ -626,9 +626,19 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 			* 2.1.3.1\) If you hit the error `Error: couldn't find key host in Secret default/debate-map-pguser-...`, kill the tilt-up process, then rerun it. (this will allow tilt / `Reflector.star` to generate a new annotation on the `default/debate-map-pguser-admin` resource, triggering it to reflect the now-populated secret in the `postgres` namespace)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
-		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
-		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
-			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
+		* 2.2.1\) Start serving of frontend. (if not already)
+			* 2.2.1.1\) Run web-server directly: `cd Packages/web-server; cargo run` (not yet tested)
+			* 2.2.2.2\) Serve frontend files using rspack, as described in the [run-frontend-local](#run-frontend-local) module.
+		* 2.2.1\) Start app server:
+			* NOTE: To connect to this app-server process from the frontend, you'll need to add a `appServerPort=5110` query-param to the url.
+				* Limitation: Currently, the app-server cannot access the k8s service-account token, thus `get_k8s_certs()` fails, thus `get_or_create_k8s_secret()` fails, thus `get_or_create_jwt_key_hs256()` fails, thus actions which require that the user be signed-in fail (due to the app-server being unable to validate the JWT tokens that are provided).
+			* 2.2.1.1\) Option 1, run locally by using the command `npm start app_server.run` which sets the required env variables and runs cargo run.
+			* 2.2.1.2\) Option 2, run with the debugger using vscode:
+				* 2.2.1.2.1\) The CodeLLDB extension for vscode must be installed.
+				* 2.2.1.2.2\) Generate the necessary `.env.local` file by running `npm start db.local_secrets`.
+				* 2.2.1.2.3\) Run the debugger by going to the debugging side-panel, selecting "Debug App Server", then pressing to the play/start-debugging button.
+				* NOTE: Pressing "Stop" in the debugger controls *does not always* succeed in killing the app-server process, which can cause later launches to fail (due to the port being in use). If you hit this issue, you can kill the zombie processes manually. (eg. using task-manager)
+					* On Windows, you can run in the terminal: `taskkill /IM "app_server.exe" /F`
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
 * 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the graphql playground page at `localhost:5100/app-server/gql-playground`).
 

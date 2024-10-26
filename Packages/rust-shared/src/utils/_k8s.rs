@@ -36,6 +36,10 @@ use crate::{
 	},
 };
 
+pub fn get_k8s_service_account_token() -> Result<String, Error> {
+	fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token").context("Failed to retrieve k8s service-account token.")
+}
+
 #[derive(Debug)]
 pub struct K8sPodBasicInfo {
 	pub name: String,
@@ -43,7 +47,7 @@ pub struct K8sPodBasicInfo {
 	pub creation_time_str: String,
 }
 pub async fn get_k8s_pod_basic_infos(namespace: &str, filter_to_running_pods: bool) -> Result<Vec<K8sPodBasicInfo>, Error> {
-	let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+	let token = get_k8s_service_account_token()?;
 	let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
 	let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 
@@ -86,7 +90,7 @@ pub async fn try_get_k8s_secret(name: String, namespace: &str) -> Result<Option<
 }
 pub async fn get_or_create_k8s_secret(name: String, namespace: &str, new_data_if_missing: Option<JSONValue>) -> Result<K8sSecret, Error> {
 	info!("Beginning request to get/create the k8s-secret named \"{name}\".");
-	let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+	let token = get_k8s_service_account_token()?;
 	let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
 	let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 
@@ -135,7 +139,7 @@ pub async fn get_or_create_k8s_secret(name: String, namespace: &str, new_data_if
 
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>, allow_utf8_lossy: bool) -> Result<String, Error> {
 	info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
-	let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token").context("Failed to retrieve k8s service-account token.")?;
+	let token = get_k8s_service_account_token()?;
 	/*let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
 	let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
 
