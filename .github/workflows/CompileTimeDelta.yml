@@ -43,5 +43,5 @@ jobs:
           git config user.email debatemap@gmail.com
           git add docs/timings/raw_html
           NEW_BUILD_HTML_FILE=$(ls -t docs/timings/raw_html/ | head -n1)
-          git commit -m "ci: add build timing html file $NEW_BUILD_HTML_FILE_${{ env.COMMIT_HASH }}"
+          git commit -m "ci: add build timing html $NEW_BUILD_HTML_FILE"
           git push
