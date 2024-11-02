@@ -29,7 +29,7 @@ jobs:
           path : compile-timings
           token : ${{ secrets.PAT }}
 
-      - name: Create required directories & copy raw timing file (with the timestamp in it's name) to target repository's timings/raw_html directory
+      - name: Copy raw timing files to target repo
         run: |
           mkdir -p compile-timings/docs/timings/raw_html
           for file in debate-map/target/cargo-timings/cargo-timing-*.html; do
