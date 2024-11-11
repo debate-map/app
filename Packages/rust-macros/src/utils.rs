@@ -71,7 +71,7 @@ pub type SlotReplacement = Option<Vec<TokenTree>>;
 pub fn replace_token_sequences_matching(tokens: TokenStream, slots: &Vec<Slot>) -> TokenStream {
 	let mut token_replacements_planned: HashMap<usize, SlotReplacement> = HashMap::new();
 
-	let mut tokens_so_far = Vec::new();
+	let mut tokens_so_far: Vec<TokenTree> = Vec::new();
 	for token in tokens {
 		//println!("Processing token:{}", token.to_string());
 		tokens_so_far.push(token);
@@ -86,7 +86,23 @@ pub fn replace_token_sequences_matching(tokens: TokenStream, slots: &Vec<Slot>) 
 				//println!("Blocking this token, and the {} before it.", tokens_for_slots.len() - 1);
 				for (i2, slot) in slots.iter().enumerate() {
 					let index_to_replace = token_index_for_first_slot + i2;
-					token_replacements_planned.insert(index_to_replace, slot.1.clone());
+					let replacement_tokens_final = match slot.1 {
+						Option::None => None,
+						Option::Some(ref replacement_tokens) => {
+							Some(
+								replacement_tokens
+									.iter()
+									.map(|replacement_token| {
+										let mut new_token = replacement_token.clone();
+										// preserve span-information (for more precise error-message locations)
+										new_token.set_span(tokens_so_far[index_to_replace].span());
+										new_token
+									})
+									.collect(),
+							)
+						},
+					};
+					token_replacements_planned.insert(index_to_replace, replacement_tokens_final);
 				}
 			}
 		}
@@ -109,7 +125,10 @@ pub fn replace_token_sequences_matching(tokens: TokenStream, slots: &Vec<Slot>) 
         match token {
             TokenTree::Group(data) => {
                 let new_stream = replace_token_sequences_matching(data.stream(), &slots);
-                TokenTree::Group(Group::new(data.delimiter(), new_stream))
+                let mut new_token = TokenTree::Group(Group::new(data.delimiter(), new_stream));
+				// preserve span-information (for more precise error-message locations)
+				new_token.set_span(data.span());
+				new_token
             },
             _ => token,
         }

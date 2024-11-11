@@ -36,7 +36,7 @@ use super::super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::super::_shared::add_node::add_node;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
 
-//wrap_slow_macros!{
+wrap_slow_macros! {
 
 #[derive(Default)]
 pub struct SubscriptionShard_CloneMapSpecial;
@@ -130,7 +130,7 @@ pub struct CloneMapSpecialResult {
 	pub doneAt: Option<i64>,
 }
 
-//}
+}
 
 pub fn clone_map_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User, _is_root: bool, input: CloneMapSpecialInput, _extras: NoExtras, nodes_warned_s1: FSender<String>) -> impl Stream<Item = Result<(String, String), Error>> + 'a {
 	let base_stream = async_stream::stream! {

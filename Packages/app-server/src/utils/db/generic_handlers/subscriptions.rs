@@ -2,7 +2,7 @@ use deadpool_postgres::Pool;
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
 use metrics::{counter, histogram};
 use rust_shared::async_graphql::{
-	async_stream::{self, stream, AsyncStream},
+	async_stream::{self, stream},
 	parser::types::Field,
 	Object, OutputType, Positioned, Result,
 };
