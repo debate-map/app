@@ -29,7 +29,7 @@ export function GetTransferNodesInitialData(map: DMap|n, transferNode: NodeL3, t
 				newAccessPolicyID: map?.nodeAccessPolicy,
 				childGroup: outerChildGroupOrDefault,
 				claimForm: transferNode.link.form,
-				argumentPolarity: transferNode.link.polarity,
+				argumentPolarity: transferNode.link.polarity ?? Polarity.supporting,
 			},
 		],
 	};
@@ -71,6 +71,7 @@ export function GetTransferNodesInitialData(map: DMap|n, transferNode: NodeL3, t
 				clone_newType: NodeType.argument,
 				clone_keepChildren: false,
 				clone_keepTags: NodeTagCloneType.basics,
+				argumentPolarity: Polarity.supporting,
 			});
 		}
 	}

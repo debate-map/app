@@ -59,8 +59,10 @@ export class NodeInfoForTransfer {
 	@Field({$ref: "ClaimForm"}, {opt: true})
 	claimForm?: ClaimForm|n;
 
+	// NOTE: Atm, this field cannot be null on frontend, but can be null on backend. (done since simpler, ie. to avoid UI ever operating on a null polarity)
+	// Fine for now, but maybe make the server match (by having its argumentPolarity field also be non-nullable) in the future.
 	@Field({$ref: "Polarity"}, {opt: true})
-	argumentPolarity?: Polarity|n;
+	argumentPolarity: Polarity;
 }
 
 /*export const TransferType_values = [
@@ -152,7 +154,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
 				if (newNode.type == NodeType.argument) {
-					newLink.polarity = transfer.argumentPolarity ?? Polarity.supporting;
+					newLink.polarity = transfer.argumentPolarity;
 				}
 
 				this.IntegrateSubcommand<AddChildNode>(
@@ -280,7 +282,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 							link: new NodeLink({
 								group: transfer.childGroup,
 								orderKey: orderKeyForNewNode,
-								polarity: transfer.argumentPolarity ?? Polarity.supporting,
+								polarity: transfer.argumentPolarity,
 							}),
 						});
 						return cmd;

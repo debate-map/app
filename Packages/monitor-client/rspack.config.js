@@ -1,6 +1,6 @@
 // @ts-check
 
-import {buildConfig} from "web-vcore/Scripts/RsPack/rspack.js";
+import {NN, buildConfig} from "web-vcore/Scripts/RsPack/rspack.js";
 import path from "path";
 import {fileURLToPath} from "node:url";
 
@@ -18,4 +18,9 @@ const config = buildConfig({
 		path.resolve(__dirname, "../client/Resources"),
 	],
 });
+
+// hot/live reloading disabled, so that accidental reloads (causing loss of debugging context) don't happen (this should be customizable per-dev in the future)
+NN(config.devServer).hot = false;
+NN(config.devServer).liveReload = false;
+
 export default config;

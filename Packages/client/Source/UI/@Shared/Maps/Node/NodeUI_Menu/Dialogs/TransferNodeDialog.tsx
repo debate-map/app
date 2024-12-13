@@ -302,9 +302,8 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 						</Row>}
 					</RowLR>
 					{(()=>{
-						const childGroupsThisNodeIsValidIn = GetValues(ChildGroup).filter(group=>CheckLinkIsValid(newParentType, finalType, group, null) == null); // todo: perhaps change passed polarity from null to pro/con
-						if (!childGroupsThisNodeIsValidIn.includes(nodeInfo.childGroup)) {
-							const validityError = CheckLinkIsValid(newParentType, finalType, nodeInfo.childGroup, null); // todo: perhaps change passed polarity from null to pro/con
+						const validityError = CheckLinkIsValid(newParentType, finalType, nodeInfo.childGroup, finalType == NodeType.argument ? nodeInfo.argumentPolarity : null);
+						if (validityError) {
 							return <Row mt={5} style={{color: "red"}}
 								// temp; add special class-name, which blocks dialog from proceeding / having OK pressed
 								className="transferNodeBlocker"
@@ -361,4 +360,3 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 		);
 	}
 }
-
