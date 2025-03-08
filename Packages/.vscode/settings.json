@@ -17,4 +17,5 @@
 		"source.fixAll.eslint": "explicit"
 	},
 	"git.openRepositoryInParentFolders": "always",
+	"rust-analyzer.initializeStopped": true,
 }

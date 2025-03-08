@@ -159,7 +159,7 @@ pub async fn handle_generic_gql_doc_subscription_base<'a, T: 'static + UsesRLS +
 					return stream_for_error(err);
 				},
 			};
-			let entry_as_type = entries_as_type.pop();
+			let entry_as_type = entries_as_type.pop(); // this *should* be fine (popping pre-access-filter), since id-filter should ensure <=1 results (even pre-access-filter)
 
 			(entry_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
 		};
@@ -178,7 +178,7 @@ pub async fn handle_generic_gql_doc_subscription_base<'a, T: 'static + UsesRLS +
 					Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
 				};
 				let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries).map_err(to_sub_err)?;
-				let next_entry_as_type: Option<T> = next_entries_as_type.pop();
+				let next_entry_as_type: Option<T> = next_entries_as_type.pop(); // this *should* be fine (popping pre-access-filter), since id-filter should ensure <=1 results (even pre-access-filter)
 
 				// only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)
 				if let (next_result, changed) = rls_applier.filter_next_result_for_doc(next_entry_as_type) && changed {

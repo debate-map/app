@@ -667,18 +667,18 @@ Note: We use Google Cloud here, but others could be used.
 	* 3.1\) For the main Google Cloud project instance, you'll need to be supplied with the service-account key-file. (contact Venryx)
 	* 3.2\) If you're creating your own fork/deployment, you'll need to:
 		* 3.2.1\) Create a GCP project.
-		* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
+		* 3.2.2\) Enable the Artifact Registry API for your GCP project: https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com
 		* 3.2.3\) Create a service-account: (it's possible a user account could also be granted access directly, but service-accounts are recommended anyway)
 			* 3.2.3.1\) Go to: https://console.cloud.google.com/iam-admin/serviceaccounts/create
-			* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
+			* 3.2.3.2\) Choose a service-account name (eg. "service-account-1"), and add the role "Artifact Registry Administrator" and "Storage Admin" (*not* the weaker "Storage Object Admin").
 			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
 			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
 	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
 	* 3.5\) Add the service-account to your Docker authentication, in a similar way:
-		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
-		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://gcr.io`
+		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://GEOGRAPHICAL_LOCATION_IN_GCP-docker.pkg.dev` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://GEOGRAPHICAL_LOCATION_IN_GCP-docker.pkg.dev`
 
 
 </details>
@@ -694,8 +694,11 @@ Note: We use Google Cloud here, but others could be used.
 * 2\) Ensure that a Pulumi project is set up, to hold the Pulumi deployment "stack".
 	* 2.1\) Collaborators on the main release can contact Stephen (aka Venryx) to be added as project members (you can view it online [here](https://app.pulumi.com/Venryx/debate-map) if you have access).
 	* 2.2\) If you're creating your own fork/deployment:
-		* 2.2.1\) Create a new Pulumi project [here](https://app.pulumi.com). Make sure your project is named `debate-map`, so that it matches the name in `Pulumi.yaml`.
-* 3\) Run: `npm start pulumiUp` (`pulumi up` also works, *if* the last result of `npm start backend.dockerPrep` is up-to-date)
+		* 2.2.1\) Create a new Pulumi project [here](https://app.pulumi.com).
+			* 2.2.1.1\) For the "project type", choose "Pulumi/Kubernetes Cluster" (TypeScript).
+			* 2.2.1.2\) Set project's name to `debate-map` (so that it matches the name in `Pulumi.yaml`), and the stack name to "prod". (the rest can be left default, as of 2025-01)
+* 3\) Run: `npm start backend.pulumiUp` (`pulumi up` also works, *if* the last result of `npm start backend.dockerPrep` is up-to-date)
+	* 3.1\) If this fails on trying to provision a GCS bucket or GAR repo (`oauth2: "invalid_grant" "Bad Request"`), run `gcloud auth application-default login`, sign-in to a google account with GCP access (see step 3.2.3.4 of [cloud-project-init](#cloud-project-init)), then retry.
 * 4\) Select the stack you want to deploy to. (for now, we always deploy to `prod`)
 * 5\) Review the changes it prepared, then proceed with "yes".
 * 6\) After a bit, the provisioning/updating process should complete. There should now be a GCS bucket, container registry, etc. provisioned, within the Google Cloud project whose service-account was associated with Pulumi earlier.
@@ -715,11 +718,14 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
 * 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "dm-ovh". (open `$HOME/.kube/config`, copy the aforementioned context section, then change the copy's name to `dm-ovh`)
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
-	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
-		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
-		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.5 of [cloud-project-init](#cloud-project-init))
-		* 5.1.3\) Submit the credentials to OVH: `kubectl --context dm-ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
-	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context dm-ovh get --namespace default -o json secret registry-credentials` (currently we are pushing the secret to the `default` namespace, as that's where the `web-server` and `app-server` pods currently are; if these pods are moved to another namespace, adjust this line accordingly)
+	* 5.1\) Option 1 (recommended): Load the credentials into ovh, directly from the GCR credentials file.
+		* 5.1.1\) If on Windows, run: ``$keyContent = (Get-Content -Raw "Others/Secrets/gcs-key.json").replace('"', '\"').replace('`n', '\n'); kubectl --context dm-ovh create secret docker-registry registry-credentials --namespace default --docker-server=us-west1-docker.pkg.dev --docker-username=_json_key --docker-password=$keyContent --docker-email=not-needed@example.com``
+	* 5.2\) Option 2: Load the credentials into docker in plain text, then push them to the OVH cluster as well. (recommended only if already in plain text)
+		* 5.2.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
+			* 5.2.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
+			* 5.2.1.2\) Log in to your image registry again. (ie. rerun step 3.5 of [cloud-project-init](#cloud-project-init))
+			* 5.2.1.3\) Submit the credentials to OVH: `kubectl --context dm-ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
+		* 5.2.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context dm-ovh get --namespace default -o json secret registry-credentials` (currently we are pushing the secret to the `default` namespace, as that's where the `web-server` and `app-server` pods currently are; if these pods are moved to another namespace, adjust this line accordingly)
 
 </details>
 
@@ -747,7 +753,7 @@ In order to use the oauth options for sign-in (eg. Google Sign-in), the frontend
 Google Sign-in:
 * 1\) Create a Google Cloud project for your fork.
 * 2\) Go to: https://console.cloud.google.com/apis/credentials?project=YOUR_PROJECT_NAME
-* 3\) In the "Credentials->OAuth 2.0 Client IDs" section, create a new "Web Application" entry.
+* 3\) In the "Credentials->OAuth 2.0 Client IDs" section, create a new "Web Application" entry. (can name it whatever, eg. "Web client (main)")
 * 4\) Set the values below: (yes, the plain `localhost` one is [also needed](https://stackoverflow.com/a/68469319)) [replacing CLUSTER_IP_IN_CLOUD with the URL of your cloud-based Kubernetes cluster, if you want direct access to be possible]
 ```
 Authorized JavaScript Origins:
@@ -896,7 +902,7 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 	* 1.1\) You can manually remove the taint by running (as seen [here](https://stackoverflow.com/a/63471551/2452165)): `kubectl taint node <nodename> node.kubernetes.io/memory-pressure:NoSchedule-`
 		1.1.1\) Update: This didn't actually seem to work for me. Perhaps k8s is instantly re-applying the taint, since it's based on a persistent memory shortage? Anyway, currently I just wait for the memory shortage to resolve (somehow).
 		1.1.2\) For now, another workaround that *seems* to help (from a couple tries), is opening pod-list in Lens, searching for all pods of the given type, selecting-all, then removing/killing all.
-		1.1.3\) Another partial workaround seems to be to use Lens->Deployment, set Scale to 0, wait till entry updates, then set Scale to 1 again; in a couple cases this seemed to resolve the taint issue (maybe just coincidence though). 
+		1.1.3\) Another partial workaround seems to be to use Lens->Deployment, set Scale to 0, wait till entry updates, then set Scale to 1 again; in a couple cases this seemed to resolve the taint issue (maybe just coincidence though).
 * 2\) If you get the error "Unable to attach or mount volumes: unmounted volumes [...]" (in my case, after replacing a 4gb node-pool with an 8gb one), the issue may be that the stale persistent-volume-claims requested by the old nodes are still sticking around, causing new claims for the new node to not get created (issue [described here](https://veducate.co.uk/kubelet-unable-attach-volumes/)). To fix this:
 	* 2.1\) Run `npm start backend.tiltDown_ovh`.
 	* 2.2\) Tilt-down appears to not delete everything, so complete the job by using Tilt to manually delete anything added by our project: basically everything except what's in the `kube-node-lease`, `kube-public`, and `kube-system` namespaces.
@@ -906,6 +912,8 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 		* 2.2.4\) For the persistent-volumes and persistent-volume-claims, due the same thing: comment out its "finalizers", then delete like normal.
 	* 2.3\) Rerun the tilt-up script.
 	* 2.4\) EDIT: After doing the above, the issue still remains :(. Based on my reading, the above "should" fix it, but it hasn't. For now, I'm resolving this issue by just completely resetting the cluster. (with "Computing nodes" option set to "Keep and reinstall nodes" -- the "Delete nodes" option appears to not be necessary)
+* 3\) In some cases, when pushing a new pod version to your k8s cluster, the pod will fail to be added, with the message `0/1 nodes are available: 1 node(s) had taint {node.kubernetes.io/disk-pressure: }, that the pod didn't tolerate.`
+	* 3.1\) One approach which has worked for me (there's probably a lighter solution though): `docker system prune`
 
 </details>
 

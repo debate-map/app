@@ -23,13 +23,13 @@ exports.SetEnvVarsCmd = vars=>{
 		if (value == null) continue;
 		result += win32 ? "set " : "export ";
 		if (win32) {
-			const escapeChar = '^';
-			let string = `${value}`;
+			const escapeChar = "^";
+			const string = `${value}`;
 			result += `${key}=${string.replace(/([?*\/\\|"`><&])/g, `${escapeChar}$1`)}`;
 		} else {
 			result += `${key}=${value}`;
 		}
-	
+
 		result += win32 ? "&& " : " && "; // yes, windows command-line is weird (space before the "&&" would be interpreted as part of previous env-var's value)
 	}
 	if (result.length > 0) result = result.slice(0, -1); // remove final space

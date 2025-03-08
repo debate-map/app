@@ -20,6 +20,7 @@ function GetValue<T>(output: Output<T>) {
 	//fs.writeFileSync("./PulumiOutput_Private.json", JSON.stringify({}));
 	const bucket_dev_uniformPrivate_gsPseudoURL = await GetValue(bucket_dev_uniformPrivate.url);
 	const bucket_prod_uniformPrivate_gsPseudoURL = await GetValue(bucket_prod_uniformPrivate.url);
+	// todo: probably need to update this to "../../../Pulumi..." after pulumi update (as in other repo)
 	fs.writeFileSync("./PulumiOutput_Public.json", JSON.stringify({
 		registryURL: await GetValue(registryUrl),
 		bucket_dev_uniformPrivate_url: bucket_dev_uniformPrivate_gsPseudoURL.replace("gs://", "https://storage.googleapis.com/"),

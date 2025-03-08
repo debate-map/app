@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "#1 tsc",
+			"label": "#1 client.tsc",
 			"type": "shell",
 			"command": "npm start client.tsc",
 

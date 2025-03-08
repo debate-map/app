@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require("fs");
 const glob = require("glob");
 const paths = require("path");
@@ -17,7 +19,7 @@ Object.assign(scripts, {
 
 Object.assign(scripts, {
 	app_server: {
-		run: Dynamic(()=> {
+		run: Dynamic(()=>{
 			const port = 5120;
 			const secret = GetK8sPGUserAdminSecretData("dm-local");
 			const envVarsCommand = SetEnvVarsCmd({
@@ -27,12 +29,11 @@ Object.assign(scripts, {
 				DB_ADDR: "localhost",
 				DB_NAME: "debate-map",
 
-				ENVIRONMENT: 'dev'
+				ENVIRONMENT: "dev"
 			});
 			return `${envVarsCommand} cd Packages/app-server && cargo run`;
 		}),
 	},
-
 });
 
 Object.assign(scripts, {
@@ -216,7 +217,7 @@ Object.assign(scripts, {
 				const latestKGetFolder = folders.slice(-1)[0];
 				const profFile = paths.resolve(latestKGetFolder, "")
 			});*/
-			// eslint-disable-next-line global-require
+
 			require("globby")("./Temp/kget_as-rs_*/*profdata", {stats: true}).then(/** @param {import("globby").Entry[]} files */ files=>{
 				files.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
 				const latestProfDataFile = paths.resolve(files.slice(-1)[0].path);
@@ -297,7 +298,7 @@ function GetPortForwardCommandsStr(context) {
 
 const extraTiltArgs = commandArgs.join(" ");
 function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
-	let command = `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port} -- --env prod`;
+	let command = `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port} -- --env prod`;
 	if (tiltfileArgsStr) command += ` -- --env prod ${tiltfileArgsStr} ${extraTiltArgs}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = process.platform === "win32"
@@ -341,11 +342,11 @@ Object.assign(scripts, {
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
 		}),*/
 
-		tiltUp_local:         `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_local_release: `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev  --compileWithRelease ${extraTiltArgs}`,
-		tiltDown_local:       `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`, // tilt-port +1, so can coexist with tilt dev-instance
-		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTileEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`,
+		tiltUp_local:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_local_release: `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local            -- --env dev  --compileWithRelease ${extraTiltArgs}`,
+		tiltDown_local:       `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local            -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh --port 10351 -- --env prod                      ${extraTiltArgs}`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
 		tiltUp_ovh_webServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
 		tiltUp_ovh_appServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
@@ -492,7 +493,7 @@ Object.assign(scripts, {
 	},
 });
 scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@JSBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
-function SetTileEnvCmd() {
+function SetTiltEnvCmd() {
 	return SetEnvVarsCmd({
 		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
 		//ENVIRONMENT: prod ? "prod" : "dev", // commented; now passed as tilt config (eg. " --env=prod")
