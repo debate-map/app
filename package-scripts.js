@@ -138,7 +138,7 @@ const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOu
 	let result = entryStrings.map(str=>{
 		// example source string: "dm-app-server-69b55c8dfc-k5zrq   1/1     Running   0 (6h5m ago)   2d"
 		console.log(`Str1:[${str}]`);
-		const [sourceStr, name, ready, status, restarts, age] = /^(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)$/.exec(str);
+		const [sourceStr, name, ready, status, restarts, age] = /^(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)$/.exec(str) ?? [];
 		return {sourceStr, name, ready, status, restarts, age};
 	});
 	//if (filterOutEvicted) result = result.filter(a=>a.status != "Evicted");
@@ -177,7 +177,7 @@ const PrepDockerCmd = ()=>{
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
-function GetServeCommand(env_short = null, pkg = "client") {
+function GetServeCommand(/** @type {"dev" | "prod" | null} */ env_short = null, pkg = "client") {
 	const env_long = {dev: "development", prod: "production"}[env_short] ?? env_short;
 	return `cross-env-shell ${env_long ? `NODE_ENV=${env_long} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
 }
@@ -211,14 +211,14 @@ Object.assign(scripts, {
 		}),
 
 		// before you can use this, install crox and such (see error message below for details)
-		lastProfData_prep: Dynamic(()=>{
+		/*lastProfData_prep: Dynamic(()=>{
 			/*require("globby")("./Temp/kget_as-rs_*", {onlyFiles: false, stats: true}).then(/** @param {import("globby").Entry[]} folders *#/ folders=>{
 				folders.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
 				const latestKGetFolder = folders.slice(-1)[0];
 				const profFile = paths.resolve(latestKGetFolder, "")
-			});*/
+			});*#/
 
-			require("globby")("./Temp/kget_as-rs_*/*profdata", {stats: true}).then(/** @param {import("globby").Entry[]} files */ files=>{
+			require("globby")("./Temp/kget_as-rs_*#/*profdata", {stats: true}).then(/** @param {import("globby").Entry[]} files *#/ files=>{
 				files.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
 				const latestProfDataFile = paths.resolve(files.slice(-1)[0].path);
 				const folder = paths.dirname(latestProfDataFile);
@@ -236,7 +236,7 @@ Object.assign(scripts, {
 				}
 				OpenFileExplorerToPath(folder);
 			});
-		}),
+		}),*/
 
 		// other rust profiling-related commands (install with: cargo install cargo-llvm-lines, run: in place you'd run "cargo build")
 		// 1) $env:RUSTFLAGS = '-Awarnings'; cargo llvm-lines | Select -First 30
@@ -278,7 +278,8 @@ Object.assign(scripts, {
 				console.log(`Could not find pod with the exact name "${podNameSearchStr}", so selecting first from these pods containing the provided string:`, podsContainingSearchStr.map(a=>a.name));
 				targetPod = podsContainingSearchStr[0];
 			}
-			return `${KubeCTLCmd(context)} debug -n ${targetPod.namespace} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
+			const namespaceArg = ""; //`-n ${targetPod.namespace}`;
+			return `${KubeCTLCmd(context)} debug ${namespaceArg} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
 		}),
 	},
 });
@@ -508,8 +509,8 @@ function GetK8sPGUserAdminSecretData(context) {
 	//console.log("CM:", cm);
 	// todo: fix that this command fails to run as a vscode build-task, on my linux laptop
 	const secretsStr = execSync(cm).toString();
-	const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
-	const GetField = name=>fromBase64(keyValuePairs.find(a=>a[0] == name)[1]);
+	const keyValuePairs = secretsStr.match(/\[(.+)\]/)?.[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
+	const GetField = name=>fromBase64(keyValuePairs?.find(a=>a[0] == name)?.[1]);
 	return {secretsStr, keyValuePairs, GetField};
 }
 function ImportPGUserSecretAsEnvVars(context) {
@@ -543,7 +544,7 @@ Object.assign(scripts, {
 });
 
 // todo: clean up the initDB stuff, to be more certain to be safe
-function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null, pager = null) {
+function StartPSQLInK8s(context, database = "debate-map", /** @type {any} */ spawnOptions = null, /** @type {any} */ pager = null) {
 	noTimings();
 
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
