@@ -97,13 +97,17 @@ function Start() {
 	/** @type {Map<string, string>} */
 	const outerPkg_wvcManagedResolutions = new Map();
 	for (const depName of GetDepsToConsolidate()) {
-		const versionIsExact = version=>version.match(/^[\d.]+$/) != null;
+		const versionIsExactOrSpecial = version=>{
+			if (version.match(/^[\d.]+$/) != null) return true;
+			if (version.includes(":")) return true;
+			return false;
+		};
 
 		const depVersion_wvc = wvcPkg.dependencies[depName];
 		if (depVersion_wvc == null) {
 			console.log(`Dependency version not specified in web-vcore/package.json, for package-to-consolidate: ${depName}`);
-		} else if (!versionIsExact(depVersion_wvc)) {
-			console.log(`Dependency version specified in web-vcore/package.json ("${depVersion_wvc}") is invalid (must be exact), for package-to-consolidate: ${depName}`);
+		} else if (!versionIsExactOrSpecial(depVersion_wvc)) {
+			console.log(`Dependency version specified in web-vcore/package.json ("${depVersion_wvc}") is invalid (must be exact, or special protocol), for package-to-consolidate: ${depName}`);
 		} else {
 			outerPkg_wvcManagedResolutions.set(depName, depVersion_wvc);
 		}
@@ -112,8 +116,8 @@ function Start() {
 		const depVersion_override = outerPkg_old.resolutions_wvcOverrides?.[depName];
 		if (depVersion_override == null) {
 			// do nothing; user has no need to specify overrides
-		} else if (!versionIsExact(depVersion_override)) {
-			console.log(`Dependency version specified in user project's package.json ("${depVersion_override}") is invalid (must be exact), for package-to-consolidate: ${depName}`);
+		} else if (!versionIsExactOrSpecial(depVersion_override)) {
+			console.log(`Dependency version specified in user project's package.json ("${depVersion_override}") is invalid (must be exact, or special protocol), for package-to-consolidate: ${depName}`);
 		} else {
 			outerPkg_wvcManagedResolutions.set(depName, depVersion_override);
 		}
@@ -121,9 +125,10 @@ function Start() {
 
 	// keep a consistent order for the wvc-managed entries in "resolutions" (all at start, alphabetically sorted)
 	const outerPkg_wvcManagedResolutions_sorted = new Map([...outerPkg_wvcManagedResolutions.entries()].sort((a, b)=>a[0].localeCompare(b[0])));
-	const outerPkg_unmanagedResolutions = Object.entries(outerPkg_old.resolutions ?? {}).filter(a=>!outerPkg_wvcManagedResolutions.has(a[0]));
+	const outerPkg_unmanagedResolutions = Object.entries(outerPkg_old.resolutions ?? {}).filter(a=>!outerPkg_wvcManagedResolutions.has(a[0]) && a[0] != "-----");
 	const outerPkg_newResolutions = Object.fromEntries([
 		...outerPkg_wvcManagedResolutions_sorted,
+		...{"-----": "(web-vcore manages entries above this line)"},
 		...outerPkg_unmanagedResolutions,
 	]);
 
@@ -134,6 +139,8 @@ function Start() {
 		console.log(`Yarn pre-install (web-vcore): The "resolutions" field of the outer project's package.json was already up-to-date.`);
 		return;
 	}
+
+	// todo: maybe have this script also add {libX: "*"} entries to the "dependencies" collection (since eg. vscode's typescript auto-import only works for packages listed in package.json's dependencies)
 
 	// wait to print these buffered logs until we're sure we're actually going to make changes (too noisy to be worth including unless an actual dependency version-change was made)
 	//PrintBufferedLogs();

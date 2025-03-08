@@ -1,7 +1,7 @@
 import {enableES5, setAutoFreeze, setUseProxies} from "immer";
 import {Assert, AssertWarn, CE, Clone, E, emptyArray, RemoveCircularLinks, ToJSON} from "js-vextensions";
 import {autorun, computed, configure, observable, ObservableMap, ObservableSet, reaction, onReactionError, _getAdministration, keys as mobx_keys, get as mobx_get} from "mobx";
-import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink"; // eslint-disable-line
+import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink";
 import {observer} from "mobx-react";
 //import {getAdministration, ObservableObjectAdministration, storedAnnotationsSymbol} from "mobx/dist/internal";
 import type {ObservableObjectAdministration} from "mobx/dist/internal"; // for some reason, webpack breaks on actual/runtime imports of this (for production builds), so only import types
@@ -42,6 +42,7 @@ export function ConfigureMobX() {
 }*/
 
 export type ActionFunc<StoreType> = (store: StoreType)=>void;
+export type ActionFuncWithExtras<StoreType, ExtraData> = (store: StoreType, extraData: ExtraData)=>void;
 
 type IReactComponent = any; // temp
 /** Variant of observer(...) wrapper-func, which returns a simple function result, instead of a ReactJS element-info entry. (*was* needed for ShowMessageBox.message; should be unnecessary now) */
@@ -115,7 +116,7 @@ export function ClassHooks(targetClass: Function) {
 		return render_orig.apply(this, arguments);
 	};
 }
-let magicStackSymbol_cached: Symbol|undefined;
+let magicStackSymbol_cached: symbol|undefined;
 export function GetMagicStackSymbol(comp: Component) {
 	if (magicStackSymbol_cached == null) {
 		const instanceKey = React.version.indexOf("15") === 0 ? "_instance" : "stateNode";
@@ -124,7 +125,7 @@ export function GetMagicStackSymbol(comp: Component) {
 
 		const compBeingRendered_fake = {render: ()=>({})};
 		ReactInternals.ReactCurrentOwner.current = {[instanceKey]: compBeingRendered_fake};
-		// eslint-disable-next-line
+
 		{
 			//useClassRef(); // more straight-forward, but involves `require("react-universal-hooks")` from web-vcore, which is nice to be able to avoid
 			/*const useRefIsModified = useRef["isModified"] ?? (useRef["isModified"] = useRef.toString().includes("useClassRef"));
@@ -175,7 +176,7 @@ export function StoreAction(...args) {
 }
 
 const observableWarningGivenFor = new WeakSet<Function>();
-export const O = ((target: Object, propertyKey: string | symbol)=>{
+export const O = ((target: object, propertyKey: string | symbol)=>{
 	//if (target.constructor instanceof Function && !target.constructor.toString().includes("makeObservable(")) {
 	if (target.constructor instanceof Function && !target.constructor.toString().includes("makeObservable")) { // transpilation makes only the raw name safe to look for
 		if (!observableWarningGivenFor.has(target.constructor)) {
@@ -195,9 +196,9 @@ for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(
 export {RunInAction};
 
 export function RunInAction_Set(setterFunc: ()=>any);
-export function RunInAction_Set(classInstance: Object, setterFunc: ()=>any);
+export function RunInAction_Set(classInstance: object, setterFunc: ()=>any);
 export function RunInAction_Set(...args) {
-	let classInstance: Object|n, setterFunc: ()=>any;
+	let classInstance: object|n, setterFunc: ()=>any;
 	if (args.length == 1) [setterFunc] = args;
 	else [classInstance, setterFunc] = args;
 
@@ -208,7 +209,7 @@ export function RunInAction_Set(...args) {
 }
 
 export var GetMobXStoredAnnotationSymbol_cached;
-export function GetMobXStoredAnnotationSymbol(objectsPossiblyHavingSymbol: Object[]) {
+export function GetMobXStoredAnnotationSymbol(objectsPossiblyHavingSymbol: object[]) {
 	if (GetMobXStoredAnnotationSymbol_cached == null) {
 		for (const obj of objectsPossiblyHavingSymbol) {
 			if (obj == null) continue;
@@ -223,7 +224,7 @@ export function GetMobXStoredAnnotationSymbol(objectsPossiblyHavingSymbol: Objec
 	}
 	return GetMobXStoredAnnotationSymbol_cached;
 }
-export function GetMobXStoredAnnotations(mobxTree: Object) {
+export function GetMobXStoredAnnotations(mobxTree: object) {
 	const mobxTree_proto = mobxTree != null ? Object.getPrototypeOf(mobxTree) : null;
 	//const symbol = storedAnnotationsSymbol;
 	const symbol = GetMobXStoredAnnotationSymbol([mobxTree_proto, mobxTree]);
