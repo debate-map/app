@@ -125,6 +125,7 @@ export const buildConfig = options=>{
 							 */
 							options: {
 								jsc: {
+									target: "es2016",
 									parser: {
 										syntax: "typescript",
 										decorators: true,

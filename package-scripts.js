@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require("fs");
 const glob = require("glob");
 const paths = require("path");
@@ -32,7 +34,6 @@ Object.assign(scripts, {
 			return `${envVarsCommand} cd Packages/app-server && cargo run`;
 		}),
 	},
-
 });
 
 Object.assign(scripts, {

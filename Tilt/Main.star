@@ -115,7 +115,7 @@ if ENV not in ("dev", "prod"):
 
 if CONTEXT not in recognizedContexts:
 	contextNames_quoted = '"' + '", "'.join(recognizedContexts) + '"'
-	fail("Invalid CONTEXT env-var value: " + ENV + " (must be one of " + contextNames_quoted + ")")
+	fail("Invalid CONTEXT env-var value: " + CONTEXT + " (must be one of " + contextNames_quoted + ")")
 
 # if deploying to prod, check some of the values from the ".env" file to see if they appear valid
 if PROD:

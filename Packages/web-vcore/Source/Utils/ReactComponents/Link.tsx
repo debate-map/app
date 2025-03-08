@@ -6,7 +6,7 @@ import {RootStore} from "web-vcore_UserTypes";
 import {BailError} from "mobx-graphlink";
 import {GetCurrentURL} from "../URL/URLs.js";
 import {manager} from "../../Manager.js";
-import {ActionFunc, Observer, RunInAction} from "../Store/MobX.js";
+import {ActionFunc, ActionFuncWithExtras, Observer, RunInAction} from "../Store/MobX.js";
 import {NotifyCalledHistoryReplaceOrPushState} from "./AddressBarWrapper.js";
 
 function isModifiedEvent(event) {
@@ -19,7 +19,7 @@ export type Link_Props = {
 	onClick?, style?,
 	text?: string|n, to?: string|n, target?: string|n, replace?: boolean|n, // url-based
 	//actions?: (dispatch: Function)=>void,
-	actionFunc?: ActionFunc<RootStore>|n, // new approach, for mobx/mst store
+	actionFunc?: ActionFuncWithExtras<RootStore, {callType: "click" | "getUrl"}>|n, // new approach, for mobx/mst store
 	//updateURLOnActions?: boolean, // action-based
 } & Omit<React.HTMLProps<HTMLAnchorElement>, "href">;
 
@@ -41,7 +41,7 @@ export class Link extends BaseComponentPlus({} as Link_Props, {}) {
 
 		if (actionFunc != null) {
 			event.preventDefault();
-			RunInAction("Link.handleClick", ()=>actionFunc(manager.store));
+			RunInAction("Link.handleClick", ()=>actionFunc(manager.store, {callType: "click"}));
 		} else if (to != null) {
 			const isExternalOrNewTab = VURL.Parse(to, true).domain != GetCurrentURL().domain;
 			if (isExternalOrNewTab || target) return; // let browser handle external or new-tab links
@@ -59,7 +59,8 @@ export class Link extends BaseComponentPlus({} as Link_Props, {}) {
 	}
 
 	render() {
-		let {text, actionFunc, to, target, children, ...rest} = this.props;
+		const {actionFunc, target, children, ...rest} = this.props;
+		let {text, to} = this.props;
 
 		if (actionFunc) {
 			/*const newState = produce(manager.store, draft=>{
@@ -70,7 +71,7 @@ export class Link extends BaseComponentPlus({} as Link_Props, {}) {
 			//const newURL = manager.GetNewURL.WS(newState)();
 			to = newURL.toString();*/
 			try {
-				to = manager.GetNewURLForStoreChanges(actionFunc);
+				to = manager.GetNewURLForStoreChanges(store=>actionFunc(store, {callType: "getUrl"}));
 			} catch (ex) {
 				if (ex instanceof BailError) {
 					// if "error" was just a bail, do nothing (data for the "to" prop is just still loading)

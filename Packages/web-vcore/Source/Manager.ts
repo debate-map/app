@@ -11,7 +11,7 @@ import {Skin} from "./Utils/Skins/Skin.js";
 import {ShouldErrorBeIgnored} from "./Utils/General/Errors.js";
 
 /** For any field in baseMap that extendMap lacks, mutate extendMap to include it; equivalent to Object.assign(extendMap, baseMap, {...extendMap}). */
-function ExtendObjectMap_StoredInExtendMap(baseMap: Object, extendMap: Object|n) {
+function ExtendObjectMap_StoredInExtendMap(baseMap: object, extendMap: object|n) {
 	if (extendMap == null) return baseMap;
 	for (const [key, value] of Object.entries(baseMap)) {
 		if (!(key in extendMap)) {
@@ -84,7 +84,7 @@ export class Manager {
 	GetAuth: ()=>any;
 	GetUserID: ()=>string|n;
 	// If provided, Command.ts will apply each Command's db-updates to a local copy of the db-data, then send this modified data to the ValidateDBData function (for assertions). Should probably disable in production.
-	ValidateDBData?: (newData: Object)=>void;
+	ValidateDBData?: (newData: object)=>void;
 
 	// others
 	// ==========

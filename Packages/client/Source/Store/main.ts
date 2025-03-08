@@ -34,8 +34,6 @@ export class MainState {
 	@O analyticsEnabled = true;
 	@O blockMobXUnsubscribing = false;
 	@O blockCacheClearing = false;
-	//topLeftOpenPanel: string;
-	//topRightOpenPanel: string;
 	@O @ignore shareBeingLoaded: string|n;
 	@O @ignore selectNode_fragmentPath: string|n;
 
