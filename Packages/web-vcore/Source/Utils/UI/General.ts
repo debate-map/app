@@ -5,9 +5,9 @@ import ReactDOM from "react-dom";
 import {OnPopulated} from "../../Manager.js";
 import {FixHTMLProps} from "react-vcomponents/Dist/@Types";
 
-export type HTMLProps<T extends keyof JSX.IntrinsicElements> = JSX.IntrinsicElements[T];
+export type HTMLProps<T extends keyof React.JSX.IntrinsicElements> = React.JSX.IntrinsicElements[T];
 export {FixHTMLProps};
-export type HTMLProps_Fixed<T extends keyof JSX.IntrinsicElements> = FixHTMLProps<JSX.IntrinsicElements[T]>;
+export type HTMLProps_Fixed<T extends keyof React.JSX.IntrinsicElements> = FixHTMLProps<React.JSX.IntrinsicElements[T]>;
 
 export function StandardCompProps() {
 	return ["dispatch", "_user", "_permissions", "_extraInfo"];

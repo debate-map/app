@@ -2,7 +2,7 @@ import React from "react";
 import {Row} from "react-vcomponents";
 
 /** Variant of <ul> which provides more control over the layout. */
-export const List = (props: {items: (string | JSX.Element)[]})=>{
+export const List = (props: {items: (string | React.JSX.Element)[]})=>{
 	return (
 		// span is used to remain a "valid child" of <p>
 		<div style={{display: "block", padding: "5px 0 5px 5px"}}>

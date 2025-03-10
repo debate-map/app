@@ -1,7 +1,7 @@
 import {BaseComponent} from "react-vextensions";
 import React from "react";
 
-import RCSlider, {Range as RCRange} from "rc-slider";
+import RCSlider from "rc-slider";
 /*type RCSlider_Type = import("rc-slider");
 const RCSlider = require("rc-slider");*/
 
@@ -19,7 +19,7 @@ export class Slider extends BaseComponent
 		return (
 			<RCSlider ref={c=>this.slider = c as any} {...rest} disabled={!enabled}
 				value={editedValue != null ? editedValue : (value || 0)}
-				onChange={val=>{
+				onChange={(val: number)=>{
 					if (!instant) {
 						this.SetState({editedValue: val});
 					} else {
@@ -27,7 +27,7 @@ export class Slider extends BaseComponent
 						this.SetState({editedValue: null});
 					}
 				}}
-				onAfterChange={val=>{
+				onChangeComplete={(val: number)=>{
 					if (!instant && onChange) {
 						onChange(val);
 						this.SetState({editedValue: null});
@@ -46,14 +46,14 @@ export class Range extends BaseComponent
 		},
 		{editedValue: number[]|null}> {
 	static defaultProps = {enabled: true};
-	slider: typeof RCRange;
+	slider: typeof RCSlider;
 	render() {
 		const {value, enabled, instant, onChange, ...rest} = this.props;
 		const {editedValue} = this.state;
 		return (
-			<RCRange ref={c=>this.slider = c as any} {...rest} disabled={!enabled}
+			<RCSlider range ref={c=>this.slider = c as any} {...rest} disabled={!enabled}
 				value={editedValue != null ? editedValue : (value || 0)}
-				onChange={val=>{
+				onChange={(val: number[])=>{
 					if (!instant) {
 						this.SetState({editedValue: val});
 					} else {
@@ -61,7 +61,7 @@ export class Range extends BaseComponent
 						this.SetState({editedValue: null});
 					}
 				}}
-				onAfterChange={val=>{
+				onAfterChange={(val: number[])=>{
 					if (!instant && onChange) {
 						onChange(val);
 						this.SetState({editedValue: null});
