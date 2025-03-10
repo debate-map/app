@@ -10,7 +10,7 @@ BailHandler_loadingUI_default_Set(info=>{
 
 export class DefaultLoadingUI extends BaseComponent<{
 	comp: BaseComponent<any>, bailMessage: BailError, style?,
-	extraUI_inRoot?: JSX.Element, extraUI_inRow?: JSX.Element,
+	extraUI_inRoot?: React.JSX.Element, extraUI_inRow?: React.JSX.Element,
 }, {}> {
 	render() {
 		const {comp, bailMessage, style, extraUI_inRoot, extraUI_inRow} = this.props;
@@ -54,7 +54,7 @@ export class DefaultLoadingUI extends BaseComponent<{
 
 // ugly fix for useXXX call-count sometimes increasing, due to mobx-graphlink's bail-system being used (eg. first render bails, so 0 useXXX calls, followed by successful render, with X calls)
 export const valueForPrevInputSlotsNotYetInitialized = Symbol("valueForPrevInputSlotsNotYetInitialized");
-// eslint-disable-next-line
+
 Object.defineProperty(Object.prototype, "prevInputs", {
 	//configurable: true, // already defaults to true
 	get() {

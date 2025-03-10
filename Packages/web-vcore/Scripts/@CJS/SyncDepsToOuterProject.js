@@ -127,8 +127,8 @@ function Start() {
 	const outerPkg_wvcManagedResolutions_sorted = new Map([...outerPkg_wvcManagedResolutions.entries()].sort((a, b)=>a[0].localeCompare(b[0])));
 	const outerPkg_unmanagedResolutions = Object.entries(outerPkg_old.resolutions ?? {}).filter(a=>!outerPkg_wvcManagedResolutions.has(a[0]) && a[0] != "-----");
 	const outerPkg_newResolutions = Object.fromEntries([
-		...outerPkg_wvcManagedResolutions_sorted,
-		...{"-----": "(web-vcore manages entries above this line)"},
+		...outerPkg_wvcManagedResolutions_sorted.entries(),
+		["-----", "(web-vcore manages entries above this line)"],
 		...outerPkg_unmanagedResolutions,
 	]);
 

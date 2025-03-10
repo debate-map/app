@@ -1,5 +1,5 @@
 import {BaseComponent} from "react-vextensions";
-import React, {SVGFactory, DetailedHTMLFactory} from "react";
+import React from "react";
 import {Assert, E} from "js-vextensions";
 import {manager} from "../../index.js";
 import {cssHelper} from "react-vextensions";;
@@ -29,7 +29,7 @@ export class Icon extends BaseComponent<Props, {}> {
 		const {divContainer, icon, iconData, size, color, style, ...rest} = this.props;
 		const {css} = cssHelper(this);
 
-		let svgComp: JSX.Element|undefined;
+		let svgComp: React.JSX.Element|undefined;
 		if (icon) {
 			//let info = require(`../../../../../Resources/SVGs/${icon}.svg`).default;
 			//let info = files[`./${icon}.svg`];

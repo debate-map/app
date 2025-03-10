@@ -5,7 +5,7 @@ import {Icon} from "./Icon.js";
 import {cssHelper} from "react-vextensions";;
 
 type Props = {
-	collapsable?: boolean, className?: string, itemClassName?: string, title: (JSX.Element | string), selected?: boolean, defaultCollapsed?: boolean, style?, titleStyle?: any,
+	collapsable?: boolean, className?: string, itemClassName?: string, title: (React.JSX.Element | string), selected?: boolean, defaultCollapsed?: boolean, style?, titleStyle?: any,
 	onClick?: (e: Event)=>void, onArrowClick?: (newCollapsed: boolean)=>void
 } & Omit<React.HTMLProps<HTMLDivElement>, "title">;
 export class TreeView extends BaseComponent<Props, {collapsed: boolean}> {

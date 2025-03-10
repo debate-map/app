@@ -14,6 +14,7 @@ import {EnsureClassProtoRenderFunctionIsWrapped} from "react-vextensions";
 }*/
 import {createTransformer} from "mobx-utils";
 import {HandleError} from "../General/Errors.js";
+import {IsSet_ReactInternals_PolyfillAtOldPath, React_currentOwner_override, React_currentOwner_override_set} from "./ReactInternals.js";
 
 //import {useClassRef} from "react-universal-hooks";
 
@@ -54,7 +55,7 @@ export function observer_simple<T extends IReactComponent>(target: T): T {
 
 // variant of @observer decorator, which also adds (and is compatible with) class-hooks (similar to mobx-graphlink's @ObserverMGL, but with more options)
 export class Observer_Options {
-	classHooks = true;
+	classHooks = false;
 
 	/*mglObserver = true;
 	mglObserver_opts?: ObserverMGL_Options;*/
@@ -119,20 +120,23 @@ export function ClassHooks(targetClass: Function) {
 let magicStackSymbol_cached: symbol|undefined;
 export function GetMagicStackSymbol(comp: Component) {
 	if (magicStackSymbol_cached == null) {
-		const instanceKey = React.version.indexOf("15") === 0 ? "_instance" : "stateNode";
-		const ReactInternals = React["__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED"];
-		const compBeingRendered_real = ReactInternals.ReactCurrentOwner.current;
+		if (!IsSet_ReactInternals_PolyfillAtOldPath()) throw new Error("Set_ReactInternals_PolyfillAtOldPath() must be called prior (early in initial scripts execution, in fact) to a react-component being rendered that has the @ClassHooks decorator.");
+		//EnsureReactInternalsProxySetUp();
+		//const compBeingRendered_real = ReactInternals.ReactCurrentOwner.current;
 
 		const compBeingRendered_fake = {render: ()=>({})};
-		ReactInternals.ReactCurrentOwner.current = {[instanceKey]: compBeingRendered_fake};
+		//ReactInternals.ReactCurrentOwner.current = {stateNode: compBeingRendered_fake};
+		React_currentOwner_override_set({stateNode: compBeingRendered_fake});
 
 		{
 			//useClassRef(); // more straight-forward, but involves `require("react-universal-hooks")` from web-vcore, which is nice to be able to avoid
 			/*const useRefIsModified = useRef["isModified"] ?? (useRef["isModified"] = useRef.toString().includes("useClassRef"));
 			if (!useRefIsModified) throw new Error("Cannot get magic-stack symbol, because react-universal-hooks has not overridden the React.useRef function.");*/
-			useRef(); // this triggers react-universal-hooks to attach data to the "comp being rendered" (fake object above)
+			useRef(null); // this triggers react-universal-hooks to attach data to the "comp being rendered" (fake object above)
 		}
-		ReactInternals.ReactCurrentOwner.current = compBeingRendered_real;
+		//ReactInternals.ReactCurrentOwner.current = compBeingRendered_real;
+		//React_currentOwner_override = compBeingRendered_real;
+		React_currentOwner_override_set(null);
 
 		// now we can obtain the secret magic-stacks symbol, by iterating the symbols on compBeingRendered_fake
 		const symbols = Object.getOwnPropertySymbols(compBeingRendered_fake);

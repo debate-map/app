@@ -61,7 +61,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}), cursor: "pointer"})}
 					onClick={onDirectClick}
 				>
-					<div ref={c=>this.textHolder = c} onClick={onTextHolderClick} style={ES(
+					<div ref={c=>void(this.textHolder = c)} onClick={onTextHolderClick} style={ES(
 						{
 							position: "relative", width: "calc(100% - 17px)", padding,
 							paddingRight: showNotificationButton ? NOTIFICATION_BELL_WIDTH : undefined,
@@ -119,7 +119,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							</button>
 						</Div>}
 					</div>
-					<Button ref={c=>this.expandButton = c}
+					<Button ref={c=>void(this.expandButton = c)}
 						text={<>
 							{/*expanded ? "-" : "+"*/}
 							{expanded ? "<" : ">"}

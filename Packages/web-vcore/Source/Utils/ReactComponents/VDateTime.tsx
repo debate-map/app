@@ -1,6 +1,7 @@
 import {IsString, E} from "js-vextensions";
+import {observer} from "mobx-react";
 import Moment from "moment";
-import React from "react";
+import React, {useCallback, useState} from "react";
 import DateTime, {DatetimepickerProps} from "react-datetime";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 
@@ -47,49 +48,39 @@ export type VDateTime_Props = {
 	// fixes for DatetimepickerProps
 	value?: Date | string | Moment.Moment | n, dateFormat?: string | false, timeFormat?: string | false,
 } & Omit<DatetimepickerProps, "value" | "onChange" | "dateFormat" | "timeFormat">;
-export class VDateTime extends BaseComponentPlus(
-	{
-		enabled: true,
-		/*dateFormatExtras: [""],
-		timeFormatExtras: [""],*/
-	} as VDateTime_Props,
-	{editedValue_raw: null as Moment.Moment | string | n},
-) {
-	render() {
-		let {enabled, value, onChange, instant, dateFormat, timeFormat, inputProps, min, max, ...rest} = this.props;
-		const {editedValue_raw} = this.state;
+export const VDateTime = observer(({enabled, value, onChange, instant, dateFormat, timeFormat, inputProps, min, max, ...rest}: VDateTime_Props)=>{
+	const [editedValue_raw, setEditedValue_raw] = useState<Moment.Moment | string | n>(null);
 
-		if (!enabled) {
-			inputProps = E(inputProps, {disabled: true});
-		}
-
-		return (
-			<DateTime {...rest} value={editedValue_raw != null ? editedValue_raw : (value ?? undefined)}
-				dateFormat={dateFormat} timeFormat={timeFormat}
-				onChange={newVal_raw=>{
-					const newVal = MomentOrString_Normalize(newVal_raw, dateFormat, timeFormat, min, max);
-					if (`${newVal}` == `${RawValToMoment(editedValue_raw, dateFormat, timeFormat)}`) return; // if no change, ignore event
-
-					if (!instant) {
-						this.SetState({editedValue_raw: newVal_raw}, undefined, false);
-					} else {
-						onChange(newVal);
-						this.SetState({editedValue_raw: null});
-					}
-				}}
-				inputProps={E({onBlur: e=>this.OnInputBlurOrBoxClose(e.target.value)}, inputProps)}
-				onBlur={val=>this.OnInputBlurOrBoxClose(val as string | Moment.Moment)}/>
-		);
+	if (!enabled) {
+		inputProps = E(inputProps, {disabled: true});
 	}
-	OnInputBlurOrBoxClose(newVal_raw: Moment.Moment | string) {
-		const {value, onChange, instant, dateFormat, timeFormat, min, max} = this.props;
+
+	const OnInputBlurOrBoxClose = useCallback((newVal_raw: Moment.Moment | string)=>{
 		const newVal = MomentOrString_Normalize(newVal_raw, dateFormat, timeFormat, min, max);
 		//if (`${newVal}` == `${value}`) return; // if no change, ignore event
 		const valChanged = `${newVal}` != `${value}`; // don't just return if same value; we still need to clear edited-value (in case date-time string needs normalization)
 
 		if (!instant) {
 			if (onChange && valChanged) onChange(newVal);
-			this.SetState({editedValue_raw: null});
+			setEditedValue_raw(null);
 		}
-	}
-}
+	}, [value, dateFormat, timeFormat, min, max, instant, onChange]);
+
+	return (
+		<DateTime {...rest} value={editedValue_raw != null ? editedValue_raw : (value ?? undefined)}
+			dateFormat={dateFormat} timeFormat={timeFormat}
+			onChange={newVal_raw=>{
+				const newVal = MomentOrString_Normalize(newVal_raw, dateFormat, timeFormat, min, max);
+				if (`${newVal}` == `${RawValToMoment(editedValue_raw, dateFormat, timeFormat)}`) return; // if no change, ignore event
+
+				if (!instant) {
+					setEditedValue_raw(newVal_raw);
+				} else {
+					onChange(newVal);
+					setEditedValue_raw(null);
+				}
+			}}
+			inputProps={E({onBlur: e=>OnInputBlurOrBoxClose(e.target.value)}, inputProps)}
+			onClose={val=>OnInputBlurOrBoxClose(val as string | Moment.Moment)}/>
+	);
+});

@@ -1,4 +1,4 @@
-import ReactMarkdown, {ReactMarkdownOptions} from "react-markdown";
+import ReactMarkdown, {Options as ReactMarkdownOptions} from "react-markdown";
 import {BaseComponent, ShallowChanged, FilterOutUnrecognizedProps, cssHelper} from "react-vextensions";
 //import {Component as BaseComponent} from "react";
 import {VURL, E} from "js-vextensions";
@@ -8,7 +8,7 @@ import {GetCurrentURL} from "../URL/URLs.js";
 import {Link} from "./Link.js";
 import {manager} from "../../Manager.js";
 
-export type ReplacementFunc = (segment: Segment, index: number, extraInfo)=>JSX.Element;
+export type ReplacementFunc = (segment: Segment, index: number, extraInfo)=>React.JSX.Element;
 
 // this is distinct from react-vmarkdown (this is a markdown renderer, whereas react-vmarkdown is a markdown editor)
 export class VReactMarkdown extends BaseComponent

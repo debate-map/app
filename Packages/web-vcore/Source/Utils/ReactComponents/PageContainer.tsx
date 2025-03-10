@@ -4,19 +4,19 @@ import {Row, Div} from "react-vcomponents";
 import {ToInt, IsNumber, E} from "js-vextensions";
 import React from "react";
 
-export function GetExpandedCSSPropValuesFromString(propName: string, styleStrOrNum: React.ReactText) {
+export function GetExpandedCSSPropValuesFromString(propName: string, styleStrOrNum: string | number) {
 	if (styleStrOrNum == null) return {};
 	if (IsNumber(styleStrOrNum)) return GetExpandedCSSPropValuesFromValueArray(propName, [styleStrOrNum]);
 	//const values = styleStrOrNum.match(/\d+/g).map(valStr=>ToInt(valStr));
 	const values = styleStrOrNum.split(" "); //.map(valStr=>ToInt(valStr));
 	return GetExpandedCSSPropValuesFromValueArray(propName, values);
 }
-export function GetExpandedCSSPropValuesFromValueArray(propName: string, styleValues: React.ReactText[]) {
+export function GetExpandedCSSPropValuesFromValueArray(propName: string, styleValues: (string | number)[]) {
 	/*if (styleValues.length === 1) {
 		return {[propName]: styleValues[0]};
 	}*/
 	//function ExpandCSSPropValue(propName: string, ...values) {
-	function Expand(...values: React.ReactText[]) {
+	function Expand(...values: (string | number)[]) {
 		return {
 			[`${propName}Top`]: values[0],
 			[`${propName}Right`]: values[1],
@@ -33,7 +33,7 @@ export function GetExpandedCSSPropValuesFromValueArray(propName: string, styleVa
 	return {}; // invalid number of values (must contain calc() or something); return empty object
 }
 
-export function ReactTextToPixelVal(reactText: React.ReactText | number | n) {
+export function ReactTextToPixelVal(reactText: string | number | n) {
 	if (reactText == null) return null;
 	if (IsNumber(reactText)) return reactText;
 	if (reactText.trim() == "0") return 0;
@@ -44,12 +44,15 @@ export function ReactTextToPixelVal(reactText: React.ReactText | number | n) {
 
 export type PageContainerPreset = "text" | "full";
 
-export class PageContainer extends BaseComponentPlus(
-	{preset: "text", scrollable: false} as {preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, style?, innerStyle?} & React.HTMLProps<ScrollView & Row>,
-	{},
-) {
+export class PageContainer extends BaseComponent<
+	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, style?, innerStyle?} & React.HTMLProps<ScrollView & Row>,
+	{}
+> {
+	static defaultProps = {preset: "text", scrollable: false};
+
+	root: Div|n;
 	render() {
-		let {preset, scrollable, shadow, style, innerStyle, children, ...rest} = this.props; // eslint-disable-line
+		let {preset, scrollable, shadow, style, innerStyle, children, ...rest} = this.props;
 		const {css} = cssHelper(this);
 		const outerStyle = style || {};
 		innerStyle = innerStyle || {};
@@ -84,7 +87,7 @@ export class PageContainer extends BaseComponentPlus(
 			);
 		}
 		return (
-			<Div {...rest as any}
+			<Div {...rest as any} ref={c=>void(this.root = c)}
 				style={css("root", outerStyle_base, innerStyle_base, {alignItems: "stretch"}, outerStyle, innerStyle)}
 			>
 				{children}
