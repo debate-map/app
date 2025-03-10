@@ -7,6 +7,14 @@ import {GetSize, GetSize_Method, Size, SizeComp} from "./Sizes.js";
 // general
 // ==========
 
+export const useForceUpdate = ()=>{
+	const [_state, setState] = React.useState(true);
+	const forceUpdate = React.useCallback(()=>{
+	  setState(s=>!s);
+	}, []);
+	return forceUpdate;
+}
+
 // will try to finish this once I have more experience with react-hooks
 /* export function UseCheckStillHoveredTimer() {
 	let checkStillHoveredTimer;
@@ -47,11 +55,14 @@ export function UseSize(options?: Partial<UseSize_Options>): [(node: Component |
 	const [size, setSize] = UseState({width: null, height: null} as Size_Nullable, ShallowEquals);
 
 	//const [node, setNode] = UseState(null);
-	const nodeRef = useRef<Element>(); // use ref, so that we don't trigger render just by storing newNode (setSize runs later than it anyway)
+	const nodeRef = useRef<Element>(null); // use ref, so that we don't trigger render just by storing newNode (setSize runs later than it anyway)
 	const ref = useCallback(compOrNode=>{
 		if (compOrNode == null) return; // if element was unmounted, just ignore (ie. wait till remounted to call setSize)
-		let newNode: Element = compOrNode;
-		if (compOrNode instanceof Component) newNode = ReactDOM.findDOMNode(compOrNode) as Element; // eslint-disable-line
+		const newNode: Element = compOrNode;
+		if (compOrNode instanceof Component) {
+			throw new Error("UseSize does not support passing a component as ref. (pass a DOM element to the ref/callback instead)");
+			//newNode = ReactDOM.findDOMNode(compOrNode) as Element; // eslint-disable-line
+		}
 		//setNode(newNode);
 		nodeRef.current = newNode;
 	}, []);
@@ -106,7 +117,7 @@ export function useResizeObserver() {
 		return ()=>observer.disconnect();
 	}, [ref]);
 
-	const refCb:React.RefCallback<HTMLElement> = React.useCallback(node=>{
+	const refCb = React.useCallback(node=>{
 		if (node) {
 			setRef(node);
 		}

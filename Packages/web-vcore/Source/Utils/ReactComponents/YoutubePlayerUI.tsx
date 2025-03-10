@@ -25,7 +25,7 @@ export class YoutubePlayerUI extends BaseComponentPlus(
 		const {heightVSWidthPercent, style} = this.props;
 		const {css} = cssHelper(this);
 		return (
-			<div ref={c=>this.root = c} style={css({position: "relative", paddingBottom: `${heightVSWidthPercent * 100}%`, height: 0}, style)}/>
+			<div ref={c=>void(this.root = c)} style={css({position: "relative", paddingBottom: `${heightVSWidthPercent * 100}%`, height: 0}, style)}/>
 		);
 	}
 

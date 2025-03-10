@@ -12,7 +12,7 @@
     "@rspack/cli": "1.0.0-beta.4",
     "@rspack/core": "1.0.0-beta.4",
     "@types/history": "4.7.3",
-    "@types/react-list": "0.8.5",
+    "@types/react-list": "0.8.12",
     "commander": "2.19.0",
     "cross-env": "6.0.3",
     "shx": "0.3.2",
@@ -27,7 +27,7 @@
     "react": "16.9.0",
     "react-color": "^2.14.1",
     "react-katex": "^2.0.2",
-    "react-list": "0.8.11",
+    "react-list": "0.8.18",
     "stream-browserify": "^3.0.0",
     "ua-parser-js": "^0.7.12",
     "updeep": "^1.0.0"
