@@ -5,16 +5,16 @@ import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
 import {InfoButton} from "./InfoButton.js";
 
 BailHandler_loadingUI_default_Set(info=>{
-	return <DefaultLoadingUI comp={info.comp} bailMessage={info.bailMessage}/>;
+	return <DefaultLoadingUI comp={info!.comp} bailMessage={info!.bailMessage}/>;
 });
 
 export class DefaultLoadingUI extends BaseComponent<{
-	comp: BaseComponent<any>, bailMessage: BailError, style?,
+	comp: BaseComponent<any>|n, bailMessage: BailError|n, style?,
 	extraUI_inRoot?: React.JSX.Element, extraUI_inRow?: React.JSX.Element,
 }, {}> {
 	render() {
 		const {comp, bailMessage, style, extraUI_inRoot, extraUI_inRow} = this.props;
-		const compProps_neededPropsOnly = Object.entries(comp.props).filter(a=>{
+		const compProps_neededPropsOnly = Object.entries(comp?.props ?? {}).filter(a=>{
 			// allow attachment of hello-pangea-dnd's drag-handle props, otherwise a prominent warning is generated (in dev mode)
 			if (a[0].startsWith("data-rbd-drag-handle-")) return true;
 			return false;
@@ -43,7 +43,7 @@ export class DefaultLoadingUI extends BaseComponent<{
 				<Row center>
 					<Text>Loading...</Text>
 					<InfoButton ml={5} mt={2} // dunno why mt:2 needed, but wouldn't center fully otherwise
-						sel text={`Details (comp: ${comp["name"] ?? comp.constructor?.name}): ${bailMessage.message}`}/>
+						sel text={`Details (comp: ${comp?.["name"] ?? comp?.constructor?.name ?? "(no associated comp found)"}): ${bailMessage?.message ?? "(no associated bail error found)"}`}/>
 					{extraUI_inRow}
 				</Row>
 				{extraUI_inRoot}
