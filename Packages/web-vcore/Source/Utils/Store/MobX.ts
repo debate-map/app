@@ -80,6 +80,11 @@ export function Observer(...args) {
 		if (targetClass.prototype.PreRender) {
 			EnsureClassProtoRenderFunctionIsWrapped(targetClass.prototype);
 		}
+
+		// in react 19, we need to apply the Observer decorator first, then the BailHandler decorator (since the BailHandler wrapper no longer directly calls the render-func -- it just has a child comp that does)
+		// EDIT: Actually, I've delayed that change to @BailHandler for now, so moving the call to observer to the end again. (also needed there, because a "bail unhandled" error can occur otherwise)
+		//observer(targetClass as any);
+
 		/*if (opts.mglObserver) {
 			ObserverMGL(opts.mglObserver_opts)(targetClass);
 		} else {

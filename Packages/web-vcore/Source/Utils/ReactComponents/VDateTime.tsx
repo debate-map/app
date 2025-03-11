@@ -2,8 +2,11 @@ import {IsString, E} from "js-vextensions";
 import {observer} from "mobx-react";
 import Moment from "moment";
 import React, {useCallback, useState} from "react";
-import DateTime, {DatetimepickerProps} from "react-datetime";
+import DateTime_Wrapper, {DatetimepickerProps} from "react-datetime";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+
+// fsr, the import is receiving the module wrapper, not the default export; so fix it manually
+const DateTime = DateTime_Wrapper["default"] as typeof DateTime_Wrapper;
 
 function RawValToMoment(val: Moment.Moment | string | n, dateFormat: string | false | n, timeFormat: string | false | n): Moment.Moment|null {
 	//let timeOnly = props.dateFormat == false;

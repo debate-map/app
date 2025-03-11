@@ -52,18 +52,33 @@ If including package.json, modify the diff file afterward to omit the npm-instal
 
 For details on how the patch files are parsed, see here: https://github.com/ds300/patch-package/blob/5c2c92bf504885fba4840870a23fc8999c00e572/src/patch/parse.ts
 
-### Usage of yalc/zalc with subdeps
+### Usage of yalc/zalc with subdeps (transferred indirectly via web-vcore)
 
 > todo: ensure these instructions are up-to-date
 
 Steps to newly-link subdep:
-* 1\) Run `zalc push` in subdep's source repo.
-* 2\) Run `zalc link SUBDEP_NAME` in web-vcore repo.
-* 3\) Open `package.json`, and set the version for that subdep (back to) the current version number. (must update this when version changes in subdep's source repo)
-* 4\) Run `yarn` in web-vcore repo.
-* 5\) Run `zalc push` in web-vcore repo.
-* 6\) Run `yarn` in user project.
+* 1\) Run in subdep: `zalc push`
+* 2\) Run in web-vcore: `zalc link SUBDEP_NAME`
+* 3\) Open web-vcore's `package.json`, and set the version for that subdep (back to) the current version number. (must update this when version changes in subdep's source repo)
+* 4\) Run in web-vcore: `yarn`
+* 5\) Run in web-vcore: `zalc push`
+* 6\) Run (in user project): `yarn`
 * Note: If you need to repair the linkage manually fsr, use a tool like [Hard Link Shell Extension](https://schinagl.priv.at/nt/hardlinkshellext/linkshellextension.html) to create a Junction from `node_modules/X` to `.yalc/X`.
+
+### Usage of yalc/zalc with subdeps (transferred directly into user-project)
+
+Steps to newly-link subdep:
+* 1\) Run in subdep: `zalc push`
+* 2\) Run (in user project): `zalc link SUBDEP_NAME`
+* 3\) Open user project's `package.json`, and set `resolutions_wvcOverrides.SUBDEP_NAME` to `link:.yalc/SUBDEP_NAME`.
+* 4\) Run (in user project): `yarn`
+
+When ready to push your changes (to the user project and locally-modified dependency):
+* 1\) Release the new version of the dependency.
+* 3\) Rename the key under `resolutions_wvcOverrides` to `DISABLED_[...]`.
+* 2\) Update the entry under `package.json` -> `dependencies`, to reference the newly-released version.
+* 4\) Run (in user project): `yarn` (to update the lockfile to the new release)
+* 5\) Git commit and push.
 
 ### Troubleshooting
 
