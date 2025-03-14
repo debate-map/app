@@ -1,22 +1,16 @@
 import {enableES5, setAutoFreeze, setUseProxies} from "immer";
-import {Assert, AssertWarn, CE, Clone, E, emptyArray, RemoveCircularLinks, ToJSON} from "js-vextensions";
-import {autorun, computed, configure, observable, ObservableMap, ObservableSet, reaction, onReactionError, _getAdministration, keys as mobx_keys, get as mobx_get} from "mobx";
+import {CE, E, RemoveCircularLinks, ToJSON, emptyArray} from "js-vextensions";
+import {ObservableMap, ObservableSet, _getAdministration, configure, observable, onReactionError, reaction} from "mobx";
 import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink";
 import {observer} from "mobx-react";
-//import {getAdministration, ObservableObjectAdministration, storedAnnotationsSymbol} from "mobx/dist/internal";
 import type {ObservableObjectAdministration} from "mobx/dist/internal"; // for some reason, webpack breaks on actual/runtime imports of this (for production builds), so only import types
-import {ComputedValue} from "mobx/dist/core/computedvalue.js";
-import React, {Component, useRef} from "react";
 import {EnsureClassProtoRenderFunctionIsWrapped} from "react-vextensions";
+import {HandleError} from "../General/Errors.js";
+//import {getAdministration, ObservableObjectAdministration, storedAnnotationsSymbol} from "mobx/dist/internal";
 /*export function RunInAction(name: string, action: ()=>any) {
 	 Object.defineProperty(action, "name", {value: name});
 	 return runInAction(action);
 }*/
-import {createTransformer} from "mobx-utils";
-import {HandleError} from "../General/Errors.js";
-import {IsSet_ReactInternals_PolyfillAtOldPath, React_currentOwner_override, React_currentOwner_override_set} from "./ReactInternals.js";
-
-//import {useClassRef} from "react-universal-hooks";
 
 // old: call ConfigureMobX() before any part of mobx tree is created (ie. at start of Store/index.ts); else, immer produce() doesn't work properly
 //ConfigureMobX();
@@ -55,8 +49,6 @@ export function observer_simple<T extends IReactComponent>(target: T): T {
 
 // variant of @observer decorator, which also adds (and is compatible with) class-hooks (similar to mobx-graphlink's @ObserverMGL, but with more options)
 export class Observer_Options {
-	classHooks = false;
-
 	/*mglObserver = true;
 	mglObserver_opts?: ObserverMGL_Options;*/
 	// from mobx-graphlink's @ObserverMGL
@@ -75,7 +67,6 @@ export function Observer(...args) {
 	}
 
 	function ApplyToClass(targetClass: Function) {
-		if (opts.classHooks) ClassHooks(targetClass);
 		//if (targetClass instanceof (BaseComponent.prototype as any)) {
 		if (targetClass.prototype.PreRender) {
 			EnsureClassProtoRenderFunctionIsWrapped(targetClass.prototype);
@@ -93,62 +84,6 @@ export function Observer(...args) {
 		if (opts.bailHandler) BailHandler(opts.bailHandler_opts)(targetClass);
 		observer(targetClass as any);
 	}
-}
-
-export function ClassHooks(targetClass: Function) {
-	AssertWarn(targetClass.prototype.componentWillMount == null, "ClassHooks encountered a 'componentWillMount' method rather than UNSAFE_componentWillMount; ignoring/dropping its functionality.");
-	const attachProp = targetClass.prototype.ComponentWillMount ? "ComponentWillMount" : "UNSAFE_componentWillMount";
-
-	const componentWillMount_orig = targetClass.prototype[attachProp];
-	targetClass.prototype[attachProp] = function() {
-		const MAGIC_STACKS = GetMagicStackSymbol(this);
-		if (!this[MAGIC_STACKS]) {
-			// by initializing comp[MAGIC_STACKS] ahead of time, we keep react-universal-hooks from patching this.render
-			this[MAGIC_STACKS] = {};
-		}
-		if (componentWillMount_orig) return componentWillMount_orig.apply(this, arguments);
-	};
-
-	const render_orig = targetClass.prototype.render;
-	// note our patching Class.render, not instance.render -- this is compatible with mobx-react
-	targetClass.prototype.render = function() {
-		const MAGIC_STACKS = GetMagicStackSymbol(this);
-		if (this[MAGIC_STACKS]) {
-			// apply the stack-resetting functionality normally done in the on-instance patched this.render
-			Object.getOwnPropertySymbols(this[MAGIC_STACKS]).forEach(k=>{
-				this[MAGIC_STACKS][k] = 0;
-			});
-		}
-		return render_orig.apply(this, arguments);
-	};
-}
-let magicStackSymbol_cached: symbol|undefined;
-export function GetMagicStackSymbol(comp: Component) {
-	if (magicStackSymbol_cached == null) {
-		if (!IsSet_ReactInternals_PolyfillAtOldPath()) throw new Error("Set_ReactInternals_PolyfillAtOldPath() must be called prior (early in initial scripts execution, in fact) to a react-component being rendered that has the @ClassHooks decorator.");
-		//EnsureReactInternalsProxySetUp();
-		//const compBeingRendered_real = ReactInternals.ReactCurrentOwner.current;
-
-		const compBeingRendered_fake = {render: ()=>({})};
-		//ReactInternals.ReactCurrentOwner.current = {stateNode: compBeingRendered_fake};
-		React_currentOwner_override_set({stateNode: compBeingRendered_fake});
-
-		{
-			//useClassRef(); // more straight-forward, but involves `require("react-universal-hooks")` from web-vcore, which is nice to be able to avoid
-			/*const useRefIsModified = useRef["isModified"] ?? (useRef["isModified"] = useRef.toString().includes("useClassRef"));
-			if (!useRefIsModified) throw new Error("Cannot get magic-stack symbol, because react-universal-hooks has not overridden the React.useRef function.");*/
-			useRef(null); // this triggers react-universal-hooks to attach data to the "comp being rendered" (fake object above)
-		}
-		//ReactInternals.ReactCurrentOwner.current = compBeingRendered_real;
-		//React_currentOwner_override = compBeingRendered_real;
-		React_currentOwner_override_set(null);
-
-		// now we can obtain the secret magic-stacks symbol, by iterating the symbols on compBeingRendered_fake
-		const symbols = Object.getOwnPropertySymbols(compBeingRendered_fake);
-		const magicStackSymbol = symbols.find(a=>a.toString() == "Symbol(magicStacks)");
-		magicStackSymbol_cached = magicStackSymbol;
-	}
-	return magicStackSymbol_cached as any; // needed for ts to allow as index
 }
 
 // todo: probably remove this; upcoming improvements to mobx-devtools-advanced and/or mobx-graphlink-devtools will make the "store call-details in action-name" behavior redundant

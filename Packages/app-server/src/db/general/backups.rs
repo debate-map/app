@@ -27,6 +27,7 @@ use rust_shared::{
 };
 use tracing::{info, warn};
 
+use crate::db::general::permission_helpers::is_user_admin;
 use crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx;
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
@@ -72,7 +73,7 @@ pub struct GetDBDumpResult {
 }
 
 pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
-	ensure!(actor.permissionGroups.admin, "Only admins can access this endpoint.");
+	ensure!(is_user_admin(actor), "Only admins can access this endpoint.");
 
 	let target_pod =
 		get_k8s_pod_basic_infos("postgres-operator", true).await.context("Failed to retrieve basic-info of the k8s pods.")?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;

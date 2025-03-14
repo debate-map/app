@@ -449,9 +449,36 @@ Steps:
 </details>
 
 <!----><a name="continuous-profiling"></a>
-<details><summary><b>[continuous-profiling] How to set up continuous profiling of the NodeJS pods</b></summary>
+<details><summary><b>[continuous-profiling] How to view continuous-profiling (for CPU usage)</b></summary>
 
-We used to use NewRelic to try to do this, but that was cancelled. Tooling to use for this is "to be decided".
+We use Pyroscope for this now. Use Lens to find the pyroscope pod, and open a port-forward to its webpage at port 4040; it will display profiling data for the time-range selected at the top-right.
+
+</details>
+
+<!----><a name="memory-profiling"></a>
+<details><summary><b>[memory-profiling] How to collect+view memory profiling data</b></summary>
+
+Reference: https://medium.com/lumen-engineering-blog/tutorial-profiling-cpu-and-ram-usage-of-rust-micro-services-running-on-kubernetes-fbc32714da93
+
+Steps:
+* 1\) Ensure the target pod ~~has `privileged: true`~~, and the `SYS_PTRACE` permission:
+	```
+	securityContext:
+		#privileged: true
+      capabilities:
+        add:
+        - “SYS_PTRACE”
+	```
+* 2\) Open a shell in the target pod (eg. app-server).
+* 3\) Run: `apt-get update && apt-get install -y gdb heaptrack procps`
+* 4\) Run `ps -e`, and note the PID of the pod's executable. (should be something like 10 or 11)
+* 5\) Run: `heaptrack --pid PID` (replace PID with the noted PID)
+* 6\) Trigger the pod to perform whatever behavior you want to get heap-profiling for.
+* 7\) Press ctrl+c to terminate heaptrack, and have it complete recording of its heap-profiling data.
+* 8\) Find the name of the heapstack data-file, by running: `ls`
+* 9\) Copy the heapstack data onto your host computer, by running: `kubectl cp <NAMESPACE>/<POD_NAME>:<HEAPSTACK_DATA_FILENAME> -c <CONTAINER_NAME> ./<HEAPSTACK_DATA_FILENAME>`
+
+TODO: Merge (or otherwise harmonize) this with the instructions in app-server/Dockerfile.
 
 </details>
 
