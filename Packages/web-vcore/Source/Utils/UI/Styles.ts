@@ -55,6 +55,11 @@ export function ES(...styles) {
 	return result;
 }
 
+/// Temp replacement for css() helper-function, until the actual cssHelper from react-vextensions is fixed to work with func-comps.
+export function css2(...styles) {
+	return ES(...styles.filter(a=>typeof a != "string")); // exclude strings from the styles array (this can happen because the first arg can be an identifier-string in cssHelper)
+}
+
 addHook_css(CompClass_Any, ctx=>{
 	// special cases, which should not have their styles modified
 	if (ctx.self instanceof TextArea && ctx.self.props.autoSize) return; // if using TextArea with autoSize=true, don't modify styles (else minHeight may get set, which causes error in react-textarea-autosize)

@@ -31,7 +31,6 @@ function GetDepsToConsolidate() {
 			"raven-js",
 			"rc-slider",
 			"rc-tooltip",
-			"react-universal-hooks",
 			"subscriptions-transport-ws",
 			"uplot",
 		],

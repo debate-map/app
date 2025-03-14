@@ -90,7 +90,7 @@ def Start_App(g):
 		"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
 	}))
 
-	# port forwards (see readme's [project-service-urls] guide-module for details)
+	# port forwards (see readme's [project-service-urls] guide-module for details) [now only using one port-forward, in NGINX_Gateway.star]
 	# ==========
 
 	NEXT_k8s_resource_batch(g, [

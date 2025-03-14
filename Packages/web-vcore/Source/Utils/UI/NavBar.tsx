@@ -6,6 +6,8 @@ import {manager} from "../../Manager.js";
 import {Link} from "../ReactComponents/Link.js";
 import {Observer, RunInAction} from "../Store/MobX.js";
 import {observer} from "mobx-react";
+import {observer_mgl} from "mobx-graphlink";
+import {ES, css2} from "./Styles.js";
 
 // todo: someday move the NavBar comp itself here (probably)
 
@@ -81,47 +83,37 @@ export const NavBarButton = observer(({page, subpage, text, active, style, onCli
 	);
 });
 
-@Observer
-export class NavBarPageButton extends BaseComponentPlus({} as {page?: string, subpage?: string, text: string, style?}, {}) {
-	render() {
-		const {...rest} = this.props;
-		return (
-			<NavBarButton {...rest}/>
-		);
-	}
-}
+export const NavBarPageButton = observer_mgl((props: {page?: string, subpage?: string, text: string, style?})=>{
+	const {...rest} = props;
+	return (
+		<NavBarButton {...rest}/>
+	);
+});
 
-@Observer
-export class NavBarPanelButton extends BaseComponentPlus({} as {text?: string, panel: string, onClick?: (e: any) => void, hasPage?: boolean, corner: "top-left" | "top-right", style?}, {}, {active: false}) {
-	render() {
-		const {text, onClick, panel, hasPage, corner, style, children} = this.props;
-		const {topLeftOpenPanel, topRightOpenPanel} = manager.store.main;
-		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
+export const NavBarPanelButton = observer_mgl((props: {text?: string, panel: string, onClick?: (e: any) => void, hasPage?: boolean, corner: "top-left" | "top-right", style?} & PropsWithChildren)=>{
+	const {text, onClick, panel, hasPage, corner, style, children} = props;
+	const {topLeftOpenPanel, topRightOpenPanel} = manager.store.main;
+	const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
 
-		this.Stash({active});
-		const {css} = cssHelper(this);
-		return (
-			<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={e=>{
-				if (onClick) {
-					onClick(e);
-				}
-				this.OnClick(e);
-			}} style={css(style)}>
-				{children}
-			</NavBarButton>
-		);
-	}
-
-	OnClick = (e: MouseEvent)=>{
+	const onClick_outer = useCallback((e: MouseEvent)=>{
+		if (onClick) {
+			onClick(e);
+		}
 		e.preventDefault();
-		const {corner, panel, active} = this.PropsStateStash;
 		RunInAction("NavBarPanelButton_OnClick", ()=>{
-
 			if (corner == "top-left") {
 				manager.store.main.topLeftOpenPanel = active ? null : panel;
 			} else {
 				manager.store.main.topRightOpenPanel = active ? null : panel;
 			}
 		});
-	};
-}
+	}, [onClick, active, panel, corner]);
+
+	//const {css} = cssHelper(this);
+	const css = css2;
+	return (
+		<NavBarButton page={hasPage ? panel : null} text={text} panel={true} active={active} onClick={onClick_outer} style={css(style)}>
+			{children}
+		</NavBarButton>
+	);
+});
