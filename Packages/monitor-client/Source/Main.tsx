@@ -1,7 +1,6 @@
 import "./Utils/PreRunners/Start_0";
 import {VURL} from "js-vextensions";
-import ReactDOM from "react-dom";
-import {supportReactDevTools} from "react-universal-hooks";
+import {createRoot} from "react-dom/client";
 import React from "react";
 
 // stuff from Main.ts (in client)
@@ -21,15 +20,13 @@ Object.assign(g, {ENV_DYN: ENV, ENV_DYN_ORIG: ENV, DEV_DYN: DEV, PROD_DYN: PROD,
 // rest
 // ==========
 
-// supportReactDevTools({ active: DEV });
-supportReactDevTools({active: true});
-
 require("./Utils/LibIntegrations/@InitLibs").InitLibs();
 
-const mountNode = document.getElementById("root");
+const mountNode = document.getElementById("root") as HTMLDivElement;
 const {RootUIWrapper} = require("./UI/Root");
 
 // wait a moment before rendering; apparently react is more synchronous than before, and can call componentWillMount before all schemas (eg. Map) have had a chance to resolve!
 setTimeout(()=>{
-	ReactDOM.render(<RootUIWrapper/>, mountNode);
+	const root = createRoot(mountNode);
+	root.render(<RootUIWrapper/>);
 });

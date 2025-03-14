@@ -12629,15 +12629,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-universal-hooks@npm:0.5.1":
-  version: 0.5.1
-  resolution: "react-universal-hooks@npm:0.5.1"
-  peerDependencies:
-    react: ">=16.8.0"
-  checksum: a774ea105384b90aca885f6550e2eb8846e81bbdcf3f0bf18069f229f405a786a0c6517f2e59d7831f45e2fe223b7161fd213ebd9407d5ed06996a071356054b
-  languageName: node
-  linkType: hard
-
 "react-uplot@npm:0.0.9":
   version: 0.0.9
   resolution: "react-uplot@npm:0.0.9"
@@ -16319,7 +16310,6 @@ __metadata:
     react-datetime: "npm:^3.3.1"
     react-dom: "npm:19.0.0"
     react-markdown: "npm:10.1.0"
-    react-universal-hooks: "npm:0.5.1"
     react-uplot: "npm:0.0.9"
     react-vcomponents: "npm:1.0.47"
     react-vextensions: "npm:1.0.22"

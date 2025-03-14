@@ -28,7 +28,7 @@ use tracing::{error, info};
 use tracing_subscriber::{self, Layer};
 
 use crate::{
-	db::general::{backups::try_get_db_dump, sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info},
+	db::general::{sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info},
 	globals::{set_up_globals, GLOBAL},
 	gql::{self, get_gql_data_from_http_request},
 	links::{

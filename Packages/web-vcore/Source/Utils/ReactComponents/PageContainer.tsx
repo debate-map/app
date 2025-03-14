@@ -3,6 +3,7 @@ import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
 import {Row, Div} from "react-vcomponents";
 import {ToInt, IsNumber, E} from "js-vextensions";
 import React from "react";
+import {ES, css2} from "../UI/Styles.js";
 
 export function GetExpandedCSSPropValuesFromString(propName: string, styleStrOrNum: string | number) {
 	if (styleStrOrNum == null) return {};
@@ -44,54 +45,50 @@ export function ReactTextToPixelVal(reactText: string | number | n) {
 
 export type PageContainerPreset = "text" | "full";
 
-export class PageContainer extends BaseComponent<
-	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, style?, innerStyle?} & React.HTMLProps<ScrollView & Row>,
-	{}
-> {
-	static defaultProps = {preset: "text", scrollable: false};
+export const PageContainer: React.FC<
+	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, innerStyle?} & React.HTMLProps<ScrollView & Row>
+> = props=>{
+	const {preset = "text", scrollable = false, shadow: shadowProp, style, innerStyle, children, ...rest} = props;
+	//const {css} = cssHelper();
+	const css = css2;
+	const outerStyle = style || {};
+	const innerStyleFinal = innerStyle || {};
+	let shadow = shadowProp;
 
-	root: Div|n;
-	render() {
-		let {preset, scrollable, shadow, style, innerStyle, children, ...rest} = this.props;
-		const {css} = cssHelper(this);
-		const outerStyle = style || {};
-		innerStyle = innerStyle || {};
-		//shadow = shadow ?? preset == "text";
-		if (preset == "text" && shadow == null) {
-			shadow = true;
-		}
+	if (preset == "text" && shadow == null) {
+		shadow = true;
+	}
 
-		const outerStyle_base = css("outerStyle_base",
-			preset == "text" && {flex: "0 1 960px", margin: "50px 10px 20px 10px"},
-			preset == "full" && {flex: 1, width: "100%", margin: "30px 0 0 0"},
-			shadow && {filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"});
-		const innerStyle_base = css("innerStyle_base",
-			{display: "flex", flexDirection: "column", borderRadius: 10},
-			preset == "text" && {padding: 50, background: `rgba(0,0,0,${shadow ? ".6" : ".8"})`});
+	const outerStyle_base = css("outerStyle_base",
+		preset == "text" && {flex: "0 1 960px", margin: "50px 10px 20px 10px"},
+		preset == "full" && {flex: 1, width: "100%", margin: "30px 0 0 0"},
+		shadow && {filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"});
+	const innerStyle_base = css("innerStyle_base",
+		{display: "flex", flexDirection: "column", borderRadius: 10},
+		preset == "text" && {padding: 50, background: `rgba(0,0,0,${shadow ? ".6" : ".8"})`});
 
-		if (preset) {
-			const marginValuesFromMarginProp = GetExpandedCSSPropValuesFromString("margin", css(outerStyle_base, outerStyle).margin as string);
-			const marginValues = css(marginValuesFromMarginProp, outerStyle);
-			const verticalMargin = (ReactTextToPixelVal(marginValues.marginTop) ?? 0) + (ReactTextToPixelVal(marginValues.marginBottom) ?? 0);
-			outerStyle_base[preset == "full" ? "height" : "maxHeight"] = `calc(100% - ${verticalMargin}px)`;
-		}
+	if (preset) {
+		const marginValuesFromMarginProp = GetExpandedCSSPropValuesFromString("margin", css(outerStyle_base, outerStyle).margin as string);
+		const marginValues = css(marginValuesFromMarginProp, outerStyle);
+		const verticalMargin = (ReactTextToPixelVal(marginValues.marginTop) ?? 0) + (ReactTextToPixelVal(marginValues.marginBottom) ?? 0);
+		outerStyle_base[preset == "full" ? "height" : "maxHeight"] = `calc(100% - ${verticalMargin}px)`;
+	}
 
-		if (scrollable) {
-			return (
-				<ScrollView {...rest as any}
-					style={css("root", outerStyle_base, outerStyle)}
-					contentStyle={css("root_content", innerStyle_base, innerStyle)}
-				>
-					{children}
-				</ScrollView>
-			);
-		}
+	if (scrollable) {
 		return (
-			<Div {...rest as any} ref={c=>void(this.root = c)}
-				style={css("root", outerStyle_base, innerStyle_base, {alignItems: "stretch"}, outerStyle, innerStyle)}
+			<ScrollView {...rest as any}
+				style={css("root", outerStyle_base, outerStyle)}
+				contentStyle={css("root_content", innerStyle_base, innerStyleFinal)}
 			>
 				{children}
-			</Div>
+			</ScrollView>
 		);
 	}
-}
+	return (
+		<Div {...rest as any}
+			style={css("root", outerStyle_base, innerStyle_base, {alignItems: "stretch"}, outerStyle, innerStyleFinal)}
+		>
+			{children}
+		</Div>
+	);
+};
