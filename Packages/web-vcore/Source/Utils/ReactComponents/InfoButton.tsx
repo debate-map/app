@@ -90,12 +90,12 @@ export const InfoButton = ((props: InfoButtonProps)=>{
 					ClassBasedStyles({":hover": {opacity: 1}}),
 				].join(" ")}
 				style={E(
-					BasicStyles(props),
 					{
 						display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundRepeat: "no-repeat", borderRadius: 5, color: "rgb(170,170,170)",
 						fontSize: 14, textAlign: "center", cursor: "pointer", opacity: .6, width: 13, height: 13, padding: 0, backgroundImage: `url("/Images/Buttons/Info.png")`, backgroundPosition: "center center", backgroundSize: "13px",
 						position: "relative", zIndex: 1, marginLeft: 1, alignSelf: "center",
 					},
+					BasicStyles(props), // apply this after (just before user-provided style), so user-provided `ml={X}` and such replace the defaults above
 					style,
 				)}/>
 		</Tooltip>
