@@ -12655,15 +12655,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-vextensions@npm:1.0.22":
-  version: 1.0.22
-  resolution: "react-vextensions@npm:1.0.22"
+"react-vextensions@npm:1.0.23":
+  version: 1.0.23
+  resolution: "react-vextensions@npm:1.0.23"
   dependencies:
     classnames: "npm:^2.2.5"
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: d6c46d932d46b164aac96eb932fd7631d73bfbf124a941efb546dfc52d3fe3e5ff2dc2919ec03b07f1136a4eaf5e2ed6aa4d9f1083d498cf6d3ea750a547a8cd
+  checksum: 4f50b1fe7c7bf224676de691264190716516d38989ab73059c2b6710f99444d6d6ed8b8be39df14de3bb527891df2c1b7166b448954912b029695143c36aaaab
   languageName: node
   linkType: hard
 
@@ -16312,7 +16312,7 @@ __metadata:
     react-markdown: "npm:10.1.0"
     react-uplot: "npm:0.0.9"
     react-vcomponents: "npm:1.0.47"
-    react-vextensions: "npm:1.0.22"
+    react-vextensions: "npm:1.0.23"
     react-vmarkdown: "npm:1.0.4"
     react-vmenu: "npm:1.0.16"
     react-vmessagebox: "npm:1.0.19"

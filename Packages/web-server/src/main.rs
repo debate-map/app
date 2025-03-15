@@ -20,8 +20,13 @@
 )]
 #![feature(stmt_expr_attributes)] // allow attributes on expressions, eg. for disabling rustfmt per-expression
 
+use globset::GlobBuilder;
+use http::HeaderMap;
 use rust_shared::anyhow::Error;
-use static_web_server::Settings;
+use static_web_server::{
+	settings::{Advanced, Headers},
+	Settings,
+};
 use std::path::PathBuf;
 //use include_dir::{include_dir, Dir};
 
@@ -39,7 +44,37 @@ fn main() -> Result<(), Error> {
 	opts.general.health = true;
 	opts.general.compression_static = true;
 	opts.general.page_fallback = format!("{STATIC_DIR_PATH}/index.html").into();
+
+	// override the default cache-control-headers (which simply keeps each resource for 24hr), to only use that caching for js/css/etc. files (most important: NOT caching the index.html file, whether requested directly or as fallback)
+	opts.general.cache_control_headers = false;
+	opts.advanced = Some(Advanced {
+		#[rustfmt::skip]
+		headers: Some(vec![
+            // base caching: no caching
+            Headers { source: compile_glob("*"), headers: headers_for_no_caching() },
+            // caching for files with extensions up to 4 characters long: cache for one day
+            Headers { source: compile_glob("*.{????}"), headers: headers_for_caching_for_x_seconds(36000) },
+            // caching for .html files: no caching
+            Headers { source: compile_glob("*.html"), headers: headers_for_no_caching() },
+		]),
+		..Default::default()
+	});
 	static_web_server::Server::new(opts)?.run_standalone(None)?;
 
 	Ok(())
+}
+
+fn headers_for_no_caching() -> HeaderMap {
+	let mut headers = HeaderMap::new();
+	headers.insert("Cache-Control", "no-cache, no-store, must-revalidate".parse().unwrap());
+	headers.insert("Pragma", "no-cache".parse().unwrap());
+	headers.insert("Expires", "0".parse().unwrap());
+	headers
+}
+fn headers_for_caching_for_x_seconds(seconds: u64) -> HeaderMap {
+	let mut headers = HeaderMap::new();
+	headers.insert("Cache-Control", format!("public, max-age={}", seconds).parse().unwrap());
+	headers.insert("Pragma", "".parse().unwrap());
+	headers.insert("Expires", "".parse().unwrap());
+	headers
 }
