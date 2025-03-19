@@ -71,6 +71,7 @@ export const buildConfig = options=>{
 			//filename: "[name].js?[contenthash]", // commented; doesn't work currently
 			filename: "[name].[contenthash].js",
 			path: opt.outputDir,
+			clean: true, // clean output directory before each build (otherwise the DevOutput folder gets huge during the development process)
 		},
 		optimization: {
 			moduleIds: "named",
