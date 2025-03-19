@@ -46,14 +46,17 @@ fn main() -> Result<(), Error> {
 	opts.general.page_fallback = format!("{STATIC_DIR_PATH}/index.html").into();
 
 	// override the default cache-control-headers (which simply keeps each resource for 24hr), to only use that caching for js/css/etc. files (most important: NOT caching the index.html file, whether requested directly or as fallback)
-	opts.general.cache_control_headers = false;
+	let compile_glob = |str: &str| GlobBuilder::new(str).build().unwrap().compile_matcher();
 	opts.advanced = Some(Advanced {
 		#[rustfmt::skip]
 		headers: Some(vec![
             // base caching: no caching
             Headers { source: compile_glob("*"), headers: headers_for_no_caching() },
-            // caching for files with extensions up to 4 characters long: cache for one day
-            Headers { source: compile_glob("*.{????}"), headers: headers_for_caching_for_x_seconds(36000) },
+            // caching for files with extensions of 1-4 characters long: cache for one day
+            Headers { source: compile_glob("*.[!/]"), headers: headers_for_caching_for_x_seconds(36000) },
+            Headers { source: compile_glob("*.[!/][!/]"), headers: headers_for_caching_for_x_seconds(36000) },
+            Headers { source: compile_glob("*.[!/][!/][!/]"), headers: headers_for_caching_for_x_seconds(36000) },
+            Headers { source: compile_glob("*.[!/][!/][!/][!/]"), headers: headers_for_caching_for_x_seconds(36000) },
             // caching for .html files: no caching
             Headers { source: compile_glob("*.html"), headers: headers_for_no_caching() },
 		]),

@@ -51,7 +51,7 @@ export type VDateTime_Props = {
 	// fixes for DatetimepickerProps
 	value?: Date | string | Moment.Moment | n, dateFormat?: string | false, timeFormat?: string | false,
 } & Omit<DatetimepickerProps, "value" | "onChange" | "dateFormat" | "timeFormat">;
-export const VDateTime = observer(({enabled, value, onChange, instant, dateFormat, timeFormat, inputProps, min, max, ...rest}: VDateTime_Props)=>{
+export const VDateTime = observer(({enabled = true, value, onChange, instant, dateFormat, timeFormat, inputProps, min, max, ...rest}: VDateTime_Props)=>{
 	const [editedValue_raw, setEditedValue_raw] = useState<Moment.Moment | string | n>(null);
 
 	if (!enabled) {

@@ -12682,9 +12682,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-vmenu@npm:1.0.16":
-  version: 1.0.16
-  resolution: "react-vmenu@npm:1.0.16"
+"react-vmenu@npm:1.0.17":
+  version: 1.0.17
+  resolution: "react-vmenu@npm:1.0.17"
   dependencies:
     classnames: "npm:^2.2.5"
   peerDependencies:
@@ -12692,7 +12692,7 @@ __metadata:
     mobx-react: ^9.2.0
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 351371ccc7e24a45b0f987b2e8beb44816f4a789646eb6599009f07aa9e8cff6b658f7e99f93d1c8bf2136250e7bac183ee2c1b0b067323cc23a7bec4387ae05
+  checksum: 3737d0103069d236b7f6f36d0c48d9d64f969b0809b6dc130042d6b5845358488c6ca8a3dde1372408c36a8971eb4ba598ae905d01edce3228a7ca5a82d8be59
   languageName: node
   linkType: hard
 
@@ -16314,7 +16314,7 @@ __metadata:
     react-vcomponents: "npm:1.0.47"
     react-vextensions: "npm:1.0.23"
     react-vmarkdown: "npm:1.0.4"
-    react-vmenu: "npm:1.0.16"
+    react-vmenu: "npm:1.0.17"
     react-vmessagebox: "npm:1.0.19"
     react-vscrollview: "npm:1.0.15"
     remarkable: "npm:^2.0.1"
