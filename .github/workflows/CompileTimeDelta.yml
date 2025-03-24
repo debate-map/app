@@ -1,0 +1,55 @@
+name: Save cargo build timing information
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  linux-ubuntu:
+    name: Add build timing information to another repository
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: debate-map
+      - name: Build Timing
+        working-directory: debate-map
+        run: cargo build --package app_server --timings
+
+      - name: Get commit hash
+        working-directory: debate-map
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Checkout compile timings repo
+        uses: actions/checkout@v4
+        with:
+          repository: debate-map/compile-timings
+          path : compile-timings
+          token : ${{ secrets.PAT }}
+
+      - name: Copy raw timing files to target repo
+        run: |
+          mkdir -p compile-timings/docs/timings/raw_html
+          for file in debate-map/target/cargo-timings/cargo-timing-*.html; do
+            mv "$file" "compile-timings/docs/timings/raw_html/$(basename "$file" .html)_${{ env.COMMIT_HASH }}.html"
+          done
+
+      - name: Commit and push changes
+        working-directory: compile-timings
+        run: |
+          git config user.name "compile-timings[bot]"
+          git config user.email debatemap@gmail.com
+          git add docs/timings/raw_html
+          NEW_BUILD_HTML_FILE=$(ls -t docs/timings/raw_html/ | head -n1)
+          git commit -m "ci: add build timing html $NEW_BUILD_HTML_FILE"
+          git push
