@@ -1,6 +1,13 @@
 name: Save cargo build timing information
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   linux-ubuntu:
@@ -9,6 +16,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
 
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - name: Checkout main repo
         uses: actions/checkout@v4
@@ -16,7 +24,7 @@ jobs:
           path: debate-map
       - name: Build Timing
         working-directory: debate-map
-        run: cargo build --package app-server --timings
+        run: cargo build --package app_server --timings
 
       - name: Get commit hash
         working-directory: debate-map
