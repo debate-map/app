@@ -7,22 +7,22 @@ import {manager} from "../../Manager.js";
 import {ActionFunc, Observer} from "../Store/MobX.js";
 import {Link} from "../ReactComponents/Link.js";
 import {observer} from "mobx-react";
+import {observer_mgl} from "mobx-graphlink";
 
 export const subNavBarHeight = 30;
 
-export class SubNavBar_Auto extends BaseComponent<{page: string, fullWidth?: boolean, filter?: (subpage: Page)=>boolean}, {}> {
-	render() {
-		const {page, filter, ...rest} = this.props;
-		const subpages = manager.pageTree.children[page]?.children.VValues() ?? [];
-		return (
-			<SubNavBar>
-				{subpages.filter(filter ?? (page=>true)).map(subpage=>{
-					return <SubNavBarButton key={subpage.key} {...{page}} subpage={subpage.key} text={subpage.title}/>;
-				})}
-			</SubNavBar>
-		);
-	}
-}
+// observer_mgl needed, since the "filter" prop may access mobx values
+export const SubNavBar_Auto = observer_mgl((props: {page: string, fullWidth?: boolean, filter?: (subpage: Page)=>boolean})=>{
+	const {page, filter, ...rest} = props;
+	const subpages = manager.pageTree.children[page]?.children.VValues() ?? [];
+	return (
+		<SubNavBar>
+			{subpages.filter(filter ?? (page=>true)).map(subpage=>{
+				return <SubNavBarButton key={subpage.key} {...{page}} subpage={subpage.key} text={subpage.title}/>;
+			})}
+		</SubNavBar>
+	);
+});
 
 // we wrap with observer(), in case manager.useExpandedNavBar() uses mobx-getters
 export const SubNavBar = observer(({fullWidth, children}: {fullWidth?: boolean} & PropsWithChildren)=>{

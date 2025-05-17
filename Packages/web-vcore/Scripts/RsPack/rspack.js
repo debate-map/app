@@ -16,6 +16,7 @@ const require = createRequire(import.meta.url);
 	entryFile: string,
 	dotEnvFile: string,
 	resourceDirs?: string[],
+	//CopyRspackPlugin_extraIgnoreGlobs?: string[],
 	outputDir?: string,
 }} BuildConfigOptions
 */
@@ -256,7 +257,10 @@ export const buildConfig = options=>{
 					from: resourceDir,
 					to: opt.outputDir,
 					globOptions: {
-						ignore: ["**/index.html"],
+						ignore: [
+							"**/index.html",
+							//...(opt.CopyRspackPlugin_extraIgnoreGlobs ?? []),
+						],
 					},
 				})) ?? [],
 			}),

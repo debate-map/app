@@ -62,7 +62,11 @@ export const PageContainer: React.FC<
 	const outerStyle_base = css("outerStyle_base",
 		preset == "text" && {flex: "0 1 960px", margin: "50px 10px 20px 10px"},
 		preset == "full" && {flex: 1, width: "100%", margin: "30px 0 0 0"},
-		shadow && {filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"});
+		shadow && {
+			filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)",
+			// presumably-temp fix for "display:flex" + "filter:..." causing page to not show up! (in recent chrome versions)
+			willChange: "filter",
+		});
 	const innerStyle_base = css("innerStyle_base",
 		{display: "flex", flexDirection: "column", borderRadius: 10},
 		preset == "text" && {padding: 50, background: `rgba(0,0,0,${shadow ? ".6" : ".8"})`});
