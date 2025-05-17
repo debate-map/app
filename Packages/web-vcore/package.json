@@ -1,7 +1,7 @@
 {
 	"name": "web-vcore",
 	"description": "Core code shared between my projects, for web-app frontends.",
-	"version": "0.0.112",
+	"version": "0.0.113",
 	"license": "MIT",
 	"author": "Venryx (https://venryx.com)",
 	"repository": "https://github.com/Venryx/web-vcore",
@@ -96,7 +96,7 @@
 		"lodash": "^4.17.15",
 		"mini-css-extract-plugin": "^1.6.0",
 		"mobx": "6.3.13",
-		"mobx-graphlink": "0.1.2",
+		"mobx-graphlink": "0.1.5",
 		"mobx-react": "9.2.0",
 		"mobx-sync": "3.0.0",
 		"mobx-utils": "^6.0.6",
