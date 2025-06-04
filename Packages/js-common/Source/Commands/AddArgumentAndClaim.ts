@@ -19,7 +19,7 @@ type Payload = {
 	],
 })*/
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$mapID: {type: "string"},
 		$argumentParentID: {type: "string"}, $argumentNode: {$ref: "Node_Partial"}, $argumentRevision: {$ref: "NodeRevision_Partial"},
 		//argumentLink: {$ref: NodeLink.name},
@@ -28,7 +28,7 @@ type Payload = {
 		//claimLink: {$ref: NodeLink.name},
 		claimLink: DeriveJSONSchema(NodeLink, {makeOptional: ["parent", "child"]}),
 	}),
-	returnSchema: ()=>SimpleSchema({
+	responseSchema: ()=>SimpleSchema({
 		$argumentNodeID: {$ref: "UUID"},
 		$argumentRevisionID: {$ref: "UUID"},
 		$claimNodeID: {$ref: "UUID"},
@@ -40,19 +40,19 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 	sub_addArgument: AddChildNode;
 	sub_addClaim: AddChildNode;
 	Validate() {
-		const {mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink} = this.payload;
+		const {mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink} = this.input;
 
 		this.IntegrateSubcommand(()=>this.sub_addArgument, null, ()=>new AddChildNode({
 			mapID, parentID: argumentParentID, node: argumentNode, revision: argumentRevision, link: argumentLink,
 		}), a=>a.recordAsNodeEdit = false); // don't record the argument-node's creation as a node-edit, as it'll confuse people (ie. adding one argument, and seeing a marker for "+2" new-nodes)
 
-		this.IntegrateSubcommand(()=>this.sub_addClaim, null, ()=>new AddChildNode({mapID, parentID: this.sub_addArgument.returnData.nodeID, node: claimNode, revision: claimRevision, link: claimLink}));
+		this.IntegrateSubcommand(()=>this.sub_addClaim, null, ()=>new AddChildNode({mapID, parentID: this.sub_addArgument.response.nodeID, node: claimNode, revision: claimRevision, link: claimLink}));
 
-		this.returnData = {
-			argumentNodeID: this.sub_addArgument.sub_addNode.payload.node.id,
-			argumentRevisionID: this.sub_addArgument.sub_addNode.sub_addRevision.payload.revision.id,
-			claimNodeID: this.sub_addClaim.sub_addNode.payload.node.id,
-			claimRevisionID: this.sub_addClaim.sub_addNode.sub_addRevision.payload.revision.id,
+		this.response = {
+			argumentNodeID: this.sub_addArgument.sub_addNode.input.node.id,
+			argumentRevisionID: this.sub_addArgument.sub_addNode.sub_addRevision.input.revision.id,
+			claimNodeID: this.sub_addClaim.sub_addNode.input.node.id,
+			claimRevisionID: this.sub_addClaim.sub_addNode.sub_addRevision.input.revision.id,
 			doneAt: Date.now(),
 		};
 	}

@@ -1,4 +1,4 @@
-import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
+import {AddSchema, Field, MGLClass} from "mobx-graphlink";
 
 // todo: make this have a length constraint as well
 export const User_id = "^[a-zA-Z0-9]+$";
@@ -10,34 +10,27 @@ export class User {
 		Object.assign(this, data);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	displayName: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	photoURL?: string|n;
 
 	// custom
 	// ==========
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	joinDate: number;
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "PermissionGroupSet"})
 	permissionGroups: PermissionGroupSet;
 
-	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"})
 	edits = 0;
 
-	@DB((t, n)=>t.bigInteger(n).nullable())
 	@Field({type: "number"}, {opt: true})
 	lastEditAt?: number|n;
 }

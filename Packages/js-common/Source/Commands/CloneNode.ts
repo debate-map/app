@@ -3,12 +3,12 @@ import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
 
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$mapID: {$ref: "UUID"},
 		$baseNodePath: {type: "string"},
 		$newParentID: {$ref: "UUID"},
 	}),
-	returnSchema: ()=>SimpleSchema({
+	responseSchema: ()=>SimpleSchema({
 		$nodeID: {$ref: "UUID"},
 		$revisionID: {$ref: "UUID"},
 	}),

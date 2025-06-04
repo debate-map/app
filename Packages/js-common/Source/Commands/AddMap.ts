@@ -14,15 +14,15 @@ import {GetFinalAccessPolicyForNewEntry} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$map: {$ref: "DMap"},
 	}),
-	returnSchema: ()=>SimpleSchema({$id: {$ref: "UUID"}}),
+	responseSchema: ()=>SimpleSchema({$id: {$ref: "UUID"}}),
 })
 export class AddMap extends Command<{map: DMap}, {id: UUID}> {
 	sub_addNode: AddNode;
 	Validate() {
-		const {map} = this.payload;
+		const {map} = this.input;
 		AssertV(map.featured === undefined, 'Cannot set "featured" to true while first adding a map. (hmmm)');
 
 		map.id = this.GenerateUUID_Once("id");
@@ -42,14 +42,14 @@ export class AddMap extends Command<{map: DMap}, {id: UUID}> {
 		const newRootNodeRevision = new NodeRevision({phrasing: NodePhrasing.Embedded({text_base: "Root"})});
 		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
 
-		map.rootNode = this.sub_addNode.payload.node.id;
+		map.rootNode = this.sub_addNode.input.node.id;
 		AssertValidate("DMap", map, "Map invalid");
 
-		this.returnData = {id: map.id};
+		this.response = {id: map.id};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {map} = this.payload;
+		const {map} = this.input;
 		db.set(dbp`maps/${map.id}`, map);
 		db.add(this.sub_addNode.GetDBUpdates(db)); // add node first, since map has fk-ref to it
 	}

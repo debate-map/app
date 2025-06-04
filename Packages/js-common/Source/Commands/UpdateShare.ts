@@ -8,7 +8,7 @@ const MTName = "Share";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
@@ -22,7 +22,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
-		const {id, updates} = this.payload;
+		const {id, updates} = this.input;
 		this.oldData = GetShare.NN(id);
 		AssertV(PERMISSIONS.Share.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
@@ -30,7 +30,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`shares/${id}`, this.newData);
 	}
 }

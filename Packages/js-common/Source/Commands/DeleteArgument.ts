@@ -7,7 +7,7 @@ import {UnlinkNode} from "./UnlinkNode.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$argumentID: {$ref: "UUID"},
 		$claimID: {$ref: "UUID"},
@@ -20,7 +20,7 @@ export class DeleteArgument extends Command<{mapID?: string|n, argumentID: strin
 	sub_deleteContainerArgument: DeleteNode;
 
 	Validate() {
-		const {mapID, argumentID, claimID, deleteClaim} = this.payload;
+		const {mapID, argumentID, claimID, deleteClaim} = this.input;
 
 		if (deleteClaim) {
 			this.IntegrateSubcommand(()=>this.sub_deleteClaim, null, ()=>new DeleteNode({mapID, nodeID: claimID}));

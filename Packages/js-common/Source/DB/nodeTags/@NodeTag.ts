@@ -1,4 +1,4 @@
-import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "mobx-graphlink";
+import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field} from "mobx-graphlink";
 import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "js-vextensions";
 import {NodeTagCloneType} from "../../Commands.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
@@ -9,15 +9,12 @@ export class NodeTag {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
@@ -26,38 +23,30 @@ export class NodeTag {
 	//@Field({patternProperties: {[UUID_regex]: {type: "string"}}})
 	//nodes: {[key: string]: string};
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {$ref: "UUID"}})
 	nodes: string[];
 
 	// type-specific fields (ie. tag comps)
 	// ==========
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_Labels", ...MarkerForNonScalarField()}, {opt: true})
 	labels?: TagComp_Labels;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_MirrorChildrenFromXToY", ...MarkerForNonScalarField()}, {opt: true})
 	mirrorChildrenFromXToY?: TagComp_MirrorChildrenFromXToY;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_XIsExtendedByY", ...MarkerForNonScalarField()}, {opt: true})
 	xIsExtendedByY?: TagComp_XIsExtendedByY;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_MutuallyExclusiveGroup", ...MarkerForNonScalarField()}, {opt: true})
 	mutuallyExclusiveGroup?: TagComp_MutuallyExclusiveGroup;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_RestrictMirroringOfX", ...MarkerForNonScalarField()}, {opt: true})
 	restrictMirroringOfX?: TagComp_RestrictMirroringOfX;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_CloneHistory", ...MarkerForNonScalarField()}, {opt: true})
 	cloneHistory?: TagComp_CloneHistory;
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }

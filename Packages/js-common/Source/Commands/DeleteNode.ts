@@ -18,7 +18,7 @@ import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$nodeID: {$ref: "UUID"},
 	}),
@@ -40,7 +40,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 	linksAsChild: NodeLink[];
 	mapNodeEdits: MapNodeEdit[];
 	Validate() {
-		const {mapID, nodeID} = this.payload;
+		const {mapID, nodeID} = this.input;
 		const {asPartOfMapDelete, parentsToIgnore, childrenToIgnore} = this;
 
 		this.oldData = GetNodeL2(nodeID);
@@ -68,7 +68,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID} = this.payload;
+		const {nodeID} = this.input;
 
 		for (const phrasing of this.oldPhrasings) {
 			db.set(dbp`nodePhrasings/${phrasing.id}`, null);

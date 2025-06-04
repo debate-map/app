@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "js-vextensions";
-import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "mobx-graphlink";
+import {AddAJVExtraCheck, AddSchema, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "mobx-graphlink";
 import {PickOnly} from "../../Utils/General/General.js";
 import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
@@ -19,9 +19,7 @@ import {NodeType} from "./@NodeType.js";
  * Primary reason: "Node" conflicts with js global by same name.
  * Secondary reason: "NodeL1" name matches with the "NodeL2" and "NodeL3" types.
 */
-@MGLClass({table: "nodes"}, undefined, t=>{
-	//t.comment("@name NodeL1"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
-})
+@MGLClass({table: "nodes"}, undefined)
 export class NodeL1 {
 	constructor(initialData: {type: NodeType} & Partial<NodeL1>) {
 		CE(this).VSet(initialData);
@@ -30,29 +28,23 @@ export class NodeL1 {
 	// cannot be modified
 	// ==========
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "NodeType"})
 	type: NodeType;
 
 	// cannot be modified manually, but entry will become null if the map is deleted
-	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	rootNodeForMap?: string;
 
 	// cannot be modified manually, but entry will be updated to the id of the latest revision
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodeRevisions`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	c_currentRevision: string;
 
@@ -60,20 +52,16 @@ export class NodeL1 {
 	// (these are left out of node-revisions because they are "structural", ie. node-revisions are for node-internal changes, whereas the below affect the approach taken for adding children and such)
 	// ==========
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
 	// todo: remove this field eventually, since no longer in use (in rust code as well, along with the set_node_is_multi_premise command)
-	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	multiPremiseArgument?: boolean;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ArgumentType"}, {opt: true})
 	argumentType?: ArgumentType;
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "Node_Extras"})
 	extras = new Node_Extras();
 

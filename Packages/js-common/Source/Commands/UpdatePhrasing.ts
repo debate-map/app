@@ -10,7 +10,7 @@ const MTName = MTClass.name;
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
 		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["type", "text_base", "text_negation", "text_question", "text_narrative", "note", "terms", "references"], makeOptional_all: true}),
 	}),
@@ -19,7 +19,7 @@ export class UpdatePhrasing extends Command<{id: string, updates: Partial<MT>}> 
 	oldData: MT;
 	newData: MT;
 	Validate() {
-		const {id, updates} = this.payload;
+		const {id, updates} = this.input;
 		this.oldData = GetNodePhrasing.NN(id);
 		AssertV(PERMISSIONS.NodePhrasing.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...updates};
@@ -27,7 +27,7 @@ export class UpdatePhrasing extends Command<{id: string, updates: Partial<MT>}> 
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`nodePhrasings/${id}`, this.newData);
 	}
 }

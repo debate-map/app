@@ -9,7 +9,7 @@ import {GetNode, GetNodeChildren, GetNodeChildrenL2, GetNodeParents} from "../DB
 
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		nodeID: {$ref: "UUID"},
 		ratingType: {$ref: "NodeRatingType"},
 		ratingsBeingRemoved: {items: {type: "string"}},
@@ -20,7 +20,7 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 	newSummary: RatingSummary;
 	newArgumentImpactSummaries: Map<string, RatingSummary>;
 	Validate() {
-		const {nodeID, ratingType, ratingsBeingRemoved, ratingsBeingAdded} = this.payload;
+		const {nodeID, ratingType, ratingsBeingRemoved, ratingsBeingAdded} = this.input;
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
 		const ratings_prior = GetRatings(nodeID, ratingType);
 		const ratings_final = ratings_prior.filter(a=>!ratingsBeingRemoved.includes(a.id!)).concat(...ratingsBeingAdded);
@@ -70,7 +70,7 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID, ratingType} = this.payload;
+		const {nodeID, ratingType} = this.input;
 		db.set(dbp`nodes/${nodeID}/.extras/.ratingSummaries/.${ratingType}`, this.newSummary);
 		if (this.newArgumentImpactSummaries?.size) {
 			for (const [argumentID, ratingSummary] of this.newArgumentImpactSummaries) {

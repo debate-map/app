@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
-import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
+import {AddSchema, MGLClass, Field} from "mobx-graphlink";
 
 export enum MediaType {
 	image = "image",
@@ -20,36 +20,28 @@ export class Media {
 		// this.createdAt = Date.now();
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Media_namePattern})
 	name: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "MediaType"})
 	type: MediaType;
 
-	@DB((t, n)=>t.text(n))
 	//@Field({pattern: Media_urlPattern})
 	@Field({type: "string"}) // allow overriding url pattern; it just highlights possible mistakes
 	url = "";
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	description: string;
 }

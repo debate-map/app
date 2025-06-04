@@ -7,7 +7,7 @@ import {DeleteNodeRating} from "./DeleteNodeRating.js";
 import {UpdateNodeRatingSummaries} from "./UpdateNodeRatingSummaries.js";
 
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$rating: {$ref: NodeRating.name},
 	}),
 })
@@ -15,7 +15,7 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 	subs_deleteOldRatings: DeleteNodeRating[];
 	sub_updateRatingSummaries: UpdateNodeRatingSummaries;
 	Validate() {
-		const {rating} = this.payload;
+		const {rating} = this.input;
 
 		Assert(rating.type != "impact", "Cannot set impact rating directly.");
 		const oldRatings = GetRatings(rating.node, rating.type, [this.userInfo.id]);
@@ -37,13 +37,13 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 
 		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, null, new UpdateNodeRatingSummaries({
 			nodeID: rating.node, ratingType: rating.type,
-			ratingsBeingRemoved: this.subs_deleteOldRatings.map(a=>a.payload.id),
+			ratingsBeingRemoved: this.subs_deleteOldRatings.map(a=>a.input.id),
 			ratingsBeingAdded: [rating],
 		}));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {rating} = this.payload;
+		const {rating} = this.input;
 		for (const sub of this.subs_deleteOldRatings) {
 			db.add(sub.GetDBUpdates(db));
 		}

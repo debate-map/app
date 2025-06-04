@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
-import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
+import {AddSchema, Field, MGLClass} from "mobx-graphlink";
 import {Attachment} from "../../DB.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
@@ -17,48 +17,37 @@ export class Term {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n))
 	//@Field({type: "string", pattern: Term_nameFormat}) // commented atm, since too strict
 	@Field({type: "string"})
 	name: string;
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string", pattern: Term_formsEntryFormat}, minItems: 1, uniqueItems: true})
 	forms: string[];
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string", pattern: Term_disambiguationFormat}, {opt: true})
 	disambiguation?: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "TermType"})
 	type: TermType;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Term_definitionFormat})
 	definition: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	note?: string;
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({items: {$ref: "Attachment"}, ...MarkerForNonScalarField()})
 	attachments: Attachment[] = [];
 }

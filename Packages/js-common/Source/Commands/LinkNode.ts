@@ -21,11 +21,11 @@ import {CheckLinkIsValid} from "../DB/nodeLinks/NodeLinkValidity.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$link: DeriveJSONSchema(NodeLink, {makeOptional_all: true, makeRequired: ["parent", "child", "group"]}),
 	}),
-	returnSchema: ()=>SimpleSchema({
+	responseSchema: ()=>SimpleSchema({
 		$linkID: {type: "string"},
 	}),
 })
@@ -33,21 +33,21 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 	child_oldData: NodeL1|n;
 	parent_oldData: NodeL1;
 	Validate() {
-		this.payload.link = E(new NodeLink(), this.payload.link); // for props the caller didn't specify, but which have default values, use them
-		const {link} = this.payload;
+		this.input.link = E(new NodeLink(), this.input.link); // for props the caller didn't specify, but which have default values, use them
+		const {link} = this.input;
 		AssertV(link.parent != link.child, "Parent-id and child-id cannot be the same!");
 
 		this.child_oldData =
-			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.payload.node
+			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.input.node
 			?? GetNode(link.child);
 		AssertV(this.child_oldData, "Cannot link child-node that does not exist!");
 		this.parent_oldData =
-			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this.up)?.payload.argumentNode
-			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper?.payload.node
+			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this.up)?.input.argumentNode
+			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper?.input.node
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
-			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this.up)?.transferData[0].addNodeCommand?.payload.node
-			?? this.Up(TransferNodes)?.Check(a=>a.transferData[0]?.linkChildCommands.includes(this))?.transferData[0].addNodeCommand?.payload.node
-			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.linkChildCommands.includes(this))?.transferData[1].addNodeCommand?.payload.node
+			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this.up)?.transferData[0].addNodeCommand?.input.node
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[0]?.linkChildCommands.includes(this))?.transferData[0].addNodeCommand?.input.node
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.linkChildCommands.includes(this))?.transferData[1].addNodeCommand?.input.node
 			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.parent_oldData
 			?? GetNode.NN(link.parent);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
@@ -68,16 +68,16 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 		link.c_parentType = this.parent_oldData.type;
 		link.c_childType = this.child_oldData.type;
 		if (this.child_oldData.type == NodeType.argument) {
-			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
+			AssertV(this.input.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
 		} else {
-			AssertV(this.payload.link.polarity == null, "Only argument nodes should have a polarity value specified in its parent-link.");
+			AssertV(this.input.link.polarity == null, "Only argument nodes should have a polarity value specified in its parent-link.");
 		}
 
-		this.returnData = {linkID: link.id};
+		this.response = {linkID: link.id};
 		AssertValidate("NodeLink", link, "Node-child-link invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		db.set(dbp`nodeLinks/${this.payload.link.id!}`, this.payload.link);
+		db.set(dbp`nodeLinks/${this.input.link.id!}`, this.input.link);
 	}
 }

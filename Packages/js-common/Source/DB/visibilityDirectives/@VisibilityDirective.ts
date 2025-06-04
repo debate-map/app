@@ -1,4 +1,4 @@
-/*import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
+/*import {AddSchema, MGLClass, Field} from "mobx-graphlink";
 
 @MGLClass({table: "visibilityDirectives"})
 export class VisibilityDirective {

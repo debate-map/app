@@ -1,4 +1,4 @@
-import {DB, Field, MGLClass} from "mobx-graphlink";
+import {Field, MGLClass} from "mobx-graphlink";
 
 @MGLClass({table: "globalData"})
 export class GlobalData {
@@ -13,12 +13,10 @@ export class GlobalData {
 	lastTimelineStepID: number;*/
 
 	// this "id" field is just needed to be more consistent with the other tables (so mobx-graphlink doesn't need special handling for these singleton-type classes)
-	@DB((t, n)=>t.text(n).primary())
 	//@Field({$ref: "UUID"}, {opt: true})
 	@Field({type: "string"})
 	id: string; // can be whatever (I use "main")
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "GlobalData_Extras"})
 	extras = new GlobalData_Extras();
 }

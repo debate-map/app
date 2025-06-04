@@ -106,16 +106,16 @@ class TransferData {
 	],
 })*/
 @CommandMeta({
-	payloadSchema: ()=>GetSchemaJSON("TransferNodesPayload"),
-	returnSchema: ()=>SimpleSchema({
+	inputSchema: ()=>GetSchemaJSON("TransferNodesPayload"),
+	responseSchema: ()=>SimpleSchema({
 		//$id: {type: "string"},
 	}),
 })
 export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/}> {
 	transferData = [] as TransferData[];
 	Validate() {
-		const {nodes} = this.payload;
-		console.log("Validate called. @payload:", this.payload);
+		const {nodes} = this.input;
+		console.log("Validate called. @payload:", this.input);
 
 		for (const [i, transfer] of nodes.entries()) {
 			const prevTransfer = nodes[i - 1];
@@ -137,7 +137,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				if (transfer.newParentID != null) {
 					AssertV(GetNodeL2(transfer.newParentID) != null, "New-parent-id specifies a node that doesn't exist!");
 				}
-				const newParentID = transfer.newParentID ?? prevTransferData.addNodeCommand?.returnData.nodeID;
+				const newParentID = transfer.newParentID ?? prevTransferData.addNodeCommand?.response.nodeID;
 				AssertV(newParentID != null, "Parent-node-id is still null!");
 				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParentID).next().key;
 				/*const newParent = transfer.newParentID ? GetNode(transfer.newParentID) : prevTransferData.addNodeCommand?.sub_addNode.payload.node;
@@ -175,7 +175,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 					cmd=>cmd.sub_addLink,
 				);
 				const transferData = this.transferData[i]; // by this point, it'll be set
-				const newNodeID = transferData.addNodeCommand!.returnData.nodeID;
+				const newNodeID = transferData.addNodeCommand!.response.nodeID;
 
 				if (transfer.clone_keepChildren) {
 					const oldChildLinks = GetNodeLinks(node.id);
@@ -185,7 +185,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 							cmd=>transferData.linkChildCommands[i2] = cmd,
 							()=>{
 								const newLink = {...link};
-								newLink.parent = transferData.addNodeCommand!.returnData.nodeID;
+								newLink.parent = transferData.addNodeCommand!.response.nodeID;
 
 								// if we're changing the node's type, check for child-links it has that are invalid (eg. wrong child-group), and try to change them to be valid
 								if (newNode.type != node.type && CheckLinkIsValid(newNode.type, newLink.c_childType!, newLink.group, newLink.polarity) != null) {
@@ -243,9 +243,9 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 						()=>transferData.addTagCommands[i2],
 						cmd=>transferData.addTagCommands[i2] = cmd,
 						()=>{
-							const newNodes = [node.id, transferData.addNodeCommand!.returnData.nodeID];
+							const newNodes = [node.id, transferData.addNodeCommand!.response.nodeID];
 							const newCloneHistory = new TagComp_CloneHistory();
-							newCloneHistory.cloneChain = [node.id, transferData.addNodeCommand!.returnData.nodeID];
+							newCloneHistory.cloneChain = [node.id, transferData.addNodeCommand!.response.nodeID];
 							const addTagCommand = new AddNodeTag({
 								tag: {
 									nodes: newNodes,
@@ -291,7 +291,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 			}
 		}
 
-		this.returnData = {};
+		this.response = {};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

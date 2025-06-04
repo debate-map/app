@@ -10,7 +10,7 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {type: "string"},
 	}),
 })
@@ -20,7 +20,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 	sub_deleteNode: DeleteNode;
 	nodeEdits: MapNodeEdit[];
 	Validate() {
-		const {id} = this.payload;
+		const {id} = this.input;
 		this.oldData = GetMap.NN(id);
 		AssertV(PERMISSIONS.Map.Delete(this.userInfo.id, this.oldData));
 		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
@@ -32,7 +32,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.add(this.sub_deleteNode.GetDBUpdates(db));
 		db.set(dbp`maps/${id}`, null);
 		/*for (const userMapInfoSet of this.userMapInfoSets) {

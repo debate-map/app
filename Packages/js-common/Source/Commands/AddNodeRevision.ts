@@ -33,11 +33,11 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 	],
 })
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		revision: {$ref: NodeRevision.name},
 	}),
-	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+	responseSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRevision}, {id: string}> {
 	// controlled by parent
@@ -48,7 +48,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRe
 	nodeEdit?: MapNodeEdit;
 	map_nodeEdits?: MapNodeEdit[];
 	Validate() {
-		const {mapID, revision} = this.payload;
+		const {mapID, revision} = this.input;
 
 		// this.revisionID = (await GetDataAsync('general', 'data', '.lastNodeRevisionID')) + this.lastNodeRevisionID_addAmount + 1;
 		revision.id = this.GenerateUUID_Once("revision.id");
@@ -75,13 +75,13 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRe
 			this.map_nodeEdits = GetMapNodeEdits(mapID);
 		}
 
-		this.returnData = {id: revision.id};
+		this.response = {id: revision.id};
 
 		AssertValidate("NodeRevision", revision, "Revision invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {mapID, revision} = this.payload;
+		const {mapID, revision} = this.input;
 		// needed, since "node.c_currentRevision" and "nodeRevision.node" are fk-refs to each other
 		//db.DeferConstraints = true; // commented; done globally in Command.augmentDBUpdates now (instant-checking doesn't really improve debugging in this context)
 

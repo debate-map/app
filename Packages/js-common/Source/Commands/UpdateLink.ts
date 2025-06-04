@@ -5,7 +5,7 @@ import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$linkID: {$ref: "UUID"},
 		$linkUpdates: DeriveJSONSchema(NodeLink, {includeOnly: ["form", "polarity", "orderKey"], makeOptional_all: true}),
 	}),
@@ -13,14 +13,14 @@ import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 export class UpdateLink extends Command<{linkID: string, linkUpdates: Partial<NodeLink>}, {}> {
 	newData: NodeLink;
 	Validate() {
-		const {linkID, linkUpdates} = this.payload;
+		const {linkID, linkUpdates} = this.input;
 		const oldData = GetNodeLink.NN(linkID);
 		this.newData = {...oldData, ...linkUpdates};
 		AssertValidate("NodeLink", this.newData, "New node-child-link data invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {linkID} = this.payload;
+		const {linkID} = this.input;
 		db.set(dbp`nodeLinks/${linkID}`, this.newData);
 	}
 }

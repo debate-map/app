@@ -24,7 +24,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 	],
 })
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$parentID: {type: ["null", "string"]},
 		$node: {$ref: "Node_Partial"},
@@ -34,7 +34,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		link: DeriveJSONSchema(NodeLink, {makeOptional: ["parent", "child"]}),
 		//asMapRoot: {type: "boolean"},
 	}),
-	returnSchema: ()=>SimpleSchema({
+	responseSchema: ()=>SimpleSchema({
 		$nodeID: {$ref: "UUID"},
 		$revisionID: {$ref: "UUID"},
 		$linkID: {$ref: "UUID"},
@@ -49,27 +49,27 @@ export class AddChildNode extends Command<{mapID?: string|n, parentID: string, n
 	sub_addLink: LinkNode;
 	parent_oldData: NodeL1|n;
 	Validate() {
-		const {mapID, parentID, node, revision} = this.payload;
+		const {mapID, parentID, node, revision} = this.input;
 		//const link = this.payload.link = this.payload.link ?? {} as NodeLink;
-		this.payload.link = E(new NodeLink(), this.payload.link);
-		this.payload.link.parent = parentID;
+		this.input.link = E(new NodeLink(), this.input.link);
+		this.input.link.parent = parentID;
 
 		// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
 		this.parent_oldData =
-			this.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this)?.payload.argumentNode
-			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this)?.transferData[0].addNodeCommand?.payload.node
+			this.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this)?.input.argumentNode
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this)?.transferData[0].addNodeCommand?.input.node
 			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_addArgumentWrapper == this)?.newParent_data
 			?? GetNode.NN(parentID)!;
 
 		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID, node, revision}), a=>a.recordAsNodeEdit = this.recordAsNodeEdit);
-		this.payload.link.child = this.sub_addNode.payload.node.id;
+		this.input.link.child = this.sub_addNode.input.node.id;
 
-		this.IntegrateSubcommand(()=>this.sub_addLink, null, ()=>new LinkNode({mapID, link: this.payload.link!}));
+		this.IntegrateSubcommand(()=>this.sub_addLink, null, ()=>new LinkNode({mapID, link: this.input.link!}));
 
-		this.returnData = {
-			nodeID: this.sub_addNode.payload.node.id,
-			revisionID: this.sub_addNode.sub_addRevision.payload.revision.id,
-			linkID: this.sub_addLink.payload.link.id!,
+		this.response = {
+			nodeID: this.sub_addNode.input.node.id,
+			revisionID: this.sub_addNode.sub_addRevision.input.revision.id,
+			linkID: this.sub_addLink.input.link.id!,
 			doneAt: Date.now(),
 		};
 	}

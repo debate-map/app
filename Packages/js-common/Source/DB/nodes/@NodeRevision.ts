@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
-import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "mobx-graphlink";
+import {AddSchema, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "mobx-graphlink";
 import {DMap} from "../maps/@Map.js";
 import {NodeL3} from "./@Node.js";
 import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";
@@ -152,30 +152,24 @@ export class NodeRevision {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	node: string;
 
-	@DB((t, n)=>t.text(n).nullable()) //.references("id").inTable(`nodeRevisions`).DeferRef()) // disabled for now, relating to deletion
 	@Field({type: ["null", "string"]}, {opt: true})
 	replacedBy?: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
 	//updatedAt: number;
 	//approved = false;
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "NodePhrasing_Embedded", ...MarkerForNonScalarField()})
 	phrasing = NodePhrasing.Embedded({text_base: ""});
 
@@ -184,15 +178,12 @@ export class NodeRevision {
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
 	phrasing_tsvector?: any;*/
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: NodeRevisionDisplayDetails.name}, {opt: true})
 	displayDetails?: NodeRevisionDisplayDetails;
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({items: {$ref: "Attachment"}, ...MarkerForNonScalarField()})
 	attachments: Attachment[] = [];
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }

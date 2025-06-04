@@ -38,7 +38,7 @@
 	},
 	//"rust-analyzer.checkOnSave.enable": false,
 	// have RA's cargo-check use a separate cache-directory (otherwise, eg. running cargo-check in terminal with different flags will mess up RA's cargo-check cache, requiring a full re-check for RA)
-	"rust-analyzer.checkOnSave.extraArgs": [
+	"rust-analyzer.check.extraArgs": [
 		"--target-dir", "./Temp/rust-analyzer-check"
 	],
 	// maybe use these in the future, in place of the "-Awarnings" flag in config.toml and Dockerfile

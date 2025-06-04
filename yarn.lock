@@ -16296,7 +16296,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:6.3.13"
-    mobx-graphlink: "npm:0.1.2"
+    mobx-graphlink: "npm:0.1.5"
     mobx-react: "npm:9.2.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"

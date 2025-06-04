@@ -14,7 +14,7 @@ import {PERMISSIONS} from "../DB.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {type: "string"},
 		parentID: {type: "string"},
 		childID: {type: "string"},
@@ -25,7 +25,7 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 
 	parentToChildLinks: NodeLink[];
 	Validate() {
-		const {parentID, childID} = this.payload;
+		const {parentID, childID} = this.input;
 		const childParents = GetNodeLinks(undefined, childID);
 		this.parentToChildLinks = GetNodeLinks(parentID, childID);
 		AssertV(this.parentToChildLinks.length == 1, FancyFormat({}, `There should be 1 and only 1 link between parent and child. Links:`, this.parentToChildLinks));

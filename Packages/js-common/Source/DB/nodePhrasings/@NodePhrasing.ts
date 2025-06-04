@@ -1,4 +1,4 @@
-import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "mobx-graphlink";
+import {AddSchema, DeriveJSONSchema, Field, MGLClass} from "mobx-graphlink";
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "js-vextensions";
 import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
@@ -15,59 +15,46 @@ export class NodePhrasing {
 		CE(this).VSet(data);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({$ref: "UUID"})
 	node: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "NodePhrasingType"})
 	type: NodePhrasingType;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	text_base: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	text_negation?: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	text_question?: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	text_narrative?: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	note?: string;
 
 	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
-	@DB((t, n)=>t.specificType(n, "jsonb[]"))
 	@Field({items: {$ref: TermAttachment.name}, ...MarkerForNonScalarField()})
 	terms: TermAttachment[] = [];
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 
 	// for web phrasings
 	// ==========
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	references: string[] = [];
 }

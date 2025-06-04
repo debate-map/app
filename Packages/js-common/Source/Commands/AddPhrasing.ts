@@ -6,14 +6,14 @@ import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$phrasing: {$ref: NodePhrasing.name},
 	}),
-	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+	responseSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddPhrasing extends Command<{phrasing: NodePhrasing}, {id: string}> {
 	Validate() {
-		const {phrasing} = this.payload;
+		const {phrasing} = this.input;
 
 		phrasing.id = this.GenerateUUID_Once("id");
 		phrasing.creator = this.userInfo.id;
@@ -23,11 +23,11 @@ export class AddPhrasing extends Command<{phrasing: NodePhrasing}, {id: string}>
 		const node = GetNode(phrasing.node);
 		Assert(node, `Node with id ${phrasing.node} does not exist.`);
 
-		this.returnData = {id: phrasing.id};
+		this.response = {id: phrasing.id};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {phrasing} = this.payload;
+		const {phrasing} = this.input;
 		db.set(dbp`nodePhrasings/${phrasing.id}`, phrasing);
 	}
 }

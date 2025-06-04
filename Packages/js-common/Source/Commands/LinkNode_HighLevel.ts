@@ -70,7 +70,7 @@ export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parentToTra
 }
 
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		oldParentID: {$ref: "UUID"},
 		$newParentID: {$ref: "UUID"},
@@ -82,7 +82,7 @@ export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parentToTra
 		unlinkFromOldParent: {type: "boolean"},
 		deleteEmptyArgumentWrapper: {type: "boolean"},
 	}),
-	returnSchema: ()=>SimpleSchema({
+	responseSchema: ()=>SimpleSchema({
 		argumentWrapperID: {$ref: "UUID"},
 		/*argumentWrapperID: {anyOf: [
 			{$ref: "UUID"},
@@ -102,12 +102,12 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	sub_unlinkFromOldParent: UnlinkNode;
 	sub_deleteOldParent: DeleteNode;
 	Validate() {
-		let {mapID, oldParentID, newParentID, nodeID, newForm, /*createWrapperArg,*/ childGroup, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
+		let {mapID, oldParentID, newParentID, nodeID, newForm, /*createWrapperArg,*/ childGroup, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.input;
 		AssertV(oldParentID !== nodeID, "Old parent-id and child-id cannot be the same!");
 		AssertV(newParentID !== nodeID, "New parent-id and child-id cannot be the same!");
 		//AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
 
-		this.returnData = {};
+		this.response = {};
 
 		this.map_data = GetMap(mapID);
 		this.node_data = GetNodeL2.NN(nodeID);
@@ -157,8 +157,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				link: new NodeLink({group: childGroup, orderKey: this.orderKeyForOuterNode, polarity: newPolarity}),
 			}));
 
-			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
-			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
+			this.response.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.input.node.id;
+			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.input.node.id;
 		}
 
 		this.IntegrateSubcommand(()=>this.sub_linkToNewParent, null, ()=>new LinkNode({

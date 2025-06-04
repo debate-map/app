@@ -6,7 +6,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 /** Do not try to use this from client. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$node: {$ref: "Node_Partial"},
 		$revision: {$ref: "NodeRevision_Partial"},
@@ -21,7 +21,7 @@ export class AddNode extends Command<{mapID?: string|n, node: NodeL1, revision: 
 	//parentID: string;
 	//parent_oldChildrenOrder: number[];
 	Validate() {
-		const {mapID, node, revision} = this.payload;
+		const {mapID, node, revision} = this.input;
 		//AssertV(revision.node == null || revision.node == node.id, "Cannot specify revision's node-id. It will be generated automatically.");
 		if (this.parentCommand == null) { // todo: maybe switch this to check if this is the "first call" (ie. to avoid assert fails after looping caused vals to be populated)
 			AssertV(node.id == null, "Cannot specify node's id. It will be generated automatically.");
@@ -45,7 +45,7 @@ export class AddNode extends Command<{mapID?: string|n, node: NodeL1, revision: 
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {node} = this.payload;
+		const {node} = this.input;
 
 		// add node
 		db.set(dbp`nodes/${node.id}`, node);
