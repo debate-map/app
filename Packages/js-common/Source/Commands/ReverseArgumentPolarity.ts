@@ -11,7 +11,7 @@ import {NodeType} from "../DB/nodes/@NodeType.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			mapID: {type: "string"},
 			nodeID: {type: "string"},
@@ -25,7 +25,7 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string|n, nodeID: 
 	oldNodeData: NodeL3;
 	newLinkData: NodeLink;
 	Validate() {
-		const {nodeID, path} = this.payload;
+		const {nodeID, path} = this.input;
 
 		this.oldNodeData = GetNodeL3.NN(path);
 		AssertV(this.oldNodeData.type == NodeType.argument, "Can only reverse polarity of an argument node.");

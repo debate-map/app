@@ -12,7 +12,7 @@ const MTName = MTClass.name;
 @MapEdit("id")
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
 		$updates: DeriveJSONSchema(MTClass, {
 			includeOnly: ["accessPolicy", "name", "note", "noteInline", "defaultExpandDepth", "nodeAccessPolicy", /*"nodeAccessPolicy_required",*/ "editors", "extras"],
@@ -24,7 +24,7 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<MT>}
 	oldData: MT;
 	newData: MT;
 	Validate() {
-		const {id: mapID, updates: mapUpdates} = this.payload;
+		const {id: mapID, updates: mapUpdates} = this.input;
 		this.oldData = GetMap.NN(mapID);
 		AssertV(PERMISSIONS.Map.Modify(this.userInfo.id, this.oldData));
 		this.newData = {...this.oldData, ...mapUpdates};
@@ -33,7 +33,7 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<MT>}
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`maps/${id}`, this.newData);
 	}
 }

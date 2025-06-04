@@ -4,22 +4,22 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({$policy: {$ref: AccessPolicy.name}}),
-	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+	inputSchema: ()=>SimpleSchema({$policy: {$ref: AccessPolicy.name}}),
+	responseSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddAccessPolicy extends Command<{policy: AccessPolicy}, {id: string}> {
 	Validate() {
-		const {policy} = this.payload;
+		const {policy} = this.input;
 		policy.id = this.GenerateUUID_Once("id");
 		policy.creator = this.userInfo.id;
 		policy.createdAt = Date.now();
 
-		this.returnData = {id: policy.id};
+		this.response = {id: policy.id};
 		AssertValidate(AccessPolicy.name, policy, "Access-policy invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {policy} = this.payload;
+		const {policy} = this.input;
 		db.set(dbp`accessPolicies/${policy.id}`, policy);
 	}
 }

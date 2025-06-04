@@ -17,7 +17,7 @@ const MTName = MTClass.name;
 			"backgroundID", "backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
 		]}),
 	}),*/
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
 			updates: DeriveJSONSchema(MTClass, {
@@ -36,14 +36,14 @@ export class SetUserData_Hidden extends Command<{id: string, updates: Partial<MT
 	oldData: MT;
 	newData: MT;
 	Validate() {
-		const {id, updates} = this.payload;
+		const {id, updates} = this.input;
 		this.oldData = GetUserHidden.NN(id);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`userHiddens/${id}`, this.newData);
 	}
 }

@@ -8,7 +8,7 @@ const MTName = "User";
 
 //export class SetUserData extends Command<{id: string, updates: Partial<MainType>, allowPrevious?: boolean}, {}> {
 @CommandMeta({
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
@@ -25,7 +25,7 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
-		const {id, updates} = this.payload;
+		const {id, updates} = this.input;
 		//AssertV(id == this.userInfo.id, "Cannot set user-data for another user!");
 		this.oldData = GetUser.NN(id);
 		/*if (!allowPrevious) {
@@ -42,7 +42,7 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`users/${id}`, this.newData);
 	}
 }

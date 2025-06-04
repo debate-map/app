@@ -6,20 +6,20 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {type: "string"},
 	}),
 })
 export class DeleteTerm extends Command<{id: string}, {}> {
 	oldData: Term;
 	Validate() {
-		const {id} = this.payload;
+		const {id} = this.input;
 		this.oldData = GetTerm(id)!;
 		AssertV(PERMISSIONS.Term.Delete(this.userInfo.id, this.oldData));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`terms/${id}`, null);
 		//db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${id}`, WrapDBValue(null, {merge: true}));
 	}

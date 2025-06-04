@@ -6,7 +6,7 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$nodeID: {$ref: "UUID"},
 		$accessPolicy: {$ref: "UUID"},
 	}),
@@ -15,7 +15,7 @@ export class UpdateNodeAccessPolicy extends Command<{nodeID: string, accessPolic
 	oldNodeData: NodeL1;
 	newNodeData: NodeL1;
 	Validate() {
-		const {nodeID, accessPolicy} = this.payload;
+		const {nodeID, accessPolicy} = this.input;
 		const node = this.oldNodeData = GetNode.NN(nodeID);
 		AssertV(PERMISSIONS.Node.Modify(this.userInfo.id, this.oldNodeData));
 
@@ -24,7 +24,7 @@ export class UpdateNodeAccessPolicy extends Command<{nodeID: string, accessPolic
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID} = this.payload;
+		const {nodeID} = this.input;
 		db.set(dbp`nodes/${nodeID}`, this.newNodeData);
 	}
 }
