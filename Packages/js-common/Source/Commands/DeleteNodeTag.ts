@@ -6,20 +6,20 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {type: "string"},
 	}),
 })
 export class DeleteNodeTag extends Command<{id: string}, {}> {
 	oldData: NodeTag;
 	Validate() {
-		const {id} = this.payload;
+		const {id} = this.input;
 		this.oldData = GetNodeTag.NN(id);
 		AssertV(PERMISSIONS.NodeTag.Delete(this.userInfo.id, this.oldData));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`nodeTags/${id}`, null);
 	}
 }

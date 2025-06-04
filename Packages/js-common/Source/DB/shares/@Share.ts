@@ -1,4 +1,4 @@
-import {AddSchema, DB, Field, MGLClass} from "mobx-graphlink";
+import {AddSchema, Field, MGLClass} from "mobx-graphlink";
 import {CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "js-vextensions";
 import {MapView} from "./@MapView.js";
 
@@ -13,35 +13,28 @@ export class Share {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	//@Field({$ref: "UUID"}, {opt: true})
 	@Field({type: "string"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	name: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "ShareType"})
 	type: ShareType;
 
 	// if map
 	// ==========
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	mapID?: string;
 
-	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "MapView"}, {opt: true})
 	mapView?: MapView;
 }

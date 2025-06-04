@@ -19,7 +19,7 @@ export function CanConvertFromClaimTypeXToY(from: AttachmentType, to: Attachment
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			mapID: {type: "string"},
 			nodeID: {type: "string"},

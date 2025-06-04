@@ -1,5 +1,5 @@
 import {CreateStringEnum, GetValues, GetValues_ForSchema} from "js-vextensions";
-import {AddSchema, MGLClass, DB, Field} from "mobx-graphlink";
+import {AddSchema, MGLClass, Field} from "mobx-graphlink";
 
 export enum ChangeType {
 	add = "add",
@@ -16,27 +16,21 @@ export class MapNodeEdit {
 		Object.assign(this, data);
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({type: "string"})
 	map: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	node: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"})
 	time: number;
 
-	@DB((t, n)=>t.text(n))
 	@Field({$ref: "ChangeType"})
 	type: ChangeType;
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	c_accessPolicyTargets: string[]; // format is: `${policyId}:${apTable}`
 }

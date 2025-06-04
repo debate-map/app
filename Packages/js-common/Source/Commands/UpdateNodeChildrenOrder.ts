@@ -36,7 +36,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID} = this.payload;
+		const {nodeID} = this.input;
 		db.set(dbp`nodes/${nodeID}`, this.newNodeData);
 	}
 }

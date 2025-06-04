@@ -7,7 +7,7 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {type: "string"},
 	}),
 })
@@ -15,7 +15,7 @@ export class DeleteNodeRating extends Command<{id: string}, {}> {
 	oldData: NodeRating;
 	sub_updateRatingSummaries: UpdateNodeRatingSummaries;
 	Validate() {
-		const {id} = this.payload;
+		const {id} = this.input;
 		//this.oldData = GetNodeRating.NN(id);
 		this.oldData = this.oldData ?? GetNodeRating.NN(id); // temp fix for issue that will ultimately be fixed by planned Command-execution rework (wrapper command read+write logic in [regular-code-driven] PG transactions)
 		AssertV(PERMISSIONS.NodeRating.Delete(this.userInfo.id, this.oldData));
@@ -27,7 +27,7 @@ export class DeleteNodeRating extends Command<{id: string}, {}> {
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`nodeRatings/${id}`, null);
 		db.add(this.sub_updateRatingSummaries.GetDBUpdates(db));
 	}

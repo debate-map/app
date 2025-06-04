@@ -1,5 +1,5 @@
 import {CE} from "js-vextensions";
-import {DB, Field, MGLClass} from "mobx-graphlink";
+import {Field, MGLClass} from "mobx-graphlink";
 import {ChildOrdering} from "../nodeRatings.js";
 import {ChildLayout} from "../nodes/@NodeRevision.js";
 
@@ -23,94 +23,72 @@ export class DMap {
 		}*/
 	}
 
-	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	name: string;
 
-	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	note?: string;
 
-	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	noteInline? = true;
 
-	/*@DB((t,n)=>t.text(n))
-	@Field({enum: GetValues(MapType)})
+	/*@Field({enum: GetValues(MapType)})
 	type: MapType;*/
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef({enforceAtTransactionEnd: true}))
 	@Field({type: "string"}, {opt: true})
 	rootNode: string;
 
-	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"})
 	defaultExpandDepth = 2;
 
-	/*@DB((t,n)=>t.text(n))
-	@Field({type: "string"}, {opt: true})
+	/*@Field({type: "string"}, {opt: true})
 	defaultTimelineID: string;*/
 
-	/*@DB((t,n)=>t.boolean(n))
-	@Field({type: "boolean"}, {opt: true})
+	/*@Field({type: "boolean"}, {opt: true})
 	requireMapEditorsCanEdit?: boolean;*/
 
-	/*@DB((t, n)=>t.jsonb(n).nullable())
-	@Field(()=>NewSchema({
+	/*@Field(()=>NewSchema({
 		properties: CE(GetSchemaJSON("NodeRevision").properties!).IncludeKeys(...NodeRevision_Defaultable_props),
 	}))
 	nodeDefaults?: NodeRevision_Defaultable;*/
 
-	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	nodeAccessPolicy?: string;
 
-	/*@DB((t, n)=>t.boolean(n))
-	@Field({$ref: "UUID"})
+	/*@Field({$ref: "UUID"})
 	nodeAccessPolicy_required = false;*/
 
-	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	featured?: boolean;
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
 	//@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
 	@Field({items: {type: "string"}})
 	editors: string[];
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"}, {opt: true})
 	edits: number;
 
-	@DB((t, n)=>t.bigInteger(n).nullable())
 	@Field({type: "number"}, {opt: true})
 	editedAt?: number;
 
-	/*@DB((t,n)=>t.specificType(n, "text[]"))
-	@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
+	/*@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
 	layers: {[key: string]: boolean};
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
 	@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
 	timelines: {[key: string]: boolean};*/
 
-	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "Map_Extras"})
 	extras = new Map_Extras();
 }
@@ -157,4 +135,3 @@ export class ToolbarItem {
 	@Field({type: "string"})
 	panel: NodePanel;
 }
-

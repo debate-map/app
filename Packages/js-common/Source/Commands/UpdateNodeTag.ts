@@ -10,7 +10,7 @@ const MTName = "NodeTag";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
+	inputSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
@@ -25,7 +25,7 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
-		const {id, updates} = this.payload;
+		const {id, updates} = this.input;
 		this.oldData = GetNodeTag.NN(id);
 		AssertV(PERMISSIONS.NodeTag.Modify(this.userInfo.id, this.oldData));
 
@@ -34,7 +34,7 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`nodeTags/${id}`, this.newData);
 	}
 }

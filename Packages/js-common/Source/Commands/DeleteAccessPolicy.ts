@@ -7,7 +7,7 @@ import {PERMISSIONS} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
+	inputSchema: ()=>SimpleSchema({
 		$id: {type: "string"},
 	}),
 })
@@ -15,7 +15,7 @@ export class DeleteAccessPolicy extends Command<{id: string}, {}> {
 	oldData: AccessPolicy;
 	userHiddensWithPolicyAsLastUsed: UserHidden[];
 	Validate() {
-		const {id} = this.payload;
+		const {id} = this.input;
 		this.oldData = GetAccessPolicy(id)!;
 		AssertV(PERMISSIONS.AccessPolicy.Delete(this.userInfo.id, this.oldData));
 		this.userHiddensWithPolicyAsLastUsed = GetDocs({
@@ -26,7 +26,7 @@ export class DeleteAccessPolicy extends Command<{id: string}, {}> {
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {id} = this.payload;
+		const {id} = this.input;
 		db.set(dbp`accessPolicies/${id}`, null);
 		for (const userHidden of this.userHiddensWithPolicyAsLastUsed) {
 			db.set(dbp`userHiddens/${userHidden.id}/.lastAccessPolicy`, null);
