@@ -2,8 +2,8 @@ import {Attachment, AttachmentType, DescriptionAttachment, NodeType, QuoteAttach
 import {Assert, IsString} from "js-vextensions";
 
 export class CG_Node {
-	constructor(data: Partial<CG_Node>, _collectionFieldName_forSyntheticallyCreatedNodeObj: "atomic_claims" | "counter_claims" | "examples") {
-		Object.assign(this, data, {_collectionFieldName_forSyntheticallyCreatedNodeObj});
+	constructor(data: Partial<CG_Node>, _isSyntheticNodeObj_fromStringCollection: "atomic_claims" | "counter_claims" | "examples") {
+		Object.assign(this, data, {_isSyntheticNodeObj_fromStringCollection});
 	}
 
 	static GetNodeType(node: CG_Node): NodeType {
