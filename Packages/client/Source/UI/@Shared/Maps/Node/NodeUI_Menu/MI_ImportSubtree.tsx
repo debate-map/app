@@ -25,13 +25,13 @@ import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
 import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
-import {CG_Debate, CG_Node} from "Utils/DataFormats/JSON/ClaimGen/DataModel.js";
 import {GetResourcesInImportSubtree_CG} from "Utils/DataFormats/JSON/ClaimGen/ImportHelpers.js";
 import {CommandEntry, RunCommandBatch, RunCommandBatchResult} from "Utils/DB/RunCommandBatch.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {DMSubtreeData} from "../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
 import {GetResourcesInImportSubtree_JsonDm} from "../../../../../Utils/DataFormats/JSON/DM/DMImportHelpers.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../Database/Policies/PolicyPicker.js";
+import {CG_Node} from "../../../../../Utils/DataFormats/JSON/ClaimGen/DataModel.js";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportResource> {
@@ -117,7 +117,7 @@ class ImportSubtreeUI extends BaseComponent<
 		sourceText_parseError: string|n,
 		forJSONDM_subtreeData: DMSubtreeData|n,
 		forJSONDMFS_subtreeData: FS_NodeL3|n,
-		forJSONCG_subtreeData: CG_Debate|n,
+		forJSONCG_subtreeData: CG_Node|n,
 		forCSVSL_subtreeData: CSV_SL_Row[]|n,
 
 		// right-panel
@@ -281,15 +281,15 @@ class ImportSubtreeUI extends BaseComponent<
 										}
 										this.SetState(newState);
 									} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
-										let subtreeData_new: CG_Debate|n = null;
+										let subtreeData_new: CG_Node|n = null;
 										try {
 											const rawData = FromJSON(newSourceText);
 											if ("questions" in rawData) {
-												subtreeData_new = rawData as CG_Debate;
+												subtreeData_new = rawData as CG_Node;
 											} else if ("positions" in rawData) {
 												subtreeData_new = {
 													questions: [rawData],
-												} as CG_Debate;
+												} as CG_Node;
 											}
 											newState.forJSONCG_subtreeData = subtreeData_new;
 											newState.sourceText_parseError = null;
