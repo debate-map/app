@@ -5,6 +5,7 @@ use rust_shared::db_constants::{GLOBAL_ROOT_NODE_ID, SYSTEM_USER_ID};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Value};
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
@@ -20,6 +21,8 @@ use crate::db::general::permission_helpers::assert_user_can_add_child;
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::node_links::{get_node_links, ChildGroup, NodeLink, NodeLinkInput, Polarity};
 use crate::db::node_links_::node_link_validity::assert_new_link_is_valid;
+use crate::db::node_phrasings::get_first_non_empty_text_in_phrasing_embedded;
+use crate::db::node_revisions::get_node_revision;
 use crate::db::nodes::get_node;
 use crate::db::nodes_::_node::Node;
 use crate::db::nodes_::_node_type::{get_node_type_info, NodeType};
@@ -86,7 +89,12 @@ pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bo
 		/*let parent_to_child_links = get_node_links(ctx, Some(&parent_id), Some(&child_id)).await?;
 		ensure!(parent_to_child_links.len() == 0, "Node #{child_id} is already a child of node #{parent_id}.");*/
 
-		assert_new_link_is_valid(ctx, &parent_id, &link.child, link.c_childType, link.group, link.polarity, Some(actor)).await?;
+		if let Err(err) = assert_new_link_is_valid(ctx, &parent_id, &link.child, link.c_childType, link.group, link.polarity, Some(actor)).await {
+			let parent_text = get_first_non_empty_text_in_phrasing_embedded(&get_node_revision(ctx, &parent.c_currentRevision).await?.phrasing);
+			let child_text = get_first_non_empty_text_in_phrasing_embedded(&get_node_revision(ctx, &child.c_currentRevision).await?.phrasing);
+			let link_json = serde_json::to_string(&link).unwrap_or_else(|_| "<failed to serialize link>".o());
+			return Err(err.context(format!("New link is invalid. @parent_text({parent_text:?}) @childText({child_text:?}) @link({link_json})")).into());
+		}
 	}
 
 	upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link.clone()).await?;

@@ -10,7 +10,7 @@ import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {AddNotificationMessage, ES, InfoButton, O, Observer, P, RunInAction_Set, UseWindowEventListener} from "web-vcore";
 import {gql} from "@apollo/client";
-import {E, FromJSON, GetEntries, ModifyString, SleepAsync, Timer} from "js-vextensions";
+import {E, FromJSON, GetEntries, GetStackTraceStr, ModifyString, SleepAsync, Timer} from "js-vextensions";
 import {makeObservable} from "mobx";
 import {ignore} from "mobx-sync";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "react-vcomponents";
@@ -128,7 +128,7 @@ class ImportSubtreeUI extends BaseComponent<
 		selectFromIndex: number,
 		searchQueryGen: number,
 	},
-	{resources: ImportResource[]}
+	{resources: ImportResource[], resources_parseError: Error|n}
 > {
 	static initialState: Partial<ExtractState<ImportSubtreeUI>> = {
 		leftTab: ImportSubtreeUI_LeftTab.source,
@@ -156,25 +156,31 @@ class ImportSubtreeUI extends BaseComponent<
 		const importContext = useMemo(()=>({mapID: map.id, nodeAccessPolicyID}), [map.id, nodeAccessPolicyID]);
 
 		let resources: ImportResource[] = [];
+		let resources_parseError: Error|n;
 		if (process) {
-			if (uiState.sourceType == DataExchangeFormat.json_dm && forJSONDM_subtreeData != null) {
-				resources = GetResourcesInImportSubtree_JsonDm(forJSONDM_subtreeData, node);
-			} else if (uiState.sourceType == DataExchangeFormat.json_dm_fs && forJSONDMFS_subtreeData != null) {
-				resources = GetResourcesInImportSubtree_JsonDmFs(forJSONDMFS_subtreeData);
-			} else if (uiState.sourceType == DataExchangeFormat.json_cg && forJSONCG_subtreeData != null) {
-				resources = GetResourcesInImportSubtree_CG(importContext, forJSONCG_subtreeData);
-			} else if (uiState.sourceType == DataExchangeFormat.csv_sl && forCSVSL_subtreeData != null) {
-				resources = GetResourcesInImportSubtree_CSV_SL(forCSVSL_subtreeData);
-			}
-			if (uiState.accessPolicyOverride != null) {
-				for (const resource of resources) {
-					if (resource instanceof IR_NodeAndRevision) {
-						resource.node.accessPolicy = uiState.accessPolicyOverride;
+			try {
+				if (uiState.sourceType == DataExchangeFormat.json_dm && forJSONDM_subtreeData != null) {
+					resources = GetResourcesInImportSubtree_JsonDm(forJSONDM_subtreeData, node);
+				} else if (uiState.sourceType == DataExchangeFormat.json_dm_fs && forJSONDMFS_subtreeData != null) {
+					resources = GetResourcesInImportSubtree_JsonDmFs(forJSONDMFS_subtreeData);
+				} else if (uiState.sourceType == DataExchangeFormat.json_cg && forJSONCG_subtreeData != null) {
+					resources = GetResourcesInImportSubtree_CG(importContext, forJSONCG_subtreeData);
+				} else if (uiState.sourceType == DataExchangeFormat.csv_sl && forCSVSL_subtreeData != null) {
+					resources = GetResourcesInImportSubtree_CSV_SL(forCSVSL_subtreeData);
+				}
+				if (uiState.accessPolicyOverride != null) {
+					for (const resource of resources) {
+						if (resource instanceof IR_NodeAndRevision) {
+							resource.node.accessPolicy = uiState.accessPolicyOverride;
+						}
 					}
 				}
+			} catch (ex) {
+				resources_parseError = ex as Error;
+				console.error("Error while processing import-subtree data:", ex);
 			}
 		}
-		this.Stash({resources});
+		this.Stash({resources, resources_parseError});
 
 		const selectedIRs_nodeAndRev = [...uiState.selectedImportResources].filter(a=>a instanceof IR_NodeAndRevision) as IR_NodeAndRevision[];
 		const selectedIRs_nodeAndRev_importedSoFar = selectedIRs_nodeAndRev_atImportStart - selectedIRs_nodeAndRev.length;
@@ -283,14 +289,7 @@ class ImportSubtreeUI extends BaseComponent<
 									} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
 										let subtreeData_new: CG_Node|n = null;
 										try {
-											const rawData = FromJSON(newSourceText);
-											if ("questions" in rawData) {
-												subtreeData_new = rawData as CG_Node;
-											} else if ("positions" in rawData) {
-												subtreeData_new = {
-													questions: [rawData],
-												} as CG_Node;
-											}
+											subtreeData_new = FromJSON(newSourceText);
 											newState.forJSONCG_subtreeData = subtreeData_new;
 											newState.sourceText_parseError = null;
 										} catch (err) {
@@ -403,6 +402,8 @@ class ImportSubtreeUI extends BaseComponent<
 								</PolicyPicker>
 							</Row>
 							<ScrollView>
+								{resources_parseError != null &&
+								<Text mt={5} sel style={{color: "red", whiteSpace: "pre-wrap"}}>Error while processing import-subtree data: {resources_parseError.stack ?? resources_parseError.toString()}</Text>}
 								<ReactList type="variable" length={resources.length}
 									itemRenderer={this.RenderResource}
 									itemSizeEstimator={this.EstimateResourceUIHeight}/>

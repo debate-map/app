@@ -37,6 +37,32 @@ pub async fn get_node_phrasings(ctx: &AccessorContext<'_>, node_id: &str) -> Res
     }))).await
 }
 
+fn get_if_non_empty(s: Option<&str>) -> Option<String> {
+	match s {
+		Some(s) => match s {
+			s if s.is_empty() => None,
+			_ => Some(s.to_owned()),
+		},
+		None => None, //hi23233223232234234234234234234234234
+	}
+}
+#[rustfmt::skip]
+pub fn get_first_non_empty_text_in_phrasing(phrasing: &NodePhrasing) -> Option<String> {
+	let first_non_empty_title = get_if_non_empty(Some(&phrasing.text_base))
+		.or(get_if_non_empty(phrasing.text_negation.as_deref()))
+		.or(get_if_non_empty(phrasing.text_question.as_deref()))
+		.or(get_if_non_empty(phrasing.text_narrative.as_deref()));
+	first_non_empty_title
+}
+#[rustfmt::skip]
+pub fn get_first_non_empty_text_in_phrasing_embedded(phrasing: &NodePhrasing_Embedded) -> Option<String> {
+	let first_non_empty_title = get_if_non_empty(Some(&phrasing.text_base))
+		.or(get_if_non_empty(phrasing.text_negation.as_deref()))
+		.or(get_if_non_empty(phrasing.text_question.as_deref()))
+		.or(get_if_non_empty(phrasing.text_narrative.as_deref()));
+	first_non_empty_title
+}
+
 wrap_slow_macros! {
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]

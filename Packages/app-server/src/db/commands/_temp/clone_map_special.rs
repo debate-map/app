@@ -21,7 +21,7 @@ use crate::db::commands::add_map::{add_map, AddMapInput};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::maps::{get_map, MapInput};
 use crate::db::node_links::{get_node_links, ChildGroup, NodeLinkInput};
-use crate::db::node_phrasings::NodePhrasing_Embedded;
+use crate::db::node_phrasings::{get_first_non_empty_text_in_phrasing, get_first_non_empty_text_in_phrasing_embedded, NodePhrasing_Embedded};
 use crate::db::node_revisions::{get_node_revision, NodeRevision, NodeRevisionInput};
 use crate::db::nodes::{get_node, get_node_children};
 use crate::db::nodes_::_node::{Node, NodeInput};
@@ -180,20 +180,7 @@ pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 				let grandchild_links = get_node_links(ctx, Some(child.id.as_str()), None).await?;
 				let has_attachments = child_rev.attachments.len() > 0;
 				// ensure that argument has no title, in any of the text_XXX fields
-				let get_if_non_empty = |s: &Option<String>| {
-					match s {
-						Some(s) => match s {
-							s if s.is_empty() => None,
-							_ => Some(s.to_owned()),
-						},
-						None => None,
-					}
-				};
-				let first_non_empty_title =
-					get_if_non_empty(&Some(child_rev.phrasing.text_base.clone()))
-					.or(get_if_non_empty(&child_rev.phrasing.text_negation.clone()))
-					.or(get_if_non_empty(&child_rev.phrasing.text_question.clone()))
-					.or(get_if_non_empty(&child_rev.phrasing.text_narrative.clone()));
+				let first_non_empty_title = get_first_non_empty_text_in_phrasing_embedded(&child_rev.phrasing);
 				/*if let Some(title) = first_non_empty_title {
 					warn!("Argument node #{} has a non-empty title. If this is a dry-run, it's recommended to investigate these entries before proceeding. @title:\n\t{}", child.id.as_str(), title);
 				}*/

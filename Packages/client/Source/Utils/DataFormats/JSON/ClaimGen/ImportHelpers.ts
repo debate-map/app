@@ -9,24 +9,24 @@ export class ImportContext {
 }
 
 export const GetResourcesInImportSubtree_CG = CreateAccessor((context: ImportContext, rootNode: CG_Node)=>{
-	return GetResourcesInImportNode_CG(context, rootNode, [], [], null);
+	return GetResourcesInImportNode_CG(context, rootNode, [0], [CG_Node.GetText(rootNode)], null, null);
 });
-export const GetResourcesInImportNode_CG = CreateAccessor((context: ImportContext, node: CG_Node, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n)=>{
+export const GetResourcesInImportNode_CG = CreateAccessor((context: ImportContext, node: CG_Node, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n, parentNode: CG_Node|n)=>{
 	const result = [] as ImportResource[];
 
 	// own node
-	const ownResource = NewNodeResource(context, node, path_indexes, path_titles, parentResource);
+	const ownResource = NewNodeResource(context, node, path_indexes, path_titles, parentResource, parentNode);
 	result.push(ownResource);
 
 	// children nodes
 	for (const [i, child] of CG_Node.GetChildren(node).entries()) {
-		result.push(...GetResourcesInImportNode_CG(context, child, path_indexes.concat(i), path_titles.concat(CG_Node.GetText(child)), ownResource));
+		result.push(...GetResourcesInImportNode_CG(context, child, path_indexes.concat(i), path_titles.concat(CG_Node.GetText(child)), ownResource, node));
 	}
 
 	return result;
 });
 
-export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n)=>{
+export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n, parentData: CG_Node|n)=>{
 	const nodeType = CG_Node.GetNodeType(data);
 	const node = new NodeL1({
 		type: nodeType,
@@ -39,7 +39,7 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		orderKey = orderKey.next();
 	}
 	const link = new NodeLink({
-		group: ChildGroup.generic,
+		group: parentData && CG_Node.GetNodeType(parentData) == NodeType.claim ? ChildGroup.freeform : ChildGroup.generic,
 		orderKey: orderKey.toString(),
 		//form: claimForm,
 	});

@@ -20,7 +20,31 @@
 
 	"[rust]": {
 		"editor.defaultFormatter": "rust-lang.rust-analyzer",
-		"editor.formatOnSave": true
+
+		// 2025-06-06: this adds too much (often >1s) delay before save completes
+		//"editor.formatOnSave": true,
+
+		// 2025-06-06: tried this, but seems to just never do formatting
+		/*"editor.formatOnSave": true,
+		"editor.formatOnSaveMode": "modificationsIfAvailable",*/
+
+		// 2025-06-06: decided to add a custom hotkey instead (user-level keybindings.json), which explicitly does a save-all operation THEN a format operation, IF the file is a Rust file
+		/*{
+			"key": "ctrl+s",
+			"command": "runCommands", 
+			"when": "editorLangId == rust",
+			"args": {
+				"commands": [
+					"workbench.action.files.saveAll",
+					"editor.action.formatDocument",
+				]
+			}
+		},
+		{
+			"key": "ctrl+s",
+			"command": "workbench.action.files.saveAll",
+			"when": "editorLangId != rust"
+		},*/
   	},
 	"rust-analyzer.server.extraEnv": {
 		// this allows us to use unstable features (as is true for the Docker builds), without rust-analyzer showing an error on the "#![feature(XXX)]" line
@@ -38,7 +62,7 @@
 	},
 	//"rust-analyzer.checkOnSave.enable": false,
 	// have RA's cargo-check use a separate cache-directory (otherwise, eg. running cargo-check in terminal with different flags will mess up RA's cargo-check cache, requiring a full re-check for RA)
-	"rust-analyzer.checkOnSave.extraArgs": [
+	"rust-analyzer.check.extraArgs": [
 		"--target-dir", "./Temp/rust-analyzer-check"
 	],
 	// maybe use these in the future, in place of the "-Awarnings" flag in config.toml and Dockerfile

@@ -1,6 +1,7 @@
 import {Attachment, AttachmentType, DescriptionAttachment, NodeType, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType} from "dm_common";
 import {Assert, IsString} from "js-vextensions";
 
+export const CG_Node_keysForChildrenObjects: Array<keyof CG_Node> = ["positions", "categories", "claims", "arguments"] as const;
 export class CG_Node {
 	constructor(data: Partial<CG_Node>, _isSyntheticNodeObj_fromStringCollection: "atomic_claims" | "counter_claims" | "examples") {
 		Object.assign(this, data, {_isSyntheticNodeObj_fromStringCollection});
@@ -21,7 +22,15 @@ export class CG_Node {
 			if (node._isSyntheticNodeObj_fromStringCollection == "counter_claims") return NodeType.claim;
 			if (node._isSyntheticNodeObj_fromStringCollection == "examples") return NodeType.claim;
 		}
-		throw new Error("Cannot discern node-type for CG_Node: " + JSON.stringify(node));
+
+		console.warn("Cannot discern node-type for CG_Node, so using fallback node-type of category. @data: " + JSON.stringify(node, function(key, value) {
+			// for children-object collections, just show the number of children, to avoid cluttering the error message
+			if (CG_Node_keysForChildrenObjects.includes(key as any) && Array.isArray(value)) {
+				return `<children count: ${value.length}; actual json omitted for brevity>`;
+			}
+			return value;
+		}, "\t"));
+		return NodeType.category; // fallback node-type (can happen for claim-gen exports that are just a "root node" with an "arguments" children-collection, but no text or anything for that root container-node)
 	}
 
 	// special fields (added by importer itself, during interpretation process)
