@@ -661,6 +661,8 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 Note: We use Google Cloud here, but others could be used.
 
+NOTE: This section is outdated. (see "to-react-19" branch instead, for now)
+
 * 1\) Ensure you have a user-account on Google Cloud Platform: https://cloud.google.com/
 * 2\) Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
 * 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the project you want to deploy to.

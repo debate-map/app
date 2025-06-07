@@ -1,5 +1,5 @@
 import * as docker from "@pulumi/docker";
-import {registryUrl} from "./SetUpGoogleContainerRegistry";
+import {mainRepoUrl} from "./SetUpGoogleArtifactRepos";
 
 const deploysEnabled = {
 	sharedBase: true,
@@ -22,7 +22,7 @@ export const webServer_baseImageName = webServer_info!.baseImageName;
 export const webServer_fullImageName = webServer_info!.fullImageName;
 
 if (deploysEnabled.appServer) {
-	var appServer_info = DeployPackage("Packages/app-server/Dockerfile", {imageName_base: "dm-app-server"});
+	var appServer_info = DeployPackage("Pkg/app-server/Dockerfile", {imageName_base: "lf-app-server"});
 }
 export const appServer_baseImageName = appServer_info!.baseImageName;
 export const appServer_fullImageName = appServer_info!.fullImageName;
@@ -32,8 +32,10 @@ export const appServer_fullImageName = appServer_info!.fullImageName;
 
 function DeployPackage(pathToDockerfile: string, opts: {imageName_base: string, imageName_final?: string}) {
 	// Get registry info (creds and endpoint).
-	const imageName_final = opts.imageName_final ? opts.imageName_final : registryUrl.apply(url=>`${url}/${opts.imageName_base}`);
-	const registryInfo = undefined; // use gcloud for authentication.
+	//const imageName_final = opts.imageName_final ? opts.imageName_final : mainRepoUrl.apply(url=>`${url}/${opts.imageName_base}`);
+	const imageName_final = opts.imageName_final ? opts.imageName_final : `${mainRepoUrl}/${opts.imageName_base}`;
+	console.log("ImageName_Final: ", imageName_final);
+	const registryInfo = undefined; // use gcloud for authentication
 
 	// Build and publish the container image.
 	const image = new docker.Image(opts.imageName_base, {

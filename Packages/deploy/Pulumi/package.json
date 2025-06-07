@@ -1,0 +1,4 @@
+{
+	"@type_c1": "The typescript files actually use module/import syntax; but we have to set type:commonjs here, so that ts-node (called by pulumi) can run them. (see: https://github.com/TypeStrong/ts-node/issues/1062)",
+	"type": "commonjs"
+}
