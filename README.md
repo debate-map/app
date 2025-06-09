@@ -572,7 +572,15 @@ Tools:
 
 Prerequisite steps: [setup-backend](#setup-backend)
 
-* 1\) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
+Notes:
+* Docker Desktop sometimes builds up so much cache/storage usage that it reaches the storage limits (see "Docker engine" and "Builders" section of settings). This can cause your builds to suddenly start failing for no explicable reason (sometimes it has an error message, sometimes it just hangs). The steps below have fixed the issue for me in the past.
+* Also see this (seems to have overlap with what I observed): https://github.com/docker/for-win/issues/14310
+
+New instructions:
+* 1\) Install the "Disk usage" extension (in Docker Desktop), press "Reclaim space", select "Unused images" and "Dangling images" and "Build cache records", then press "Delete". (not sure if all of these checkboxes are necessary, but it's what worked to resolve it for me)
+
+Old instructions:
+* 1\) Press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
 * 2\) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
 ```
 $containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
