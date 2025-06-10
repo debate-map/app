@@ -12,7 +12,7 @@ import {observer} from "mobx-react";
 import {CheckBox, Column, Row, RowLR, Select, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {TransferNodesUIState} from "./TransferNodeDialog/TransferNodeData.js";
+import {TransferNodesUIState} from "./TransferNode/TransferNodeData.js";
 
 export type TransferNodeDialog_SharedProps = {
 	payload: TransferNodesPayload,

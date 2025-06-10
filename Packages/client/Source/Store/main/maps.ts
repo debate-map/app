@@ -11,7 +11,7 @@ import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
 import {GetPathVisibilityInfoAfterEffects, GetPlaybackEffects} from "./maps/mapStates/PlaybackAccessors/ForEffects.js";
-import {SubtreeIncludeKeys, SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsStructs.js";
+import {SubtreeIncludeKeys, SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOps/SubtreeOpsStructs.js";
 
 export enum RatingPreviewType {
 	none = "none",

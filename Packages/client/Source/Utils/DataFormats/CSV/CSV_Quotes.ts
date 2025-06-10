@@ -1,7 +1,7 @@
 import {ClaimForm, GetNodeTitleFromPhrasingAndForm, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeType, QuoteAttachment, Source, Term} from "dm_common";
 import {ClassKeys} from "mobx-graphlink";
 import {CSVCell} from "./CSV_Basic";
-import {SubtreeIncludeKeys} from "../../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOpsStructs.js";
+import {SubtreeIncludeKeys} from "../../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOps/SubtreeOpsStructs.js";
 import {DMSubtreeData} from "../JSON/DM/DMSubtreeData.js";
 
 export const csv_quotes_includeKeys = new SubtreeIncludeKeys({

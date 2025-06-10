@@ -3,7 +3,7 @@ import {gql} from "@apollo/client";
 import {Assert, NN} from "js-vextensions";
 import {ClassKeys, CreateAccessor} from "mobx-graphlink";
 import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";
-import {DMSubtreeData} from "../../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
+import {DMSubtreeData} from "../../../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
 
 export function GetServerSubtreeData_GQLQuery(rootNodeID: string, maxExportDepth: number, includeKeys: SubtreeIncludeKeys) {
 	const Fields = (fields: string[], fieldSubfieldsStrings: {[key: string]: string} = {})=>{

@@ -8,9 +8,8 @@ import {Clone, ModifyString, StartDownload} from "js-vextensions";
 import {GetSchemaJSON, TableNameToDocSchemaName} from "mobx-graphlink";
 import {Button, CheckBox, Column, Row, RowLR, Select, Text, TextArea} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {MI_SharedProps} from "../../NodeUI_Menu.js";
-import {useSubtreeRetrievalQueryOrAccessors} from "../MI_SubtreeOps.js";
-import {SubtreeIncludeKeys} from "./SubtreeOpsStructs.js";
+import {MI_SharedProps} from "../../../NodeUI_Menu.js";
+import {useSubtreeRetrievalQueryOrAccessors} from "../SubtreeOpsDialog.js";
 
 enum ExportSubtreeUI_MidTab {
 	Nodes = 10,

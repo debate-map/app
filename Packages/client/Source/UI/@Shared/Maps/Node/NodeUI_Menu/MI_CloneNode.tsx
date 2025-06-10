@@ -8,7 +8,7 @@ import {BaseComponent} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {MI_SharedProps} from "../NodeUI_Menu.jsx";
 import {ShowTransferNodeDialog, TransferNodeNeedsWrapper} from "./Dialogs/TransferNodeDialog.js";
-import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/TransferNodeData.js";
+import {GetTransferNodesInitialData} from "./Dialogs/TransferNode/TransferNodeData.js";
 
 @Observer
 export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
