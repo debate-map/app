@@ -117,10 +117,16 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.newParent_data = this.newParent_data ?? GetNodeL2.NN(newParentID);
 		this.orderKeyForOuterNode = this.orderKeyForOuterNode ?? GetHighestLexoRankUnderParent(newParentID).next().key;
 
-		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
-		//const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && createWrapperArg;
-		const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && childGroup == ChildGroup.relevance;
-		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
+		/*const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && childGroup == ChildGroup.relevance;
+		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");*/
+
+		// if the new-parent-id is the same as the old-parent-id, then only allow the re-link to proceed if the child-group is changing
+		if (newParentID == oldParentID) {
+			const oldLink = GetNodeLinks(oldParentID, nodeID)[0];
+			AssertV(oldLink, `Cannot find old-link for node (${nodeID}) under old-parent-id (${oldParentID})!`);
+			AssertV(childGroup != oldLink.group, "Old-parent-id and new-parent-id cannot be the same! (unless changing child-group)");
+		}
+
 		//AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
 		// if (command.payload.unlinkFromOldParent && node.parents.VKeys().length == 1 && newParentPath.startsWith(draggedNodePath)) {

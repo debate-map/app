@@ -91,8 +91,13 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 
 	assert_user_can_add_child(ctx, actor, &new_parent).await?; // defensive
 
-	let pasting_premise_as_relevance_arg = node_data.r#type == NodeType::claim && childGroup == ChildGroup::relevance;
-	ensure!(oldParentID.as_ref() != Some(&newParentID) || pasting_premise_as_relevance_arg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
+	// if the new-parent-id is the same as the old-parent-id, then only allow the re-link to proceed if the child-group is changing
+	if Some(&newParentID) == oldParentID.as_ref()
+		&& let Some(old_parent) = &old_parent
+	{
+		let old_link = get_first_link_under_parent(ctx, &nodeID, old_parent.id.as_str()).await?;
+		ensure!(childGroup != old_link.group, "Old-parent-id and new-parent-id cannot be the same! (unless changing child-group)");
+	}
 
 	if unlink_from_old_parent {
 		let closest_map_root_node = if new_parent.rootNodeForMap.is_some() {

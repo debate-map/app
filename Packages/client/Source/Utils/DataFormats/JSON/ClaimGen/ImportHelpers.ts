@@ -48,11 +48,13 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, nodeData:
 	const parentNodeType = parentNodeData ? CG_Node.GetNodeType(parentNodeData) : context.importUnderNode.type;
 	const link = new NodeLink({
 		group:
-			// if this parent->child link is valid using child-group "generic", then do that
-			NodeType_Info.for[parentNodeType].childGroup_childTypes.get(ChildGroup.generic)?.includes(nodeType)
-				? ChildGroup.generic
-				// else, fall back to using the "freeform" child-group
-				: ChildGroup.freeform,
+			// if parent is of type "argument", then use "freeform" child-group for anything *except* its "premises" and "atomic_claims" children
+			// (since this is a special case where "generic" group results in the special "vertical" display-mode, which we only want for premises/atomic-claims)
+			parentNodeType == NodeType.argument && (nodeData._originCollectionName != "premises" && nodeData._originCollectionName != "atomic_claims") ? ChildGroup.freeform :
+			// else, if this parent->child link is valid using child-group "generic", go with that
+			NodeType_Info.for[parentNodeType].childGroup_childTypes.get(ChildGroup.generic)?.includes(nodeType) ? ChildGroup.generic :
+			// else, fall back to using the "freeform" child-group
+			ChildGroup.freeform,
 		orderKey: orderKey.toString(),
 		//form: claimForm,
 	});

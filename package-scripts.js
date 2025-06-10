@@ -341,11 +341,11 @@ Object.assign(scripts, {
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
 		}),*/
 
-		tiltUp_local:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5150 -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_local_release: `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5150 -- --env dev  --compileWithRelease ${extraTiltArgs}`,
-		tiltDown_local:       `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local --port 5150 -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh   --port 5250 -- --env prod                      ${extraTiltArgs}`,
-		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh   --port 5250 -- --env prod                      ${extraTiltArgs}`,
+		tiltUp_local:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_local_release: `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev  --compileWithRelease ${extraTiltArgs}`,
+		tiltDown_local:       `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev                       ${extraTiltArgs}`,
+		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh   --port 5290 -- --env prod                      ${extraTiltArgs}`,
+		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh   --port 5290 -- --env prod                      ${extraTiltArgs}`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
 		tiltUp_ovh_webServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
 		tiltUp_ovh_appServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
