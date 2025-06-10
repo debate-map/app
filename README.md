@@ -156,7 +156,7 @@ Remote (public):
 Port-assignment scheme: (ie. meaning of each digit in `ABCD`)
 * A) app/project [5: debate-map]
 * B) cluster [0: skipped, 1: local, 2: remote] (0 is skipped to avoid clashes with common ports, eg. 5000 for UPnP)
-* C) pod [0: web-server, 1: app-server, 2: postgres instance, 3: monitor, 4: hyperknowledge]
+* C) pod [0: web-server, 1: app-server, 2: postgres instance, 3: monitor, 4: hyperknowledge, 5: tilt]
 * D) variant [0: main, 1: served from webpack, etc.]
 
 > Note: Not all web-accessible k8s services are shown in the list above. Specifically:
