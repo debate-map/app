@@ -5,12 +5,15 @@ edition = "2021"
 publish = false
 
 [dependencies]
-log = "0.4.16"
+log = "0.4.27"
 tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
 #include_dir = "0.7.3"
 #mime_guess = "2.0.4"
-static-web-server = "2.28.0"
+
+static-web-server = "2.36.0"
+globset = { version = "0.4", features = ["serde1"] } # match version+features specified by static-web-server
+http = "0.2" # match version specified by static-web-server
 
 #rust_macros = { path = "../rust-macros" }
 rust_shared = { path = "../rust-shared" }

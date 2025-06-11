@@ -5,7 +5,7 @@
 
 	# use the instrumentisto mirror of rust-nightly, so we can pin to a specific build (avoiding a rebuild of the whole build-chain every 24hrs, when the regular rust-nightly image gets re-pushed)
 	# NOTE: sync with version in rust-toolchain.toml (and entry in Tiltfile [edit: this part seems outdated?])
-	FROM instrumentisto/rust:nightly-bullseye-2024-03-05
+	FROM instrumentisto/rust:nightly-bullseye-2025-06-09
 # ----------
 
 # generic env-var for code to know if its running as part of a Dockerfile
