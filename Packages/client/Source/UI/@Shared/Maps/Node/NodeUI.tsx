@@ -203,7 +203,8 @@ export class NodeUI extends BaseComponentPlus(
 		}
 
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
-		const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
+		// we exclude premise and comment children from this expand-to-show count, because these are shown in other places (premises as vertically-below the node, and comments in the node's "Comments" panel)
+		const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? nodeChildrenToShow.Exclude(...ncToShow_generic) : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
 
 		const playback = GetPlaybackInfo();
 		const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;
