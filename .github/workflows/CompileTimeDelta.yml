@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [closed]
-    branches:
-      - main
 
 jobs:
   linux-ubuntu:
@@ -16,7 +12,6 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
 
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - name: Checkout main repo
         uses: actions/checkout@v4
