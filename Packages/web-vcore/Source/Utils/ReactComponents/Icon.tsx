@@ -1,5 +1,5 @@
 import {BaseComponent} from "react-vextensions";
-import React from "react";
+import React, {SVGFactory, DetailedHTMLFactory} from "react";
 import {Assert, E} from "js-vextensions";
 import {manager} from "../../index.js";
 import {cssHelper} from "react-vextensions";;
@@ -21,13 +21,16 @@ vWebAppFramework_manager.Populate({
 
 //export class Icon extends BaseComponent<{icon: IconType, color?: string}, {}> {
 type Props = {
-	divContainer?: boolean, icon?: string, iconData?: string, size: number, color?: string
-} & React.SVGProps<SVGSVGElement> & React.HTMLProps<HTMLDivElement>;
+	divContainer?: boolean, icon?: string, iconData?: string, size: number, color?: string,
+	divProps?: React.HTMLProps<HTMLDivElement>,
+	svgProps?: React.SVGProps<SVGSVGElement>,
+};
 export class Icon extends BaseComponent<Props, {}> {
 	static defaultProps = {color: "rgba(255,255,255,.7)"};
 	render() {
-		const {divContainer, icon, iconData, size, color, style, ...rest} = this.props;
+		const {divContainer, icon, iconData, size, color, divProps, svgProps, ...rest_forOutermost} = this.props;
 		const {css} = cssHelper(this);
+		const useDivContainer = !!(divContainer || iconData);
 
 		let svgComp: React.JSX.Element|undefined;
 		if (icon) {
@@ -36,16 +39,16 @@ export class Icon extends BaseComponent<Props, {}> {
 			const info = manager.iconInfo[`./${icon}.svg`];
 			Assert(info != null, `Could not find icon-info for "${icon}.svg" in manager.iconInfo map. See comment in web-vcore/Source/Utils/ReactComponent/Icon.tsx for example code.`);
 			svgComp = (
-				<svg {...rest as any} viewBox={info.viewBox} width={size} height={size} style={css(style)}>
+				<svg {...(useDivContainer ? {} : rest_forOutermost)} {...svgProps} viewBox={info.viewBox} width={size} height={size}>
 					<use xlinkHref={`#${info.id}`} style={{fill: color}}/>
 				</svg>
 			);
 		}
 
-		const divContainer_final = divContainer || iconData;
-		if (divContainer_final) {
+		if (useDivContainer) {
+			const styleFromProps = divProps?.style ?? {};
 			return (
-				<div {...rest as any} style={css({width: size, height: size}, iconData && {background: `url(${iconData})`}, style)}>
+				<div {...rest_forOutermost} {...divProps} style={css({width: size, height: size}, iconData && {background: `url(${iconData})`}, styleFromProps)}>
 					{svgComp}
 				</div>
 			);
