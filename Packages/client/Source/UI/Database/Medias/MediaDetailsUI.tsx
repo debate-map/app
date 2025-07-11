@@ -13,6 +13,27 @@ import {RunCommand_AddMedia} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
 import {store} from "../../../Store/index.js";
 
+export function ParseYoutubeVideoInfo(urlStr: string) {
+	const videoID = ParseYoutubeVideoID_New(urlStr);
+	const url = new URL(urlStr);
+	const startTimeStr = url.searchParams.get("t") || url.searchParams.get("start");
+	const startTime = startTimeStr ? parseInt(startTimeStr) : null; // in seconds
+	return {videoID, startTime};
+}
+export function ParseYoutubeVideoID_New(urlStr: string) {
+	const url = new URL(urlStr);
+	const pathParts = url.pathname.split("/");
+	if (url.hostname == "youtu.be") {
+		if (pathParts.length > 1) return pathParts[1];
+	}
+	if (url.hostname == "www.youtube.com" || url.hostname == "youtube.com") {
+		if (pathParts[1] == "watch" && url.searchParams.has("v")) return url.searchParams.get("v");
+		if (pathParts[1] == "embed" && pathParts.length > 1) return pathParts[2];
+		if (pathParts[1] == "shorts" && pathParts.length > 1) return pathParts[2];
+	}
+	return null;
+}
+
 @Observer
 export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 	scrollView: ScrollView;
@@ -20,7 +41,7 @@ export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 		const {baseData, style, onChange} = this.props;
 		const {newData, dataError} = this.state;
 		const {Change, creating, editing} = this.helpers;
-		const videoID = ParseYoutubeVideoID(newData.url);
+		const ytInfo = ParseYoutubeVideoInfo(newData.url);
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const enabled = creating || editing;
 
@@ -48,7 +69,7 @@ export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 						/*pattern={Media_urlPattern}*/ required
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.url} onChange={val=>Change(newData.url = val)}/>
-					{newData.type == MediaType.video && newData.url && videoID == null &&
+					{newData.type == MediaType.video && newData.url && ytInfo.videoID == null &&
 						<Span ml={5} style={{color: HSLA(30, 1, .6, 1), whiteSpace: "pre"}}>Only YouTube urls supported currently.</Span>}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
@@ -63,10 +84,10 @@ export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 								<img src={newData.url} style={{width: "100%"}}/>
 							</Row>}
 						{newData.type == MediaType.video &&
-							// use wrapper div (with video-id as key), to ensure element cleanup when video-id changes
-							<div key={videoID}>
-								{!videoID && <div>Invalid YouTube video url: {newData.url}</div>}
-								{videoID && <YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
+							// use wrapper div (with media url as key), to ensure element cleanup when url changes
+							<div key={newData.url}>
+								{!ytInfo.videoID && <div>Invalid YouTube video url: {newData.url}</div>}
+								{ytInfo.videoID && <YoutubePlayerUI videoID={ytInfo.videoID} startTime={ytInfo.startTime ?? 0} heightVSWidthPercent={.5625}
 									onPlayerInitialized={player=>{
 										player.GetPlayerUI().style.position = "absolute";
 									}}/>}

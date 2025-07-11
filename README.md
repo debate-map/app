@@ -661,26 +661,24 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 Note: We use Google Cloud here, but others could be used.
 
-NOTE: This section is outdated. (see "to-react-19" branch instead, for now)
-
 * 1\) Ensure you have a user-account on Google Cloud Platform: https://cloud.google.com/
 * 2\) Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
 * 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the project you want to deploy to.
 	* 3.1\) For the main Google Cloud project instance, you'll need to be supplied with the service-account key-file. (contact Venryx)
 	* 3.2\) If you're creating your own fork/deployment, you'll need to:
 		* 3.2.1\) Create a GCP project.
-		* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
+		* 3.2.2\) Enable the Artifact Registry API for your GCP project: https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com
 		* 3.2.3\) Create a service-account: (it's possible a user account could also be granted access directly, but service-accounts are recommended anyway)
 			* 3.2.3.1\) Go to: https://console.cloud.google.com/iam-admin/serviceaccounts/create
-			* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
+			* 3.2.3.2\) Choose a service-account name (eg. "service-account-1"), and add the role "Artifact Registry Administrator" and "Storage Admin" (*not* the weaker "Storage Object Admin").
 			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
 			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
 	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
 	* 3.5\) Add the service-account to your Docker authentication, in a similar way:
-		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
-		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://gcr.io`
+		* 3.5.1\) If on Windows, run: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://GEOGRAPHICAL_LOCATION_IN_GCP-docker.pkg.dev` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+		* 3.5.2\) If on Linux/Mac, run: `cat Others/Secrets/gcs-key.json | docker login -u _json_key --password-stdin https://GEOGRAPHICAL_LOCATION_IN_GCP-docker.pkg.dev`
 
 
 </details>

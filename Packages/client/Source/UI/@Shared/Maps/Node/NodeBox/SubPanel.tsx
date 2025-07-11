@@ -7,6 +7,7 @@ import {Button, Row, Text} from "react-vcomponents";
 import {E, ModifyString} from "js-vextensions";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain.js";
 import {SourcesUI} from "./SourcesUI.js";
+import {ParseYoutubeVideoInfo} from "../../../../Database/Medias/MediaDetailsUI.js";
 
 @Observer
 export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
@@ -109,15 +110,15 @@ export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: Me
 		const media = GetMedia(mediaAttachment.id); // nn: db-ref, bail
 		if (media == null) return null;
 
-		const videoID = ParseYoutubeVideoID(media.url);
+		const ytInfo = ParseYoutubeVideoInfo(media.url);
 		return (
 			<div style={{position: "relative"}}>
 				{/*<Row mt={5} style={{display: "flex", alignItems: "center"}}>*/}
 				{media.type == MediaType.image &&
 					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : undefined, maxWidth: "100%"}}/>}
 				{media.type == MediaType.video && <>
-					{videoID == null && <div>Invalid YouTube video url: {media.url}</div>}
-					{videoID != null && <YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
+					{ytInfo.videoID == null && <div>Invalid YouTube video url: {media.url}</div>}
+					{ytInfo.videoID != null && <YoutubePlayerUI videoID={ytInfo.videoID} startTime={ytInfo.startTime ?? 0} heightVSWidthPercent={.5625}
 						onPlayerInitialized={player=>{
 							player.GetPlayerUI().style.position = "absolute";
 						}}/>}
