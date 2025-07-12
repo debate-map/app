@@ -70,7 +70,8 @@ export const buildConfig = options=>{
 		output: {
 			// add hash for cache-busting (easier than ensuring web-server + cdn caching is set up consistently/correctly)
 			//filename: "[name].js?[contenthash]", // commented; doesn't work currently
-			filename: "[name].[contenthash].js",
+			//filename: "[name].[contenthash].js",
+			filename: "[name].js",
 			path: opt.outputDir,
 			clean: true, // clean output directory before each build (otherwise the DevOutput folder gets huge during the development process)
 		},
@@ -220,6 +221,7 @@ export const buildConfig = options=>{
 				filename: "index.html",
 				inject: "body",
 				publicPath: opt.publicPath,
+				hash: true,
 			}),
 			new rspack.ProgressPlugin({}),
 			new rspack.DefinePlugin({
