@@ -21,7 +21,7 @@ function ExtendObjectMap_StoredInExtendMap(baseMap: object, extendMap: object|n)
 }
 
 type Populate_OmitFields = "Populate" | "store" | "rootState";
-type Populate_OptionalFields = "colors" | "zIndexes";
+type Populate_OptionalFields = "colors" | "zIndexes" | "GetConsoleFuncIntercept";
 export class Manager {
 	/*onPopulated = new Promise((resolve, reject)=>this.onPopulated_resolve = resolve);
 	onPopulated_resolve: Function;*/
@@ -62,6 +62,27 @@ export class Manager {
 	logTypes: any;
 	/** Changes path-watch-manager to be compatible with mobx. (removes optimizations!) */
 	mobxCompatMode: boolean;
+	GetConsoleFuncIntercept = (funcName: "log" | "info" | "warn" | "error", origFunc: Function)=>{
+		if (funcName == "warn") {
+			return function(...args) {
+				//var str = message + "";
+				if (typeof args[2] == "string" && args[2].includes("do not mix longhand and shorthand properties in the same style object")) return;
+				if (typeof args[0] == "string" && args[0].includes("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
+
+				return origFunc.apply(this, args);
+			} as typeof console.warn;
+		}
+		if (funcName == "error") {
+			return function(...args) {
+				const {message} = args[0];
+				var messageAsStr = `${message}`;
+				if (messageAsStr.Contains("Warning: A component is `contentEditable`")) return;
+				//if (messageAsStr.Contains("Warning: Unknown prop `")) return;
+
+				return origFunc.apply(this, args);
+			} as typeof console.error;
+		}
+	};
 	ShouldErrorBeIgnored = ShouldErrorBeIgnored;
 	PostHandleError: (error: Error, errorStr: string)=>any;
 

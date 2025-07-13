@@ -1,5 +1,6 @@
 import {GetStackTraceStr, E} from "js-vextensions";
 import {LogTypes} from "web-vcore_UserTypes";
+import {manager, OnPopulated} from "../../index.js";
 
 /*var Debug = true;
 
@@ -15,30 +16,16 @@ var Log = function(msg, type = 'default') { if(!Debug) return;
  console.log(colorString, process.pid + '' + spaceString + msg + '\x1b[0m');
 };*/
 
-/*console.log_orig = console.log;
-console.log = function(message) {
-    var str = message + "";
-    if (str.Contains("blacklist pattern [")) return; // disable smooth-scroller extension's message
-    console.log_orig.apply(this, arguments);
-};*/
-
-var warn_orig = console.warn;
-console.warn = function(...args) {
-	//var str = message + "";
-	if (typeof args[2] == "string" && args[2].includes("do not mix longhand and shorthand properties in the same style object")) return;
-	if (typeof args[0] == "string" && args[0].includes("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
-	return warn_orig.apply(this, args);
-};
-
-var error_orig = console.error;
-console.error = function(exception) {
-	var str = `${exception}`;
-	if (str.Contains("Warning: A component is `contentEditable`")) return;
-	//if (str.Contains("Warning: Unknown prop `")) return;
-	return error_orig.apply(this, arguments);
-
-	//LogSourceStackTraceFrom(new Error());
-};
+export const consoleFuncs_orig = {};
+OnPopulated(()=>{
+	for (const funcName of ["log", "info", "warn", "error"] as const) {
+		consoleFuncs_orig[funcName] = console[funcName];
+		const replacement = manager.GetConsoleFuncIntercept(funcName, consoleFuncs_orig[funcName]);
+		if (replacement) {
+			console[funcName] = replacement;
+		}
+	}
+});
 
 // fix for that console.table doesn't seem to be working (as used by react-addons-perf)
 //console.table = function() { console.log.apply(this, arguments); };
