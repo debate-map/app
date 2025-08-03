@@ -5,6 +5,7 @@ members = [
 	"Packages/web-server",
 	"Packages/app-server",
 	"Packages/monitor-backend",
+    "Packages/oom-checker"
 	#"Packages/graphlink-server",
 ]
 
