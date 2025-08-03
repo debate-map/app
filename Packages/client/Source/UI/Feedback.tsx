@@ -3,40 +3,7 @@ import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {Observer, PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
 import React from "react";
-
-@Observer
-export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
-	render() {
-		const currentSubpage = store.main.feedback.subpage;
-		const page = "feedback";
-		return (
-			<>
-				<SubNavBar>
-					<SubNavBarButton page={page} subpage="new" text="New" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
-					{/*<SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
-					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/>*/}
-				</SubNavBar>
-				<Switch>
-					<ProposalsUI_Stub/>
-					{/*currentSubpage == "roadmap" && <RoadmapUI/>}
-					{currentSubpage == "neutrality" && <NeutralityUI/>*/}
-				</Switch>
-			</>
-		);
-	}
-}
-
-class ProposalsUI_Stub extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<PageContainer scrollable={true}>
-				<article>
-					<VReactMarkdown source={source} className="selectable"/>
-				</article>
-			</PageContainer>
-		);
-	}
-}
+import {observer_mgl} from "mobx-graphlink";
 
 const source = `
 The tracking of proposals and tasks is currently managed on the Debate Map's GitHub repo.
@@ -45,3 +12,32 @@ The tracking of proposals and tasks is currently managed on the Debate Map's Git
 
 To see the old task-tracking system, visit the "Old" subpage linked above. (in the long-term, the two systems will be merged)
 `.AsMultiline(0);
+
+export const FeedbackUI = observer_mgl(()=>{
+    const currentSubpage = store.main.feedback.subpage;
+    const page = "feedback";
+    return (
+    	<>
+    		<SubNavBar>
+    			<SubNavBarButton page={page} subpage="new" text="New" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
+    			{/*<SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
+    			<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/>*/}
+    		</SubNavBar>
+    		<Switch>
+    			<ProposalsUI_Stub/>
+    			{/*currentSubpage == "roadmap" && <RoadmapUI/>}
+    			{currentSubpage == "neutrality" && <NeutralityUI/>*/}
+    		</Switch>
+    	</>
+    );
+});
+
+const ProposalsUI_Stub = ()=>{
+    return (
+        <PageContainer scrollable>
+            <article>
+                <VReactMarkdown source={source} className="selectable" />
+            </article>
+        </PageContainer>
+    );
+};
