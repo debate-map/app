@@ -70,6 +70,15 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
+      - name: oom-checker
+        image: "TILT_PLACEHOLDER:imageURL_oomChecker"
+        securityContext:
+          privileged: true
+        env:
+          - name: INTERVAL_MS
+            value: "5000"
+          - name: THRESHOLD_PCT
+            value: "0"                # log only at/above 85%
 
 # give app-server various kubernetes-api permissions, within its own namespace "default"
 ---

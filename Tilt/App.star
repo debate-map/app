@@ -65,6 +65,7 @@ def Start_App(g):
 			"copy_from_path": CopyFromPath("web_server"),
 		},
 	)
+
 	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + ENV
 	docker_build(imageURL_appServer, '..', dockerfile='../Packages/app-server/Dockerfile',
 		build_args={
@@ -74,6 +75,16 @@ def Start_App(g):
 			"debug_vs_release_profile": rustProfile,
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
 			"copy_from_path": CopyFromPath("app_server"),
+		},
+	)
+
+	imageURL_oomChecker = g["registryURL"] + '/dm-oom-checker-' + ENV
+	docker_build(imageURL_oomChecker, '..', dockerfile='../Packages/oom-checker/Dockerfile',
+		build_args={
+			"RUST_BASE_URL": imageURL_rustBase,
+			"ENVIRONMENT": ENV,
+			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
+			"copy_from_path": CopyFromPath("oom_checker"),
 		},
 	)
 
@@ -88,6 +99,7 @@ def Start_App(g):
 	}))
 	k8s_yaml(ReadFileWithReplacements('../Packages/app-server/deployment.yaml', {
 		"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
+        "TILT_PLACEHOLDER:imageURL_oomChecker": imageURL_oomChecker,
 	}))
 
 	# port forwards (see readme's [project-service-urls] guide-module for details)

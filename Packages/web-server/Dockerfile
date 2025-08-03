@@ -31,6 +31,9 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 COPY Packages/app-server/Cargo.toml Packages/app-server/Cargo.toml
 RUN mkdir Packages/app-server/src/
 RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/app-server/src/main.rs
+COPY Packages/oom-checker/Cargo.toml Packages/oom-checker/Cargo.toml
+RUN mkdir Packages/oom-checker/src/
+RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/oom-checker/src/main.rs
 
 # copy this package
 COPY Packages/web-server/ /dm_repo/Packages/web-server/
