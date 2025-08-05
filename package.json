@@ -51,7 +51,7 @@
     "immer": "7.0.15",
     "js-vextensions": "1.0.80",
     "mobx": "6.3.13",
-    "mobx-graphlink": "0.1.6",
+    "mobx-graphlink": "0.1.5",
     "mobx-react": "9.2.0",
     "moment": "2.24.0",
     "raven-js": "3.27.2",

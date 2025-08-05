@@ -10574,9 +10574,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@npm:0.1.6":
-  version: 0.1.6
-  resolution: "mobx-graphlink@npm:0.1.6"
+"mobx-graphlink@npm:0.1.5":
+  version: 0.1.5
+  resolution: "mobx-graphlink@npm:0.1.5"
   dependencies:
     "@types/json-schema": "npm:^7.0.8"
     "@vforks/get-graphql-from-jsonschema": "npm:8.0.12-7"
@@ -10597,7 +10597,7 @@ __metadata:
     mobx: ^6.3.2
     mobx-react: ^7.6.0
     react: ^17.0.2
-  checksum: 56c04f0fe4f3e58d4a0e2b4dc49df86f3650f8d30111d91cd499ac62079531c08ce241d210357cec2b6f977870e80570032bc532918d5efe077a11154003efcb
+  checksum: 0d3248c9c7d515f48470e421d35a497e1f2f4fa99a412829f4fcce28f0ed668b585d8114738e0ea10551a2c0886fac5994c82a69c02dbdde878af8c6170122be
   languageName: node
   linkType: hard
 
@@ -16295,7 +16295,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:6.3.13"
-    mobx-graphlink: "npm:0.1.6"
+    mobx-graphlink: "npm:0.1.5"
     mobx-react: "npm:9.2.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"
