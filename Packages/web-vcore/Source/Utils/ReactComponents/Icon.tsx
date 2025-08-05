@@ -1,5 +1,5 @@
 import {BaseComponent} from "react-vextensions";
-import React, {SVGFactory, DetailedHTMLFactory} from "react";
+import React from "react";
 import {Assert, E} from "js-vextensions";
 import {manager} from "../../index.js";
 import {cssHelper} from "react-vextensions";;

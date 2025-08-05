@@ -10574,12 +10574,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@npm:0.1.2":
-  version: 0.1.2
-  resolution: "mobx-graphlink@npm:0.1.2"
+"mobx-graphlink@npm:0.1.6":
+  version: 0.1.6
+  resolution: "mobx-graphlink@npm:0.1.6"
   dependencies:
     "@types/json-schema": "npm:^7.0.8"
-    "@types/node": "npm:^20.10.6"
     "@vforks/get-graphql-from-jsonschema": "npm:8.0.12-7"
     ajv: "npm:^8.8.1"
     ajv-keywords: "npm:^5.0.0"
@@ -10592,13 +10591,13 @@ __metadata:
     updeep: "npm:^1.2.0"
     uuid: "npm:^8.3.2"
   peerDependencies:
-    "@apollo/client": ^3.7.15
-    "@types/react": ^17.0.9
+    "@apollo/client": ^3.13.3
+    "@types/react": ^19.0.0
     graphql: ^16.6.0
     mobx: ^6.3.2
     mobx-react: ^7.6.0
     react: ^17.0.2
-  checksum: 41fe0f37e257d3b08b08cea28c0caaa91c1d7744ac5fbe919843d9964fc497ad56b6ad1b9914c682696180f11107a47eef43b46891179eaa51353e310d50cbac
+  checksum: 56c04f0fe4f3e58d4a0e2b4dc49df86f3650f8d30111d91cd499ac62079531c08ce241d210357cec2b6f977870e80570032bc532918d5efe077a11154003efcb
   languageName: node
   linkType: hard
 
@@ -12475,15 +12474,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-datetime@npm:^3.3.1":
+"react-datetime@git+https://github.com/Venryx/react-datetime.git#patch-1":
   version: 3.3.1
-  resolution: "react-datetime@npm:3.3.1"
+  resolution: "react-datetime@https://github.com/Venryx/react-datetime.git#commit=d2fbeef37d96b2b930a453053a04599c79b33f45"
   dependencies:
     prop-types: "npm:^15.5.7"
   peerDependencies:
     moment: ^2.16.0
     react: ^16.5.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: cc43f178958c350e313cc880413c6a4f509cec3176790f0e5b01e04cebe6a6530b084a4b780f04f046d5b6df74de79ff80799ff796f3cd0c7ae01cf9674d785d
+  checksum: f363601aec34d873a901ccf8e72456d3812f80c6978541951ffd4527198d263602087512ba7bd48d1b17f58c1d0c14518b44d49209fed525ac2d9ef1928e4114
   languageName: node
   linkType: hard
 
@@ -16296,7 +16295,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:6.3.13"
-    mobx-graphlink: "npm:0.1.5"
+    mobx-graphlink: "npm:0.1.6"
     mobx-react: "npm:9.2.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"
@@ -16307,7 +16306,7 @@ __metadata:
     rc-slider: "npm:11.1.8"
     rc-tooltip: "npm:6.4.0"
     react: "npm:19.0.0"
-    react-datetime: "npm:^3.3.1"
+    react-datetime: "git+https://github.com/Venryx/react-datetime.git#patch-1"
     react-dom: "npm:19.0.0"
     react-markdown: "npm:10.1.0"
     react-uplot: "npm:0.0.9"

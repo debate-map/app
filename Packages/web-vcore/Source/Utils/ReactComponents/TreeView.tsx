@@ -41,14 +41,16 @@ export class TreeView extends BaseComponent<Props, {collapsed: boolean}> {
 		return (
 			<div style={style} {...rest}>
 				<Icon icon={`arrow-${collapsed ? "right" : "down"}`} size={iconSize}
-					style={css(
-						{
-							display: "inline-block", boxSizing: "content-box" as any, width: iconSize, height: iconSize, verticalAlign: "top", marginTop: 2, padding: 2,
-							backgroundPosition: 2, backgroundRepeat: "no-repeat", backgroundSize: 8, cursor: "pointer",
-						},
-						!collapsable && {opacity: 0},
-					)}
-					onClick={this.onArrowClick.bind(this)}/>
+					svgProps={{
+						style: css(
+							{
+								display: "inline-block", boxSizing: "content-box" as any, width: iconSize, height: iconSize, verticalAlign: "top", marginTop: 2, padding: 2,
+								backgroundPosition: 2, backgroundRepeat: "no-repeat", backgroundSize: 8, cursor: "pointer",
+							},
+							!collapsable && {opacity: 0},
+						),
+						onClick: this.onArrowClick.bind(this),
+					}}/>
 				<div onClick={this.onClick.bind(this)}
 					style={css(
 						titleStyle,

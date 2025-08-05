@@ -27,6 +27,8 @@ export function InitGraphlink() {
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 		onServer: false,
 	}, {
+		useIntrospection: true,
+
 		//unsubscribeTreeNodesAfter: 30000, // on live-query's data becoming unobserved, wait 30s before unsubscribing (user may re-expand something just closed, in the short-term)
 		unsubscribeTreeNodesAfter: GetMGLUnsubscribeDelay(),
 		// we want some buffering to take place, otherwise map-loading gets really slow when lots of nodes are visible

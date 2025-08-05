@@ -6,6 +6,9 @@
 		"moduleResolution": "node",
 		//"maxNodeModulesJsDepth": 1,
 
+		// temp (while waiting for mobx, react-datetime, etc. to update to fully correct react-19 typing support)
+		"skipLibCheck": true,
+
 		// compilation
 		//"target": "es2015",
 		//"target": "esnext", // babel targets es2015 (ie. transpiles our code to it), so it's fine for TS to target es-next
