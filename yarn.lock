@@ -10541,9 +10541,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@npm:0.1.8":
-  version: 0.1.8
-  resolution: "mobx-graphlink@npm:0.1.8"
+"mobx-graphlink@npm:0.1.9":
+  version: 0.1.9
+  resolution: "mobx-graphlink@npm:0.1.9"
   dependencies:
     "@types/json-schema": "npm:^7.0.8"
     ajv: "npm:^8.8.1"
@@ -10563,7 +10563,7 @@ __metadata:
     mobx: ^6.3.2
     mobx-react: ^7.6.0
     react: ^17.0.2
-  checksum: 348ffdc9f6b56f9d76fe8aae90c0b311b2d4352c5c926581e04de6a2f25dc4c91ae57a85d60da6ef045c3e7f28f90ce5ed4f6391063de3712651e2973e19c3b2
+  checksum: 19362ded2b54fe68466694b4ff9618207b587253f0e7d1f31edecc69fa66648794db6c5075ee5012c2af6c2a845014abaf3bf1baa716159e0413d7c0512b5128
   languageName: node
   linkType: hard
 
@@ -16261,7 +16261,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:6.3.13"
-    mobx-graphlink: "npm:0.1.8"
+    mobx-graphlink: "npm:0.1.9"
     mobx-react: "npm:9.2.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"
