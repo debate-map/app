@@ -1,59 +1,69 @@
 import {BaseComponent} from "react-vextensions";
+import React from "react";
 import {WaitXThenRun} from "js-vextensions";
-import {gql, useQuery, useSubscription} from "@apollo/client";
+import {gql, useSubscription} from "@apollo/client";
 import {Button} from "react-vcomponents";
 import {GetAppServerURL} from "../../../../Utils/LibIntegrations/Apollo.js";
 import {OpenSignInPopup, SignInProvider} from "../UserPanel.js";
+import {observer_mgl} from "mobx-graphlink";
+import {useCallback, useState} from "react";
 
-export class SignInButton extends BaseComponent<{provider: SignInProvider, preferredUsername?: string, onJWTReceived: (jwt: string)=>void}, {authLink: string, devSignInButtonClicked: boolean, jwtResolved: boolean}> {
-	render() {
-		const {provider, preferredUsername, onJWTReceived} = this.props;
-		const {devSignInButtonClicked, jwtResolved} = this.state;
+type SignInButtonProps = {
+	provider: SignInProvider;
+	preferredUsername?: string;
+	onJWTReceived: (jwt: string) => void;
+}
 
-		const subActive = provider == "dev"
-			// for "dev" provider, we cannot even start the sign-in subscription until the user clicks the button (since it immediately returns a jwt, rather than a link to click)
-			? devSignInButtonClicked && !jwtResolved
-			: !jwtResolved;
+export const SignInButton = observer_mgl<SignInButtonProps>(({
+	provider,
+	preferredUsername,
+	onJWTReceived
+})=>{
+	const [devSignInButtonClicked, setDevSignInButtonClicked] = useState<boolean>(false);
+	const [jwtResolved, setJwtResolved] = useState<boolean>(false);
+	const [authLink, setAuthLink] = useState<string | null>();
 
-		// todo: may want to handle possible edge-case of auth-link "expiring", requiring retrieval of a new one (ie. starting a new subscription)
-		const monthInSecs = 2629800; // 60 * 60 * 24 * 30;
-		useSubscription(gql`
-			subscription($input: SignInStartInput!) {
-				signInStart(input: $input) { instructions authLink resultJWT }
+	// for "dev" provider, we cannot even start the sign-in subscription until the user clicks the button (since it immediately returns a jwt, rather than a link to click)
+	const subActive = provider == "dev" ? devSignInButtonClicked && !jwtResolved : !jwtResolved;
+	// TODO: may want to handle possible edge-case of auth-link "expiring", requiring retrieval of a new one (ie. starting a new subscription)
+	const monthInSecs = 2629800; // 60 * 60 * 24 * 30;
+
+	useSubscription(gql`
+		subscription($input: SignInStartInput!) {
+			signInStart(input: $input) { instructions authLink resultJWT }
+		}
+	`, {
+		skip: !subActive,
+		variables: {input: {provider, jwtDuration: monthInSecs, preferredUsername}},
+		onData: info=>{
+			const gqlResult = info.data.data.signInStart;
+			if (gqlResult.authLink) {
+				setAuthLink(gqlResult.authLink);
 			}
-		`, {
-			skip: !subActive,
-			variables: {input: {provider, jwtDuration: monthInSecs, preferredUsername}},
-			onData: info=>{
-				const gqlResult = info.data.data.signInStart;
-				if (gqlResult.authLink) {
-					this.SetState({authLink: gqlResult.authLink});
-				}
+			if (gqlResult.resultJWT) {
+				//subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+				setJwtResolved(true); // by setting jwtResolved to true, we disable the subscription and clear this comp's ui contents (comp will be unmounted soon when replaced with user information)
+				onJWTReceived(gqlResult.resultJWT);
+			}
+		},
+	});
 
-				if (gqlResult.resultJWT) {
-					//subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-					this.SetState({jwtResolved: true}); // by setting jwtResolved to true, we disable the subscription and clear this comp's ui contents (comp will be unmounted soon when replaced with user information)
-					onJWTReceived(gqlResult.resultJWT);
-				}
-			},
-		});
-
-		return <>
-			{provider == "google" && <SignInButton_Google_Inner onClick={this.Google_OnClick}/>}
-			{provider == "dev" && <Button ml={5} text="Sign in" onClick={()=>this.SetState({devSignInButtonClicked: true})}/>}
-		</>;
-	}
-	//popupOpened = false;
-	// anchor this function to the class-instance, so that it doesn't change between re-renders
-	Google_OnClick = ()=>{
-		const {provider} = this.props;
-		const {authLink, jwtResolved} = this.state;
+	const handleGoogleOnClick = useCallback(()=>{
 		// Why not block popup-relaunch if was already launched? Because user may have closed the popup, but then decided to try again.
 		if (authLink != null && !jwtResolved) {
 			OpenSignInPopup(authLink, provider);
 		}
-	};
-}
+	}, [authLink, jwtResolved, provider]);
+
+	const handleDevSignInClick = ()=>{
+		setDevSignInButtonClicked(true);
+	}
+
+	return <>
+		{provider == "google" && <SignInButton_Google_Inner onClick={handleGoogleOnClick}/>}
+		{provider == "dev" && <Button ml={5} text="Sign in" onClick={handleDevSignInClick}/>}
+	</>;
+})
 
 class SignInButton_Google_Inner extends BaseComponent<{onClick: ()=>any}, {}> {
 	render() {
@@ -75,17 +85,29 @@ class SignInButton_Google_Inner extends BaseComponent<{onClick: ()=>any}, {}> {
 	}
 }
 
-// from: https://developers.google.com/identity/gsi/web/reference/js-reference
+/**
+ * Configuration options for rendering a Google Sign-In button.
+ * Reference: https://developers.google.com/identity/gsi/web/reference/js-reference
+ */
 type GsiButtonConfiguration = {
-	type?: string; // The button type: icon, or standard button.
-	theme?: string; // The button theme. For example, white or blue.
-	size?: string; // The button size. For example, samll or large.
-	text?: string; // The button text. For example, "Sign in with Google" or "Sign up with Google".
-	shape?: string; // The button shape. For example, rectangular or circular.
-	logo_alignment?: string; // The Google logo alignment: left or center.
-	width?: number; // The button width, in pixels.
-	locale?: string; // If set, then the button language is rendered.
-}
+    /** The button type: `"icon"` or `"standard"`. */
+    type?: string;
+    /** The button theme: e.g., `"white"`, `"blue"`. */
+    theme?: string;
+    /** The button size: e.g., `"small"`, `"large"`. */
+    size?: string;
+    /** The button text: e.g., `"Sign in with Google"`, `"Sign up with Google"`. */
+    text?: string;
+    /** The button shape: e.g., `"rectangular"`, `"circular"`. */
+    shape?: string;
+    /** The Google logo alignment: `"left"` or `"center"`. */
+    logo_alignment?: string;
+    /** The button width in pixels. */
+    width?: number;
+    /** The button language/locale code, e.g., `"en"`, `"fr"`. */
+    locale?: string;
+};
+
 export const googleClientID = process.env.CLIENT_ID; // supplied by client/rspack.config.js
 export function EnsureGoogleIDAPIReady() {
 	/*if (g.google == null) {

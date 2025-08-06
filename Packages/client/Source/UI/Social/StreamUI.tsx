@@ -62,8 +62,8 @@ export class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, inde
 
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 
-		let messageUI: JSX.Element;
-		let messageUI_row2: JSX.Element|n;
+		let messageUI: React.JSX.Element;
+		let messageUI_row2: React.JSX.Element|n;
 		let node_final: NodeL3|n;
 		let mapId: string|n;
 		if (run.commandName == "addChildNode") {
