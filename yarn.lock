@@ -2702,13 +2702,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/common-tags@npm:1.8.1":
-  version: 1.8.1
-  resolution: "@types/common-tags@npm:1.8.1"
-  checksum: 2ea427ecd10cef7e371c18fb38915d7df4d54dbb03159c8b5f6e6b9255c30c38e152fcde10133f42c966c58b929ccd418566a37f59a458ded0a0a87b80e0f012
-  languageName: node
-  linkType: hard
-
 "@types/connect-history-api-fallback@npm:^1.5.4":
   version: 1.5.4
   resolution: "@types/connect-history-api-fallback@npm:1.5.4"
@@ -2860,13 +2853,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: c4bffd87be9aff7e879c05bd2c28716220e0eb39788e3f8d314eee665324ad8f5f0919041cbd710254d553cd9cea023f8b776d4b1ec31d2188eac60af18c3022
-  languageName: node
-  linkType: hard
-
-"@types/json-schema@npm:7.0.8":
-  version: 7.0.8
-  resolution: "@types/json-schema@npm:7.0.8"
-  checksum: 5de577528cfa9053eb2596b9d9fd0fbd6bad8b0f38fc002a6558abe96f6a503cdd7ef052552d7247b990343696a7dba753a351f012c3a21d799ec86f4bc9b206
   languageName: node
   linkType: hard
 
@@ -3244,18 +3230,6 @@ __metadata:
   version: 1.3.0
   resolution: "@ungap/structured-clone@npm:1.3.0"
   checksum: 0fc3097c2540ada1fc340ee56d58d96b5b536a2a0dab6e3ec17d4bfc8c4c86db345f61a375a8185f9da96f01c69678f836a2b57eeaa9e4b8eeafd26428e57b0a
-  languageName: node
-  linkType: hard
-
-"@vforks/get-graphql-from-jsonschema@npm:8.0.12-7":
-  version: 8.0.12-7
-  resolution: "@vforks/get-graphql-from-jsonschema@npm:8.0.12-7"
-  dependencies:
-    "@types/common-tags": "npm:1.8.1"
-    "@types/json-schema": "npm:7.0.8"
-    common-tags: "npm:1.8.0"
-    defekt: "npm:7.3.1"
-  checksum: 3a49c914ee949f82aed6960fbaf9a7a617fc686f5a92350d5720205841142c65ae777688df6b0a742a20ea587c57c5d6e2ac63247e8d02dc865884f6ae6df52d
   languageName: node
   linkType: hard
 
@@ -5073,7 +5047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"common-tags@npm:1.8.0, common-tags@npm:^1.4.0":
+"common-tags@npm:^1.4.0":
   version: 1.8.0
   resolution: "common-tags@npm:1.8.0"
   checksum: 851f2430c653e76602c23f4a851837c507d1e7d11679474856346a265307872c9a62da7cfc001a36871aa73587dac14e60f5397c012b6ff5d0669e4f81af037e
@@ -5777,13 +5751,6 @@ __metadata:
   dependencies:
     clone: "npm:^1.0.2"
   checksum: 9cfbe498f5c8ed733775db62dfd585780387d93c17477949e1670bfcfb9346e0281ce8c4bf9f4ac1fc0f9b851113bd6dc9e41182ea1644ccd97de639fa13c35a
-  languageName: node
-  linkType: hard
-
-"defekt@npm:7.3.1":
-  version: 7.3.1
-  resolution: "defekt@npm:7.3.1"
-  checksum: c82a8f1b64c5408128dde0de3220a8cb8ff01de7a3f053f6a737fa5864d32e70225f204090dce0b5ff9eceb1c9c7941168586980e8750095abd8ca07a6fc86e9
   languageName: node
   linkType: hard
 
@@ -10574,12 +10541,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@npm:0.1.5":
-  version: 0.1.5
-  resolution: "mobx-graphlink@npm:0.1.5"
+"mobx-graphlink@npm:0.1.8":
+  version: 0.1.8
+  resolution: "mobx-graphlink@npm:0.1.8"
   dependencies:
     "@types/json-schema": "npm:^7.0.8"
-    "@vforks/get-graphql-from-jsonschema": "npm:8.0.12-7"
     ajv: "npm:^8.8.1"
     ajv-keywords: "npm:^5.0.0"
     buffer: "npm:^6.0.3"
@@ -10597,7 +10563,7 @@ __metadata:
     mobx: ^6.3.2
     mobx-react: ^7.6.0
     react: ^17.0.2
-  checksum: 0d3248c9c7d515f48470e421d35a497e1f2f4fa99a412829f4fcce28f0ed668b585d8114738e0ea10551a2c0886fac5994c82a69c02dbdde878af8c6170122be
+  checksum: 348ffdc9f6b56f9d76fe8aae90c0b311b2d4352c5c926581e04de6a2f25dc4c91ae57a85d60da6ef045c3e7f28f90ce5ed4f6391063de3712651e2973e19c3b2
   languageName: node
   linkType: hard
 
@@ -16295,7 +16261,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:6.3.13"
-    mobx-graphlink: "npm:0.1.5"
+    mobx-graphlink: "npm:0.1.8"
     mobx-react: "npm:9.2.0"
     mobx-sync: "npm:3.0.0"
     mobx-utils: "npm:^6.0.6"
