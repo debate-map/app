@@ -9,6 +9,7 @@ use rust_shared::{
 	serde, GQLError,
 };
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::{
 	filter::FilterInput,
@@ -33,12 +34,7 @@ impl From<Row> for Proposal {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_Proposal { pub nodes: Vec<Proposal> }
-#[Object] impl GQLSet_Proposal { async fn nodes(&self) -> &Vec<Proposal> { &self.nodes } }
-impl GQLSet<Proposal> for GQLSet_Proposal {
-	fn from(entries: Vec<Proposal>) -> GQLSet_Proposal { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Proposal> { &self.nodes }
-}
+gql_set_impl!(Proposal);
 
 #[derive(Default)] pub struct QueryShard_Proposal;
 #[Object] impl QueryShard_Proposal {

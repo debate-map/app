@@ -9,6 +9,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -63,12 +64,7 @@ pub struct ShareUpdates {
 	pub mapView: CanOmit<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Share { pub nodes: Vec<Share> }
-#[Object] impl GQLSet_Share { async fn nodes(&self) -> &Vec<Share> { &self.nodes } }
-impl GQLSet<Share> for GQLSet_Share {
-	fn from(entries: Vec<Share>) -> GQLSet_Share { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Share> { &self.nodes }
-}
+gql_set_impl!(Share);
 
 #[derive(Default)] pub struct QueryShard_Share;
 #[Object] impl QueryShard_Share {

@@ -16,6 +16,7 @@ use rust_shared::{serde_json, GQLError, SubError};
 
 use crate::db::node_links::get_node_links;
 use crate::db::nodes::get_node;
+use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::accessors::{get_db_entries, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
@@ -153,12 +154,7 @@ pub struct NodeRatingInput {
 	pub value: f64,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeRating { pub nodes: Vec<NodeRating> }
-#[Object] impl GQLSet_NodeRating { async fn nodes(&self) -> &Vec<NodeRating> { &self.nodes } }
-impl GQLSet<NodeRating> for GQLSet_NodeRating {
-	fn from(entries: Vec<NodeRating>) -> GQLSet_NodeRating { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<NodeRating> { &self.nodes }
-}
+gql_set_impl!(NodeRating);
 
 #[derive(Default)] pub struct QueryShard_NodeRating;
 #[Object] impl QueryShard_NodeRating {

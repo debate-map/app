@@ -8,6 +8,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::{
 	filter::FilterInput,
@@ -36,12 +37,7 @@ impl From<Row> for GlobalData {
 	}
 }
 
-#[derive(Clone)] pub struct GQLSet_GlobalData { pub nodes: Vec<GlobalData> }
-#[Object] impl GQLSet_GlobalData { async fn nodes(&self) -> &Vec<GlobalData> { &self.nodes } }
-impl GQLSet<GlobalData> for GQLSet_GlobalData {
-	fn from(entries: Vec<GlobalData>) -> GQLSet_GlobalData { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<GlobalData> { &self.nodes }
-}
+gql_set_impl!(GlobalData);
 
 #[derive(Default)] pub struct QueryShard_GlobalData;
 #[Object] impl QueryShard_GlobalData {

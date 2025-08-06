@@ -10,6 +10,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -68,12 +69,7 @@ pub struct MediaUpdates {
 	pub description: CanOmit<String>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Media { pub nodes: Vec<Media> }
-#[Object] impl GQLSet_Media { async fn nodes(&self) -> &Vec<Media> { &self.nodes } }
-impl GQLSet<Media> for GQLSet_Media {
-	fn from(entries: Vec<Media>) -> GQLSet_Media { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Media> { &self.nodes }
-}
+gql_set_impl!(Media);
 
 #[derive(Default)] pub struct QueryShard_Media;
 #[Object] impl QueryShard_Media {

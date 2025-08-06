@@ -10,6 +10,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{futures, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entries;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -109,12 +110,7 @@ pub struct TimelineStepUpdates {
 	pub extras: CanOmit<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_TimelineStep { pub nodes: Vec<TimelineStep> }
-#[Object] impl GQLSet_TimelineStep { async fn nodes(&self) -> &Vec<TimelineStep> { &self.nodes } }
-impl GQLSet<TimelineStep> for GQLSet_TimelineStep {
-	fn from(entries: Vec<TimelineStep>) -> GQLSet_TimelineStep { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<TimelineStep> { &self.nodes }
-}
+gql_set_impl!(TimelineStep);
 
 #[derive(Default)] pub struct QueryShard_TimelineStep;
 #[Object] impl QueryShard_TimelineStep {

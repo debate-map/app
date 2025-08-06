@@ -11,6 +11,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -100,12 +101,7 @@ pub struct UserFollow {
 	pub markRatings_size: f64,
 }
 
-#[derive(Clone)] pub struct GQLSet_UserHidden { pub nodes: Vec<UserHidden> }
-#[Object] impl GQLSet_UserHidden { async fn nodes(&self) -> &Vec<UserHidden> { &self.nodes } }
-impl GQLSet<UserHidden> for GQLSet_UserHidden {
-	fn from(entries: Vec<UserHidden>) -> GQLSet_UserHidden { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<UserHidden> { &self.nodes }
-}
+gql_set_impl!(UserHidden);
 
 #[derive(Default)] pub struct QueryShard_UserHidden;
 #[Object] impl QueryShard_UserHidden {

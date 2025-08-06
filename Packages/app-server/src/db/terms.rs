@@ -9,6 +9,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{futures, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -90,14 +91,7 @@ pub struct TermUpdates {
 	pub attachments: CanOmit<Vec<Attachment>>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Term { pub nodes: Vec<Term> }
-#[Object] impl GQLSet_Term { async fn nodes(&self) -> &Vec<Term> { &self.nodes } }
-//#[async_trait]
-impl GQLSet<Term> for GQLSet_Term {
-	fn from(entries: Vec<Term>) -> GQLSet_Term { Self { nodes: entries } }
-	//async fn nodes(&self) -> &Vec<Term> { &self.nodes }
-	fn nodes(&self) -> &Vec<Term> { &self.nodes }
-}
+gql_set_impl!(Term);
 
 #[derive(Default)] pub struct QueryShard_Term;
 #[Object] impl QueryShard_Term {

@@ -171,6 +171,7 @@ dependencies = [
  "metrics",
  "num_cpus",
  "oauth2",
+ "pastey",
  "pyroscope",
  "pyroscope_pprofrs",
  "rust_shared",
@@ -3078,6 +3079,12 @@ dependencies = [
  "smallvec",
  "windows-sys 0.34.0",
 ]
+
+[[package]]
+name = "pastey"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3a8cb46bdc156b1c90460339ae6bfd45ba0394e5effbaa640badb4987fdc261"
 
 [[package]]
 name = "pem-rfc7468"

@@ -7,6 +7,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::{
 	filter::FilterInput,
@@ -35,12 +36,7 @@ impl From<Row> for UserInfo {
 	}
 }
 
-#[derive(Clone)] pub struct GQLSet_UserInfo { pub nodes: Vec<UserInfo> }
-#[Object] impl GQLSet_UserInfo { async fn nodes(&self) -> &Vec<UserInfo> { &self.nodes } }
-impl GQLSet<UserInfo> for GQLSet_UserInfo {
-	fn from(entries: Vec<UserInfo>) -> GQLSet_UserInfo { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<UserInfo> { &self.nodes }
-}
+gql_set_impl!(UserInfo);
 
 #[derive(Default)] pub struct QueryShard_UserInfo;
 #[Object] impl QueryShard_UserInfo {

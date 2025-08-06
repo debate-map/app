@@ -10,6 +10,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -79,12 +80,7 @@ pub struct MapUpdates {
 	pub extras: CanOmit<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Map { pub nodes: Vec<Map> }
-#[Object] impl GQLSet_Map { async fn nodes(&self) -> &Vec<Map> { &self.nodes } }
-impl GQLSet<Map> for GQLSet_Map {
-	fn from(entries: Vec<Map>) -> GQLSet_Map { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Map> { &self.nodes }
-}
+gql_set_impl!(Map);
 
 #[derive(Default)] pub struct QueryShard_Map;
 #[Object] impl QueryShard_Map {

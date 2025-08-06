@@ -31,6 +31,7 @@ dyn-clone = "1.0.4"
 oauth2 = "4.4.2"
 dotenv = "0.15.0"
 lexicon_fractional_index = "0.0.3"
+pastey = "0.1.0"
 
 # temp-fix for https://github.com/tikv/pprof-rs/issues/232
 #pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}
@@ -69,3 +70,6 @@ thiserror = "1.0.61"
 # v-desktop, base #2: 7m17s (6m14s + 1m3s)
 # v-desktop, with volumes, no base-build #1: 30s
 # v-desktop, with volumes, no base-build #2: 1.355s (cargo build realized that nothing actually needed recompiling)
+
+[features]
+rust-analyzer = []

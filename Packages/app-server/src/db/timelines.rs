@@ -9,6 +9,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{futures, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -77,12 +78,7 @@ pub struct TimelineUpdates {
 	//pub extras: FieldUpdate<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Timeline { pub nodes: Vec<Timeline> }
-#[Object] impl GQLSet_Timeline { async fn nodes(&self) -> &Vec<Timeline> { &self.nodes } }
-impl GQLSet<Timeline> for GQLSet_Timeline {
-	fn from(entries: Vec<Timeline>) -> GQLSet_Timeline { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Timeline> { &self.nodes }
-}
+gql_set_impl!(Timeline);
 
 #[derive(Default)] pub struct QueryShard_Timeline;
 #[Object] impl QueryShard_Timeline {

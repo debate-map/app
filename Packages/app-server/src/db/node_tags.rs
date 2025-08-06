@@ -12,6 +12,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::{
@@ -181,12 +182,7 @@ impl TagComp for TagComp_CloneHistory {
 	fn get_node_ids(&self) -> Vec<String> { self.cloneChain.clone() }
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeTag { pub nodes: Vec<NodeTag> }
-#[Object] impl GQLSet_NodeTag { async fn nodes(&self) -> &Vec<NodeTag> { &self.nodes } }
-impl GQLSet<NodeTag> for GQLSet_NodeTag {
-	fn from(entries: Vec<NodeTag>) -> GQLSet_NodeTag { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<NodeTag> { &self.nodes }
-}
+gql_set_impl!(NodeTag);
 
 #[derive(Default)] pub struct QueryShard_NodeTag;
 #[Object] impl QueryShard_NodeTag {

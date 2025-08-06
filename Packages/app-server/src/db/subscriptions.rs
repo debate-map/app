@@ -12,6 +12,7 @@ use rust_shared::{async_graphql, to_sub_err, to_sub_err_in_stream};
 use rust_shared::{serde_json, GQLError, SubError};
 use tracing::info;
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::filter::{FilterOp, QueryFilter};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query, handle_generic_gql_paginated_query};
@@ -36,7 +37,7 @@ pub async fn get_subscription(ctx: &AccessorContext<'_>, id: &str) -> Result<Sub
 	.await
 }
 
-//wrap_slow_macros! {
+wrap_slow_macros! {
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug)]
 pub struct Subscription {
@@ -58,24 +59,7 @@ impl From<Row> for Subscription {
 	}
 }
 
-#[derive(Clone)]
-pub struct GQLSet_Subscription {
-	pub nodes: Vec<Subscription>,
-}
-#[Object]
-impl GQLSet_Subscription {
-	async fn nodes(&self) -> &Vec<Subscription> {
-		&self.nodes
-	}
-}
-impl GQLSet<Subscription> for GQLSet_Subscription {
-	fn from(entries: Vec<Subscription>) -> GQLSet_Subscription {
-		Self { nodes: entries }
-	}
-	fn nodes(&self) -> &Vec<Subscription> {
-		&self.nodes
-	}
-}
+gql_set_impl!(Subscription);
 
 #[derive(Default)]
 pub struct QueryShard_Subscription;
@@ -87,6 +71,7 @@ impl QueryShard_Subscription {
 	async fn subscription(&self, ctx: &Context<'_>, id: String) -> Result<Option<Subscription>, GQLError> {
 		handle_generic_gql_doc_query(ctx, "subscriptions", id).await
 	}
+	#[cfg(not(feature = "rust-analyzer"))]
 	async fn subscriptions_paginated(&self, ctx: &Context<'_>, limit: i64, after: Option<i64>, order_by: Option<String>, order_desc: Option<bool>, filter: Option<FilterInput>) -> Result<QueryPaginationResult<Subscription>, GQLError> {
 		let order_by = match order_by {
 			Some(order) if order == "createdAt" => Some("createdAt".to_owned()),
@@ -127,4 +112,4 @@ impl SubscriptionShard_Subscription {
 	}
 }
 
-//}
+}

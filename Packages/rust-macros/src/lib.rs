@@ -24,6 +24,11 @@ pub fn unchanged(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	input
 }
 
+#[proc_macro_attribute]
+pub fn unchanged_attr(_args: proc_macro::TokenStream, input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	input
+}
+
 // higher level (ie. combining multiple macros into one)
 // ==========
 

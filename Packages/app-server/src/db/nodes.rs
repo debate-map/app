@@ -12,6 +12,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, to_gql_err, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -28,12 +29,7 @@ use super::users::User;
 
 wrap_slow_macros! {
 
-#[derive(Clone)] pub struct GQLSet_Node { pub nodes: Vec<Node> }
-#[Object] impl GQLSet_Node { async fn nodes(&self) -> &Vec<Node> { &self.nodes } }
-impl GQLSet<Node> for GQLSet_Node {
-	fn from(entries: Vec<Node>) -> GQLSet_Node { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Node> { &self.nodes }
-}
+gql_set_impl!(Node);
 
 #[derive(Default)] pub struct QueryShard_Node;
 #[Object] impl QueryShard_Node {

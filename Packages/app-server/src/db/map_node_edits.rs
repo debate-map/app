@@ -10,6 +10,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::GQLError;
 use rust_shared::SubError;
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -47,12 +48,7 @@ impl From<Row> for MapNodeEdit {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_MapNodeEdit { pub nodes: Vec<MapNodeEdit> }
-#[Object] impl GQLSet_MapNodeEdit { async fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes } }
-impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
-	fn from(entries: Vec<MapNodeEdit>) -> GQLSet_MapNodeEdit { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes }
-}
+gql_set_impl!(MapNodeEdit);
 
 #[derive(Default)] pub struct QueryShard_NodeEdit;
 #[Object] impl QueryShard_NodeEdit {

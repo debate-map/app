@@ -5,7 +5,7 @@ use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::indexmap::IndexMap;
-use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::rust_macros::{self, wrap_slow_macros};
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::Client;
@@ -13,6 +13,7 @@ use rust_shared::tokio_postgres::Row;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::{
@@ -46,12 +47,7 @@ pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> 
 
 wrap_slow_macros! {
 
-#[derive(Clone)] pub struct GQLSet_AccessPolicy { pub nodes: Vec<AccessPolicy> }
-#[Object] impl GQLSet_AccessPolicy { async fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes } }
-impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
-	fn from(entries: Vec<AccessPolicy>) -> GQLSet_AccessPolicy { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes }
-}
+gql_set_impl!(AccessPolicy);
 
 #[derive(Default)] pub struct QueryShard_AccessPolicy;
 #[Object] impl QueryShard_AccessPolicy {

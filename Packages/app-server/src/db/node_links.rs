@@ -12,6 +12,7 @@ use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, should_be_unreachable, to_anyhow, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -157,12 +158,7 @@ pub struct NodeLinkUpdates {
 	pub polarity: CanNullOrOmit<Polarity>,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeLink { pub nodes: Vec<NodeLink> }
-#[Object] impl GQLSet_NodeLink { async fn nodes(&self) -> &Vec<NodeLink> { &self.nodes } }
-impl GQLSet<NodeLink> for GQLSet_NodeLink {
-	fn from(entries: Vec<NodeLink>) -> GQLSet_NodeLink { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<NodeLink> { &self.nodes }
-}
+gql_set_impl!(NodeLink);
 
 #[derive(Default)] pub struct QueryShard_NodeLink;
 #[Object] impl QueryShard_NodeLink {

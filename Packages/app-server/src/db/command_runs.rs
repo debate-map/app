@@ -5,6 +5,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -69,12 +70,7 @@ impl From<Row> for CommandRun {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_CommandRun { pub nodes: Vec<CommandRun> }
-#[Object] impl GQLSet_CommandRun { async fn nodes(&self) -> &Vec<CommandRun> { &self.nodes } }
-impl GQLSet<CommandRun> for GQLSet_CommandRun {
-	fn from(entries: Vec<CommandRun>) -> GQLSet_CommandRun { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<CommandRun> { &self.nodes }
-}
+gql_set_impl!(CommandRun);
 
 #[derive(Default)] pub struct QueryShard_CommandRun;
 #[Object] impl QueryShard_CommandRun {

@@ -127,7 +127,7 @@ struct PingResult {
 	async fn linkPreserver(&self, _ctx: &async_graphql::Context<'_>, input: LinkPreserverInput) -> impl Stream<Item = Result<LinkPreserverResult, SubError>> {
 		let base_stream = async_stream::stream! {
 			let LinkPreserverInput { updateInterval } = input;
-			if (updateInterval < 10000) { Err(SubError::new(format!("Update-interval cannot be lower than 10000ms.")))?; }
+			if updateInterval < 10000 { Err(SubError::new(format!("Update-interval cannot be lower than 10000ms.")))?; }
 
 			let mut refresh_requested_last_iteration = Path::new("./refreshPageForAllUsers_enabled").exists();
 			loop {

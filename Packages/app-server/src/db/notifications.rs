@@ -10,6 +10,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde_json, GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -50,12 +51,7 @@ impl From<Row> for Notification {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_Notification { pub nodes: Vec<Notification> }
-#[Object] impl GQLSet_Notification { async fn nodes(&self) -> &Vec<Notification> { &self.nodes } }
-impl GQLSet<Notification> for GQLSet_Notification {
-	fn from(entries: Vec<Notification>) -> GQLSet_Notification { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<Notification> { &self.nodes }
-}
+gql_set_impl!(Notification);
 
 #[derive(Default)] pub struct QueryShard_Notification;
 #[Object] impl QueryShard_Notification {

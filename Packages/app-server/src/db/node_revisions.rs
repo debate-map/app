@@ -13,6 +13,7 @@ use rust_shared::tokio_postgres::Client;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{GQLError, SubError};
 
+use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
@@ -118,12 +119,7 @@ pub enum ChildOrdering {
 	#[graphql(name = "reasonScore")] reasonScore,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeRevision { pub nodes: Vec<NodeRevision> }
-#[Object] impl GQLSet_NodeRevision { async fn nodes(&self) -> &Vec<NodeRevision> { &self.nodes } }
-impl GQLSet<NodeRevision> for GQLSet_NodeRevision {
-	fn from(entries: Vec<NodeRevision>) -> GQLSet_NodeRevision { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<NodeRevision> { &self.nodes }
-}
+gql_set_impl!(NodeRevision);
 
 #[derive(Default)] pub struct QueryShard_NodeRevision;
 #[Object] impl QueryShard_NodeRevision {

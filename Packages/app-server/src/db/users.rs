@@ -8,6 +8,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
 use std::{pin::Pin, task::Poll, time::Duration};
 
+use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
@@ -59,7 +60,9 @@ pub struct User {
 	pub lastEditAt: Option<i64>,
 }
 impl From<Row> for User {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+	fn from(row: Row) -> Self {
+		postgres_row_to_struct(row).unwrap()
+	}
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -71,15 +74,12 @@ pub struct UserUpdates {
 //#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { pub nodes: Vec<T> }
 /*#[derive(Clone)] pub struct GQLSet_User<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet_User<T> { pub async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
-#[derive(Clone)] pub struct GQLSet_User { pub nodes: Vec<User> }
-#[Object] impl GQLSet_User { async fn nodes(&self) -> &Vec<User> { &self.nodes } }
-impl GQLSet<User> for GQLSet_User {
-	fn from(entries: Vec<User>) -> GQLSet_User { Self { nodes: entries } }
-	fn nodes(&self) -> &Vec<User> { &self.nodes }
-}
+gql_set_impl!(User);
 
-#[derive(Default)] pub struct QueryShard_User;
-#[Object] impl QueryShard_User {
+#[derive(Default)]
+pub struct QueryShard_User;
+#[Object]
+impl QueryShard_User {
 	async fn users(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<User>, GQLError> {
 		handle_generic_gql_collection_query(ctx, "users", filter).await
 	}
@@ -88,8 +88,10 @@ impl GQLSet<User> for GQLSet_User {
 	}
 }
 
-#[derive(Default)] pub struct SubscriptionShard_User;
-#[Subscription] impl SubscriptionShard_User {
+#[derive(Default)]
+pub struct SubscriptionShard_User;
+#[Subscription]
+impl SubscriptionShard_User {
 	async fn users<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
 		handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter, None).await
 	}

@@ -4,7 +4,7 @@ use metrics::{counter, histogram};
 use rust_shared::async_graphql::{
 	async_stream::{self, stream},
 	parser::types::Field,
-	Object, OutputType, Positioned, Result,
+	Enum, Object, OutputType, Positioned, Result,
 };
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -44,6 +44,73 @@ use crate::{
 	},
 	utils::{db::rls::rls_applier::RLSApplier, type_aliases::PGClientObject},
 };
+
+// helpers (temp till using graphlink-rust package)
+// ==========
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+pub enum ListChangeType {
+	#[graphql(name = "FullList")]
+	FullList,
+	#[graphql(name = "EntryAdded")]
+	EntryAdded,
+	#[graphql(name = "EntryChanged")]
+	EntryChanged,
+	#[graphql(name = "EntryRemoved")]
+	EntryRemoved,
+}
+
+#[macro_export]
+macro_rules! envopt {
+	($name:expr) => {
+		option_env!($name)
+	};
+}
+
+#[macro_export]
+macro_rules! gql_set_impl {
+	($my_type:ident) => {
+		pastey::paste! {
+			#[derive(Clone)]
+			pub struct [<GQLSet_ $my_type>] {
+				pub nodes: Vec<$my_type>,
+			}
+
+			#[cfg_attr(not(feature = "rust-analyzer"), Object)]
+			impl [<GQLSet_ $my_type>] {
+				// old structure
+				async fn nodes(&self) -> &Vec<$my_type> {
+					&self.nodes
+				}
+
+				// new structure (for now, just stub for it though)
+				async fn changeType(&self) -> &$crate::utils::db::generic_handlers::subscriptions::ListChangeType {
+					&$crate::utils::db::generic_handlers::subscriptions::ListChangeType::FullList
+				}
+				async fn idOfRemoved(&self) -> &Option<String> {
+					&None
+				}
+				async fn data(&self) -> &Vec<$my_type> {
+					&self.nodes
+				}
+				async fn hashes(&self) -> &std::collections::HashMap<String, String> {
+					use std::collections::HashMap;
+					static EMPTY_HASHMAP: std::sync::LazyLock<HashMap<String, String>> = std::sync::LazyLock::new(|| HashMap::new());
+					&EMPTY_HASHMAP
+				}
+			}
+
+			impl GQLSet<$my_type> for [<GQLSet_ $my_type>] {
+				fn from(entries: Vec<$my_type>) -> [<GQLSet_ $my_type>] {
+					Self { nodes: entries }
+				}
+				fn nodes(&self) -> &Vec<$my_type> {
+					&self.nodes
+				}
+			}
+		}
+	};
+}
 
 // helpers
 // ==========
