@@ -11,6 +11,10 @@
     "Packages/monitor-client",
     "Packages/web-vcore"
   ],
+  "@resolutions_wvcOverrides_c1": "The link: entries below are used for temporary utilization of yalc for packages that have local-only modifications, for quick iteration/testing. Add 'DISABLED_' to start of entry's key, and run 'yarn install', before pushing.",
+  "resolutions_wvcOverrides": {
+    "DISABLED_mobx-graphlink": "link:.yalc/mobx-graphlink"
+  },
   "scripts": {
     "start": "nps",
     "#preinstall[disabled; can error in docker]": "npx only-allow yarn",
@@ -51,7 +55,7 @@
     "immer": "7.0.15",
     "js-vextensions": "1.0.80",
     "mobx": "6.3.13",
-    "mobx-graphlink": "0.1.5",
+    "mobx-graphlink": "0.1.8",
     "mobx-react": "9.2.0",
     "moment": "2.24.0",
     "raven-js": "3.27.2",

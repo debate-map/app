@@ -28,6 +28,8 @@ export function InitGraphlink() {
 		onServer: false,
 	}, {
 		useIntrospection: true,
+		alwaysRequestExtrasField: false,
+		useCollectionEntryCaching: false,
 
 		//unsubscribeTreeNodesAfter: 30000, // on live-query's data becoming unobserved, wait 30s before unsubscribing (user may re-expand something just closed, in the short-term)
 		unsubscribeTreeNodesAfter: GetMGLUnsubscribeDelay(),
