@@ -1,8 +1,7 @@
-import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
 import {Row, Column} from "react-vcomponents";
 import Moment from "moment";
 import {ScrollView} from "react-vscrollview";
-import {Link, PageContainer, Observer, ES, AddNotificationMessage} from "web-vcore";
+import {Link, PageContainer, ES, css2} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber} from "js-vextensions";
 import {GetUsers, GetUser, User} from "dm_common";
@@ -10,6 +9,8 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {useMemo, useState} from "react";
 import {UserProfileUI} from "./Users/UserProfile.js";
 import {ColumnData, TableData, TableHeader} from "../@Shared/TableHeader/TableHeader.js";
+import {observer_mgl} from "mobx-graphlink";
+import React from "react";
 
 const columns: ColumnData[] = [{
 	key: "displayName" as const,
@@ -43,48 +44,43 @@ const columns: ColumnData[] = [{
 	allowSort: true,
 }];
 
-@Observer
-export class UsersUI extends BaseComponentPlus({} as {}, {}) {
-	render() {
-		const users = GetUsers();
-		// const userExtraInfoMap = GetUserExtraInfoMap();
-		const selectedUser = GetSelectedUser();
+export const UsersUI = observer_mgl(()=>{
+	const users = GetUsers();
+	const selectedUser = GetSelectedUser();
+	const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
 
-		// if (userExtraInfoMap == null) return <div/>;
-		if (selectedUser) {
-			return <UserProfileUI user={selectedUser}/>;
-		}
-
-		const onTableChange = (tableData:TableData)=>{
-			setTableData({
-				columnSort: tableData.columnSort,
-				columnSortDirection: tableData.columnSortDirection,
-				filters: [...tableData.filters],
-			});
-		};
-		const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
-
-		const sortedAndFilteredUsers = useMemo(()=>{
-			return sortAndFilterUsers(users, tableData);
-		}, [users, tableData]);
-
-		return (
-			<PageContainer style={{padding: 0, background: null}}>
-				<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData}/>
-				<ScrollView style={ES({flex: 1})} contentStyle={ES({
-					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
-				})}>
-					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
-					{sortedAndFilteredUsers.map((user, index)=>{
-						return <UserRow key={user.id} index={index} last={index == sortedAndFilteredUsers.length - 1} user={user}/>;
-					})}
-				</ScrollView>
-			</PageContainer>
-		);
+	if (selectedUser) {
+		return <UserProfileUI user={selectedUser}/>;
 	}
-}
 
-function sortAndFilterUsers(users: User[], tableData: TableData) {
+	const onTableChange = (tD: TableData)=>{
+		setTableData({
+			columnSort: tD.columnSort,
+			columnSortDirection: tD.columnSortDirection,
+			filters: [...tD.filters],
+		});
+	};
+
+	const sortedAndFilteredUsers = useMemo(()=>{
+		return sortAndFilterUsers(users, tableData);
+	}, [users, tableData]);
+
+	return (
+		<PageContainer style={{padding: 0, background: undefined}}>
+			<TableHeader columns={columns} onTableChange={onTableChange} tableData={tableData}/>
+			<ScrollView style={ES({flex: 1})} contentStyle={ES({
+				flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
+			})}>
+				{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
+				{sortedAndFilteredUsers.map((user, index)=>{
+					return <UserRow key={user.id} index={index} last={index == sortedAndFilteredUsers.length - 1} user={user}/>;
+				})}
+			</ScrollView>
+		</PageContainer>
+	);
+});
+
+const sortAndFilterUsers = (users: User[], tableData: TableData)=>{
 	let output: User[] = users.slice();
 
 	// start with the "default sorting"
@@ -148,30 +144,24 @@ function sortAndFilterUsers(users: User[], tableData: TableData) {
 	return output;
 }
 
-@Observer
-export class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, {}> {
-	render() {
-		const {index, last, user} = this.props;
-
-		let {displayName} = user;
-		if (displayName.includes("@")) displayName = displayName.split("@")[0];
-		const {css} = cssHelper(this);
-		return (
-			<Column p="7px 10px" style={css(
-				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
-				last && {borderRadius: "0 0 10px 10px"},
-			)}>
-				<Row>
-					<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user.id} style={{flex: columns[0].width, fontSize: 17}}/>
-					{/* <span style={{ flex: columnWidths[0] }}>{displayName}</span> */}
-					<span style={{flex: columns[1].width}}>{Moment(user.joinDate).format("YYYY-MM-DD")}</span>
-					<span style={{flex: columns[2].width}}>{user.edits || 0}</span>
-					<span style={{flex: columns[3].width}}>{user.lastEditAt ? Moment(user.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
-					<span style={{flex: columns[4].width}}>
-						{["basic", "verified", "mod", "admin"].filter(a=>(user.permissionGroups || {})[a]).map(a=>a.replace(/^./, ch=>ch.toUpperCase())).join(", ")}
-					</span>
-				</Row>
-			</Column>
-		);
-	}
-}
+export const UserRow = observer_mgl(({ index, last, user }: { index: number, last: boolean, user: User })=>{
+	let {displayName} = user;
+	if (displayName.includes("@")) displayName = displayName.split("@")[0];
+	const css = css2;
+	return (
+		<Column p="7px 10px" style={css(
+			{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
+			last && {borderRadius: "0 0 10px 10px"},
+		)}>
+			<Row>
+				<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user.id} style={{flex: columns[0].width, fontSize: 17}}/>
+				<span style={{flex: columns[1].width}}>{Moment(user.joinDate).format("YYYY-MM-DD")}</span>
+				<span style={{flex: columns[2].width}}>{user.edits || 0}</span>
+				<span style={{flex: columns[3].width}}>{user.lastEditAt ? Moment(user.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
+				<span style={{flex: columns[4].width}}>
+					{["basic", "verified", "mod", "admin"].filter(a=>(user.permissionGroups || {})[a]).map(a=>a.replace(/^./, ch=>ch.toUpperCase())).join(", ")}
+				</span>
+			</Row>
+		</Column>
+	);
+});
