@@ -1,7 +1,7 @@
 import {Me} from "dm_common";
 import keycode from "keycode";
 import {hasHotReloaded} from "Main";
-import React from "react";
+import React, { useEffect } from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
@@ -255,49 +255,44 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 	}
 }
 
-class OverlayUI extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
-				<NodeDetailBoxesLayer/>
-				<MessageBoxLayer/>
-				<VMenuLayer/>
-			</div>
-		);
-	}
-}
+const OverlayUI = ()=>{
+	return (
+		<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
+			<NodeDetailBoxesLayer/>
+			<MessageBoxLayer/>
+			<VMenuLayer/>
+		</div>
+	);
+};
 
-function GetOpenerWindow(): Window | null {
+const GetOpenerWindow = (): Window | null=>{
 	//if (window.opener != null && window.opener.constructor?.name == "Window") {
 	if (window.opener != null) { // Firefox blocks access to window.opener.constructor, so don't check
 		return window.opener;
 	}
 	return null;
-}
+};
 
-//@Observer
-class PostLoginAttemptUI extends BaseComponent<{success: boolean}, {}> {
-	ComponentDidMount() {
-		const {success} = this.props;
-		if (!success) return; // if login failed, do nothing (since login state has not changed)
+const PostLoginAttemptUI = ({success}: {success: boolean})=>{
+	useEffect(()=>{
+		// if login failed, do nothing (since login state has not changed)
+		if (!success) return;
 
-		//window.opener.open(url, '_self');
 		const opener = GetOpenerWindow();
 		if (opener) {
 			opener.location.reload();
 			opener.focus();
 			window.close();
 		}
-	}
+	}, [success]);
 
-	render() {
-		const {success} = this.props;
-		const opener = GetOpenerWindow();
-		return (
-			<PageContainer>
-				<Text>Login {success ? "succeeded" : "failed"}.</Text>
-				{success && <Text>{opener ? "Reloading main window." : "However, main window was unable to be reloaded; you can close this popup, then reload it manually."}</Text>}
-			</PageContainer>
-		);
-	}
+	const opener = GetOpenerWindow();
+	return (
+		<PageContainer>
+			<Text>Login {success ? "succeeded" : "failed"}.</Text>
+			{success && (
+				<Text>{opener ? "Reloading main window." : "However, main window was unable to be reloaded; you can close this popup, then reload it manually."}</Text>
+			)}
+		</PageContainer>
+	);
 }
