@@ -40,7 +40,7 @@ export const MediasUI = observer_mgl(()=>{
 			}}>
 				<Row center style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 					<div style={{padding: 7, position: "absolute", left: 0}}>
-						<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}onClick={e=>{
+						<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}onClick={()=>{
 							if (userID == null) return ShowSignInPopup();
 							ShowAddMediaDialog({});
 						}}/>
