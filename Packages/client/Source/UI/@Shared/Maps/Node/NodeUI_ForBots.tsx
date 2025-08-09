@@ -81,5 +81,5 @@ export const NodeUI_ForBots = ({map, node}: NodeUI_ForBotsProps)=>{
                 <OthersPanel show={true} map={map} node={nodeL3} path={path} />
             </article>
         </ScrollView>
-    );
+	);
 };
