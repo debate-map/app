@@ -1,5 +1,5 @@
 import {MeID} from "dm_common";
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import {GetUserBackground} from "Store/db_ext/users/$user";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {observer_mgl} from "mobx-graphlink";
@@ -14,9 +14,14 @@ export const RootStyles = observer_mgl(()=>{
 	const firstExtantBackgroundURL_max = background.url_max;
 	const skin = liveSkin;
 
-	useEffect(()=>{
+	/*useEffect(()=>{
 		skin.CSSHooks_Freeform();
-	}, []);
+	}, []);*/
+	// we want to call CSSHooks_Freeform only once (well, unless skin changes); so use useMemo
+	// TODO: rework CSSHooks_Freeform to be able to be called multiple times, without resulting in duplicate hooks getting registered
+	useMemo(()=>{
+		skin.CSSHooks_Freeform();
+	}, [skin]);
 
 	return (
 		<style>{`

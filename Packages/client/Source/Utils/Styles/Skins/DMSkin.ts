@@ -1,5 +1,5 @@
 import {nodeLightBackground} from "Store/db_ext/nodes";
-import {Chroma, chroma_maxDarken, DefaultSkin, PageContainer, Skin, SubNavBar} from "web-vcore";
+import {Chroma, chroma_maxDarken, DefaultSkin, PageContainer, PageContainer_FakeClass, Skin, SubNavBar, SubNavBar_FakeClass} from "web-vcore";
 import chroma from "chroma-js";
 import {Button} from "react-vcomponents";
 import {addHook_css} from "react-vextensions";
@@ -159,7 +159,7 @@ export class DMSkin extends Skin {
 				});
 			}
 		});
-		addHook_css(PageContainer, ctx=>{
+		addHook_css(PageContainer_FakeClass, ctx=>{
 			if (ctx.key == "outerStyle_base" && !!ctx.styleArgs[2]) {
 				ctx.styleArgs.push({filter: this.BasePanelDropShadowFilter()});
 			}
@@ -176,7 +176,7 @@ export class DMSkin extends Skin {
 
 		// these hooks we only add if we're the actual skin being used
 		if (targetSkinType == DMSkin) {
-			addHook_css(SubNavBar, ctx=>{
+			addHook_css(SubNavBar_FakeClass, ctx=>{
 				if (ctx.key == "sub1") {
 					ctx.styleArgs.push({
 						//background: this.NavBarPanelBackgroundColor().css(),

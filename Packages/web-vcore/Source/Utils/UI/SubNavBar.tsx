@@ -24,12 +24,10 @@ export const SubNavBar_Auto = observer_mgl((props: {page: string, fullWidth?: bo
 	);
 });
 
+export class SubNavBar_FakeClass extends React.Component {}
 // we wrap with observer(), in case manager.useExpandedNavBar() uses mobx-getters
 export const SubNavBar = observer(({fullWidth, children}: {fullWidth?: boolean} & PropsWithChildren)=>{
-	const self = useMemo(()=>{
-		class SubNavBar_FakeClass {}
-		return new SubNavBar_FakeClass() as ReactInstance;
-	}, []);
+	const self = useMemo(()=>new SubNavBar_FakeClass({}), []);
 	if (!manager.useExpandedNavBar()) return null; // if sub-nav-bar hidden, subpage selection is handled in project's NavBar.tsx
 
 	const {key, css, dyn} = cssHelper(self);

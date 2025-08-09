@@ -2,7 +2,7 @@ import {ScrollView} from "react-vscrollview";
 import {BaseComponent, BaseComponentPlus, cssHelper} from "react-vextensions";
 import {Row, Div} from "react-vcomponents";
 import {ToInt, IsNumber, E} from "js-vextensions";
-import React from "react";
+import React, {useMemo} from "react";
 import {ES, css2} from "../UI/Styles.js";
 
 export function GetExpandedCSSPropValuesFromString(propName: string, styleStrOrNum: string | number) {
@@ -45,12 +45,14 @@ export function ReactTextToPixelVal(reactText: string | number | n) {
 
 export type PageContainerPreset = "text" | "full";
 
+export class PageContainer_FakeClass extends React.Component {}
 export const PageContainer: React.FC<
 	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, innerStyle?} & React.HTMLProps<ScrollView & Row>
 > = props=>{
 	const {preset = "text", scrollable = false, shadow: shadowProp, style, innerStyle, children, ...rest} = props;
-	//const {css} = cssHelper();
-	const css = css2;
+	const self = useMemo(()=>new PageContainer_FakeClass({}), []);
+	const {css} = cssHelper(self);
+	//const css = css2;
 	const outerStyle = style || {};
 	const innerStyleFinal = innerStyle || {};
 	let shadow = shadowProp;
