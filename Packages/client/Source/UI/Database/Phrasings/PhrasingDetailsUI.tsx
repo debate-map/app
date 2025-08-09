@@ -1,13 +1,11 @@
-import {Clone, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, E, WaitXThenRun, DelIfFalsy, ObjectCE} from "js-vextensions";
-import Moment from "moment";
-import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "react-vcomponents";
-import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "react-vextensions";
+import React, {useEffect, useRef} from "react";
+import {GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, E, WaitXThenRun, ObjectCE} from "js-vextensions";
+import {Column, Pre, RowLR, Select, TextArea, Row, Text} from "react-vcomponents";
+import {GetDOM, BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-// import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, DMap, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
-import React from "react";
+import {NodePhrasing, NodePhrasingType, DMap, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
-import {ES, Observer} from "web-vcore";
+import {ES} from "web-vcore";
 import {SLMode_GAD, SLMode_SFI} from "UI/@SL/SL";
 import {CreateAccessor} from "mobx-graphlink";
 import {RunCommand_AddNodePhrasing} from "Utils/DB/Command";
@@ -68,7 +66,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 					<Select options={GetEntries(NodePhrasingType)} enabled={false} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>}
-				<Title_Base {...sharedProps}/>
+				<TitleBase {...sharedProps}/>
 				{!SLMode_SFI && <OtherTitles {...sharedProps}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>{noteField_label}: </Pre>
@@ -91,128 +89,140 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 	}
 }
 
-class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
-	render() {
-		const {forNew, splitAt, node} = this.props;
-		const attachmentType = GetAttachmentType_Node(node);
+const TitleBase = (props: PhrasingDetailsUI_SharedProps)=>{
+	const {forNew, splitAt, node} = props;
+	const attachmentType = GetAttachmentType_Node(node);
 
-		return (
-			<>
-				{node.type == NodeType.claim && (attachmentType == AttachmentType.quote || attachmentType == AttachmentType.media) &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>If no title override is specified, a generic source-assertion claim title will be shown.</Pre>
-					</Row>}
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Text>Title (base): </Text>
-					<TitleInput {...OmitRef(this.props)} titleKey="text_base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
-				</RowLR>
-				{forNew && node.type == NodeType.argument &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>{`
-							An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
+	const inputRef = useRef<any>(null);
 
-							Examples:
-							* Shadow during lunar eclipses
-							* May have used biased sources
-							* Quote: Socrates
+	useEffect(()=>{
+	    if (!forNew) return;
+	    WaitXThenRun(0, ()=>{
+			const el = inputRef.current?.DOM_HTML ?? inputRef.current;
+			el?.focus?.();
+	    });
+	}, [forNew]);
 
-							The detailed version of the argument will be embodied in its premises/child-claims.
-						`.AsMultiline(0)}
-						</Pre>
-					</Row>}
-			</>
-		);
-	}
+	return (
+		<>
+			{node.type == NodeType.claim && (attachmentType == AttachmentType.quote || attachmentType == AttachmentType.media) &&
+				<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+					<Pre allowWrap={true}>If no title override is specified, a generic source-assertion claim title will be shown.</Pre>
+				</Row>}
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Text>Title (base): </Text>
+				<TitleInput {...OmitRef(props)} titleKey="text_base" innerRef={inputRef}/>
+			</RowLR>
+			{forNew && node.type == NodeType.argument &&
+				<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+					<Pre allowWrap={true}>{`
+						An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
+
+						Examples:
+						* Shadow during lunar eclipses
+						* May have used biased sources
+						* Quote: Socrates
+
+						The detailed version of the argument will be embodied in its premises/child-claims.
+					`.AsMultiline(0)}
+					</Pre>
+				</Row>}
+		</>
+	);
 }
 
-const WillNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: NodeLink|n)=>{
+const willNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: NodeLink|n)=>{
 	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
 	return Boolean(node.type == NodeType.claim && mainAttachment?.quote == null && linkData && linkData.form == ClaimForm.question);
 });
 
-class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
-	render() {
-		const {forNew, map, node, splitAt, Change} = this.props;
-		const willPreferQuestionTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
-		const childLayout = GetChildLayout_Final(node.current, map);
-		const showNarrativeForm = ShouldShowNarrativeFormForEditing(childLayout, node.current.phrasing);
-		return (
-			<>
-				{(node.type == NodeType.claim || (node.current.phrasing.text_negation ?? "").trim().length > 0) &&
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Title (negation): </Pre>
-					<TitleInput {...OmitRef(this.props)} titleKey="text_negation"/>
-				</RowLR>}
-				{(node.type == NodeType.claim || (node.current.phrasing.text_question ?? "").trim().length > 0) &&
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Title (question): </Pre>
-					<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
-				</RowLR>}
-				{showNarrativeForm &&
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Title (narrative): </Pre>
-					<TitleInput {...OmitRef(this.props)} titleKey="text_narrative"/>
-				</RowLR>}
-				{willPreferQuestionTitleHere && forNew &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>At this location (under a category node), this node will be displayed with its (yes or no) question title, if specified.</Pre>
-					</Row>}
-			</>
-		);
-	}
+const OtherTitles = (props: PhrasingDetailsUI_SharedProps)=>{
+	const {forNew, map, node, splitAt, Change} = props;
+	const willPreferQuestionTitleHere = willNodePreferQuestionTitleHere(node, node.link);
+	const childLayout = GetChildLayout_Final(node.current, map);
+	const showNarrativeForm = ShouldShowNarrativeFormForEditing(childLayout, node.current.phrasing);
+	return (
+		<>
+			{(node.type == NodeType.claim || (node.current.phrasing.text_negation ?? "").trim().length > 0) &&
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>Title (negation): </Pre>
+				<TitleInput {...OmitRef(props)} titleKey="text_negation"/>
+			</RowLR>}
+			{(node.type == NodeType.claim || (node.current.phrasing.text_question ?? "").trim().length > 0) &&
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>Title (question): </Pre>
+				<TitleInput {...OmitRef(props)} titleKey="text_question"/>
+			</RowLR>}
+			{showNarrativeForm &&
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>Title (narrative): </Pre>
+				<TitleInput {...OmitRef(props)} titleKey="text_narrative"/>
+			</RowLR>}
+			{willPreferQuestionTitleHere && forNew &&
+				<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+					<Pre allowWrap={true}>At this location (under a category node), this node will be displayed with its (yes or no) question title, if specified.</Pre>
+				</Row>}
+		</>
+	);
 }
 
-class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?: any} & PhrasingDetailsUI_SharedProps & React.Props<TextArea>, {}) {
-	render() {
-		const {titleKey, newData, node, enabled, Change} = this.props;
-		let extraProps = {};
-		if (titleKey == "text_base") {
-			//const hasOtherTitles = newDataAsL2.type == NodeType.claim && newDataAsL2 == AttachmentType.none;
-			const hasOtherTitlesEntered = newData.text_negation || newData.text_question || newData.text_narrative;
-			const willPreferYesNoTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
-			extraProps = {
-				// commented; node may have an attachment, in which case having a base-title may be unwanted (since it overrides the auto-text)
-				//required: !hasOtherTitlesEntered && !willPreferYesNoTitleHere,
-				ref: this.props.innerRef, // if supplied
-			};
-		}
-		return (
-			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
-			<TextArea
-				enabled={enabled} allowLineBreaks={false} style={E({flex: 1, minWidth: 0})} pattern={NodeRevision_titlePattern} autoSize={true}
-				value={newData[titleKey]} onChange={val=>{
-					// find any term-markers, adding entries for them then removing the markers (eg. "some {term} name" -> "some term name")
-					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
-						const termName = g1;
-						if (newData.terms == null) {
-							newData.terms = [];
-						}
-						if (!newData.terms.Any(a=>a.id == termName)) {
-							newData.terms.push(new TermAttachment({id: termName}));
-						}
-						return g1;
-					}) : null;
+type TitleKeyProps = {
+	titleKey: TitleKey,
+	innerRef?: any,
+} & PhrasingDetailsUI_SharedProps;
 
-					//newData.VSet(titleKey, DelIfFalsy(cleanedVal));
-					// if a field is editable by the UI, the result should always be non-null (empty string is preferred over null)
-					newData[titleKey] = cleanedVal || "";
-
-					Change();
-				}}
-				// for "base" title-key
-				{...extraProps}
-			/>
-		);
+const TitleInput = ({titleKey, newData, node, enabled, Change, innerRef}: TitleKeyProps)=>{
+	let extraProps = {};
+	if (titleKey === "text_base") {
+	    const hasOtherTitlesEntered = !!(newData.text_negation || newData.text_question || newData.text_narrative);
+	    const willPreferYesNoTitleHere = willNodePreferQuestionTitleHere(node, node.link);
+	    extraProps = {
+	        // kept commented to preserve original behavior
+	        // required: !hasOtherTitlesEntered && !willPreferYesNoTitleHere,
+	        ref: innerRef, // if supplied
+	    };
 	}
+
+	const onChange = (val: string)=>{
+		// find any term-markers, adding entries for them then removing the markers (eg. "some {term} name" -> "some term name")
+		const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
+			const termName = g1;
+			if (newData.terms == null) {
+				newData.terms = [];
+			}
+			if (!newData.terms.Any(a=>a.id == termName)) {
+				newData.terms.push(new TermAttachment({id: termName}));
+			}
+			return g1;
+		}) : null;
+
+		//newData.VSet(titleKey, DelIfFalsy(cleanedVal));
+		// if a field is editable by the UI, the result should always be non-null (empty string is preferred over null)
+		newData[titleKey] = cleanedVal || "";
+		Change();
+	};
+
+	return (
+		<TextArea
+			enabled={enabled}
+			allowLineBreaks={false}
+			style={E({flex: 1, minWidth: 0})}
+			pattern={NodeRevision_titlePattern}
+			autoSize={true}
+			value={newData[titleKey]} onChange={onChange}
+			// for "base" title-key
+			{...extraProps}
+		/>
+	);
 }
 
-export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType, map: DMap|n) {
+export const ShowAddPhrasingDialog = (node: NodeL3, type: NodePhrasingType, map: DMap|n)=>{
+	let valid = false;
 	let newEntry = new NodePhrasing({
 		node: node.id,
 		type,
 	});
 
-	let valid = false;
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add phrasing", cancelButton: true,
 		message: ()=>{
@@ -234,7 +244,6 @@ export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType, map:
 			);
 		},
 		onOK: ()=>{
-			//new AddPhrasing({phrasing: newEntry}).RunOnServer();
 			RunCommand_AddNodePhrasing(newEntry);
 		},
 	});
