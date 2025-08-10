@@ -1,6 +1,7 @@
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {VReactMarkdown, PageContainer} from "web-vcore";
 import {slackInviteLink} from "UI/More/Links.js";
+import {observer_mgl} from "mobx-graphlink";
+import React from "react";
 
 const pageText = `
 This project started as a personal goal of mine (Stephen Wicklund, aka "Venryx") around 2013. The main thing prompting it was frustration with how difficult
@@ -27,27 +28,12 @@ Anyway, I hope all of you reading this are interested in it as well! It will nee
 I'm confident that it will someday become an invaluable tool for bringing clarity and efficiency to online discussions, so I'll do my best to faithfully work on it until then.
 `;
 
-@SimpleShouldUpdate
-export class AboutUI extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<PageContainer scrollable={true}>
-				<article>
-					<VReactMarkdown className="selectable" source={pageText}
-						/* markdownOptions={{breaks: false}} rendererOptions={{breaks: false}}
-						rendererOptions={{
-							components: {
-								br: ()=><span> </span>
-							}
-						}} */
-						/* renderers={{
-							Text: props=> {
-								return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;
-							}
-						}} */
-					/>
-				</article>
-			</PageContainer>
-		);
-	}
-}
+export const AboutUI = observer_mgl(()=>{
+	return (
+		<PageContainer scrollable={true}>
+			<article>
+				<VReactMarkdown source={pageText} containerProps={{className: "selectable"}} />
+			</article>
+		</PageContainer>
+	);
+})
