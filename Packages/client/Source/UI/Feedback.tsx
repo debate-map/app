@@ -1,7 +1,5 @@
-import {Column, Switch} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {store} from "Store";
-import {Observer, PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
+import {Switch} from "react-vcomponents";
+import {PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
 import React from "react";
 import {observer_mgl} from "mobx-graphlink";
 
@@ -14,30 +12,25 @@ To see the old task-tracking system, visit the "Old" subpage linked above. (in t
 `.AsMultiline(0);
 
 export const FeedbackUI = observer_mgl(()=>{
-    const currentSubpage = store.main.feedback.subpage;
-    const page = "feedback";
-    return (
+	const page = "feedback";
+	return (
     	<>
     		<SubNavBar>
-    			<SubNavBarButton page={page} subpage="new" text="New" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
-    			{/*<SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
-    			<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/>*/}
+    			<SubNavBarButton page={page} subpage="new" text="New" />
     		</SubNavBar>
     		<Switch>
     			<ProposalsUI_Stub/>
-    			{/*currentSubpage == "roadmap" && <RoadmapUI/>}
-    			{currentSubpage == "neutrality" && <NeutralityUI/>*/}
     		</Switch>
     	</>
-    );
+	);
 });
 
 const ProposalsUI_Stub = ()=>{
-    return (
+	return (
         <PageContainer scrollable>
             <article>
-                <VReactMarkdown source={source} className="selectable" />
+                <VReactMarkdown source={source} containerProps={{className: "selectable"}}/>
             </article>
         </PageContainer>
-    );
+	);
 };
