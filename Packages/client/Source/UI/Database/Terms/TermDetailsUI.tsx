@@ -13,6 +13,7 @@ import {AttachmentsEditorUI} from "./AttachmentsEditorUI.js";
 import {observer_mgl, GetAsync} from "mobx-graphlink";
 
 export type TermDetailsUIProps = DetailsUIBaseProps<Term, {}>;
+
 export const TermDetailsUI = observer_mgl((props: TermDetailsUIProps)=>{
 	const {phase, baseData, style, onChange} = props;
 	const {newData, helpers, containerRef} = useDetailsUI<Term>({
