@@ -101,5 +101,4 @@ export const AttachmentsEditorUI = observer_mgl((props: AttachmentsEditorUIProps
 			}
 		</Column>
 	);
-
 });

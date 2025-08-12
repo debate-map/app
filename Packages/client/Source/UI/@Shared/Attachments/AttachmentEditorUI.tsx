@@ -1,56 +1,61 @@
-import {A, DEL, GetEntries, GetValues, NN} from "js-vextensions";
-import {Button, CheckBox, Row, Select, Text, TextArea} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
-import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, NodeL1, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
-import {ShowMessageBox} from "react-vmessagebox";
-import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
+import {GetEntries, GetValues, NN} from "js-vextensions";
+import {CheckBox, Row, Select, Text} from "react-vcomponents";
+import {AttachmentType, ResetAttachment, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
 import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
-import {NodeDetailsUI_SharedProps} from "../Maps/Node/NodeDetailsUI.js";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
-import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {DescriptionAttachmentEditorUI} from "./AttachmentPanel/DescriptionAttachmentEditorUI.js";
+import React from "react";
+import {DetailsUIBaseProps, useDetailsUI} from "../DetailsUI_Base.js";
 
-/*export function CanNodeHaveAttachments(node: NodeL1) {
-	//return node.type == NodeType.claim;
-	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
-	return node.type != NodeType.argument;
-}*/
+export type AttachmentEditorUIProps = DetailsUIBaseProps<Attachment,
+    {
+        target: AttachmentTarget;
+        allowedAttachmentTypes?: AttachmentType[];
+        setExpandedByDefault: (val: boolean) => any;
+    }
+>;
 
-export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: AttachmentTarget, allowedAttachmentTypes?: AttachmentType[], setExpandedByDefault: (val: boolean)=>any}> {
-	render() {
-		const {phase, target, allowedAttachmentTypes, setExpandedByDefault} = this.props;
-		const {newData} = this.state;
-		const {enabled, Change} = this.helpers;
-		const attachmentType = GetAttachmentType(newData);
-		const allowedAttachmentTypes_final = allowedAttachmentTypes ?? GetValues(AttachmentType);
+export const AttachmentEditorUI = (props: AttachmentEditorUIProps)=>{
+	const {phase, target, allowedAttachmentTypes, setExpandedByDefault, baseData, onChange} = props;
+	const {newData, helpers} = useDetailsUI<Attachment>({
+        baseData,
+        phase,
+        onChange,
+	});
+	const {enabled, Change} = helpers;
 
-		//const canHaveAttachments = CanNodeHaveAttachments(newData);
-		return (
-			<>
-				<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
-					<Text>Type:</Text>
-					<Select ml={5} options={GetEntries(AttachmentType, "ui").filter(a=>allowedAttachmentTypes_final.includes(a.value))} enabled={enabled} value={attachmentType} onChange={val=>{
-						ResetAttachment(newData, val);
-						Change();
-					}}/>
-					<CheckBox ml={5} enabled={enabled} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
-				</Row>
-				{attachmentType == AttachmentType.equation &&
-					<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}
-				{attachmentType == AttachmentType.quote &&
-					<QuoteInfoEditorUI phase={phase}
-						baseData={NN(newData.quote)} onChange={val=>Change(newData.quote = val)}/>}
-				{attachmentType == AttachmentType.references &&
-					<ReferencesAttachmentEditorUI phase={phase}
-						baseData={NN(newData.references)} onChange={val=>Change(newData.references = val)}/>}
-				{attachmentType == AttachmentType.media &&
-					<MediaAttachmentEditorUI phase={phase} baseData={NN(newData.media)} onChange={val=>Change(newData.media = val)} target={target}/>}
-				{attachmentType == AttachmentType.description &&
-					<DescriptionAttachmentEditorUI phase={phase}
-						baseData={NN(newData.description)} onChange={val=>Change(newData.description = val)}/>}
-			</>
-		);
-	}
+	const attachmentType = GetAttachmentType(newData);
+	const allowedTypes = allowedAttachmentTypes ?? GetValues(AttachmentType);
+
+	const typeOptions = GetEntries(AttachmentType, "ui").filter(opt=>allowedTypes.includes(opt.value));
+	return (
+        <>
+			<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
+				<Text>Type:</Text>
+				<Select ml={5} options={typeOptions} enabled={enabled} value={attachmentType} onChange={val=>{
+					ResetAttachment(newData, val);
+					Change();
+				}}/>
+				<CheckBox ml={5} enabled={enabled} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
+			</Row>
+
+			{attachmentType == AttachmentType.equation &&
+				<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}
+
+			{attachmentType == AttachmentType.quote &&
+				<QuoteInfoEditorUI phase={phase} baseData={NN(newData.quote)} onChange={val=>Change(newData.quote = val)}/>}
+
+			{attachmentType == AttachmentType.references &&
+				<ReferencesAttachmentEditorUI phase={phase} baseData={NN(newData.references)} onChange={val=>Change(newData.references = val)}/>}
+
+			{attachmentType == AttachmentType.media &&
+				<MediaAttachmentEditorUI phase={phase} baseData={NN(newData.media)} onChange={val=>Change(newData.media = val)} target={target}/>}
+
+			{attachmentType == AttachmentType.description &&
+				<DescriptionAttachmentEditorUI phase={phase} baseData={NN(newData.description)} onChange={val=>Change(newData.description = val)}/>}
+
+        </>
+	);
 }
