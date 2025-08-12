@@ -47,12 +47,8 @@ const columns: ColumnData[] = [{
 export const UsersUI = observer_mgl(()=>{
 	const users = GetUsers();
 	const selectedUser = GetSelectedUser();
+
 	const [tableData, setTableData] = useState({columnSort: "", columnSortDirection: "", filters: []} as TableData);
-
-	if (selectedUser) {
-		return <UserProfileUI user={selectedUser}/>;
-	}
-
 	const onTableChange = (tD: TableData)=>{
 		setTableData({
 			columnSort: tD.columnSort,
@@ -64,6 +60,10 @@ export const UsersUI = observer_mgl(()=>{
 	const sortedAndFilteredUsers = useMemo(()=>{
 		return sortAndFilterUsers(users, tableData);
 	}, [users, tableData]);
+
+	if (selectedUser) {
+		return <UserProfileUI user={selectedUser}/>;
+	}
 
 	return (
 		<PageContainer style={{padding: 0, background: undefined}}>
@@ -144,7 +144,7 @@ const sortAndFilterUsers = (users: User[], tableData: TableData)=>{
 	return output;
 }
 
-export const UserRow = observer_mgl(({ index, last, user }: { index: number, last: boolean, user: User })=>{
+export const UserRow = observer_mgl(({index, last, user}: {index: number, last: boolean, user: User})=>{
 	let {displayName} = user;
 	if (displayName.includes("@")) displayName = displayName.split("@")[0];
 	const css = css2;
