@@ -13,7 +13,7 @@ export type GenericEntryInfoUIProps = {
 	accessPolicyID?: string;
 	accessPolicyButton?: React.JSX.Element;
 	singleLine?: boolean;
-}
+};
 
 export const GenericEntryInfoUI = observer_mgl((props: GenericEntryInfoUIProps)=>{
 	const {id, creatorID, createdAt, accessPolicyID, accessPolicyButton, singleLine = false} = props;
@@ -66,4 +66,4 @@ export const GenericEntryInfoUI = observer_mgl((props: GenericEntryInfoUIProps)=
 			</>}
 		</Column>
 	);
-})
+});

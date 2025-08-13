@@ -1,99 +1,88 @@
 import {AccessPolicy, GetUser, PermissionSet, PermissionSetForType, PermitCriteria} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
-import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
+import {DetailsUIBaseProps, useDetailsUI} from "UI/@Shared/DetailsUI_Base";
 import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {RunCommand_AddAccessPolicy} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {InfoButton, Observer, TextPlus} from "web-vcore";
+import {InfoButton, TextPlus} from "web-vcore";
 import {Clone, E} from "js-vextensions";
 import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {observer_mgl} from "mobx-graphlink";
 
-@Observer
-export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsUI> {
-	render() {
-		const {baseData, style} = this.props;
-		const {newData} = this.state;
-		const {Change, creating, enabled} = this.helpers;
-		//const basePolicy = GetAccessPolicy(newData.base);
+export type PolicyDetailsUIProps = DetailsUIBaseProps<AccessPolicy, {}>
 
-		const splitAt = 140, width = 400;
-		return (
-			<Column style={style}>
-				{!creating &&
-					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Text>Name:</Text>
-					<TextInput required enabled={enabled} style={{width: "100%"}}
-						value={newData.name} onChange={val=>Change(newData.name = val)}/>
-				</RowLR>
-				{/*<RowLR mt={5} splitAt={splitAt}>
-					<TextPlus info="If set, fields left empty in this policy's permissions (shown as dash), are replaced with the value from the base-policy.">Permissions:</TextPlus>
-					<PolicyPicker value={newData.base} onChange={val=>{
-						new UpdateAccessPolicy({id: baseData.id, updates: {base: val}}).RunOnServer();
-					}}>
-						<Button enabled={enabled} text={basePolicy ? `${basePolicy.id} (id: ${basePolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
-					</PolicyPicker>
-				</RowLR>*/}
-				<Row center>
-					<Text>Permissions:</Text>
-					<InfoButton ml={5} text={`
-						These are the permissions that are granted to all visitors. (for mere viewing/access, this includes those not signed in)
+export const PolicyDetailsUI = observer_mgl((props: PolicyDetailsUIProps)=>{
+	const {baseData, style, phase, onChange} = props;
+	const {newData, helpers} = useDetailsUI<AccessPolicy>({
+		baseData,
+		phase,
+		onChange,
+	});
+	const {Change, creating, enabled} = helpers;
 
-						Note that there are a few additional permission-grants:
-						* The creator of an entry can always access an entry (and currently, modify it).
-						* Admins can access any entry, and can modify (almost) any entry.
-						* Moderators can modify (almost) any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
-					`.AsMultiline(0)}/>
-				</Row>
-				<PermissionSetEditor enabled={enabled} value={newData.permissions} onChange={val=>Change(newData.permissions = val)}/>
-				<Row mt={5}>
-					<Text>User overrides:</Text>
-					<Button ml={5} enabled={enabled} text="Add" onClick={()=>{
-						newData.permissions_userExtends["NEW_USER_ID"] = new PermissionSet();
-						Change();
-					}}/>
-				</Row>
-				{Object.entries(newData.permissions_userExtends).map(entry=>{
-					const [userID, permissions] = entry;
-					const userDisplayName = GetUser(userID)?.displayName;
-					return (
-						<Row mt={5} key={userID}>
-							{/*<TextInput mr={5} enabled={enabled} style={{}} value={userID} onChange={val=>{
+	const splitAt = 140, width = 400;
+	return (
+		<Column style={style}>
+			{!creating &&
+				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+			<RowLR mt={5} splitAt={splitAt} style={{width}}>
+				<Text>Name:</Text>
+				<TextInput required enabled={enabled} style={{width: "100%"}}
+					value={newData.name} onChange={val=>Change(newData.name = val)}/>
+			</RowLR>
+			<Row center>
+				<Text>Permissions:</Text>
+				<InfoButton ml={5} text={`
+					These are the permissions that are granted to all visitors. (for mere viewing/access, this includes those not signed in)
+
+					Note that there are a few additional permission-grants:
+					* The creator of an entry can always access an entry (and currently, modify it).
+					* Admins can access any entry, and can modify (almost) any entry.
+					* Moderators can modify (almost) any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
+				`.AsMultiline(0)}/>
+			</Row>
+			<PermissionSetEditor enabled={enabled} value={newData.permissions} onChange={val=>Change(newData.permissions = val)}/>
+			<Row mt={5}>
+				<Text>User overrides:</Text>
+				<Button ml={5} enabled={enabled} text="Add" onClick={()=>{
+					newData.permissions_userExtends["NEW_USER_ID"] = new PermissionSet();
+					Change();
+				}}/>
+			</Row>
+			{Object.entries(newData.permissions_userExtends).map(entry=>{
+				const [userID, permissions] = entry;
+				const userDisplayName = GetUser(userID)?.displayName;
+				return (
+					<Row mt={5} key={userID}>
+						<Column>
+							<UserPicker value={userID} onChange={val=>{
 								delete newData.permissions_userExtends[userID];
 								newData.permissions_userExtends[val] = permissions;
 								Change();
-							}}/>*/}
-							<Column>
-								<UserPicker value={userID} onChange={val=>{
-									delete newData.permissions_userExtends[userID];
-									newData.permissions_userExtends[val] = permissions;
-									Change();
-								}}>
-									<Button mr={5} style={{width: "calc(100% - 5px)"}} enabled={enabled} text={userID != userIDPlaceholder ? `${userDisplayName} (id: ${userID})` : "(click to select user)"}/>
-								</UserPicker>
-								<PermissionSetEditor enabled={enabled} value={permissions} onChange={val=>Change(newData.permissions_userExtends[userID] = val)}/>
-							</Column>
-							<Button ml={5} enabled={enabled} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
-								delete newData.permissions_userExtends[userID];
-								Change();
-							}}/>
-						</Row>
-					);
-				})}
-			</Column>
-		);
-	}
-}
+							}}>
+								<Button mr={5} style={{width: "calc(100% - 5px)"}} enabled={enabled} text={userID != userIDPlaceholder ? `${userDisplayName} (id: ${userID})` : "(click to select user)"}/>
+							</UserPicker>
+							<PermissionSetEditor enabled={enabled} value={permissions} onChange={val=>Change(newData.permissions_userExtends[userID] = val)}/>
+						</Column>
+						<Button ml={5} enabled={enabled} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
+							delete newData.permissions_userExtends[userID];
+							Change();
+						}}/>
+					</Row>
+				);
+			})}
+		</Column>
+	);
+});
 
 type PermissionSetEditorProps = {
 	enabled?: boolean;
 	value: PermissionSet;
 	onChange: (val: PermissionSet)=>any;
-}
+};
 
 export const PermissionSetEditor = ({enabled, value, onChange}: PermissionSetEditorProps)=>{
 	const change = (setter: (newVal: PermissionSet)=>any)=>{
@@ -138,7 +127,7 @@ type PermissionSetForTypeEditorProps = {
 	collection: string;
 	value: PermissionSetForType;
 	onChange: (val: PermissionSetForType)=>any;
-}
+};
 
 const PermissionSetForTypeEditor = ({enabled, collection, value, onChange}: PermissionSetForTypeEditorProps)=>{
 	const change = (setter: (newVal: PermissionSetForType)=>any)=>{
@@ -191,4 +180,4 @@ export const ShowAddAccessPolicyDialog = (initialData?: Partial<AccessPolicy>, p
 			if (postAdd) postAdd(id);
 		},
 	});
-}
+};
