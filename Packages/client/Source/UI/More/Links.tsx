@@ -1,5 +1,6 @@
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
+import {observer_mgl} from "mobx-graphlink";
+import React from "react";
 
 export const slackInviteLink = "https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ";
 
@@ -35,7 +36,7 @@ Links:
 
 ## Other websites
 
-### Collaborative debating 
+### Collaborative debating
 
 Hopefully, of course, you'll find this site the best option for debate-mapping -- and that through feedback we can resolve its remaining deficiencies.
 For those wanting to see other options, however, the below is a listing of the best alternatives we're aware of.
@@ -83,16 +84,12 @@ The websites below don't really match the "collaborative debating" concept, but 
 * [FactCheck](http://factcheck.org): Also a fact-checking website. Does not seem as full-fledged as the previous two.
 `;
 
-@SimpleShouldUpdate
-export class LinksUI extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<PageContainer scrollable={true}>
-				<article className="selectableAC">
-					{/* <VReactMarkdown className="selectable" source={pageText}/> */}
-					<VReactMarkdown_Remarkable source={pageText}/>
-				</article>
-			</PageContainer>
-		);
-	}
-}
+export const LinksUI = observer_mgl(()=>{
+	return (
+		<PageContainer scrollable={true}>
+			<article className="selectableAC">
+				<VReactMarkdown_Remarkable source={pageText}/>
+			</article>
+		</PageContainer>
+	);
+});
