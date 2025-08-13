@@ -4,9 +4,9 @@ import {DetailsUIBaseProps, useDetailsUI} from "UI/@Shared/DetailsUI_Base";
 import React from "react";
 
 export const EquationEditorUI = (props: DetailsUIBaseProps<EquationAttachment, {}>)=>{
-	const {phase, style, onChange} = props;
+	const {phase, style, onChange, baseData} = props;
 	const {newData, helpers} = useDetailsUI<EquationAttachment>({
-		baseData: props.baseData,
+		baseData,
 		phase,
 		onChange,
 		getNewDataPostProcess: nD=>{ if (!nD.isStep) delete nD.explanation; }
