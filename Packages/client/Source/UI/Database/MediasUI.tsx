@@ -95,7 +95,7 @@ export const MediasUI = observer_mgl(()=>{
 			</ScrollView>
 		</Row>
 	)
-})
+});
 
 export const MediaUI = (({image, first, selected}:{image: Media, first: boolean, selected: boolean})=>{
 	return (
@@ -104,9 +104,7 @@ export const MediaUI = (({image, first, selected}:{image: Media, first: boolean,
 				{padding: 5, background: liveSkin.BasePanelBackgroundColor().darken(.05 * chroma_maxDarken).css(), borderRadius: 5, cursor: "pointer"},
 				selected && {background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).css()},
 			)}
-			onClick={()=>{
-				RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);
-			}}>
+			onClick={()=>RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id)}>
 			<div>
 				<Pre>{image.name}: </Pre>
 				{image.description.KeepAtMost(100)}
@@ -117,4 +115,4 @@ export const MediaUI = (({image, first, selected}:{image: Media, first: boolean,
 			</Span>
 		</Row>
 	);
-})
+});

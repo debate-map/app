@@ -34,7 +34,7 @@ export const PolicyPicker_Button = observer_mgl((props: PolicyPicker_ButtonProps
 });
 
 export type PolicyPickerProps = {
-    value: string | null;
+    value: string|n;
     onChange: (value: string|n) => any;
     allowClear?: boolean;
     textForNull?: string;

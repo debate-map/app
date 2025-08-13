@@ -10,12 +10,12 @@ import {Button, Text, Column, Row, Select, TextInput} from "react-vcomponents";
 import {UseCallback} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import Moment from "moment";
-import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, SLMode_Main, SLMode_Climate, SLMode_GAD, GetMapNamePrefixFilterKey, namePrefixesForMapsToShowOnlyInAssociatedSkin} from "./@SL/SL";
-import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
-import {MapUIWrapper} from "./@Shared/Maps/MapUIWrapper";
-import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
-import {MapEntryUI} from "./Debates/MapEntryUI";
-import {ColumnData, TableData, TableHeader} from "./@Shared/TableHeader/TableHeader";
+import {SLMode, SLMode_AI, GetSkinPrefixInfoFromMapName, SLMode_Main, GetMapNamePrefixFilterKey, namePrefixesForMapsToShowOnlyInAssociatedSkin} from "./@SL/SL.js";
+import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI.js";
+import {MapUIWrapper} from "./@Shared/Maps/MapUIWrapper.js";
+import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel.js";
+import {MapEntryUI} from "./Debates/MapEntryUI.js";
+import {ColumnData, TableData, TableHeader} from "./@Shared/TableHeader/TableHeader.js";
 import {observer_mgl} from "mobx-graphlink"
 
 export const DebatesUI = observer_mgl(()=>{
