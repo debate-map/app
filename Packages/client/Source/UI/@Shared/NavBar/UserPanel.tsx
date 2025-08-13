@@ -1,63 +1,57 @@
-import {Assert, E, WaitXThenRun} from "js-vextensions";
+import {Assert} from "js-vextensions";
 import {Button, Column, Div, Row, Text, TextInput} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {AddNotificationMessage, ES, GetCurrentURL, InfoButton, Link, Observer} from "web-vcore";
+import {AddNotificationMessage, ES, InfoButton, Link} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import React from "react";
-import {FetchResult, gql} from "@apollo/client";
+import React, {useState} from "react";
 import {OnUserJWTChanged} from "Utils/AutoRuns/UserInfoCheck";
 import {SignInButton} from "./UserPanel/SignInButton.js";
+import {observer_mgl} from "mobx-graphlink";
 
-@Observer
-export class UserPanel extends BaseComponentPlus({}, {}) {
-	render() {
-		const user = Me();
-		//if (graph.userInfo?.id == null) {
-		if (user == null) {
-			return (
-				<Column style={{
-					padding: 10, borderRadius: "0 0 0 5px",
-					background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
-				}}>
-					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
-					<SignInPanel/>
-				</Column>
-			);
-		}
-		Assert(graph.userInfo?.id != null);
-
+export const UserPanel = observer_mgl(()=>{
+	const user = Me();
+	if (user == null) {
 		return (
 			<Column style={{
-				padding: 5, borderRadius: "0 0 0 5px",
+				padding: 10, borderRadius: "0 0 0 5px",
 				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 			}}>
-				<Column sel>
-					{/*<div>Name: {graph.userInfo.displayName}</div>*/}
-					<div>Name: {Me()?.displayName ?? "n/a"}</div>
-					<div>ID: {MeID()}</div>
-				</Column>
-				<Row mt={5}>
-					<Link ml="auto" mr={5} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
-						s.main.page = "profile";
-						s.main.topRightOpenPanel = null;
-					}}>
-						<Button text="Edit profile" style={{width: 110}} />
-					</Link>
-					<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
-						localStorage.removeItem("debate-map-user-jwt");
-						OnUserJWTChanged();
-					}} />
-				</Row>
+				<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
+				<SignInPanel/>
 			</Column>
 		);
 	}
-}
 
-export function ShowSignInPopup() {
+	Assert(graph.userInfo?.id != null);
+
+	return (
+		<Column style={{padding: 5, borderRadius: "0 0 0 5px",
+			background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
+		}}>
+			<Column sel>
+				<div>Name: {Me()?.displayName ?? "n/a"}</div>
+				<div>ID: {MeID()}</div>
+			</Column>
+
+			<Row mt={5}>
+				<Link ml="auto" mr={5} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
+					s.main.page = "profile";
+					s.main.topRightOpenPanel = null;
+				}}>
+					<Button text="Edit profile" style={{width: 110}} />
+				</Link>
+				<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
+					localStorage.removeItem("debate-map-user-jwt");
+					OnUserJWTChanged();
+				}} />
+			</Row>
+		</Column>
+	);
+});
+
+export const ShowSignInPopup =()=>{
 	const boxController: BoxController = ShowMessageBox({
 		title: "Sign in", okButton: false, cancelOnOverlayClick: true,
 		message: ()=>{
@@ -69,52 +63,49 @@ export function ShowSignInPopup() {
 			);
 		},
 	});
-}
+};
 
-@SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {dev_username: string}> {
-	static initialState = {dev_username: "Dev1"};
-	render() {
-		const {style, onSignIn} = this.props;
-		const {dev_username} = this.state;
+export type SignInPanelProps = {
+  style?: React.CSSProperties;
+  onSignIn?: () => void;
+};
 
-		const onJWTReceived = (jwt: string)=>{
-			// store jwt in local-storage
-			localStorage.setItem("debate-map-user-jwt", jwt);
-			OnUserJWTChanged();
-			onSignIn?.();
-		};
+export const SignInPanel = observer_mgl((props: {style?: React.CSSProperties, onSignIn?: ()=>void})=>{
+	const {style, onSignIn} = props;
 
-		return (
-			<Column style={ES(style)}>
-				<SignInButton provider="google" onJWTReceived={onJWTReceived}/>
-				{/*<SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
-				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
-				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/>*/}
+	const [devUsername, setDevUsername] = useState("Dev1");
+	const onJWTReceived = (jwt: string)=>{
+		localStorage.setItem("debate-map-user-jwt", jwt);
+		OnUserJWTChanged();
+		onSignIn?.();
+	};
 
-				{g.DB == "dev" &&
-				<Column style={{width: 300}}>
-					<Row mt={6} pt={3} style={{display: "block", borderTop: "2px solid gray"}}>
-						{`You're connected to a dev-mode server, where fake/passwordless sign-in is used.`}
-						<InfoButton ml={5} text={`
-							Google sign-in can work in dev-mode, but only if you fill out the "CLIENT_ID" and "CLIENT_SECRET" vars in the root .env file before building/deploying the app-server pod.
-							(also, I may remove the ability to use Google sign-in in dev-mode later on, since having it active requires adding localhost entries to the client registration, which might have drawbacks)
-						`.AsMultiline(0)}/>
-					</Row>
-					<Row>
-						<Text>Username:</Text>
-						<TextInput ml={5} style={{flex: 1}} value={dev_username} onChange={val=>this.SetState({dev_username: val})}/>
-						<SignInButton provider="dev" preferredUsername={dev_username} onJWTReceived={onJWTReceived}/>
-					</Row>
-				</Column>}
-			</Column>
-		);
-	}
-}
+	return (
+		<Column style={ES(style)}>
+   			<SignInButton provider="google" onJWTReceived={onJWTReceived}/>
+
+   			{g.DB == "dev" &&
+   			<Column style={{width: 300}}>
+   				<Row mt={6} pt={3} style={{display: "block", borderTop: "2px solid gray"}}>
+   					{`You're connected to a dev-mode server, where fake/passwordless sign-in is used.`}
+   					<InfoButton ml={5} text={`
+   						Google sign-in can work in dev-mode, but only if you fill out the "CLIENT_ID" and "CLIENT_SECRET" vars in the root .env file before building/deploying the app-server pod.
+   						(also, I may remove the ability to use Google sign-in in dev-mode later on, since having it active requires adding localhost entries to the client registration, which might have drawbacks)
+   					`.AsMultiline(0)}/>
+   				</Row>
+   				<Row>
+   					<Text>Username:</Text>
+   					<TextInput ml={5} style={{flex: 1}} value={devUsername} onChange={val=>setDevUsername(val)}/>
+   					<SignInButton provider="dev" preferredUsername={devUsername} onJWTReceived={onJWTReceived}/>
+   				</Row>
+   			</Column>}
+   		</Column>
+	);
+});
 
 export type SignInProvider = "google" | "dev";
 
-export function OpenSignInPopup(url: string, provider: SignInProvider) {
+export const OpenSignInPopup = (url: string, provider: SignInProvider)=>{
 	const name = "sign_in_popup";
 
 	let size: {width: number, height: number};
@@ -133,13 +124,13 @@ export function OpenSignInPopup(url: string, provider: SignInProvider) {
 
 		AddNotificationMessage(`
 			Popup for sign-in was blocked; please allow popups for this site, or manually open the sign-in link in a new tab.
-			
+
 			Sign-in link: ${url}
 		`);
 	}
-}
+};
 
-function WasPopupWindowBlocked(popupWindow: Window|null) {
+const WasPopupWindowBlocked = (popupWindow: Window|null)=>{
 	if (popupWindow == null) return true;
 	if (popupWindow.closed) return true;
 	// maybe needed for safari (not yet checked, but suggested by: https://stackoverflow.com/questions/2914#comment137165479_27725432)
@@ -149,4 +140,4 @@ function WasPopupWindowBlocked(popupWindow: Window|null) {
 		return true;
 	}*/
 	return false;
-}
+};
