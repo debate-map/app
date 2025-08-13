@@ -73,7 +73,7 @@ query($limit: Int!, $after: Int, $orderBy: String, $orderDesc: Boolean, $filter:
 }
 `;
 
-const SubscriptionsPaginatedUI = observer_mgl(()=>{
+export const SubscriptionsPaginatedUI = observer_mgl(()=>{
 	const [tableData, setTableData] = useState<TableData>({columnSort: "", columnSortDirection: "", filters: []});
 	const [page, setPage] = useState(0);
 
