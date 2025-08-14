@@ -2,6 +2,7 @@ import React from "react";
 import {ES} from "web-vcore";
 import {Row} from "react-vcomponents";
 import {AddGlobalStyle, BaseComponent} from "react-vextensions";
+import {PropsWithChildren} from "react";
 
 /*export function CSS_Button_MatchSelectOption(selected = false) {
 	return ES(
@@ -39,17 +40,20 @@ AddGlobalStyle(`
 }
 `);
 
-export class ButtonChain extends BaseComponent<{displayType?: "option", selected: boolean}, {}> {
-	static defaultProps = {displayType: "option"};
-	render() {
-		const {displayType, selected, children} = this.props;
-		return (
-			<Row className="ButtonChain" style={ES(
-				{border: "1px solid rgba(0,0,0,0.3)", borderRadius: 5},
-				selected && {background: "rgba(255,255,255,.5)"},
-			)}>
-				{children}
-			</Row>
-		);
-	}
-}
+export type ButtonChain_Props = PropsWithChildren<{
+	displayType?: "option",
+	selected: boolean,
+}>;
+
+export const ButtonChain = (props: ButtonChain_Props)=>{
+	const {displayType = "option", selected, children} = props;
+
+	return (
+		<Row className="ButtonChain" style={ES(
+			{border: "1px solid rgba(0,0,0,0.3)", borderRadius: 5},
+			selected && {background: "rgba(255,255,255,.5)"},
+		)}>
+			{children}
+		</Row>
+	);
+};
