@@ -36,11 +36,11 @@ import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
 import {apolloClient} from "../Utils/LibIntegrations/Apollo.js";
-import {LinkPreserver} from "./@Root/LinkPreserver";
+import {LinkPreserver} from "./@Root/LinkPreserver.js";
+import {observer_mgl} from "mobx-graphlink";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
-// export class RootUIWrapper extends BaseComponentPlus({}, { storeReady: false }) {
 @Observer
 export class RootUIWrapper extends BaseComponent<{}, {}> {
 	constructor(props) {
@@ -197,63 +197,47 @@ declare global {
 	var shiftDown: boolean;
 	var altDown: boolean;
 }
+
 g.mousePos = new Vector2(undefined, undefined);
 G({ctrlDown: false, shiftDown: false, altDown: false});
 
-@Observer
-class RootUI extends BaseComponentPlus({} as {}, {}) {
-	render() {
-		// const currentPage = State(a => a.main.page);
-		const {page} = store.main;
+export const RootUI = observer_mgl(()=>{
+	const {page} = store.main;
 
-		return (
-			<Column className='background'/* 'unselectable' */ style={{height: "100%"}}>
-				{/* <div className='background' style={{
-					position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
-				}}/> */}
-				<RootStyles/>
-				<ErrorBoundary>
-					<AddressBarWrapper/>
-					<LinkPreserver/>
-					<OverlayUI/>
-				</ErrorBoundary>
-				{ShowHeader &&
-				<ErrorBoundary>
-					{!SLMode && <NavBar/>}
-					{SLMode && <NavBar_SL/>}
-				</ErrorBoundary>}
-				{/* <InfoButton_TooltipWrapper/> */}
-				<ErrorBoundary
-					key={page} // use key, so that error-message clears when user changes pages
-				>
-					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
-						{/*{page == "stream" && <StreamPanel/>}
-						<Route path='/chat'><ChatUI/></Route>
-						<Route path='/reputation'><ReputationUI/></Route>*/}
-
-						{/* special, for login */}
-						{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
-						{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
-
-						{page == "database" && <DatabaseUI/>}
-						{page == "forum" && <ForumUI/>}
-						{page == "feedback" && <FeedbackUI/>}
-						{page == "more" && <MoreUI/>}
-						{page == "home" && !SLMode && <HomeUI/>}
-						{page == "home" && SLMode && <HomeUI_SL/>}
-						{page == "social" && <SocialUI/>}
-						{page == "debates" && <DebatesUI/>}
-						{page == "global" && <GlobalUI/>}
-
-						{/*<Route path='/search'><SearchUI/></Route>
-						<Route path='/guide'><GuideUI/></Route>*/}
-						{page == "profile" && <UserProfileUI user={Me()}/>}
-					</main>
-				</ErrorBoundary>
-			</Column>
-		);
-	}
-}
+	return (
+		<Column className='background' style={{height: "100%"}}>
+			<RootStyles/>
+			<ErrorBoundary>
+				<AddressBarWrapper/>
+				<LinkPreserver/>
+				<OverlayUI/>
+			</ErrorBoundary>
+			{ShowHeader &&
+			<ErrorBoundary>
+				{!SLMode && <NavBar/>}
+				{SLMode && <NavBar_SL/>}
+			</ErrorBoundary>}
+			<ErrorBoundary
+				key={page} // use key, so that error-message clears when user changes pages
+			>
+				<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+					{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
+					{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
+					{page == "database" && <DatabaseUI/>}
+					{page == "forum" && <ForumUI/>}
+					{page == "feedback" && <FeedbackUI/>}
+					{page == "more" && <MoreUI/>}
+					{page == "home" && !SLMode && <HomeUI/>}
+					{page == "home" && SLMode && <HomeUI_SL/>}
+					{page == "social" && <SocialUI/>}
+					{page == "debates" && <DebatesUI/>}
+					{page == "global" && <GlobalUI/>}
+					{page == "profile" && <UserProfileUI user={Me()}/>}
+				</main>
+			</ErrorBoundary>
+		</Column>
+	);
+});
 
 const OverlayUI = ()=>{
 	return (
@@ -266,8 +250,8 @@ const OverlayUI = ()=>{
 };
 
 const GetOpenerWindow = (): Window | null=>{
-	//if (window.opener != null && window.opener.constructor?.name == "Window") {
-	if (window.opener != null) { // Firefox blocks access to window.opener.constructor, so don't check
+	// Firefox blocks access to window.opener.constructor, so don't check
+	if (window.opener != null) {
 		return window.opener;
 	}
 	return null;
@@ -295,4 +279,4 @@ const PostLoginAttemptUI = ({success}: {success: boolean})=>{
 			)}
 		</PageContainer>
 	);
-}
+};
