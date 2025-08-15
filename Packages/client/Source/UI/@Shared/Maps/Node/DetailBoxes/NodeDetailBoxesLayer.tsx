@@ -1,20 +1,15 @@
 import React from "react";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
-import {GetMapUICSSFilter} from "../../MapUI";
 
 export let nodeDetailBoxesLayer_container: HTMLDivElement;
 
-export class NodeDetailBoxesLayer extends BaseComponentPlus({}, {}) {
-	render() {
-		let {} = this.props;
-		return (
-			<div ref={c=>nodeDetailBoxesLayer_container = c!} style={{
-				position: "relative", zIndex: zIndexes.overNavBarDropdown,
-				//filter: GetMapUICSSFilter(),
-			}}>
-			</div>
-		);
-	}
-}
+export const NodeDetailBoxesLayer = ()=>{
+	return (
+		<div ref={c=>{
+			nodeDetailBoxesLayer_container = c!;
+		}}style={{
+			position: "relative", zIndex: zIndexes.overNavBarDropdown,
+		}}>
+		</div>
+	);
+};
