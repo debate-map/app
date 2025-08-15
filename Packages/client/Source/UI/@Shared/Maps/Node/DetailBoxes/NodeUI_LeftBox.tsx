@@ -1,9 +1,9 @@
 import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, DMap, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType, PERMISSIONS} from "dm_common";
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {Chroma, DefaultLoadingUI, Observer} from "web-vcore";
+import {Chroma, DefaultLoadingUI, Observer, css2} from "web-vcore";
 import chroma from "chroma-js";
 import {E} from "js-vextensions";
 import {BailInfo, SlicePath} from "mobx-graphlink";
@@ -174,50 +174,46 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 	}
 }
 
-type PanelButton_Props = {
-	map: DMap|n, path: string, openPanel: string|n, panel: string, text: string, lastButtonInSeries?: boolean, style?,
-	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
-};
-class PanelButton extends BaseComponent<PanelButton_Props, {}> {
-	render() {
-		const {map, path, openPanel, panel, text, lastButtonInSeries, style, children} = this.props;
-		const {css} = cssHelper(this);
+type PanelButton_Props = PropsWithChildren<{
+	map: DMap|n,
+	path: string,
+	openPanel: string|n,
+	panel: string,
+	text: string,
+	lastButtonInSeries?: boolean,
+	style?: React.CSSProperties,
+	onPanelButtonHover: (panel: string|n)=>void,
+	onPanelButtonClick: (panel: string)=>void,
+}>;
 
-		const regularBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,0)") : Chroma("rgba(255,255,255,.1)");
-		const hoverBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,.15)") : Chroma("rgba(255,255,255,.25)");
-		return (
-			<Button text={text}
-				className="useLightText"
-				style={css(
-					{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"},
-					{
-						// border: "1px outset rgba(0,0,0,.35)",
-						border: "solid rgba(0,0,0,.4)", borderWidth: "0 0 1px 0",
-						boxShadow: "none", borderRadius: 0,
-						backgroundColor: regularBackground.css(), ":hover": {backgroundColor: hoverBackground.css()},
-						color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
-					},
-					openPanel == panel && {backgroundColor: hoverBackground.css()},
-					lastButtonInSeries && {borderRadius: "0 0 5px 5px", borderWidth: 0},
-					style,
-				)}
-				onClick={()=>{
-					const {onPanelButtonClick} = this.props;
-					onPanelButtonClick(panel);
-				}}
-				onMouseEnter={()=>{
-					const {onPanelButtonHover} = this.props;
-					onPanelButtonHover(panel);
-				}}
-				onMouseLeave={()=>{
-					const {onPanelButtonHover} = this.props;
-					onPanelButtonHover(null);
-				}}>
-				{/* <div style={{position: "absolute", right: -4, width: 4, top: 0, bottom: 0}}/> */}
-				{/* capture mouse events in gap above and below self */}
-				<div style={{position: "absolute", left: 0, right: 0, top: -3, bottom: -2, cursor: "inherit"}}/>
-				{children}
-			</Button>
-		);
-	}
-}
+const PanelButton = (props: PanelButton_Props)=>{
+	const {openPanel, panel, text, lastButtonInSeries, style, children, onPanelButtonClick, onPanelButtonHover} = props;
+	const css = css2;
+
+	const regularBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,0)") : Chroma("rgba(255,255,255,.1)");
+	const hoverBackground = liveSkin.HasWhiteLeftBoxBackground() ? Chroma("rgba(0,0,0,.15)") : Chroma("rgba(255,255,255,.25)");
+
+	return (
+		<Button text={text}
+			className="useLightText"
+			style={css(
+				{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"},
+				{
+					border: "solid rgba(0,0,0,.4)", borderWidth: "0 0 1px 0",
+					boxShadow: "none", borderRadius: 0,
+					backgroundColor: regularBackground.css(), ":hover": {backgroundColor: hoverBackground.css()},
+					color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
+				},
+				openPanel == panel && {backgroundColor: hoverBackground.css()},
+				lastButtonInSeries && {borderRadius: "0 0 5px 5px", borderWidth: 0},
+				style,
+			)}
+			onClick={()=>onPanelButtonClick(panel)}
+			onMouseEnter={()=>onPanelButtonHover(panel)}
+			onMouseLeave={()=>onPanelButtonHover(null)}>
+			{/* capture mouse events in gap above ad below self */}
+			<div style={{position: "absolute", left: 0, right: 0, top: -3, bottom: -2, cursor: "inherit"}}/>
+			{children}
+		</Button>
+	);
+};

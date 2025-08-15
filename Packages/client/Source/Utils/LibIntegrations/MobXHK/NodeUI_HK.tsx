@@ -3,7 +3,7 @@ import {GetNode_HK} from "./HKStore.js";
 import {observer_mgl} from "mobx-graphlink";
 import React from "react";
 
-export const NodeUI_HK_ = observer_mgl(({nodeID}: {nodeID: string})=>{
+export const NodeUI_HK = observer_mgl(({nodeID}: {nodeID: string})=>{
 	const node = GetNode_HK(nodeID);
 	if (node == null) return <div>Loading...</div>;
 
