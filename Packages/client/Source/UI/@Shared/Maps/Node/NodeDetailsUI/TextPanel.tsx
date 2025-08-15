@@ -1,22 +1,18 @@
-import {AsNodeL3, AttachmentType, GetAttachmentType_Node} from "dm_common";
+import {AsNodeL3} from "dm_common";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
-import {BaseComponent} from "react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
+import React from "react";
 
-export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
-	render() {
-		const {newData, newDataAsL2, newRevisionData, newLinkData, map, forNew, enabled, Change} = this.props;
-		const attachmentType = GetAttachmentType_Node(newDataAsL2);
+export const TextPanel = (props: NodeDetailsUI_SharedProps)=>{
+	const {newDataAsL2, newRevisionData, newLinkData, map, forNew, enabled, Change} = props;
 
-		//const sharedProps = this.props;
-		return (
-			<>
-				<PhrasingDetailsUI baseData={newRevisionData.phrasing} node={AsNodeL3(newDataAsL2, newLinkData, null)} map={map} forNew={forNew} enabled={enabled}
-					embeddedInNodeRevision={true}
-					onChange={val=>{
-						Change(newRevisionData.phrasing = val);
-					}}/>
-			</>
-		);
-	}
-}
+	return (
+		<>
+			<PhrasingDetailsUI baseData={newRevisionData.phrasing} node={AsNodeL3(newDataAsL2, newLinkData, null)} map={map} forNew={forNew} enabled={enabled}
+				embeddedInNodeRevision={true}
+				onChange={val=>{
+					Change(newRevisionData.phrasing = val);
+				}}/>
+		</>
+	);
+};
