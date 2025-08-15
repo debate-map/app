@@ -97,29 +97,18 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 	});
 }
 
-// temp fix for app-server validation issue, of newParentID field needing to be non-null
-/*function RemoveNullProps(tree: Object) {
-	for (const [key, val] of Object.entries(tree)) {
-		if (val == null) {
-			delete tree[key];
-			continue;
-		}
-		if (typeof val == "object") {
-			RemoveNullProps(val);
-		}
-	}
-	return tree;
-}*/
+type  InfoRect_Props = {
+	text: string,
+	first?: boolean,
+};
 
-class InfoRect extends BaseComponent<{text: string, first?: boolean}, {}> {
-	render() {
-		const {text, first} = this.props;
-		return (
-			<Row ml={first ? 0 : 5} sel style={{background: "rgba(0,0,0,.1)", padding: 3, borderRadius: 3}}>
-				{text}
-			</Row>
-		);
-	}
+const InfoRect = (props: InfoRect_Props)=>{
+	const {text, first} = props;
+	return (
+		<Row ml={first ? 0 : 5} sel style={{background: "rgba(0,0,0,.1)", padding: 3, borderRadius: 3}}>
+			{text}
+		</Row>
+	);
 }
 
 function GetTransferNodeFinalType(nodeInfo: NodeInfoForTransfer) {
