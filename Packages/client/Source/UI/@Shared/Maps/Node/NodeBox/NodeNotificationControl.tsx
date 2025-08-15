@@ -2,7 +2,7 @@ import {TextPlus} from "web-vcore";
 import {Div} from "react-vcomponents";
 import {NodeL3, SubscriptionLevel} from "dm_common";
 import {RunCommand_AddSubscriptionWithLevel} from "../../../../../Utils/DB/Command.js";
-import React from "react";
+import React, {PropsWithChildren} from "react";
 
 export type NodeNotificationControl_Props = {
 	node: NodeL3,
@@ -42,7 +42,14 @@ export const NodeNotificationControl = (props: NodeNotificationControl_Props)=>{
 	);
 };
 
-const NotificationLevelButton = (props: {node: NodeL3, backgroundColor: chroma.Color, oldLevel: SubscriptionLevel, targetLevel: SubscriptionLevel, children: React.ReactNode})=>{
+type NotificationLevelButton_Props = PropsWithChildren<{
+	node: NodeL3,
+	backgroundColor: chroma.Color,
+	oldLevel: SubscriptionLevel,
+	targetLevel: SubscriptionLevel,
+}>
+
+const NotificationLevelButton = (props: NotificationLevelButton_Props)=>{
 	const {node, backgroundColor, oldLevel, targetLevel, children} = props;
 	const active = oldLevel == targetLevel;
 
