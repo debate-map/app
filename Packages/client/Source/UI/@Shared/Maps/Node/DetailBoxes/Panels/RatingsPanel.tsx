@@ -1,5 +1,5 @@
 import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, NodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext, GetFinalAccessPolicyForNewEntry} from "dm_common";
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker";
@@ -156,30 +156,34 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 	}
 }
 
-class Group extends BaseComponent<{mt?: number, title: string, headerChildren?: JSX.Element}, {}> {
-	render() {
-		const {mt, title, children, headerChildren} = this.props;
-		return (
-			<Column mt={mt} style={{/*padding: 5, borderRadius: 5, background: "rgba(150,150,150,.3)", border: "1px solid rgba(255,255,255,.1)"*/}}>
-				<Header text={title}>
-					<Row ml="auto">
-						{headerChildren}
-					</Row>
-				</Header>
-				{children}
-			</Column>
-		);
-	}
-}
+type Group_Props = PropsWithChildren<{
+	mt?: number,
+	title: string,
+	headerChildren?: React.JSX.Element
+}>
 
-class Header extends BaseComponent<{text: string}, {}> {
-	render() {
-		const {text, children} = this.props;
-		return (
-			<Row style={{marginBottom: 5, height: 18, borderRadius: 3, paddingLeft: 5, background: "rgba(255,255,255,.1)"}}>
-				<Text style={{fontSize: 12}}>{text}</Text>
-				{children}
-			</Row>
-		);
-	}
-}
+const Group = (props: Group_Props)=>{
+	const {mt, title, children, headerChildren} = props;
+
+	return (
+		<Column mt={mt} style={{/*padding: 5, borderRadius: 5, background: "rgba(150,150,150,.3)", border: "1px solid rgba(255,255,255,.1)"*/}}>
+			<Header text={title}>
+				<Row ml="auto">
+					{headerChildren}
+				</Row>
+			</Header>
+			{children}
+		</Column>
+	);
+};
+
+const Header = (props: PropsWithChildren<{text: string}>)=>{
+	const {text, children} = props;
+
+	return (
+		<Row style={{marginBottom: 5, height: 18, borderRadius: 3, paddingLeft: 5, background: "rgba(255,255,255,.1)"}}>
+			<Text style={{fontSize: 12}}>{text}</Text>
+			{children}
+		</Row>
+	);
+};
