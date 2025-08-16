@@ -16,6 +16,7 @@ import * as htmlToImage from "html-to-image";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel.js";
 import {MapUI} from "../../MapUI.js";
+import {observer_mgl} from "mobx-graphlink";
 
 const changesSince_options = [] as {name: string, value: string}[];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
@@ -160,68 +161,62 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: DMap}, {}) {
 	}
 }
 
-@Observer
-export class ScreenshotModeCheckbox extends BaseComponent<{text: string}, {}> {
-	render() {
-		const {text} = this.props;
-		const uiState = store.main.maps;
-		return (
-			<>
-				<TextPlus sel info={`
-					When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with a cleaner appearance. Specifically:
-					1) Nav-bar shadows are removed, to reduce visual artifacts at the edges of map. (scroll-bars are also hidden, for if using screenshot extension)
-					2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
-					3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
-					4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
-					5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
-					6) Node outlines (eg. for recent changes) are hidden.
-					7) Notification-popups are restricted to the left-most 600px of page. (so they don't cover the map-ui)
-					8) Tooltips are restricted to the left-most 600px of page. (so they don't cover the map-ui)
-					Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
-				`.AsMultiline(0)}>{text}</TextPlus>
-				<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
-				{uiState.screenshotMode && // NOTE: This scrollbar-hiding css applies globally when the screenshotMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
-				<style>{`
-					.scrollTrack {
-						display: none !important;
-					}
-					nav, nav > div {
-						box-shadow: none !important;
-					}
-					.NotificationsUI {
-						max-width: calc(${TimelinePanel_width}px - 10px - 20px) !important;
-					}
-					.rc-tooltip {
-						left: 0 !important;
-						right: calc(100% - 600px);
-					}
-				`}</style>}
-			</>
-		);
-	}
-}
+export const ScreenshotModeCheckbox = observer_mgl(({text}: {text: string})=>{
+	const uiState = store.main.maps;
 
-@Observer
-export class FastScrollModeCheckbox extends BaseComponent<{}, {}> {
-	render() {
-		const {} = this.props;
-		const uiState = store.main.maps;
-		return (
-			<>
-				<TextPlus sel info={`
-					When enabled, scrolling is faster in huge maps (eg. 1000+), but currently causes some UI glitches. (eg. node's bottom panel showing *under* other nodes)
-				`.AsMultiline(0)}>Fast-scroll mode</TextPlus>
-				<CheckBox ml={5} value={uiState.fastScrollMode} onChange={val=>RunInAction_Set(this, ()=>uiState.fastScrollMode = val)}/>
-				{uiState.fastScrollMode && // NOTE: This scrollbar-hiding css applies globally when the fastScrollMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
-				<style>{`
-					.MapUI > .NodeUI {
-						will-change: transform;
-					}
-				`}</style>}
-			</>
-		);
-	}
-}
+	return (
+		<>
+			<TextPlus sel info={`
+				When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with a cleaner appearance. Specifically:
+				1) Nav-bar shadows are removed, to reduce visual artifacts at the edges of map. (scroll-bars are also hidden, for if using screenshot extension)
+				2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
+				3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
+				4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
+				5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
+				6) Node outlines (eg. for recent changes) are hidden.
+				7) Notification-popups are restricted to the left-most 600px of page. (so they don't cover the map-ui)
+				8) Tooltips are restricted to the left-most 600px of page. (so they don't cover the map-ui)
+				Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
+			`.AsMultiline(0)}>{text}</TextPlus>
+			<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(()=>uiState.screenshotMode = val)}/>
+			{uiState.screenshotMode && // NOTE: This scrollbar-hiding css applies globally when the screenshotMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
+			<style>{`
+				.scrollTrack {
+					display: none !important;
+				}
+				nav, nav > div {
+					box-shadow: none !important;
+				}
+				.NotificationsUI {
+					max-width: calc(${TimelinePanel_width}px - 10px - 20px) !important;
+				}
+				.rc-tooltip {
+					left: 0 !important;
+					right: calc(100% - 600px);
+				}
+			`}</style>}
+		</>
+	);
+});
+
+export const FastScrollModeCheckbox = observer_mgl(()=>{
+	const uiState = store.main.maps;
+
+	return (
+		<>
+			<TextPlus sel info={`
+				When enabled, scrolling is faster in huge maps (eg. 1000+), but currently causes some UI glitches. (eg. node's bottom panel showing *under* other nodes)
+			`.AsMultiline(0)}>Fast-scroll mode</TextPlus>
+			<CheckBox ml={5} value={uiState.fastScrollMode} onChange={val=>RunInAction_Set(()=>uiState.fastScrollMode = val)}/>
+			{uiState.fastScrollMode && // NOTE: This scrollbar-hiding css applies globally when the fastScrollMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
+			<style>{`
+				.MapUI > .NodeUI {
+					will-change: transform;
+				}
+			`}</style>}
+		</>
+	);
+});
 
 const StyleRuleUI_ErrorWrapper = BuildErrorWrapperComp<StyleRuleUI_Props>(()=>StyleRuleUI, (info, comp)=>{
 	const uiState = store.main.maps;
@@ -232,6 +227,7 @@ const StyleRuleUI_ErrorWrapper = BuildErrorWrapperComp<StyleRuleUI_Props>(()=>St
 });
 
 type StyleRuleUI_Props = {rule: NodeStyleRule, index: number};
+
 @Observer
 class StyleRuleUI extends BaseComponent<StyleRuleUI_Props, {}> {
 	render() {

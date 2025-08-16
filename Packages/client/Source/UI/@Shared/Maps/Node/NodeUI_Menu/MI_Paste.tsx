@@ -2,39 +2,36 @@ import {ClaimForm, GetNodeDisplayText, NodeType, MeID, TransferType} from "dm_co
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {Observer} from "web-vcore";
-import {BaseComponent} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {ShowTransferNodeDialog} from "./Dialogs/TransferNodeDialog.js";
 import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/TransferNodeData.js";
+import {observer_mgl} from "mobx-graphlink";
 
-// todo: have this menu-item fully replace MI_Paste_Old
+// TODO: have this menu-item fully replace MI_Paste_Old
 
-@Observer
-export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
-	render() {
-		const {map, node, path, copiedNode, copiedNodePath, copiedNode_asCut} = this.props;
-		if (copiedNode == null || copiedNodePath == null) return null;
-		if (map == null) return null;
-		const childGroup = node.link?.group;
+export const MI_Paste = observer_mgl((props: MI_SharedProps)=>{
+	const {map, node, copiedNode, copiedNodePath, copiedNode_asCut} = props;
 
-		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
+	if (copiedNode == null || copiedNodePath == null) return null;
+	if (map == null) return null;
+	const childGroup = node.link?.group;
 
-		const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(map, copiedNode, copiedNodePath, node, childGroup, copiedNode_asCut ? TransferType.move : TransferType.link);
-		if (commandData_initial == null || uiState_initial == null) return;
+	const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		return (
-			<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`}
-				style={liveSkin.Style_VMenuItem()} onClick={e=>{
-					if (e.button != 0) return;
-					if (MeID() == null) return ShowSignInPopup();
+	const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(map, copiedNode, copiedNodePath, node, childGroup, copiedNode_asCut ? TransferType.move : TransferType.link);
+	if (commandData_initial == null || uiState_initial == null) return;
 
-					ShowTransferNodeDialog(commandData_initial, uiState_initial);
-				}}/>
-		);
-	}
-}
+	return (
+		<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`}
+			style={liveSkin.Style_VMenuItem()} onClick={e=>{
+				if (e.button != 0) return;
+				if (MeID() == null) return ShowSignInPopup();
+
+				ShowTransferNodeDialog(commandData_initial, uiState_initial);
+			}}/>
+	);
+});
 
 // old code
 // ==========
