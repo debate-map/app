@@ -1,11 +1,11 @@
 import Moment from "moment";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {Observer, VReactMarkdown_Remarkable} from "web-vcore";
-import {DMap, NodeL3, GetUser, NodeRevision, MeID, GetNodeChildren, NodeType, AsNodeL1Input, NodeLink, ChildGroup, NodeL1, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, NodePhrasing, GetNodeRevision, GetNodeL2, CheckUserCanDeleteNode, NodeL2, GetNodePhrasing, NodePhrasing_Embedded, GetNodePhrasings, AsNodeRevisionInput} from "dm_common";
+import {DMap, NodeL3, GetUser, NodeRevision, MeID, GetNodeChildren, NodeType, AsNodeL1Input, NodeLink, ChildGroup, NodeL1, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, NodePhrasing, GetNodeRevision, GetNodeL2, CheckUserCanDeleteNode, NodeL2, AsNodeRevisionInput} from "dm_common";
 import {minidenticon} from "minidenticons";
-import {RunCommand_AddChildNode, RunCommand_AddNodeRevision, RunCommand_DeleteNode, RunCommand_DeleteNodeRevision, RunCommand_UpdateNode, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command.js";
-import React, {useMemo, useState} from "react";
+import {RunCommand_AddChildNode, RunCommand_AddNodeRevision, RunCommand_DeleteNode, RunCommand_DeleteNodeRevision} from "Utils/DB/Command.js";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Button, Row, TextArea} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ShowVMenu, VMenuItem} from "react-vmenu";
@@ -13,9 +13,8 @@ import {Vector2} from "js-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import Tooltip from "rc-tooltip";
 import {CatchBail} from "mobx-graphlink";
-import keycode from "keycode/index.js";
-import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
+import {observer_mgl} from "mobx-graphlink";
 
 const MinidenticonImg = ({username, saturation, lightness, ...props})=>{
 	const svgURI = useMemo(()=>`data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(username, saturation, lightness))}`, [username, saturation, lightness]);
@@ -30,61 +29,72 @@ const ExactTime = ({timestamp})=>(
 	<span>{Moment(timestamp).format("MMMM Do YYYY, h:mm:ss a")}</span>
 );
 
-@Observer
-export class CommentsPanel extends BaseComponentPlus({} as {show: boolean, map?: DMap | n, node: NodeL3, path: string}, {}) {
-	detailsUI: NodeDetailsUI;
-	render() {
-		const {show, map, node} = this.props;
-		const rootCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
-		const nodeAccessPolicyID = (map?.nodeAccessPolicy) ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
-		const [value, updateValue] = useState("");
-		const userID = MeID();
+export type CommentsPanel_Props = {
+	show: boolean,
+	map?: DMap | n,
+	node: NodeL3,
+	path: string
+};
 
-		const addComment = async(comment: string, parentNodeID: string)=>{
-			if (userID == null) {
-				ShowSignInPopup();
-				return false;
+export const CommentsPanel = observer_mgl((props: CommentsPanel_Props)=>{
+	const {show, map, node} = props;
+	const rootCommentNodes = useMemo(
+		()=>GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment),
+		[node.id],
+	);
+
+	const nodeAccessPolicyID = useMemo(
+	     ()=>(map?.nodeAccessPolicy) ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name),
+	     [map?.nodeAccessPolicy],
+	);
+
+	const [value, updateValue] = useState("");
+	const userID = MeID();
+
+	const addComment = async(comment: string, parentNodeID: string)=>{
+		if (userID == null) {
+			ShowSignInPopup();
+			return false;
+		}
+		const commentNode = new NodeL1({
+			type: NodeType.comment,
+			accessPolicy: nodeAccessPolicyID,
+		});
+		const nodeRev = new NodeRevision({
+			phrasing: NodePhrasing.Embedded({text_base: comment}),
+		});
+		const nodeLink = new NodeLink({
+			group: ChildGroup.comment,
+			orderKey: "a0",
+		});
+		await RunCommand_AddChildNode({
+			parentID: parentNodeID,
+			node: AsNodeL1Input(commentNode),
+			revision: nodeRev,
+			link: nodeLink,
+			mapID: map ? map.id : null,
+		});
+		return true;
+	};
+
+	return (
+		<ScrollView style={{maxHeight: 300, display: show ? "flex" : "none"}}>
+			{rootCommentNodes.length === 0 ?
+				<div style={{width: "100%", height: "2rem", display: "flex", justifyContent: "center", alignItems: "center"}}><p>No comments yet!</p></div> :
+				rootCommentNodes.map((n, i)=><CommentNodeUI map={map} node={n} key={i} addComment={addComment} isRootNode={true} isLastNode={(rootCommentNodes.length - 1) === i}/>)
 			}
-			const commentNode = new NodeL1({
-				type: NodeType.comment,
-				accessPolicy: nodeAccessPolicyID,
-			});
-			const nodeRev = new NodeRevision({
-				phrasing: NodePhrasing.Embedded({text_base: comment}),
-			});
-			const nodeLink = new NodeLink({
-				group: ChildGroup.comment,
-				orderKey: "a0",
-			});
-			await RunCommand_AddChildNode({
-				parentID: parentNodeID,
-				node: AsNodeL1Input(commentNode),
-				revision: nodeRev,
-				link: nodeLink,
-				mapID: map ? map.id : null,
-			});
-			return true;
-		};
-
-		return (
-			<ScrollView style={{maxHeight: 300, display: show ? "flex" : "none"}}>
-				{rootCommentNodes.length === 0 ?
-					<div style={{width: "100%", height: "2rem", display: "flex", justifyContent: "center", alignItems: "center"}}><p>No comments yet!</p></div> :
-					rootCommentNodes.map((n, i)=><CommentNodeUI map={map} node={n} key={i} addComment={addComment} isRootNode={true} isLastNode={(rootCommentNodes.length - 1) === i}/>)
-				}
-				<CommentInput inputType={"Comment"} value={value}
-					onSubmit={async()=>{
-						// TODO: Add some sort of loading on the comment button that indicates it's going out (as the addComment returns a promise)
-						const success = await addComment(value, node.id);
-						// only clear the comment input if the comment is successfully added
-						if (success) updateValue("");
-					}}
-					onCancel={()=>updateValue("")}
-					onValueChange={newVal=>updateValue(newVal)}/>
-			</ScrollView>
-		);
-	}
-}
+			<CommentInput inputType={"Comment"} value={value}
+				onSubmit={async()=>{
+					// TODO: Add some sort of loading on the comment button that indicates it's going out (as the addComment returns a promise)
+					const success = await addComment(value, node.id);
+					// only clear the comment input if the comment is successfully added
+					if (success) updateValue("");
+				}}
+				onCancel={()=>updateValue("")}
+				onValueChange={newVal=>updateValue(newVal)}/>
+		</ScrollView>
+	);
+});
 
 @Observer
 export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (comment: string, parentNodeID: string)=>Promise<boolean>, node: NodeL1, isRootNode: boolean, isLastNode: boolean},
@@ -211,58 +221,72 @@ export class CommentNodeUI extends BaseComponent<{map: DMap | n, addComment: (co
 	}
 }
 
-class ActionButtons extends BaseComponent<{onUpvoteClick: ()=>void, onDownvoteClick: ()=>void, onToggleReplyClick: ()=>void, onDeleteClick: ()=>void, onEditClick: ()=>void, currentNodeCreator: string, disableDelete?: boolean, disableReply?: boolean}, {}> {
-	render() {
-		const {onUpvoteClick, onDownvoteClick, onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator, disableDelete, disableReply} = this.props;
-		const buttonStyle = {fontSize: "12px", color: "white", height: "20px"};
+type ActionButtons_Props = {
+	onUpvoteClick: ()=>void,
+	onDownvoteClick: ()=>void,
+	onToggleReplyClick: ()=>void,
+	onDeleteClick: ()=>void,
+	onEditClick: ()=>void,
+	currentNodeCreator: string,
+	disableDelete?: boolean,
+	disableReply?: boolean
+};
 
-		return (
-			<div style={{display: "flex", paddingTop: "5px"}}>
-				{/*<Button style={buttonStyle} p="2px 3px" mdIcon="thumb-up" enabled={true} onClick={onUpvoteClick}/>
-				<Button ml={5} style={buttonStyle} p="2px 3px" mdIcon="thumb-down" enabled={true} onClick={onDownvoteClick}/>*/}
-				<Button /*ml={5}*/ style={buttonStyle} p="2px 3px" text="Reply" enabled={!disableReply} onClick={onToggleReplyClick}/>
-				{currentNodeCreator === MeID() &&
-					<Button style={buttonStyle} ml={5} mdIcon="dots-horizontal" onClick={e=>{
-						const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
-						ShowVMenu(
-							{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
-							<>
-								<VMenuItem text="Edit" enabled={true} style={liveSkin.Style_VMenuItem()} onClick={onEditClick}/>
-								<VMenuItem text="Delete" enabled={!disableDelete} style={liveSkin.Style_VMenuItem()} onClick={onDeleteClick}/>
-							</>,
-						);
-					}}/>
-				}
-			</div>
-		);
-	}
+const ActionButtons = (props: ActionButtons_Props)=>{
+	const {onToggleReplyClick, onDeleteClick, onEditClick, currentNodeCreator, disableDelete, disableReply} = props;
+	const buttonStyle = {fontSize: "12px", color: "white", height: "20px"};
+
+	return (
+		<div style={{display: "flex", paddingTop: "5px"}}>
+			<Button style={buttonStyle} p="2px 3px" text="Reply" enabled={!disableReply} onClick={onToggleReplyClick}/>
+			{currentNodeCreator === MeID() &&
+				<Button style={buttonStyle} ml={5} mdIcon="dots-horizontal" onClick={e=>{
+					const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
+					ShowVMenu(
+						{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
+						<>
+							<VMenuItem text="Edit" enabled={true} style={liveSkin.Style_VMenuItem()} onClick={onEditClick}/>
+							<VMenuItem text="Delete" enabled={!disableDelete} style={liveSkin.Style_VMenuItem()} onClick={onDeleteClick}/>
+						</>,
+					);
+				}}/>
+			}
+		</div>
+	);
 }
 
-export class CommentInput extends BaseComponent<{inputType: "Comment" | "Reply" | "Edit", onSubmit: ()=>Promise<void>, onCancel: ()=>void, value: string, onValueChange: (newVal: string)=>void}, {}> {
-	ComponentDidMount() {
-		this.textAreaRef?.DOM_HTML?.focus();
-	}
-	textAreaRef: TextArea|n;
-	render() {
-		const {inputType, onSubmit, onCancel, value, onValueChange} = this.props;
-		const placeholder = `Enter your ${inputType.toLowerCase()}`;
+export type CommentInput_Props = {
+	inputType: "Comment" | "Reply" | "Edit",
+	onSubmit: ()=>Promise<void>,
+	onCancel: ()=>void,
+	value: string,
+	onValueChange: (newVal: string)=>void
+};
 
-		return (
-			<Row mt={8} style={{borderRadius: "5px", border: "1px solid rgba(0,0,0,.3)"}}>
-				<TextArea p={5} instant value={value} onChange={onValueChange} placeholder={placeholder} autoSize={true}
-					ref={c=>this.textAreaRef = c}
-					style={{outline: "none", borderWidth: 0, borderRadius: "5px 0 0 5px"}}
-					onKeyDownCapture={e=>{
-						if (e.keyCode == keycode.codes.esc) {
-							onCancel();
-						} else if (e.keyCode == keycode.codes.enter && !e.shiftKey) {
-							onSubmit();
-							e.preventDefault();
-						}
-					}}/>
-				{/*<Button ml={5} mdIcon="cancel" title="Cancel" onClick={onCancel}/>*/}
-				<Button mdIcon="send" width={32} title={inputType} onClick={onSubmit} style={{height: null, borderRadius: "0 5px 5px 0"}}/>
-			</Row>
-		);
+export const CommentInput = (props: CommentInput_Props)=>{
+	const {inputType, onSubmit, onCancel, value, onValueChange} = props;
+	const textAreaRef = useRef<TextArea>(null);
+
+	useEffect(()=>{
+		textAreaRef.current?.DOM_HTML?.focus();
+	}, []);
+
+	const placeholder = `Enter your ${inputType.toLowerCase()}`;
+	const onKeyDownCapture = (e: React.KeyboardEvent<HTMLTextAreaElement>)=>{
+		if (e.key === "Escape") {
+			onCancel();
+		} else if (e.key === "Enter" && !e.shiftKey) {
+			onSubmit();
+			e.preventDefault();
+		}
 	}
-}
+
+	return (
+		<Row mt={8} style={{borderRadius: "5px", border: "1px solid rgba(0,0,0,.3)"}}>
+			<TextArea p={5} instant value={value} onChange={onValueChange} placeholder={placeholder} autoSize={true} ref={textAreaRef}
+				style={{outline: "none", borderWidth: 0, borderRadius: "5px 0 0 5px"}} onKeyDownCapture={onKeyDownCapture}
+			/>
+			<Button mdIcon="send" width={32} title={inputType} onClick={onSubmit} style={{height: null, borderRadius: "0 5px 5px 0"}}/>
+		</Row>
+	);
+};
