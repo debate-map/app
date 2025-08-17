@@ -20,7 +20,7 @@ export const UUIDStub = ({id}: {id: string})=>{
 
 export type UUIDPathStub_Props = {
 	path: string,
-	copyButton: boolean
+	copyButton?: boolean
 } & BaseProps;
 
 export const UUIDPathStub = (props: UUIDPathStub_Props)=>{
