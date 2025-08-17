@@ -1,60 +1,63 @@
 import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
-import {GetUpdates, Observer} from "web-vcore";
+import {GetUpdates} from "web-vcore";
 import {E} from "js-vextensions";
-import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, DMap, NodeL3, PERMISSIONS} from "dm_common";
+import {NodePhrasing, MeID, DMap, NodeL3, PERMISSIONS} from "dm_common";
 import {RunCommand_DeleteNodePhrasing, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command";
+import {observer_mgl} from "mobx-graphlink";
+import React, {useRef, useState} from "react";
 
-@Observer
-export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {map: DMap|n, node: NodeL3, phrasing: NodePhrasing}, {dataError: null as string|n}) {
-	detailsUI: PhrasingDetailsUI;
-	render() {
-		const {map, node, phrasing} = this.props;
-		const {dataError} = this.state;
-		const creator = GetUser(phrasing.creator);
+type DetailsPanel_Phrasings_Props = {
+	map: DMap|n,
+	node: NodeL3,
+	phrasing: NodePhrasing
+};
 
-		const creatorOrMod = PERMISSIONS.NodePhrasing.Access(MeID(), phrasing);
-		return (
-			<Column style={{position: "relative", width: "100%"}}>
-				<PhrasingDetailsUI ref={c=>this.detailsUI = c!}
-					baseData={phrasing} map={map} node={node}
-					forNew={false} enabled={creatorOrMod}
-					onChange={(val, error)=>{
-						this.SetState({dataError: error});
+export const DetailsPanel_Phrasings = observer_mgl((props: DetailsPanel_Phrasings_Props)=>{
+	const {map, node, phrasing} = props;
+
+	const detailsUIRef = useRef<PhrasingDetailsUI>(null);
+	const [dataError, setDataError] = useState<string|n>(null);
+	const creatorOrMod = PERMISSIONS.NodePhrasing.Access(MeID(), phrasing);
+
+	return (
+		<Column style={{position: "relative", width: "100%"}}>
+			<PhrasingDetailsUI ref={detailsUIRef}
+				baseData={phrasing} map={map} node={node}
+				forNew={false} enabled={creatorOrMod}
+				onChange={(val, error)=>{
+					setDataError(error);
+				}}/>
+			{creatorOrMod &&
+				<Row mt={5}>
+					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
+						const phrasingUpdates = GetUpdates(phrasing, detailsUIRef.current!.GetNewData());
+						if (phrasingUpdates.VKeys().length) {
+							await RunCommand_UpdateNodePhrasing(E({id: phrasing.id, updates: phrasingUpdates}));
+						}
 					}}/>
-				{creatorOrMod &&
-					<Row mt={5}>
-						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
-							if (phrasingUpdates.VKeys().length) {
-								//await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).RunOnServer();
-								await RunCommand_UpdateNodePhrasing(E({id: phrasing.id, updates: phrasingUpdates}));
-							}
-						}}/>
-						<Button ml="auto" text="Delete" onLeftClick={async()=>{
-							ShowMessageBox({
-								title: "Delete phrasing", cancelButton: true,
-								message: `
-									Delete the node phrasing below?
+					<Button ml="auto" text="Delete" onLeftClick={async()=>{
+						ShowMessageBox({
+							title: "Delete phrasing", cancelButton: true,
+							message: `
+								Delete the node phrasing below?
 
-									Text (base): ${phrasing.text_base}${
-									phrasing.text_negation == null ? "" : `\nText (negation): ${phrasing.text_negation}`
-									}${
-										phrasing.text_question == null ? "" : `\nText (question): ${phrasing.text_question}`
-									}${
-										phrasing.text_narrative == null ? "" : `\nText (narrative): ${phrasing.text_narrative}`
-									}
-								`.AsMultiline(0),
-								onOK: async()=>{
-									//await new DeletePhrasing({id: phrasing.id}).RunOnServer();
-									await RunCommand_DeleteNodePhrasing({id: phrasing.id});
-								},
-							});
-						}}/>
-					</Row>}
-			</Column>
-		);
-	}
-}
+								Text (base): ${phrasing.text_base}${
+								phrasing.text_negation == null ? "" : `\nText (negation): ${phrasing.text_negation}`
+								}${
+									phrasing.text_question == null ? "" : `\nText (question): ${phrasing.text_question}`
+								}${
+									phrasing.text_narrative == null ? "" : `\nText (narrative): ${phrasing.text_narrative}`
+								}
+							`.AsMultiline(0),
+							onOK: async()=>{
+								//await new DeletePhrasing({id: phrasing.id}).RunOnServer();
+								await RunCommand_DeleteNodePhrasing({id: phrasing.id});
+							},
+						});
+					}}/>
+				</Row>}
+		</Column>
+	);
+});
