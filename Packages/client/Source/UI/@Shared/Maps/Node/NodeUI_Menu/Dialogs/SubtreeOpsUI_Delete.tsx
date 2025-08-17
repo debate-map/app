@@ -17,27 +17,20 @@ import {UserPicker_Button} from "../../../../Users/UserPicker.js";
 
 const splitAt = 150;
 
-export class SubtreeOpsUI_Delete_Left extends BaseComponentPlus(
-	{} as {} & MI_SharedProps,
-	{},
-) {
-	render() {
-		let {} = this.props;
-		const {} = this.state;
-		const dialogState = store.main.maps.subtreeOperationsDialog;
+export const SubtreeOpsUI_Delete_Left = (props: MI_SharedProps)=>{
+	const dialogState = store.main.maps.subtreeOperationsDialog;
 
-		return (
-			<>
-				<RowLR mt={5} splitAt={splitAt}>
-					<Row center>
-						<Text>Deletion depth:</Text>
-						<InfoButton ml={5} text={`This value is automatically set to the retrieval max-depth (set above). [they need to match for the previewing/checking to work]`}/>
-					</Row>
-					<Spinner ml={5} min={0} max={30} enabled={false} value={dialogState.maxExportDepth} onChange={val=>RunInAction_Set(this, ()=>dialogState.maxExportDepth = val)}/>
-				</RowLR>
-			</>
-		);
-	}
+	return (
+		<>
+			<RowLR mt={5} splitAt={splitAt}>
+				<Row center>
+					<Text>Deletion depth:</Text>
+					<InfoButton ml={5} text={`This value is automatically set to the retrieval max-depth (set above). [they need to match for the previewing/checking to work]`}/>
+				</Row>
+				<Spinner ml={5} min={0} max={30} enabled={false} value={dialogState.maxExportDepth} onChange={val=>RunInAction_Set(()=>dialogState.maxExportDepth = val)}/>
+			</RowLR>
+		</>
+	);
 }
 
 @Observer
@@ -154,7 +147,7 @@ export class SubtreeOpsUI_Delete_Right extends BaseComponent<{} & MI_SharedProps
 						Warning: Once started, the batch operation cannot be stopped. It also cannot be undone. (short of a full database restore)
 						<InfoButton ml={5} style={{verticalAlign: "middle"}} text={`
 							Technically, you may be able to cancel the operation by quickly closing/refreshing the page to early-drop the graphql subscription.
-							
+
 							Because these batch operations can complete quickly in some cases though, this is unreliable and shouldn't be relied on!
 						`.AsMultiline(0)}/>
 					</div>
