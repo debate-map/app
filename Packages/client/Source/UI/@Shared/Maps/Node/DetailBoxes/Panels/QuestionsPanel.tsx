@@ -1,15 +1,13 @@
 import {Div, Column} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import React from "react";
 
-export class QuestionsPanel extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<Column style={{position: "relative"}}>
-				{/*<div style={{fontSize: 12, whiteSpace: "initial"}}>
-					Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
-				</div>*/}
-				<Div style={{fontSize: 12, color: "rgba(255, 255, 255, 0.5)"}}>Questions panel is under development.</Div>
-			</Column>
-		);
-	}
-}
+export const QuestionsPanel = ()=>{
+	return (
+		<Column style={{position: "relative"}}>
+			{/*<div style={{fontSize: 12, whiteSpace: "initial"}}>
+				Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
+			</div>*/}
+			<Div style={{fontSize: 12, color: "rgba(255, 255, 255, 0.5)"}}>Questions panel is under development.</Div>
+		</Column>
+	);
+};
