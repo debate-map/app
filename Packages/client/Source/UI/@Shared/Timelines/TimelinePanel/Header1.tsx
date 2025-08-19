@@ -16,7 +16,7 @@ import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
 import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
 import {observer_mgl} from "mobx-graphlink";
 
-export const Header1Fn = observer_mgl(({map}:{map: DMap})=>{
+export const Header1 = observer_mgl(({map}:{map: DMap})=>{
 	const timelineSelectRef = useRef<DropDown>(null);
 
 	const uiState = store.main.timelines;

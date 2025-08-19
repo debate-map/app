@@ -1,53 +1,59 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useReducer, useRef, useState} from "react";
 import {Button, ButtonProps} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
 import {Timer} from "js-vextensions";
 
-export class AudioFileMiniPlayer extends BaseComponent<{file: File|n, volume?: number|n, buttonProps: ButtonProps}, {}> {
-	static defaultProps = {volume: 1};
+type Props = {
+	file: File|n,
+	volume?: number|n,
+	buttonProps: ButtonProps
+};
 
-	audioEl: HTMLAudioElement|n;
+export const AudioFileMiniPlayer = (props: Props)=>{
+	const {file, volume = 1, buttonProps} = props;
 
-	updateWhilePlayingTimer = new Timer(100, ()=>{
-		this.Update();
-		if (this.audioEl?.paused) {
-			this.updateWhilePlayingTimer.Stop();
+	const [_, reRender] = useReducer(x=>x+1, 0);
+	const audioRef = useRef<HTMLAudioElement|n>(null);
+	const [blobURL, setBlobURL] = useState<string|n>();
+
+	const updateWhilePlayingTimer = useRef<Timer|n>(new Timer(100, ()=>{
+		reRender();
+		if (audioRef.current?.paused) {
+			updateWhilePlayingTimer.current?.Stop();
 		}
-	});
+	}));
 
-	render() {
-		const {file, volume, buttonProps} = this.props;
+	useEffect(()=>{
+		if (file == null) return void setBlobURL(null);
+		const url = URL.createObjectURL(file);
+		setBlobURL(url);
+		return ()=>URL.revokeObjectURL(url);
+	}, [file]);
 
-		const [blobURL, setBlobURL] = useState<string|n>();
-		useEffect(()=>{
-			if (file == null) return void setBlobURL(null);
-			const url = URL.createObjectURL(file);
-			setBlobURL(url);
-			return ()=>URL.revokeObjectURL(url);
-		}, [file]);
-
-		return (
-			<>
-				{blobURL != null &&
-				<audio
-					ref={c=>{
-						this.audioEl = c;
-						if (c) c.volume = volume ?? 1;
-					}}
-					src={blobURL}
-					style={{display: "none"}} // in case browser displays non-`controls` audio-elements
-				/>}
-				<Button {...buttonProps} enabled={blobURL != null} mdIcon={(this.audioEl == null || this.audioEl.paused) ? "play" : "stop"} onClick={()=>{
-					if (this.audioEl == null) return;
-					if (this.audioEl.paused) {
-						this.audioEl.play();
-						this.updateWhilePlayingTimer.Start();
-					} else {
-						if (!this.audioEl.paused) this.audioEl.pause();
-						this.audioEl.currentTime = 0;
-					}
-				}}/>
-			</>
-		);
+	const handleAudioRef = (c: HTMLAudioElement|n)=>{
+		audioRef.current = c;
+		if (c) {
+			c.volume = volume ?? 1;
+		}
 	}
-}
+
+	return (
+		<>
+			{blobURL != null &&
+			<audio ref={handleAudioRef}
+				src={blobURL}
+				style={{display: "none"}} // in case browser displays non-`controls` audio-elements
+			/>}
+			<Button {...buttonProps} enabled={blobURL != null} mdIcon={(audioRef.current == null || audioRef.current.paused) ? "play" : "stop"} onClick={()=>{
+				if (audioRef.current == null) return;
+
+				if (audioRef.current.paused) {
+					audioRef.current.play();
+					updateWhilePlayingTimer.current?.Start();
+				} else {
+					if (!audioRef.current.paused) audioRef.current.pause();
+					audioRef.current.currentTime = 0;
+				}
+			}}/>
+		</>
+	);
+};
