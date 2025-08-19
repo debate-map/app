@@ -55,12 +55,13 @@ type Props = {
 	usePortal?: boolean,
 	nodeUI?: NodeBox,
 	onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>)=>any,
+	ref: React.Ref<HTMLDivElement>,
 }
 
 export const NodeUI_BottomPanelFn = observer_mgl((props: Props)=>{
 	const {
 		map, node, path, parent, width, minWidth, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
-		backgroundColor, usePortal, nodeUI, onClick,
+		backgroundColor, usePortal, nodeUI, onClick, ref
 	} = props;
 
 	const [hoverTermID, setHoverTermID] = useState<string|n>(null);
@@ -107,8 +108,21 @@ export const NodeUI_BottomPanelFn = observer_mgl((props: Props)=>{
 		return el;
 	};
 
+	const handleRef = (el: HTMLDivElement | null)=>{
+		if (!el) return;
+		uiRoot = el!;
+
+		if (!ref) return;
+		if (typeof ref === "function") {
+			ref(el);
+		} else {
+			ref.current = el;
+		}
+
+	};
+
 	return MaybeCreatePortal(
-		<div ref={c=>{uiRoot = c!}} className="NodeUI_BottomPanel useLightText"
+		<div ref={handleRef} className="NodeUI_BottomPanel useLightText"
 			onClick={onClick}
 			style={ES(
 				{
