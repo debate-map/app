@@ -7,7 +7,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
-export const OthersPanelFn = (props: NodeDetailsUI_SharedProps)=>{
+export const OthersPanel = (props: NodeDetailsUI_SharedProps)=>{
 	const {newRevisionData, enabled, Change} = props;
 	const SetDisplayDetail = (key: keyof NodeRevisionDisplayDetails, value: any)=>{
 		if (value != null) {
