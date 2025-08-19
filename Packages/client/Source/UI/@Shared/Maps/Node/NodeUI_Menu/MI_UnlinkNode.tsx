@@ -7,7 +7,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {observer_mgl} from "mobx-graphlink";
 import React from "react";
 
-const MI_UnlinkNode = observer_mgl((props: MI_SharedProps)=>{
+export const MI_UnlinkNode = observer_mgl((props: MI_SharedProps)=>{
 	const {map, node, path} = props;
 
 	if (!PERMISSIONS.Node.Modify(MeID(), node)) return null;
