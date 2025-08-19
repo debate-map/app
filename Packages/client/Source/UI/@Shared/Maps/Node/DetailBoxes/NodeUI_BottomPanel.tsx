@@ -58,7 +58,7 @@ type Props = {
 	ref: React.Ref<HTMLDivElement>,
 }
 
-export const NodeUI_BottomPanelFn = observer_mgl((props: Props)=>{
+export const NodeUI_BottomPanel = observer_mgl((props: Props)=>{
 	const {
 		map, node, path, parent, width, minWidth, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
 		backgroundColor, usePortal, nodeUI, onClick, ref

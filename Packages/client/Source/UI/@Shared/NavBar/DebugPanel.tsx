@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {observer_mgl} from "mobx-graphlink";
 
-export const DebugPanelFn = observer_mgl(()=>{
+export const DebugPanel = observer_mgl(()=>{
 	const [, rerender] = useReducer((c: number)=>c + 1, 0);
 
 	useEffect(()=>{
