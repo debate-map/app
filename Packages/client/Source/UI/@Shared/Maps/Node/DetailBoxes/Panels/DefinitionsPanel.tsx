@@ -16,11 +16,12 @@ export type DefinitionsPanel_Props = {
 	hoverTermIDs?: string[]|n,
 	openTermIDs?: string[]|n,
 	onHoverTerm?: (termIDs: string[])=>void,
-	onClickTerm?: (termIDs: string[])=>void
+	onClickTerm?: (termIDs: string[])=>void,
+	ref?: React.Ref<HTMLElement>,
 };
 
 export const DefinitionsPanel = observer_mgl((props: DefinitionsPanel_Props)=>{
-	const {map, show, node, path, hoverTermIDs, openTermIDs} = props;
+	const {map, show, node, path, hoverTermIDs, openTermIDs, ref} = props;
 
 	const displayText = GetNodeDisplayText(node, path, map);
 	const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a) as Term[];
@@ -37,8 +38,17 @@ export const DefinitionsPanel = observer_mgl((props: DefinitionsPanel_Props)=>{
 	const clickTerms = openTermIDs ? openTermIDs.map(id=>GetTerm(id)) : null;
 	const termsToShow = (hoverTerms ?? clickTerms ?? termsToSearchFor).filter(a=>a) as Term[];
 
+	const handleRef = (el: Column|null)=>{
+		if (!ref || !el) return;
+		if (typeof ref === "function") {
+			ref(el.DOM_HTML);
+		} else {
+			ref.current = el.DOM_HTML;
+		}
+	};
+
 	return (
-		<Column style={{position: "relative", display: show ? null : "none"}}>
+		<Column ref={handleRef} style={{position: "relative", display: show ? null : "none"}}>
 			{termsToShow.length > 0 && termsToShow.map((term, index)=>{
 				return <Fragment key={index}>
 					{index > 0 && <div style={{marginTop: 7, marginBottom: 5, border: "1px solid rgba(255,255,255,.3)"}}/>}
