@@ -3,8 +3,9 @@ import {ButtonProps, Button} from "react-vcomponents";
 import {HSLA} from "web-vcore";
 import {E} from "js-vextensions";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
+import {BasicStyles, BaseProps} from "react-vextensions";
 
-export const Button_SL = (props: ButtonProps)=>{
+export const Button_SL = (props: ButtonProps & BaseProps)=>{
 	const {style, ...rest} = props;
 
 	return (
@@ -16,6 +17,7 @@ export const Button_SL = (props: ButtonProps)=>{
 				},
 				GetCinzelStyleForBold(),
 				style,
+				BasicStyles(rest),
 			)}/>
 	);
 };
