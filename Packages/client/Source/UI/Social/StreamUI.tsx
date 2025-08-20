@@ -43,9 +43,9 @@ export const StreamUI = observer_mgl((props: { panel?: boolean })=>{
                 )}
             </Row>
             <ScrollView>
-                {commandRuns.Take(entryLimit).map((run, index)=>(
-                    <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel}/>
-                ))}
+				{commandRuns.Take(entryLimit).map((run, index)=>(
+					<CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel}/>
+				))}
             </ScrollView>
         </Column>
 	);
@@ -201,7 +201,7 @@ export const CommandRunUI = observer_mgl(({run, index, panel}: CommandRunUIProps
 	};
 
 	return (
-		<Column ref={a=>rootRef(a?.DOM_HTML ?? null)}>
+		<Column ref={a=>rootRef(a?.root ?? null)}>
 			<Row mt={index > 0 ? 10 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
 				<Column sel ml={5} mr={5} p={5} center style={{justifyContent: "center"}}>
 					<Pre>{moment(run.runTime).format("YYYY-MM-DD")}</Pre>
