@@ -1,5 +1,5 @@
 import {BaseComponent} from "react-vextensions";
-import React from "react";
+import React, {useReducer} from "react";
 import {WaitXThenRun} from "js-vextensions";
 import {gql, useSubscription} from "@apollo/client";
 import {Button} from "react-vcomponents";
@@ -65,25 +65,22 @@ export const SignInButton = observer_mgl<SignInButtonProps>(({
 	</>;
 })
 
-class SignInButton_Google_Inner extends BaseComponent<{onClick: ()=>any}, {}> {
-	render() {
-		const {onClick} = this.props;
-		return (
-			<div ref={c=>{
-				if (!c) return;
-				if (g.google == null) {
-					WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
-					return;
-				}
-				EnsureGoogleIDAPIReady();
+export const SignInButton_Google_Inner= ({onClick}: {onClick: ()=>any})=>{
+	const [_, reRender] = useReducer(x=>x+1, 0);
+	return (
+		<div ref={c=>{
+			if (!c) return;
+			if (g.google == null) {
+				WaitXThenRun(100, ()=>reRender()); // wait until google-id api is loaded
+				return;
+			}
+			EnsureGoogleIDAPIReady();
 
-				const options: GsiButtonConfiguration = {};
-				//g.google.accounts.id.renderButton(c, options);
-				g.google.accounts.id.renderButton(c, options, onClick);
-			}}/>
-		);
-	}
-}
+			const options: GsiButtonConfiguration = {};
+			g.google.accounts.id.renderButton(c, options, onClick);
+		}}/>
+	);
+};
 
 /**
  * Configuration options for rendering a Google Sign-In button.
