@@ -21,4 +21,4 @@ export const TextPlus = (props: TextPlusProps)=>{
 		);
 	}
 	return text;
-}
+};

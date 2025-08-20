@@ -1,5 +1,5 @@
 import React, {HTMLProps} from "react";
-import {css2} from "Utils/UI/Styles";
+import {css2} from "../UI/Styles.js";
 
 export type InTooltipProps = {style?: any} & Partial<HTMLProps<HTMLDivElement>>;
 
