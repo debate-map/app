@@ -19,18 +19,6 @@ import {TimelineEffectApplier_Smooth} from "./MapUI/TimelineEffectApplier_Smooth
 import {TimeTrackerUI} from "./MapUI/TimeTrackerUI.js";
 import {observer_mgl} from "mobx-graphlink";
 
-export const MapUIWaitMessage = ({message}:{message: string})=>{
-	return (
-		<div style={ES({
-			display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25,
-			color: "white",
-			textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
-		})}>
-			{message}
-		</div>
-	);
-};
-
 export type Padding = {
 	left: number,
 	right: number,
@@ -38,21 +26,25 @@ export type Padding = {
 	bottom: number
 };
 
-export type MapUIWrapperProps = {
-	mapID: string, rootNode?: NodeL3,
-	withinPage?: boolean, padding?: Padding,
+export type MapUIWrapper_Props = {
+	mapID: string,
+	rootNode?: NodeL3,
+	withinPage?: boolean,
+	padding?: Padding,
 } & HTMLProps<"div">;
 
-export const MapUIWrapper = observer_mgl((props: MapUIWrapperProps)=>{
-	const {mapID, rootNode: rootNode_passed, withinPage, padding} = props;
+const ValidateProps = (props: MapUIWrapper_Props)=>{
+	const {rootNode: rootNode_passed} = props;
+	const rootNode = rootNode_passed;
+	if (rootNode) {
+	    Assert(IsNodeL2(rootNode), "Node supplied to MapUI is not level-2!");
+	    Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
+	}
+}
 
-	(function ValidateProps() {
-	    const rootNode = rootNode_passed;
-	    if (rootNode) {
-	        Assert(IsNodeL2(rootNode), "Node supplied to MapUI is not level-2!");
-	        Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
-	    }
-	})();
+export const MapUIWrapper = observer_mgl((props: MapUIWrapper_Props)=>{
+	const {mapID, rootNode: rootNode_passed, withinPage, padding} = props;
+	ValidateProps(props);
 	Assert(mapID, "mapID is null!");
 
 	const getMapUIPadding = (): Padding=>{
@@ -69,13 +61,12 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapperProps)=>{
 	};
 
 	const [containerPadding, setContainerPadding] = useState<Padding>(()=>getMapUIPadding());
+	const graph_forLayoutHelper = useGraph(true, null);
+	const graph_main = useGraph(false, graph_forLayoutHelper);
+
 	UseWindowEventListener("resize", ()=>{
 		setContainerPadding(getMapUIPadding());
 	});
-
-	// graphs
-	const graph_forLayoutHelper = useGraph(true, null);
-	const graph_main = useGraph(false, graph_forLayoutHelper);
 
 	// map fetch + access checks
 	const map = GetMap(mapID);
@@ -92,8 +83,6 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapperProps)=>{
 	graph_forLayoutHelper.containerPadding = containerPadding;
 
 	const mapView = GetMapView(mapID);
-	if (mapView == null) return <MapUIWaitMessage message="Initializing map view..." />;
-
 	const rootNode = useMemo(()=>{
 		let result: NodeL3 | null | undefined = rootNode_passed;
 		if (result == null && map && map.rootNode) {
@@ -106,6 +95,7 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapperProps)=>{
 		return result ?? null;
 	}, [rootNode_passed, map, mapView]);
 
+	if (mapView == null) return <MapUIWaitMessage message="Initializing map view..." />;
 	if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
 
 	// bot-only path
@@ -181,3 +171,17 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapperProps)=>{
 		</Column>
 	);
 });
+
+export const MapUIWaitMessage = (props:{message: string})=>{
+	const {message} = props;
+
+	return (
+		<div style={ES({
+			display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25,
+			color: "white",
+			textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+		})}>
+			{message}
+		</div>
+	);
+};
