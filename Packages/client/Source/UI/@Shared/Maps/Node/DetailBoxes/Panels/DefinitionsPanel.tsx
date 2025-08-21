@@ -2,7 +2,7 @@ import {Button, Column, Row, Text} from "react-vcomponents";
 import {Link, RunInAction} from "web-vcore";
 import {NodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, DMap} from "dm_common";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import React, {Fragment} from "react";
+import React, {Fragment, Ref} from "react";
 import {GetSegmentsForTerms} from "../../NodeBox/TitlePanel.js";
 import {observer_mgl} from "mobx-graphlink";
 
@@ -17,7 +17,7 @@ export type DefinitionsPanel_Props = {
 	openTermIDs?: string[]|n,
 	onHoverTerm?: (termIDs: string[])=>void,
 	onClickTerm?: (termIDs: string[])=>void,
-	ref?: React.Ref<HTMLElement>,
+	ref?: Ref<HTMLDivElement>,
 };
 
 export const DefinitionsPanel = observer_mgl((props: DefinitionsPanel_Props)=>{
@@ -41,9 +41,9 @@ export const DefinitionsPanel = observer_mgl((props: DefinitionsPanel_Props)=>{
 	const handleRef = (el: Column|null)=>{
 		if (!ref || !el) return;
 		if (typeof ref === "function") {
-			ref(el.DOM_HTML);
+			ref(el.root!);
 		} else {
-			ref.current = el.DOM_HTML;
+			ref.current = el.root!;
 		}
 	};
 
