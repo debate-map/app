@@ -14,6 +14,7 @@ import Tooltip from "rc-tooltip";
 import {CatchBail} from "mobx-graphlink";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 import {observer_mgl} from "mobx-graphlink";
+import { withDefault } from "updeep/types/withDefault.js";
 
 const MinidenticonImg = ({username, saturation, lightness, ...props})=>{
 	const svgURI = useMemo(()=>`data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(username, saturation, lightness))}`, [username, saturation, lightness]);
@@ -279,7 +280,11 @@ export const CommentInput = (props: CommentInput_Props)=>{
 	const textAreaRef = useRef<TextArea>(null);
 
 	useEffect(()=>{
-		textAreaRef.current?.DOM_HTML?.focus();
+		if (textAreaRef.current?.root == null) return;
+
+		if (textAreaRef.current.root instanceof HTMLTextAreaElement) {
+			textAreaRef.current.root.focus();
+		}
 	}, []);
 
 	const placeholder = `Enter your ${inputType.toLowerCase()}`;
@@ -294,7 +299,13 @@ export const CommentInput = (props: CommentInput_Props)=>{
 
 	return (
 		<Row mt={8} style={{borderRadius: "5px", border: "1px solid rgba(0,0,0,.3)"}}>
-			<TextArea p={5} instant value={value} onChange={onValueChange} placeholder={placeholder} autoSize={true} ref={textAreaRef}
+			<TextArea
+				p={5}
+				instant value={value}
+				onChange={onValueChange}
+				placeholder={placeholder}
+				autoSize={true}
+				ref={textAreaRef}
 				style={{outline: "none", borderWidth: 0, borderRadius: "5px 0 0 5px"}} onKeyDownCapture={onKeyDownCapture}
 			/>
 			<Button mdIcon="send" width={32} title={inputType} onClick={onSubmit} style={{height: null, borderRadius: "0 5px 5px 0"}}/>
