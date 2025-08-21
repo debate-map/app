@@ -60,8 +60,7 @@ export const SubPanel = observer_mgl((props: SubPanel_Props)=>{
 	);
 });
 
-export const SubPanel_Quote = observer_mgl((props: {attachment: QuoteAttachment})=>{
-	const {attachment} = props;
+export const SubPanel_Quote = observer_mgl(({attachment}: {attachment: QuoteAttachment})=>{
 	return (
 		<div style={{position: "relative", whiteSpace: "initial"}}>
 			<VReactMarkdown_Remarkable source={attachment.content}/>
@@ -71,9 +70,7 @@ export const SubPanel_Quote = observer_mgl((props: {attachment: QuoteAttachment}
 	);
 });
 
-export const SubPanel_References = observer_mgl((props: {attachment: ReferencesAttachment})=>{
-	const {attachment} = props;
-
+export const SubPanel_References = observer_mgl(({attachment}: {attachment: ReferencesAttachment})=>{
 	return (
 		<div style={{position: "relative", whiteSpace: "initial"}}>
 			<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
@@ -82,8 +79,7 @@ export const SubPanel_References = observer_mgl((props: {attachment: ReferencesA
 	);
 });
 
-export const SubPanel_Media = observer_mgl((props: {mediaAttachment: MediaAttachment})=>{
-	const {mediaAttachment} = props;
+export const SubPanel_Media = observer_mgl(({mediaAttachment}: {mediaAttachment: MediaAttachment})=>{
 	const media = GetMedia(mediaAttachment.id); // nn: db-ref, bail
 	if (media == null) return null;
 
@@ -107,8 +103,7 @@ export const SubPanel_Media = observer_mgl((props: {mediaAttachment: MediaAttach
 	);
 });
 
-export const SubPanel_Description = observer_mgl((props: {attachment: DescriptionAttachment})=>{
-	const {attachment} = props;
+export const SubPanel_Description = observer_mgl(({attachment}: {attachment: DescriptionAttachment})=>{
 	return (
 		<div style={{position: "relative", whiteSpace: "initial"}}>
 			<VReactMarkdown_Remarkable source={attachment.text}/>

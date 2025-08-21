@@ -13,7 +13,6 @@ import {NOTIFICATION_BELL_WIDTH} from "./NodeLayoutConstants.js";
 import {observer_mgl} from "mobx-graphlink";
 
 export type ExpandableBox_Props = {
-	parent?,
 	className?: string,
 	width: number|string|n,
 	widthOverride?: number|n, // is this still needed?
@@ -53,7 +52,7 @@ class ExpandableBox_FakeClass extends React.Component {}
 export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 	ValidateProps(props);
 
-	const {parent, className, width, widthOverride, innerWidth, outlineColor, outlineThickness = 1, roundedTopLeftCorner = true, padding, style,
+	const {className, width, widthOverride, innerWidth, outlineColor, outlineThickness = 1, roundedTopLeftCorner = true, padding, style,
 		onClick, onDirectClick, onMouseEnter, onMouseLeave, backgroundFillPercent, backgroundColor, markerPercent, text, onTextHolderClick,
 		textHolderStyle, beforeChildren, afterChildren, expanded, toggleExpanded, expandButtonStyle, isExpandButtonForNodeChildren, ref,
 		showNotificationButton = false, onToggleNotifications, notificationLevel = "none", ...rest} = props;
