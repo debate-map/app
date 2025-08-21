@@ -14,7 +14,6 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {DraggableProvidedDragHandleProps} from "@hello-pangea/dnd";
 import {NodeMathUI} from "../NodeMathUI.js";
-import {NodeBox} from "../NodeBox.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
 import {observer_mgl} from "mobx-graphlink";
 import {JSX} from "react";
@@ -30,16 +29,15 @@ import {JSX} from "react";
 //	}
 
 type Props = {
-	parent: NodeBox,
 	map: DMap|n,
 	node: NodeL3,
 	path: string,
 	indexInNodeList: number,
 	style: React.CSSProperties,
 	dragHandleProps: DraggableProvidedDragHandleProps|n,
-	ref?: Ref<HTMLElement|n>,
+	ref?: Ref<TitlePanelElement|n>,
 	setParentState?: (state: any)=>void,
-} & HTMLProps_Fixed<"div">;
+} & Omit<HTMLProps_Fixed<"div">, "ref">;
 
 type State = {
 	editing: boolean,
@@ -53,7 +51,7 @@ export type TitlePanelElement = HTMLElement & {
 };
 
 export const TitlePanel = observer_mgl((props: Props)=>{
-	const {map, setParentState, ref, parent, node, path, style, onClick, dragHandleProps, ...rest} = props;
+	const {map, setParentState, ref, node, path, style, onClick, dragHandleProps, ...rest} = props;
 	const [{editing, edit_newTitle, applyingEdit, edit_titleKey}, setState] = React.useState<State>({
 		editing: false,
 		edit_newTitle: null as string|n,
@@ -146,6 +144,7 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 			elExt.onDoubleClick = onDoubleClick;
 			return elExt;
 		}
+		return null as any;
 	}, [onDoubleClick]);
 
 	return (
@@ -168,7 +167,7 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 				if (onClick) return onClick(e);
 			}}
 			ref={el=>{
-				rowRef.current = el?.DOM_HTML;
+				rowRef.current = el?.root;
 			}}
 		>
 			{equationNumber != null &&
