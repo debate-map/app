@@ -13,7 +13,7 @@ import {observer_mgl} from "mobx-graphlink";
 
 const Phrasing_FakeID = "FAKE";
 
-type PhrasingPanel_Props = {
+type PhrasingsPanel_Props = {
 	show: boolean,
 	map: DMap|n,
 	node: NodeL3,
@@ -25,7 +25,7 @@ type State = {
 	selectedPhrasingID: string|n
 };
 
-export const PhrasingPanel  = observer_mgl((props: PhrasingPanel_Props)=>{
+export const PhrasingsPanel  = observer_mgl((props: PhrasingsPanel_Props)=>{
 	const {show, map, node} = props;
 	const [{selectedPhrasingID, selectedPhrasingType}, setState] = React.useState<State>({
 		selectedPhrasingType: NodePhrasingType.standard,
