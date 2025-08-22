@@ -6,7 +6,7 @@ import {ES, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {observer_mgl} from "mobx-graphlink";
-import React, {PropsWithChildren, ReactNode, useRef} from "react";
+import React, {ReactNode, useRef} from "react";
 
 type UserPicker_Button_Props = {
 	enabled?: boolean,
@@ -41,7 +41,7 @@ type UserPicker_Props = {
 	children: ReactNode | ((text:string)=>ReactNode)
 };
 
-const UserPicker = observer_mgl((props: UserPicker_Props)=>{
+export const UserPicker = observer_mgl((props: UserPicker_Props)=>{
 	const {value, onChange, containerStyle, children} = props;
 	const dropDownRef = useRef<DropDown>(null);
 
