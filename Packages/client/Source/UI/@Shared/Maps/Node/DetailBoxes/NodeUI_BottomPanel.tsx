@@ -1,5 +1,5 @@
 import {DMap, NodeL3, NodeType, NodeRatingType} from "dm_common";
-import React, {useEffect, useRef, useState} from "react";
+import React, {RefObject, useEffect, useRef} from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
@@ -9,7 +9,6 @@ import {GetValues, NN} from "js-vextensions";
 import {SlicePath} from "mobx-graphlink";
 import ReactDOM from "react-dom";
 import {GetMapUICSSFilter} from "../../MapUI.js";
-import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./Panels/DefinitionsPanel.js";
@@ -53,7 +52,7 @@ type Props = {
 	onTermHover: (ids: string[])=>void,
 	backgroundColor: chroma.Color,
 	usePortal?: boolean,
-	nodeUI?: NodeBox,
+	nodeUIRef?: RefObject<HTMLDivElement|null>,
 	onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>)=>any,
 	ref: React.Ref<HTMLDivElement>,
 }
@@ -61,11 +60,8 @@ type Props = {
 export const NodeUI_BottomPanel = observer_mgl((props: Props)=>{
 	const {
 		map, node, path, parent, width, minWidth, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
-		backgroundColor, usePortal, nodeUI, onClick, ref
+		backgroundColor, usePortal, onClick, ref, nodeUIRef
 	} = props;
-
-	const [hoverTermID, setHoverTermID] = useState<string|n>(null);
-	const definitionsPanelRef = useRef<HTMLElement>(null);
 	const panelsOpened = useRef(new Set<string>());
 
 	const nodeView = GetNodeView(map?.id, path);
@@ -82,8 +78,8 @@ export const NodeUI_BottomPanel = observer_mgl((props: Props)=>{
 			let stop = false;
 			const update = ()=>{
 				if (stop) return;
-				if (uiRoot != null && nodeUI!.root?.DOM != null) {
-					const nodeUIRect = nodeUI!.root.DOM.getBoundingClientRect();
+				if (uiRoot != null && nodeUIRef?.current != null) {
+					const nodeUIRect = nodeUIRef.current.getBoundingClientRect();
 					uiRoot.style.display = "initial";
 					if (panelsPosition == "left") {
 						uiRoot.style.left = `${nodeUIRect.left}px`;
@@ -153,7 +149,7 @@ export const NodeUI_BottomPanel = observer_mgl((props: Props)=>{
 				}
 				return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType}/>;
 			})()}
-			{renderPanel("definitions", show=><DefinitionsPanel ref={definitionsPanelRef} {...{show, map, node, path, hoverTermIDs}}
+			{renderPanel("definitions", show=><DefinitionsPanel {...{show, map, node, path, hoverTermIDs}}
 					openTermIDs={nodeView?.openTermIDs}
 					onHoverTerm={termIDs=>onTermHover(termIDs)}
 					onClickTerm={termIDs=>{
