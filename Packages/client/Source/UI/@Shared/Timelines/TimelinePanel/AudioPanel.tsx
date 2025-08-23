@@ -1,16 +1,17 @@
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextArea, TimeSpanInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
-import {StartUpload, Range, E, GetPercentFromXToY, Lerp, SleepAsync, StartDownload, Timer, WaitXThenRun} from "js-vextensions";
-import {Observer, RunInAction, RunInAction_Set, TextPlus, useResizeObserver, UseSize} from "web-vcore";
-import {useEffect, useMemo, useState} from "react";
-
+import {StartUpload, Range, E, GetPercentFromXToY, Lerp, SleepAsync, StartDownload, Timer} from "js-vextensions";
+import {Observer, RunInAction, RunInAction_Set, TextPlus, useResizeObserver} from "web-vcore";
+import {useEffect, useMemo, useReducer, useState} from "react";
 import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineSteps, DMap, Timeline} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
+import React from "react";
+import {observer_mgl} from "mobx-graphlink";
 
 class ParseData {
 	audioData?: ParseData_Audio;
@@ -290,86 +291,96 @@ export class AudioPanel extends BaseComponent<{map: DMap, timeline: Timeline}, {
 	}
 }
 
-@Observer
-class TimeMarker extends BaseComponent<{audioData: ParseData_Audio, timeGetter: ()=>number, color: string, updateInterval?: number}, {}> {
-	render() {
-		const {audioData, timeGetter, color, updateInterval} = this.props;
-		const {secondsPerRow} = audioData;
+type TimeMarker_Props = {
+	audioData: ParseData_Audio,
+	timeGetter: ()=>number,
+	color: string,
+	updateInterval?: number
+};
 
-		useEffect(()=>{
-			if (updateInterval == null) return;
-			const timer = new Timer(updateInterval, ()=>{
-				this.Update();
-			}).Start();
-			return ()=>timer.Stop();
-		}, [updateInterval]);
+const TimeMarker = observer_mgl((props: TimeMarker_Props)=>{
+	const {audioData, timeGetter, color, updateInterval} = props;
+	const {secondsPerRow} = audioData;
+	const [_, reRender] = useReducer(a=>a+1, 0);
 
-		const currentRow = Math.floor(timeGetter() / secondsPerRow);
+	useEffect(()=>{
+		if (updateInterval == null) return;
+		const timer = new Timer(updateInterval, ()=>{
+			reRender();
+		}).Start();
+		return ()=>timer.Stop();
+	}, [updateInterval]);
 
-		return (
-			<div style={{
-				position: "absolute", zIndex: 1, pointerEvents: "none",
-				left: ((timeGetter() % secondsPerRow) / secondsPerRow).ToPercentStr(),
-				top: 100 * currentRow,
-				width: 1,
-				height: 100,
-				background: color,
+	const currentRow = Math.floor(timeGetter() / secondsPerRow);
+
+	return (
+		<div style={{
+			position: "absolute", zIndex: 1, pointerEvents: "none",
+			left: ((timeGetter() % secondsPerRow) / secondsPerRow).ToPercentStr(),
+			top: 100 * currentRow,
+			width: 1,
+			height: 100,
+			background: color,
+		}}/>
+	);
+});
+
+type AudioRow_Props = {
+	rowIndex: number,
+	audioData: ParseData_Audio|undefined,
+	rowContainerWidth: number,
+	wavesurfer: WaveSurfer
+};
+
+const AudioRow = (props: AudioRow_Props)=>{
+	const {rowIndex, audioData, rowContainerWidth, wavesurfer} = props;
+	const uiState = store.main.timelines.audioPanel;
+
+	return (
+		<canvas
+			// set canvas-width to match the number of samples in the row, for pixel-perfect/no-scaling rendering
+			width={audioData?.samplesPerRow ?? rowContainerWidth} height={100}
+			style={{
+				position: "absolute", left: 0, top: rowIndex * 100,
+				// but set the css-width to just whatever the container's width is, so it fills the visual area (canvas takes care of visual scaling)
+				//width: "100%", height: 100,
+			}}
+			onClick={e=>{
+				if (audioData == null) return;
+				const timeAtStartOfRow = rowIndex * audioData.secondsPerRow;
+				const timeAtEndOfRow = (rowIndex + 1) * audioData.secondsPerRow;
+				const targetTimeInSeconds = Lerp(timeAtStartOfRow, timeAtEndOfRow, e.nativeEvent.offsetX / rowContainerWidth);
+				wavesurfer.seekTo(targetTimeInSeconds / wavesurfer.getDuration());
+				if (uiState.playOnClick) {
+					wavesurfer.play();
+				} else {
+					wavesurfer.pause();
+				}
+				RunInAction("AudioRow.canvas.onClick", ()=>{
+					uiState.selection_start = targetTimeInSeconds;
+					uiState.wavesurferStateChangedAt = Date.now();
+				});
+			}}
+			ref={c=>{
+				if (c && audioData) {
+					const {rowDatas} = audioData;
+					const rowData = rowDatas[rowIndex];
+					const ctx = c.getContext("2d")!;
+					ctx.fillStyle = "rgb(0, 0, 0)";
+					ctx.fillRect(0, 0, c.width, c.height);
+
+					if (rowDatas[rowIndex] == null) return;
+
+					ctx.fillStyle = "rgb(255, 255, 255)";
+					//const halfHeight = 50;
+					for (let x = 0; x < rowData.maxValues.length; x++) {
+						/*const y1 = halfHeight + (rowData.maxValues[x] * halfHeight);
+						const y2 = halfHeight + (rowData.minValues[x] * halfHeight);*/
+						const y1 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.maxValues[x]));
+						const y2 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.minValues[x]));
+						ctx.fillRect(x, y1, 1, y2 - y1);
+					}
+				}
 			}}/>
-		);
-	}
-}
-
-class AudioRow extends BaseComponent<{rowIndex: number, audioData: ParseData_Audio|undefined, rowContainerWidth: number, wavesurfer: WaveSurfer}, {}> {
-	render() {
-		const {rowIndex, audioData, rowContainerWidth, wavesurfer} = this.props;
-		const uiState = store.main.timelines.audioPanel;
-
-		return (
-			<canvas
-				// set canvas-width to match the number of samples in the row, for pixel-perfect/no-scaling rendering
-				width={audioData?.samplesPerRow ?? rowContainerWidth} height={100}
-				style={{
-					position: "absolute", left: 0, top: rowIndex * 100,
-					// but set the css-width to just whatever the container's width is, so it fills the visual area (canvas takes care of visual scaling)
-					//width: "100%", height: 100,
-				}}
-				onClick={e=>{
-					if (audioData == null) return;
-					const timeAtStartOfRow = rowIndex * audioData.secondsPerRow;
-					const timeAtEndOfRow = (rowIndex + 1) * audioData.secondsPerRow;
-					const targetTimeInSeconds = Lerp(timeAtStartOfRow, timeAtEndOfRow, e.nativeEvent.offsetX / rowContainerWidth);
-					wavesurfer.seekTo(targetTimeInSeconds / wavesurfer.getDuration());
-					if (uiState.playOnClick) {
-						wavesurfer.play();
-					} else {
-						wavesurfer.pause();
-					}
-					RunInAction("AudioRow.canvas.onClick", ()=>{
-						uiState.selection_start = targetTimeInSeconds;
-						uiState.wavesurferStateChangedAt = Date.now();
-					});
-				}}
-				ref={c=>{
-					if (c && audioData) {
-						const {rowDatas} = audioData;
-						const rowData = rowDatas[rowIndex];
-						const ctx = c.getContext("2d")!;
-						ctx.fillStyle = "rgb(0, 0, 0)";
-						ctx.fillRect(0, 0, c.width, c.height);
-
-						if (rowDatas[rowIndex] == null) return;
-
-						ctx.fillStyle = "rgb(255, 255, 255)";
-						//const halfHeight = 50;
-						for (let x = 0; x < rowData.maxValues.length; x++) {
-							/*const y1 = halfHeight + (rowData.maxValues[x] * halfHeight);
-							const y2 = halfHeight + (rowData.minValues[x] * halfHeight);*/
-							const y1 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.maxValues[x]));
-							const y2 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.minValues[x]));
-							ctx.fillRect(x, y1, 1, y2 - y1);
-						}
-					}
-				}}/>
-		);
-	}
-}
+	);
+};
