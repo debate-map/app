@@ -4,6 +4,7 @@ import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, Or
 import {RunCommand_AddTimeline, RunCommand_AddTimelineStep} from "Utils/DB/Command.js";
 import {GetAsync} from "mobx-graphlink";
 import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
+import React from "react";
 
 const defaultIntroMessage = `
 Welcome to the Debate Map platform.
@@ -48,7 +49,6 @@ export async function ShowAddTimelineDialog(userID: string, mapID: string) {
 				message: defaultIntroMessage.trim(),
 				orderKey: OrderKey.mid().toString(),
 				groupID: "full",
-				//nodeReveals: [],
 			});
 			RunCommand_AddTimelineStep(step);
 		},
