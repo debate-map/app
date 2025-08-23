@@ -14,7 +14,7 @@ export type PolicyPicker_ButtonProps = {
 	idTrimLength?: number;
 	extraText?: string;
 	style?: any;
-} & ButtonProps;
+} & Omit<ButtonProps, "style">;
 
 /**
  * Basic implementation of a button to be used as the child of the PolicyPicker wrapper component.
