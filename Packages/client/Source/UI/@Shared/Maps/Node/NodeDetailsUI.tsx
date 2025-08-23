@@ -34,8 +34,11 @@ type State = {
 };
 
 export type NodeDetailsUIElem = HTMLDivElement & {
-	getValidationError: () => any
-	getNewRevisionData: () => NodeRevision
+	getValidationError: () => any,
+	getNewData: () => NodeL1,
+	getNewRevisionData: () => NodeRevision,
+	getNewLinkData: () => NodeLink,
+
 };
 
 export type NodeDetailsUI_SharedProps = {
@@ -46,37 +49,41 @@ export type NodeDetailsUI_SharedProps = {
 
 export const NodeDetailsUI = observer_mgl((props: Props)=>{
 	const {enabled = true, ref, baseData, baseRevisionData, baseLinkData, forNew, style, onChange} = props;
-	const [state, setState] = useState<State|n>(null);
+	const [state, setState] = useState<State>({
+		newData: AsNodeL1(Clone(baseData)),
+		newRevisionData: Clone(baseRevisionData),
+		newLinkData: Clone(baseLinkData),
+	});
 
 	const didTriggerOnChange = useRef(false);
 	const internalRef = useRef<HTMLDivElement|n>(null);
 	const [_,reRender] = useReducer(x=>x+1, 0);
-
-	const modifyElem = (el: HTMLDivElement|n)=>{
-		return el ? (Object.assign(el, {getValidationError}) as NodeDetailsUIElem) : null
-	}
-
-	const Change = (..._)=>{
-		if (onChange) { onChange(getNewData(), getNewRevisionData(), getNewLinkData(), modifyElem(internalRef.current)!)}
-		reRender()
-	};
 
 	const getValidationError = ()=>{
 		return GetErrorMessagesUnderElement(internalRef.current)[0];
 	}
 
 	const getNewData = (): NodeL1=>{
-		AssertValidate("NodeL1", state!.newData, "NodeDetailsUI returned map-node data that is invalid. Is the AsNodeL1() function up-to-date?"); // catch regressions
-		return CloneWithPrototypes(state!.newData) as NodeL1;
+		AssertValidate("NodeL1", state.newData, "NodeDetailsUI returned map-node data that is invalid. Is the AsNodeL1() function up-to-date?"); // catch regressions
+		return CloneWithPrototypes(state.newData) as NodeL1;
 	}
 
 	const getNewRevisionData = (): NodeRevision=>{
-		return CloneWithPrototypes(state!.newRevisionData) as NodeRevision;
+		return CloneWithPrototypes(state.newRevisionData) as NodeRevision;
 	}
 
 	const getNewLinkData = (): NodeLink=>{
-		return CloneWithPrototypes(state!.newLinkData) as NodeLink;
+		return CloneWithPrototypes(state.newLinkData) as NodeLink;
 	}
+
+	const modifyElem = (el: HTMLDivElement|n)=>{
+		return el ? (Object.assign(el, {getValidationError, getNewRevisionData, getNewData, getNewLinkData}) as NodeDetailsUIElem) : null
+	}
+
+	const Change = (..._)=>{
+		if (onChange) { onChange(getNewData(), getNewRevisionData(), getNewLinkData(), modifyElem(internalRef.current)!)}
+		reRender()
+	};
 
 	useEffect(()=>{
 		if (!state || didTriggerOnChange.current) return;
@@ -105,9 +112,9 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 
 	const policy = GetAccessPolicy(state?.newData.accessPolicy);
 	if (policy == null) return null;
-	const newDataAsL2 = AsNodeL2(state!.newData, state!.newRevisionData, policy);
+	const newDataAsL2 = AsNodeL2(state.newData, state.newRevisionData, policy);
 
-	const sharedProps: NodeDetailsUI_SharedProps = {...props, Change, newDataAsL2, ...state!, SetState: setState};
+	const sharedProps: NodeDetailsUI_SharedProps = {...props, Change, newDataAsL2, ...state, SetState: setState};
 	const subPanel = store.main.maps.detailsPanel.subpanel;
 	return (
 		<Column style={E({padding: 5}, style)} ref={v=>{internalRef.current = v?.root}}>
@@ -128,4 +135,4 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 			{subPanel === DetailsPanel_Subpanel.others && <OthersPanel {...sharedProps}/>}
 		</Column>
 	);
-})
+});

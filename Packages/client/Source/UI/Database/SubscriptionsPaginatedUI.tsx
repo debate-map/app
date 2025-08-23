@@ -145,7 +145,7 @@ type SubscriptionRowProps = {
 	onDelete: () => void;
 }
 
-export const SubscriptionRow = observer_mgl(({index, last, subscription, onDelete}:SubscriptionRowProps)=>{
+export const SubscriptionRow = observer_mgl(({index, subscription, onDelete}:SubscriptionRowProps)=>{
 	const level = GetSubscriptionLevel(subscription);
 	const levelInfo = [[subscription.addChildNode, "Add Child Node"],
 		[subscription.addNodeLink, "Add Node Link"],
@@ -184,10 +184,20 @@ export const SubscriptionRow = observer_mgl(({index, last, subscription, onDelet
 			}}>
 				<span ref={c=>c && ref(c)} style={{flex: columns[0].width, marginRight: 10, /*pointerEvents: "none",*/ marginTop: nodeFinal?.type == "claim" ? 30 : 0}}>
 					{nodeFinal != null &&
-						<NodeBox indexInNodeList={0} node={nodeFinal} path={nodeFinal.id} treePath="0" forLayoutHelper={false} forSubscriptionsPage={true}
-							backgroundFillPercentOverride={100} width={width}
-							useLocalPanelState={true} usePortalForDetailBoxes={true} />}
-					{nodeFinal == null && <div className="selectable" style={{flex: 1, fontSize: 12, color: "rgba(255,255,255,.5)"}}>Node "{subscription.node}" not found.</div>}
+						<NodeBox
+							indexInNodeList={0}
+							node={nodeFinal}
+							path={nodeFinal.id}
+							treePath="0"
+							forLayoutHelper={false}
+							forSubscriptionsPage={true}
+							backgroundFillPercentOverride={100}
+							width={width}
+							useLocalPanelState={true}
+							usePortalForDetailBoxes={true}
+						/>
+					}
+					{nodeFinal == null && <div className="selectable" style={{flex: 1, fontSize: 12, color: "rgba(255,255,255,.5)"}}>Node &quot;{subscription.node}&quot; not found.</div>}
 				</span>
 				<span style={{flex: columns[1].width}}>
 					<TextPlus info={levelInfo}>{levelText}</TextPlus>

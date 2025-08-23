@@ -1,6 +1,6 @@
 import {Column, Row} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, OrderKey, GetFinalAccessPolicyForNewEntry} from "dm_common";
+import {Timeline, TimelineStep, OrderKey, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {RunCommand_AddTimeline, RunCommand_AddTimelineStep} from "Utils/DB/Command.js";
 import {GetAsync} from "mobx-graphlink";
 import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
@@ -37,7 +37,7 @@ export async function ShowAddTimelineDialog(userID: string, mapID: string) {
 			boxController.options.okButtonProps = {enabled: error == null};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<TimelineDetailsUI baseData={newTimeline} forNew={true} onChange={(val, ui)=>Change(newTimeline = val, error = ui.GetValidationError())}/>
+					<TimelineDetailsUI baseData={newTimeline} forNew={true} onChange={(val, ui)=>Change(newTimeline = val, error = ui.getValidationError())}/>
 					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
 				</Column>
 			);
