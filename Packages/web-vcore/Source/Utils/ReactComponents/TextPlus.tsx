@@ -1,12 +1,13 @@
 import React from "react";
 import {TextProps, Row, Text} from "react-vcomponents";
 import {InfoButton, InfoButtonProps} from "./InfoButton.js";
+import {BaseProps} from "react-vextensions";
 
 type TextPlusProps = {
     info?: string;
     infoProps?: InfoButtonProps;
     sel?: boolean;
-} & TextProps;
+} & TextProps & BaseProps;
 
 export const TextPlus = (props: TextPlusProps)=>{
 	const {info, infoProps, sel, children, ...rest} = props;

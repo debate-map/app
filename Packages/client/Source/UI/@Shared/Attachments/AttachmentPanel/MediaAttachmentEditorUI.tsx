@@ -1,6 +1,5 @@
-import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "js-vextensions";
-import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
+import {E} from "js-vextensions";
+import {Column, Pre, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import {MediaAttachment, GetMedia, GetMediasByURL, HasModPermissions, MeID, GetUser, Media, AttachmentTarget} from "dm_common";
 import {Validate} from "mobx-graphlink";
@@ -10,7 +9,8 @@ import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
-import {TermDefinitionPanel} from "../../Maps/Node/DetailBoxes/Panels/DefinitionsPanel.js";
+import {observer_mgl} from "mobx-graphlink";
+import React from "react";
 
 @Observer
 export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, MediaAttachmentEditorUI, {target: AttachmentTarget}> {
@@ -66,7 +66,7 @@ export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, Med
 					<Pre>% (0 for auto)</Pre>
 				</Row>}
 				<Row mt={10}>
-					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI ref={c=>{this.chainsEditor = c}} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
 		);
@@ -77,59 +77,68 @@ export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, Med
 	}
 }
 
-@Observer
-class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enabled: boolean, onSelect: (id: string)=>void}, {}) {
-	render() {
-		const {url, enabled, onSelect} = this.props;
-		const mediasWithMatchingURL = GetMediasByURL(url);
-		return (
-			<>
-				{mediasWithMatchingURL.length == 0 && <Row style={{padding: 5}}>No media found with the url "{url}".</Row>}
-				{mediasWithMatchingURL.map((media, index)=>{
-					return <FoundMediaUI key={media.id} media={media} index={index} enabled={enabled} onSelect={()=>onSelect(media.id)}/>;
-				})}
-				<Row mt={5} style={{
-					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
-					background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
-					padding: 5,
-					borderRadius: "0 0 5px 5px",
-				}}>
-					<Button text="Create new image" enabled={enabled && HasModPermissions(MeID())}
-						title={HasModPermissions(MeID()) ? undefined : "Only moderators can add media currently. (till review/approval system is implemented)"}
-						onClick={e=>{
-							ShowAddMediaDialog({url}, onSelect);
-						}}/>
-				</Row>
-			</>
-		);
-	}
-}
-@Observer
-export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: number, enabled: boolean, onSelect: ()=>void}, {}) {
-	render() {
-		const {media, index, enabled, onSelect} = this.props;
-		const creator = GetUser(media.creator);
-		return (
-			<Row center
-				style={E(
-					{
-						whiteSpace: "normal", //cursor: "pointer",
-						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
-						padding: 5,
-					},
-					index == 0 && {borderRadius: "5px 5px 0 0"},
-				)}
-			>
-				<Link text={`${media.id}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
-					onContextMenu={e=>e.nativeEvent["handled"] = true}
-					actionFunc={s=>{
-						s.main.page = "database";
-						s.main.database.subpage = "media";
-						s.main.database.selectedMediaID = media.id;
+type MediaSearchOrCreateUI_Props = {
+	url: string,
+	enabled: boolean,
+	onSelect: (id: string)=>void
+};
+
+export const MediaSearchOrCreateUI = observer_mgl((props: MediaSearchOrCreateUI_Props)=>{
+	const {url, enabled, onSelect} = props;
+	const mediasWithMatchingURL = GetMediasByURL(url);
+
+	return (
+		<>
+			{mediasWithMatchingURL.length == 0 && <Row style={{padding: 5}}>No media found with the url &quote;{url}&quote;.</Row>}
+			{mediasWithMatchingURL.map((media, index)=>{
+				return <FoundMediaUI key={media.id} media={media} index={index} enabled={enabled} onSelect={()=>onSelect(media.id)}/>;
+			})}
+			<Row mt={5} style={{
+				background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
+				padding: 5, borderRadius: "0 0 5px 5px",
+			}}>
+				<Button text="Create new image" enabled={enabled && HasModPermissions(MeID())}
+					title={HasModPermissions(MeID()) ? undefined : "Only moderators can add media currently. (till review/approval system is implemented)"}
+					onClick={()=>{
+						ShowAddMediaDialog({url}, onSelect);
 					}}/>
-				<Text ml={5} sel style={{fontSize: 13}}>{media.name}</Text>
-				<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>
 			</Row>
-		);
-	}
-}
+		</>
+	);
+
+})
+
+type FoundMediaUI_Props = {
+	media: Media,
+	index: number,
+	enabled: boolean,
+	onSelect: ()=>void
+};
+
+export const FoundMediaUI = observer_mgl((props: FoundMediaUI_Props)=>{
+	const {media, index, enabled, onSelect} = props;
+	const creator = GetUser(media.creator);
+
+	return (
+		<Row center
+			style={E(
+				{
+					whiteSpace: "normal",
+					background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
+					padding: 5,
+				},
+				index == 0 && {borderRadius: "5px 5px 0 0"},
+			)}
+		>
+			<Link text={`${media.id}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
+				onContextMenu={e=>e.nativeEvent["handled"] = true}
+				actionFunc={s=>{
+					s.main.page = "database";
+					s.main.database.subpage = "media";
+					s.main.database.selectedMediaID = media.id;
+				}}/>
+			<Text ml={5} sel style={{fontSize: 13}}>{media.name}</Text>
+			<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>
+		</Row>
+	);
+});
