@@ -1,22 +1,23 @@
 import {SleepAsync, Vector2, WaitXThenRun, E, ea} from "js-vextensions";
 import keycode from "keycode";
 import moment from "moment";
-import {Button, Column, Div, Pre, Row, TextArea, TextInput} from "react-vcomponents";
+import {Button, Column, Div, Pre, Row, TextInput} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction, chroma_maxDarken} from "web-vcore";
+import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
-import {runInAction, flow} from "mobx";
 import {Validate, GetAsync, UUID} from "mobx-graphlink";
-import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced, NodeL2} from "dm_common";
+import {GetNodeRevision, MapView, NodeView, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeLinks, globalMapID, GetSearchTerms_Advanced, NodeL2} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "@apollo/client";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
+import {observer_mgl} from "mobx-graphlink";
+import React from "react";
 
 const columnWidths = [0.68, 0.2, 0.12];
 
@@ -195,47 +196,43 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: 
 	}
 }
 
-@Observer
-export class MapPathResult extends BaseComponentPlus({} as {path: string}, {}) {
-	render() {
-		const {path: resultPath} = this.props;
+export const MapPathResult = observer_mgl((props: {path: string})=>{
+	const {path: resultPath} = props;
 
-		const openMapID = GetOpenMapID();
-		const openMap = GetMap(openMapID);
-		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
+	const openMapID = GetOpenMapID();
+	const openMap = GetMap(openMapID);
+	const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
 
-		const resultPath_nodeIDs = resultPath.split("/");
-		const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
-		const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
-		const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
+	const resultPath_nodeIDs = resultPath.split("/");
+	const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
+	const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
+	const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
 
-		const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
-		const resultPath_str = resultPath_nodeTitles.map(a=>{
-			return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
-		}).join(" -> ");
+	const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
+	const resultPath_str = resultPath_nodeTitles.map(a=>{
+		return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
+	}).join(" -> ");
 
-		return (
-			<Button style={{
-				justifyContent: "flex-start",
-			}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
-				if (inCurrentMap) {
-					JumpToNode(openMapID!, resultPath);
-				} else {
-					if (result_map == null) return; // still loading
-					RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-						if (result_map.id == globalMapID) {
-							store.main.page = "global";
-						} else {
-							store.main.page = "debates";
-							store.main.debates.selectedMapID = result_map.id;
-						}
-					});
-				}
-			}}/>
-		);
-	}
-
-}
+	return (
+		<Button style={{
+			justifyContent: "flex-start",
+		}} key={resultPath} text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
+			if (inCurrentMap) {
+				JumpToNode(openMapID!, resultPath);
+			} else {
+				if (result_map == null) return; // still loading
+				RunInAction("SearchResultRow.OpenContainingMap", ()=>{
+					if (result_map.id == globalMapID) {
+						store.main.page = "global";
+					} else {
+						store.main.page = "debates";
+						store.main.debates.selectedMapID = result_map.id;
+					}
+				});
+			}
+		}}/>
+	);
+});
 
 @Observer
 export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, index: number}, {}) {
