@@ -47,7 +47,7 @@ export type PageContainerPreset = "text" | "full";
 
 export class PageContainer_FakeClass extends React.Component {}
 export const PageContainer: React.FC<
-	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, innerStyle?} & React.HTMLProps<ScrollView & Row>
+	{preset?: PageContainerPreset, scrollable?: boolean, shadow?: boolean, innerStyle?, style?} & Omit<React.HTMLProps<ScrollView & Row>, "style">
 > = props=>{
 	const {preset = "text", scrollable = false, shadow: shadowProp, style, innerStyle, children, ...rest} = props;
 	const self = useMemo(()=>new PageContainer_FakeClass({}), []);
