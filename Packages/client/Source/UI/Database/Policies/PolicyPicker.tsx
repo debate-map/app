@@ -7,6 +7,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import React, {ReactNode, useRef} from "react";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {observer_mgl} from "mobx-graphlink";
+import {BaseProps, BasicStyles} from "react-vextensions";
 
 export type PolicyPicker_ButtonProps = {
 	enabled?: boolean;
@@ -14,7 +15,7 @@ export type PolicyPicker_ButtonProps = {
 	idTrimLength?: number;
 	extraText?: string;
 	style?: any;
-} & Omit<ButtonProps, "style">;
+} & Omit<ButtonProps, "style"> & BaseProps;
 
 /**
  * Basic implementation of a button to be used as the child of the PolicyPicker wrapper component.
@@ -29,7 +30,7 @@ export const PolicyPicker_Button = observer_mgl((props: PolicyPicker_ButtonProps
 			policy && policy.name,
 			policy && idTrimLength == null && ` (id: ${policy.id})`,
 			policy && idTrimLength != null && ` [${policy.id.slice(0, idTrimLength)}]`,
-		].filter(a=>a).join("") + (extraText ?? "")} style={style}/>
+		].filter(a=>a).join("") + (extraText ?? "")} style={E(style, BasicStyles(rest))}/>
 	);
 });
 
