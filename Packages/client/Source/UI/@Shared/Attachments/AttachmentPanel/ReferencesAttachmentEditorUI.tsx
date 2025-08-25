@@ -3,10 +3,12 @@ import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {ReferencesAttachment, GetNodeDisplayText, NodeType, ClaimForm, CleanUpdatedSourceChains} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {SourceChainsEditorUI, SourceChainsEditorUIElem} from "../../Maps/Node/SourceChainsEditorUI.js";
 import {SubPanel_Quote, SubPanel_References} from "../../Maps/Node/NodeBox/SubPanel.js";
+import React from "react";
 
 export class ReferencesAttachmentEditorUI extends DetailsUI_Base<ReferencesAttachment, ReferencesAttachmentEditorUI> {
+	chainsEditor: SourceChainsEditorUIElem|n;
 	render() {
 		const {} = this.props;
 		const {newData} = this.state;
@@ -24,14 +26,12 @@ export class ReferencesAttachmentEditorUI extends DetailsUI_Base<ReferencesAttac
 					</Column>,
 				]*/}
 				<Row mt={5}>
-					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
-				</Row>
+					<SourceChainsEditorUI ref={c=>{this.chainsEditor = c}} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/> </Row>
 			</Column>
 		);
 	}
-	chainsEditor: SourceChainsEditorUI|n;
 	GetValidationError_Extras() {
-		return this.chainsEditor?.GetValidationError();
+		return this.chainsEditor?.getValidationError();
 	}
 
 	GetNewData_PostProcess(newData: ReferencesAttachment) {

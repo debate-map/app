@@ -2,21 +2,21 @@ import {CleanUpdatedSourceChains, QuoteAttachment} from "dm_common";
 import {DetailsUIBaseProps, useDetailsUI} from "UI/@Shared/DetailsUI_Base.js";
 import {Column, Pre, Row} from "react-vcomponents";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {SourceChainsEditorUI, SourceChainsEditorUIElem} from "../../Maps/Node/SourceChainsEditorUI.js";
 import React from "react";
 
 export const QuoteInfoEditorUI = (props: DetailsUIBaseProps<QuoteAttachment, {}>)=>{
 	const {phase, onChange, baseData} = props;
 
 	const editorRef = React.useRef<MarkdownEditor>(null);
-	const chainsEditorRef = React.useRef<SourceChainsEditorUI | null>(null);
+	const chainsEditorRef = React.useRef<SourceChainsEditorUIElem>(null);
 
 	const {newData, helpers, containerRef} = useDetailsUI<QuoteAttachment>({
 		baseData,
 		phase,
 		onChange,
 		getNewDataPostProcess: nD=>CleanUpdatedQuoteAttachment(nD),
-		getValidationErrorExtras: ()=>chainsEditorRef.current?.GetValidationError(),
+		getValidationErrorExtras: ()=>chainsEditorRef.current?.getValidationError(),
 	});
 	const {Change, enabled} = helpers;
 
