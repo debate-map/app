@@ -8,13 +8,14 @@ import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {SourceChainsEditorUI, SourceChainsEditorUIElem} from "../../Maps/Node/SourceChainsEditorUI.js";
 import {observer_mgl} from "mobx-graphlink";
 import React from "react";
 
 @Observer
 export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, MediaAttachmentEditorUI, {target: AttachmentTarget}> {
 	scrollView: ScrollView;
+	chainsEditor: SourceChainsEditorUIElem|n;
 	render() {
 		const {style, target} = this.props;
 		const {newData} = this.state;
@@ -71,9 +72,8 @@ export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, Med
 			</Column>
 		);
 	}
-	chainsEditor: SourceChainsEditorUI|n;
 	GetValidationError_Extras() {
-		return this.chainsEditor?.GetValidationError();
+		return this.chainsEditor?.getValidationError();
 	}
 }
 
