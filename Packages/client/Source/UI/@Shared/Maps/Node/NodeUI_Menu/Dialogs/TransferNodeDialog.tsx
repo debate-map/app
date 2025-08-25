@@ -1,16 +1,12 @@
-import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, NodeL3, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
-import React from "react";
+import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNodeDisplayText, GetNodeL3, IsWrapperArgNeededForTransfer, NodeL3, NodeType, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodesPayload, TransferType} from "dm_common";
+import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {RunCommand_TransferNodes} from "Utils/DB/Command.js";
-import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {ES, InfoButton, Observer} from "web-vcore";
-import {gql} from "@apollo/client";
-import {Clone, GetEntries, GetValues, ModifyString} from "js-vextensions";
-import {Command, observer_mgl} from "mobx-graphlink";
-import {observer} from "mobx-react";
-import {CheckBox, Column, Row, RowLR, Select, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {ES, InfoButton} from "web-vcore";
+import {GetEntries, GetValues, ModifyString} from "js-vextensions";
+import {observer_mgl} from "mobx-graphlink";
+import {Column, Row, RowLR, Select, Text} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
 import {TransferNodesUIState} from "./TransferNodeDialog/TransferNodeData.js";
 
@@ -42,7 +38,7 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 		title: titleOverride ?? `Pasting node to new location`, cancelButton: true,
 		message: observer_mgl(()=>{
 			return (
-				<Column ref={c=>root = c} style={{width: 1000}}>
+				<Column ref={c=>{root = c}} style={{width: 1000}}>
 					{payload.nodes.length > 1 &&
 					<Row mb={5} style={{whiteSpace: "pre-wrap"}}>{`
 						Note: The source for this transfer (ie. the node-box you pressed "${{move: "Cut", link: "Copy", clone: "Clone", shim: "Clone"}[payload_initial.nodes[0].transferType]}" on), is actually a "combined node-box", representing two nodes:
@@ -124,228 +120,229 @@ export function TransferNodeNeedsWrapper(nodeInfo: NodeInfoForTransfer, uiState:
 	return nodeInfo.transferType != "ignore" && IsWrapperArgNeededForTransfer(uiState.destinationParent.type, uiState.destinationChildGroup, finalType, nodeInfo.childGroup);
 }
 
-@Observer
-class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nodeInfo: NodeInfoForTransfer, index: number}, {}> {
-	render() {
-		const {payload, uiState, Change, nodeInfo, index} = this.props;
+type TransferNodeUI_Props ={
+	nodeInfo: NodeInfoForTransfer,
+	index: number
+} & TransferNodeDialog_SharedProps;
 
-		const earlierNodeInfos = payload.nodes.slice(0, index);
-		const earlierNodeInfo_transferring = earlierNodeInfos.find(a=>a.transferType != "ignore");
-		/*let newParent: NodeL3|n;
-		if (earlierNodeInfo_transferring?.transferType == "shim") newParent = null;
-		else if (earlierNodeInfo_transferring != null) newParent = GetNodeL3(`${earlierNodeInfo_transferring.nodeID}`);
-		else newParent = uiState.destinationParent;*/
-		const newParentType = earlierNodeInfo_transferring != null ? GetTransferNodeFinalType(earlierNodeInfo_transferring) : uiState.destinationParent.type;
-		if (newParentType == null) return "Transfer #1 is invalid; cannot retrieve data for its source-node.";
-		const newParent = earlierNodeInfo_transferring != null ? null : uiState.destinationParent;
+const TransferNodeUI = observer_mgl((props: TransferNodeUI_Props)=>{
+	const {payload, uiState, Change, nodeInfo, index} = props;
 
-		const path = nodeInfo.oldParentID ? `${nodeInfo.oldParentID}/${nodeInfo.nodeID}` : nodeInfo.nodeID;
-		const node = GetNodeL3(path);
-		if (node == null) return;
+	const earlierNodeInfos = payload.nodes.slice(0, index);
+	const earlierNodeInfo_transferring = earlierNodeInfos.find(a=>a.transferType != "ignore");
+	/*let newParent: NodeL3|n;
+	if (earlierNodeInfo_transferring?.transferType == "shim") newParent = null;
+	else if (earlierNodeInfo_transferring != null) newParent = GetNodeL3(`${earlierNodeInfo_transferring.nodeID}`);
+	else newParent = uiState.destinationParent;*/
+	const newParentType = earlierNodeInfo_transferring != null ? GetTransferNodeFinalType(earlierNodeInfo_transferring) : uiState.destinationParent.type;
+	if (newParentType == null) return "Transfer #1 is invalid; cannot retrieve data for its source-node.";
+	const newParent = earlierNodeInfo_transferring != null ? null : uiState.destinationParent;
 
-		const nodeTypeEntries = GetEntries(NodeType, "ui");
-		const nodeTypeEntry_orig = nodeTypeEntries.find(a=>a.value == node.type)!;
-		nodeTypeEntries.Move(nodeTypeEntry_orig, 0);
-		nodeTypeEntry_orig.name = `Keep original type (${nodeTypeEntry_orig.name})`;
+	const path = nodeInfo.oldParentID ? `${nodeInfo.oldParentID}/${nodeInfo.nodeID}` : nodeInfo.nodeID;
+	const node = GetNodeL3(path);
+	if (node == null) return;
 
-		const finalType = GetTransferNodeFinalType(nodeInfo);
-		if (finalType == null) return;
+	const nodeTypeEntries = GetEntries(NodeType, "ui");
+	const nodeTypeEntry_orig = nodeTypeEntries.find(a=>a.value == node.type)!;
+	nodeTypeEntries.Move(nodeTypeEntry_orig, 0);
+	nodeTypeEntry_orig.name = `Keep original type (${nodeTypeEntry_orig.name})`;
 
-		//const wrapperSection = nodeInfo.transferType != "ignore" && IsWrapperArgNeededForTransfer(finalType, nodeInfo.childGroup);
+	const finalType = GetTransferNodeFinalType(nodeInfo);
+	if (finalType == null) return;
 
-		const transferTypeOptions = GetValues(TransferType).map(a=>({name: ModifyString(a, m=>[m.startLower_to_upper]), value: a}));
-		const isArgumentForCombined = index == 0 && payload.nodes.length > 1;
-		const canBeShim = isArgumentForCombined; //&& TransferNodeNeedsWrapper(payload.nodes[1], uiState);
-		if (!canBeShim) transferTypeOptions.Remove(transferTypeOptions.find(a=>a.value == "shim"));
-		// temp: disable the Move and Link options for now, since not yet implemented in new transfer system
-		transferTypeOptions.filter(a=>a.value == "move" || a.value == "link").forEach(a=>a["style"] = {pointerEvents: "none", opacity: .5, cursor: "default"});
+	//const wrapperSection = nodeInfo.transferType != "ignore" && IsWrapperArgNeededForTransfer(finalType, nodeInfo.childGroup);
 
-		const splitAt = 110;
-		const yesAndNoOpts = [{name: "Yes", value: true}, {name: "No", value: false}];
-		return <>
-			{/*wrapperSection &&
-			<>
-				<Row mt={index === 0 ? 0 : 5} style={{fontSize: 16, fontWeight: "bold"}}>Extra wrapper-argument (for transfer #2)</Row>
-				<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
-					<RowLR mt={5} splitAt={splitAt}>
-						<Row>
-							<Text>Wrapper:</Text>
-							<InfoButton ml={5} mt={3} text={`
-								The source-node is set to be of type "claim" after transfer, but the destination child-group doesn't accept "bare" claim children.
-								Thus, an empty argument node will be created under the listed "New parent" node, then the transferred node will be placed under that.
-							`.AsMultiline(0)}/>
-						</Row>
-						<Text>{`(destination child-group doesn't accept bare claims, so an empty argument node will be created under "New parent" to hold the transferred claim)`}</Text>
-					</RowLR>
-				</Column>
-			</>*/}
+	const transferTypeOptions = GetValues(TransferType).map(a=>({name: ModifyString(a, m=>[m.startLower_to_upper]), value: a}));
+	const isArgumentForCombined = index == 0 && payload.nodes.length > 1;
+	const canBeShim = isArgumentForCombined; //&& TransferNodeNeedsWrapper(payload.nodes[1], uiState);
+	if (!canBeShim) transferTypeOptions.Remove(transferTypeOptions.find(a=>a.value == "shim"));
+	// temp: disable the Move and Link options for now, since not yet implemented in new transfer system
+	transferTypeOptions.filter(a=>a.value == "move" || a.value == "link").forEach(a=>a["style"] = {pointerEvents: "none", opacity: .5, cursor: "default"});
 
-			<Row mt={index === 0 /*&& !wrapperSection*/ ? 0 : 5} style={{fontSize: 16, fontWeight: "bold"}}>Transfer #{index + 1}</Row>
+	const splitAt = 110;
+	const yesAndNoOpts = [{name: "Yes", value: true}, {name: "No", value: false}];
+	return <>
+		{/*wrapperSection &&
+		<>
+			<Row mt={index === 0 ? 0 : 5} style={{fontSize: 16, fontWeight: "bold"}}>Extra wrapper-argument (for transfer #2)</Row>
 			<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
-				<RowLR splitAt={splitAt}>
-					<Text>Source node:</Text>
-					{nodeInfo.transferType != "shim" && <NodePreviewUI key={index} panel="source" node={node!} index={0}/>}
-					{nodeInfo.transferType == "shim" &&
-					<Text>{`(source-node not relevant, since "shim" is selected; ie. an empty argument node will be created to hold the claim node in box #2)`}</Text>}
-				</RowLR>
-				<RowLR splitAt={splitAt} mt={5}>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Row>
-						<Text>Transfer:</Text>
+						<Text>Wrapper:</Text>
 						<InfoButton ml={5} mt={3} text={`
-							Ignore: Leave this node at its original location, without moving, linking, or cloning it. (caveat: if this is the "Transfer #2" box, and the "Transfer #1" box is set to "Clone",
-								this 2nd transfer's source node may still get linked into the destination location by means of the "Keep children" setting of the 1st transfer)
-							Move (aka "Cut then paste"): Unlink the source-node from its existing location, and link it instead under the listed "New parent" node.
-							Link (aka "Copy then paste"): Link the source-node under the listed "New parent" node, but keep it also linked at its existing location. (changes to the node in either place thus affect the other location)
-							Clone: Make an independent* duplicate of the source-node, and link it under the listed "New parent" node.
-								IMPORTANT: While the source-node *itself* is cloned/duplicated (and thus editable independently), any children the clone carries with it (ie. if "Keep children" is set to "Yes") will only be linked, *not* cloned.
-								Thus, the clone's children/descendants must themselves also be cloned afterward, if you want to produce a fully independent node-tree.
-							Shim: Make a brand new argument-node under the listed "New parent" node, then use this as the parent for the claim-node being transferred in box #2. (this option only shows up when applicable)
-
-							Note: The Move and Link options are disabled at the moment, since their implementation in the new transfer system is not yet complete.
+							The source-node is set to be of type "claim" after transfer, but the destination child-group doesn't accept "bare" claim children.
+							Thus, an empty argument node will be created under the listed "New parent" node, then the transferred node will be placed under that.
 						`.AsMultiline(0)}/>
 					</Row>
-					<Select displayType="button bar" options={transferTypeOptions} value={nodeInfo.transferType} onChange={val=>{
-						nodeInfo.transferType = val;
-						Change();
-					}}/>
+					<Text>{`(destination child-group doesn't accept bare claims, so an empty argument node will be created under "New parent" to hold the transferred claim)`}</Text>
 				</RowLR>
-				{nodeInfo.transferType != "ignore" &&
+			</Column>
+		</>*/}
+
+		<Row mt={index === 0 /*&& !wrapperSection*/ ? 0 : 5} style={{fontSize: 16, fontWeight: "bold"}}>Transfer #{index + 1}</Row>
+		<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
+			<RowLR splitAt={splitAt}>
+				<Text>Source node:</Text>
+				{nodeInfo.transferType != "shim" && <NodePreviewUI key={index} panel="source" node={node!} index={0}/>}
+				{nodeInfo.transferType == "shim" &&
+				<Text>{`(source-node not relevant, since "shim" is selected; ie. an empty argument node will be created to hold the claim node in box #2)`}</Text>}
+			</RowLR>
+			<RowLR splitAt={splitAt} mt={5}>
+				<Row>
+					<Text>Transfer:</Text>
+					<InfoButton ml={5} mt={3} text={`
+						Ignore: Leave this node at its original location, without moving, linking, or cloning it. (caveat: if this is the "Transfer #2" box, and the "Transfer #1" box is set to "Clone",
+							this 2nd transfer's source node may still get linked into the destination location by means of the "Keep children" setting of the 1st transfer)
+						Move (aka "Cut then paste"): Unlink the source-node from its existing location, and link it instead under the listed "New parent" node.
+						Link (aka "Copy then paste"): Link the source-node under the listed "New parent" node, but keep it also linked at its existing location. (changes to the node in either place thus affect the other location)
+						Clone: Make an independent* duplicate of the source-node, and link it under the listed "New parent" node.
+							IMPORTANT: While the source-node *itself* is cloned/duplicated (and thus editable independently), any children the clone carries with it (ie. if "Keep children" is set to "Yes") will only be linked, *not* cloned.
+							Thus, the clone's children/descendants must themselves also be cloned afterward, if you want to produce a fully independent node-tree.
+						Shim: Make a brand new argument-node under the listed "New parent" node, then use this as the parent for the claim-node being transferred in box #2. (this option only shows up when applicable)
+
+						Note: The Move and Link options are disabled at the moment, since their implementation in the new transfer system is not yet complete.
+					`.AsMultiline(0)}/>
+				</Row>
+				<Select displayType="button bar" options={transferTypeOptions} value={nodeInfo.transferType} onChange={val=>{
+					nodeInfo.transferType = val;
+					Change();
+				}}/>
+			</RowLR>
+			{nodeInfo.transferType != "ignore" &&
+			<RowLR mt={5} splitAt={splitAt}>
+				{/*<Row>
+					<Text>New parent*:</Text>
+					<InfoButton ml={5} mt={3} text={`
+						More precisely, this is the "destination node" for the transfer, ie. the node under which contents will be placed.
+						In a case where the source-node is set to be of type "claim" after transfer, but to a destination child-group that doesn't accept "bare" claim children,
+							a wrapper argument will be created to "hold" the cloned claim. (for more info, see the info-box in the "Wrapper" row -- which is visible when relevant)
+					`.AsMultiline(0)}/>
+				</Row>*/}
+				<Text>New parent:</Text>
+				<NodePreviewUI key={index} panel="destination" node={newParent} index={1}/>
+			</RowLR>}
+			{nodeInfo.transferType != "ignore" &&
+			<>
+				{nodeInfo.transferType == "clone" &&
 				<RowLR mt={5} splitAt={splitAt}>
-					{/*<Row>
-						<Text>New parent*:</Text>
-						<InfoButton ml={5} mt={3} text={`
-							More precisely, this is the "destination node" for the transfer, ie. the node under which contents will be placed.
-							In a case where the source-node is set to be of type "claim" after transfer, but to a destination child-group that doesn't accept "bare" claim children,
-								a wrapper argument will be created to "hold" the cloned claim. (for more info, see the info-box in the "Wrapper" row -- which is visible when relevant)
-						`.AsMultiline(0)}/>
-					</Row>*/}
-					<Text>New parent:</Text>
-					<NodePreviewUI key={index} panel="destination" node={newParent} index={1}/>
-				</RowLR>}
-				{nodeInfo.transferType != "ignore" &&
-				<>
-					{nodeInfo.transferType == "clone" &&
-					<RowLR mt={5} splitAt={splitAt}>
-						<Text>Clone details:</Text>
-						<Row>
-							<Text>Keep children:</Text>
-							<Select ml={5} options={yesAndNoOpts}
-								value={nodeInfo.clone_keepChildren} onChange={val=>Change(nodeInfo.clone_keepChildren = val)}/>
-							<InfoButton ml={5} text={
-							index == 0
-								? `
-									Yes: All children (^1) of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked (^2).
-									No: The clone is created without any children (^1).
+					<Text>Clone details:</Text>
+					<Row>
+						<Text>Keep children:</Text>
+						<Select ml={5} options={yesAndNoOpts}
+							value={nodeInfo.clone_keepChildren} onChange={val=>Change(nodeInfo.clone_keepChildren = val)}/>
+						<InfoButton ml={5} text={
+						index == 0
+							? `
+								Yes: All children (^1) of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked (^2).
+								No: The clone is created without any children (^1).
 
-									^1: If this transfer's source-node is a single-premise argument (${payload.nodes.length == 1 ? "in this case, it's not" : "in this case, it is"}), then transfer of that child premise is controlled by the "Transfer #2" section below.
-									^2: Exception: If old-node-type is category (with claim children), and new-node-type is claim, then children claims are wrapped into argument nodes. (for fixing common structuring mistake)
-								`.AsMultiline(0)
-								: `
-									Yes: All children of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked (^1).
-									No: The clone is created without any children.
+								^1: If this transfer's source-node is a single-premise argument (${payload.nodes.length == 1 ? "in this case, it's not" : "in this case, it is"}), then transfer of that child premise is controlled by the "Transfer #2" section below.
+								^2: Exception: If old-node-type is category (with claim children), and new-node-type is claim, then children claims are wrapped into argument nodes. (for fixing common structuring mistake)
+							`.AsMultiline(0)
+							: `
+								Yes: All children of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked (^1).
+								No: The clone is created without any children.
 
-									^1: Exception: If old-node-type is category (with claim children), and new-node-type is claim, then children claims are wrapped into argument nodes. (for fixing common structuring mistake)
-								`.AsMultiline(0)}/>
-						</Row>
-						<Row ml={5}>
-							<Text>Keep tags:</Text>
-							<Select ml={5} options={GetEntries(NodeTagCloneType)}
-								value={nodeInfo.clone_keepTags} onChange={val=>Change(nodeInfo.clone_keepTags = val)}/>
-							<InfoButton ml={5} text={`
-								Minimal: No tags are cloned, other than one exception: Any "clone history" tags that had the old node as the result/last-entry, will be cloned and extended.
-								Basics: The "minimal" tags (described above) will be cloned, plus any "basic" tag-types: labels
+								^1: Exception: If old-node-type is category (with claim children), and new-node-type is claim, then children claims are wrapped into argument nodes. (for fixing common structuring mistake)
 							`.AsMultiline(0)}/>
-						</Row>
-						<Row ml={5}>
-							<Text>Convert clone to:</Text>
-							<Select ml={5} options={nodeTypeEntries} value={nodeInfo.clone_newType} onChange={val=>Change(nodeInfo.clone_newType = val)}/>
-						</Row>
-					</RowLR>}
-					<RowLR mt={5} splitAt={splitAt}>
-						<Text>Link details:</Text>
-						<Row>
-							<Text>Child group:</Text>
-							<Select ml={5} options={GetEntries(ChildGroup)} value={nodeInfo.childGroup}
-								onChange={val=>{
-									Change(nodeInfo.childGroup = val);
-									// todo
-								}}/>
-						</Row>
-						{finalType == NodeType.claim &&
-						<Row ml={5}>
-							<Text>Claim form:</Text>
-							<Select ml={5} options={GetEntries(ClaimForm)} value={nodeInfo.claimForm}
-								onChange={val=>{
-									Change(nodeInfo.claimForm = val);
-									// todo
-								}}/>
-						</Row>}
-						{finalType == NodeType.argument &&
-						<Row ml={5}>
-							<Text>Argument polarity:</Text>
-							<Select ml={5} options={GetEntries(Polarity)} value={nodeInfo.argumentPolarity}
-								onChange={val=>{
-									Change(nodeInfo.argumentPolarity = val);
-									// todo
-								}}/>
-						</Row>}
-					</RowLR>
-					{(()=>{
-						const validityError = CheckLinkIsValid(newParentType, finalType, nodeInfo.childGroup, finalType == NodeType.argument ? nodeInfo.argumentPolarity : null);
-						if (validityError) {
-							return <Row mt={5} style={{color: "red"}}
-								// temp; add special class-name, which blocks dialog from proceeding / having OK pressed
-								className="transferNodeBlocker"
-							>
-								{/*`Issue: This transfer's selected child-group (${ChildGroup[nodeInfo.childGroup]}) is not valid given its transfer context. (${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)})`*/}
-								{`Issue: ${validityError}`}
-							</Row>;
-						}
-					})()}
-				</>}
-			</Column>
-		</>;
-	}
-}
+					</Row>
+					<Row ml={5}>
+						<Text>Keep tags:</Text>
+						<Select ml={5} options={GetEntries(NodeTagCloneType)}
+							value={nodeInfo.clone_keepTags} onChange={val=>Change(nodeInfo.clone_keepTags = val)}/>
+						<InfoButton ml={5} text={`
+							Minimal: No tags are cloned, other than one exception: Any "clone history" tags that had the old node as the result/last-entry, will be cloned and extended.
+							Basics: The "minimal" tags (described above) will be cloned, plus any "basic" tag-types: labels
+						`.AsMultiline(0)}/>
+					</Row>
+					<Row ml={5}>
+						<Text>Convert clone to:</Text>
+						<Select ml={5} options={nodeTypeEntries} value={nodeInfo.clone_newType} onChange={val=>Change(nodeInfo.clone_newType = val)}/>
+					</Row>
+				</RowLR>}
+				<RowLR mt={5} splitAt={splitAt}>
+					<Text>Link details:</Text>
+					<Row>
+						<Text>Child group:</Text>
+						<Select ml={5} options={GetEntries(ChildGroup)} value={nodeInfo.childGroup}
+							onChange={val=>{
+								Change(nodeInfo.childGroup = val);
+								// todo
+							}}/>
+					</Row>
+					{finalType == NodeType.claim &&
+					<Row ml={5}>
+						<Text>Claim form:</Text>
+						<Select ml={5} options={GetEntries(ClaimForm)} value={nodeInfo.claimForm}
+							onChange={val=>{
+								Change(nodeInfo.claimForm = val);
+								// todo
+							}}/>
+					</Row>}
+					{finalType == NodeType.argument &&
+					<Row ml={5}>
+						<Text>Argument polarity:</Text>
+						<Select ml={5} options={GetEntries(Polarity)} value={nodeInfo.argumentPolarity}
+							onChange={val=>{
+								Change(nodeInfo.argumentPolarity = val);
+								// todo
+							}}/>
+					</Row>}
+				</RowLR>
+				{(()=>{
+					const validityError = CheckLinkIsValid(newParentType, finalType, nodeInfo.childGroup, finalType == NodeType.argument ? nodeInfo.argumentPolarity : null);
+					if (validityError) {
+						return <Row mt={5} style={{color: "red"}}
+							// temp; add special class-name, which blocks dialog from proceeding / having OK pressed
+							className="transferNodeBlocker"
+						>
+							{/*`Issue: This transfer's selected child-group (${ChildGroup[nodeInfo.childGroup]}) is not valid given its transfer context. (${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)})`*/}
+							{`Issue: ${validityError}`}
+						</Row>;
+					}
+				})()}
+			</>}
+		</Column>
+	</>;
+});
 
-@Observer
-class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node: NodeL3|n, index: number}, {menuOpened: boolean}> {
-	render() {
-		const {panel, node, index} = this.props;
-		const {menuOpened} = this.state;
-		const path = node?.link ? `${node.link?.parent}/${node.link?.child}` : node?.id;
+type NodePreviewUI_Props = {
+	panel: "source" | "destination",
+	node: NodeL3|n,
+	index: number
+};
 
-		const backgroundColor = node ? GetNodeColor(node, "background", false)/*.desaturate(0.5)*/.alpha(0.8) : null;
-		return (
-			<Column style={{flex: 1}}>
-				{node &&
-				<Row className="useLightText cursorSet"
-					style={ES(
-						{
-							/*flex: 1,*/ padding: 5,
-							background: backgroundColor!.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-							color: liveSkin.NodeTextColor(),
-						},
-						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
-					)}
-					onClick={e=>{
-						//if (e.button !== 2) return false;
-						if (e.button !== 0) return false;
-						this.SetState({menuOpened: !menuOpened});
-					}}>
-					<span className="selectable" style={{flex: 1}}>{GetNodeDisplayText(node, path)}</span>
-				</Row>}
-				{node == null &&
-				<Row>(the resulting node of transfer #1 above)</Row>}
-				{menuOpened && node &&
-				<Row mt={5}>
-					{/*<Text>{panel == "source" ? "Source info:" : "Destination info:"}</Text>*/}
-					<InfoRect text={`Type: ${NodeType[node.type]}`} first={true}/>
-					<InfoRect text={`ID: ${node.id}`}/>
-					{/*<InfoRect text="Created at: todo"/>
-					<InfoRect text="Created by: todo"/>*/}
-				</Row>}
-			</Column>
-		);
-	}
-}
+const NodePreviewUI = observer_mgl((props: NodePreviewUI_Props)=>{
+	const {node} = props;
+	const [menuOpened, setMenuOpened] = useState(false);
+	const path = node?.link ? `${node.link?.parent}/${node.link?.child}` : node?.id;
+
+	const backgroundColor = node ? GetNodeColor(node, "background", false).alpha(0.8) : null;
+
+	return (
+		<Column style={{flex: 1}}>
+			{node &&
+			<Row className="useLightText cursorSet"
+				style={ES(
+					{
+						padding: 5,
+						background: backgroundColor!.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
+						color: liveSkin.NodeTextColor(),
+					},
+				)}
+				onClick={e=>{
+					if (e.button !== 0) return false;
+					setMenuOpened(prev=>!prev);
+				}}>
+				<span className="selectable" style={{flex: 1}}>{GetNodeDisplayText(node, path)}</span>
+			</Row>}
+			{node == null &&
+			<Row>(the resulting node of transfer #1 above)</Row>}
+			{menuOpened && node &&
+			<Row mt={5}>
+				<InfoRect text={`Type: ${NodeType[node.type]}`} first={true}/>
+				<InfoRect text={`ID: ${node.id}`}/>
+			</Row>}
+		</Column>
+	);
+});
