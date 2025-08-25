@@ -7,7 +7,7 @@ import {NodeL3, GetParentNodeL3, GetLinkUnderParent, MeID, DMap, HasModPermissio
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
-import {NodeDetailsUI} from "../../NodeDetailsUI.js";
+import {NodeDetailsUI, NodeDetailsUIElem} from "../../NodeDetailsUI.js";
 import {SLMode_SFI} from "../../../../../@SL/SL.js";
 import {observer_mgl} from "mobx-graphlink";
 import {useRef, useState} from "react";
@@ -39,7 +39,7 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 		dataError: null,
 		saveState: "idle",
 	});
-	const detailsUIRref = useRef<NodeDetailsUI>(null);
+	const detailsUIRref = useRef<NodeDetailsUIElem>(null);
 
 	const parentNode = GetParentNodeL3(path);
 	const link = GetLinkUnderParent(node.id, parentNode);
@@ -50,21 +50,21 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 
 	return (
 		<Column style={{position: "relative", display: show ? null : "none"}}>
-			<NodeDetailsUI ref={detailsUIRref} map={map} parent={parentNode}
-				baseData={node} baseRevisionData={node.current} baseLinkData={link}
-				forNew={false} enabled={canEdit}
-				onChange={(newData, newRevisionData, newLinkData, comp)=>{
+			<NodeDetailsUI ref={detailsUIRref} map={map} parent={parentNode} baseData={node} baseRevisionData={node.current}
+				baseLinkData={link} forNew={false} enabled={canEdit} onChange={()=>{
 					setState(prevState=>({
 						...prevState,
-						dataError: detailsUIRref.current!.GetValidationError(),
+						dataError: detailsUIRref.current!.getValidationError(),
 					}));
-				}}/>
+				}}
+			/>
+
 			{canEdit &&
 				<Row>
 					<Button text="Save" enabled={state.dataError == null} title={state.dataError} onLeftClick={async()=>{
 						setState(prevState=>({...prevState, saveState: "saving"}));
 
-						const newRevision = detailsUIRref.current!.GetNewRevisionData();
+						const newRevision = detailsUIRref.current!.getNewRevisionData();
 						const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 						RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						setState(prevState=>({...prevState, saveState: "success"}));
