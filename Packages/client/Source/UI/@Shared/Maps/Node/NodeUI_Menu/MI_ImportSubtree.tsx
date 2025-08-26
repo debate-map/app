@@ -32,67 +32,55 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {DMSubtreeData} from "../../../../../Utils/DataFormats/JSON/DM/DMSubtreeData.js";
 import {GetResourcesInImportSubtree_JsonDm} from "../../../../../Utils/DataFormats/JSON/DM/DMImportHelpers.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../Database/Policies/PolicyPicker.js";
+import {observer_mgl} from "mobx-graphlink";
 
-@Observer
-export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportResource> {
-	//lastController: BoxController;
-	render() {
-		const {map, node, path} = this.props;
-		if (map == null) return null;
-		const sharedProps = this.props as MI_SharedProps;
-		if (!HasAdminPermissions(MeID())) return null;
-		const childGroup = node.link?.group;
+export const MI_ImportSubtree = observer_mgl((props: MI_SharedProps)=>{
+	const {map, node} = props;
+	if (map == null) return null;
+	const sharedProps = props as MI_SharedProps;
+	if (!HasAdminPermissions(MeID())) return null;
+	const childGroup = node.link?.group;
 
-		const uiState = store.main.maps.importSubtreeDialog;
-		const selectedIRs_nodeAndRev = [...uiState.selectedImportResources].filter(a=>a instanceof IR_NodeAndRevision) as IR_NodeAndRevision[];
+	const uiState = store.main.maps.importSubtreeDialog;
+	const selectedIRs_nodeAndRev = [...uiState.selectedImportResources].filter(a=>a instanceof IR_NodeAndRevision) as IR_NodeAndRevision[];
 
-		return (
-			<>
-				<VMenuItem text="Import subtree" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
-					if (e.button != 0) return;
-					let ui: ImportSubtreeUI|n;
-					const controller = ShowMessageBox({
-						title: `Import subtree`,
-						okButton: false, buttonBarStyle: {display: "none"},
+	return (
+		<>
+			<VMenuItem text="Import subtree" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
+				if (e.button != 0) return;
+				let ui: ImportSubtreeUI|n;
+				const controller = ShowMessageBox({
+					title: `Import subtree`,
+					okButton: false, buttonBarStyle: {display: "none"},
 
-						// don't use overlay/background-blocker
-						overlayStyle: {background: "none", pointerEvents: "none"},
-						containerStyle: {pointerEvents: "auto"},
+					// don't use overlay/background-blocker
+					overlayStyle: {background: "none", pointerEvents: "none"},
+					containerStyle: {pointerEvents: "auto"},
 
-						// also make fully opaque; this dialog has complex content, so we need max readability
-						//containerStyle: {pointerEvents: "auto", backgroundColor: "rgba(255,255,255,1) !important"}, // commented; this way doesn't work
+					// also make fully opaque; this dialog has complex content, so we need max readability
+					//containerStyle: {pointerEvents: "auto", backgroundColor: "rgba(255,255,255,1) !important"}, // commented; this way doesn't work
 
-						message: ()=>{
-							// style block is a hack-fix for to make this dialog fully opaque (its content is complex, so we need max readability)
-							return <>
-								<style>{`
-									.ReactModal__Content:not(.neverMatch) { background-color: rgba(255,255,255,1) !important; }
-								`}</style>
-								<ImportSubtreeUI ref={c=>ui = c} {...sharedProps} {...{controller}}/>
-							</>;
-						},
-					});
-					//this.lastController = controller;
-				}}/>
-				{selectedIRs_nodeAndRev.length > 0 &&
-				<VMenuItem text="Recreate import-node here (1st)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
-					if (e.button != 0) return;
-					const res = selectedIRs_nodeAndRev[0];
-					/*if (res.node.type == NodeType.argument) {
-						const command = new AddArgumentAndClaim({
-							mapID: map?.id,
-							argumentParentID: node.id, argumentNode: res.node, argumentRevision: res.revision, argumentLink: res.link,
-							claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
-						});
-						command.RunOnServer();
-					} else {*/
-					res.link.group = childGroup ?? ChildGroup.generic;
-					await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: AsNodeL1Input(res.node), revision: res.revision, link: res.link});
-				}}/>}
-			</>
-		);
-	}
-}
+					message: ()=>{
+						// style block is a hack-fix for to make this dialog fully opaque (its content is complex, so we need max readability)
+						return <>
+							<style>{`
+								.ReactModal__Content:not(.neverMatch) { background-color: rgba(255,255,255,1) !important; }
+							`}</style>
+							<ImportSubtreeUI ref={c=>{ui = c}} {...sharedProps} {...{controller}}/>
+						</>;
+					},
+				});
+			}}/>
+			{selectedIRs_nodeAndRev.length > 0 &&
+			<VMenuItem text="Recreate import-node here (1st)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
+				if (e.button != 0) return;
+				const res = selectedIRs_nodeAndRev[0];
+				res.link.group = childGroup ?? ChildGroup.generic;
+				await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: AsNodeL1Input(res.node), revision: res.revision, link: res.link});
+			}}/>}
+		</>
+	);
+});
 
 enum ImportSubtreeUI_LeftTab {
 	source = "source",
@@ -220,7 +208,7 @@ class ImportSubtreeUI extends BaseComponent<
 										Obtain this subtree-json by:
 										1) In the old, firestore-based version of Debate Map, right click the subtree you want, and press "Export subtree".
 										2) Set your settings, press "Get data", then wait a few seconds for the data to be retrieved.
-										3) Open dev-tools panel, open Source tab, press ctrl+o, type "MI_ExportSubtree.js", and open the file found. (if not found, turn on "Enable JavaScript source maps" in dev-tools F1/options panel) 
+										3) Open dev-tools panel, open Source tab, press ctrl+o, type "MI_ExportSubtree.js", and open the file found. (if not found, turn on "Enable JavaScript source maps" in dev-tools F1/options panel)
 										4) Place a breakpoint on line 70 (right after the "var subtree = ..." line), by clicking on the line-number label.
 										5) Change the "Base export depth" up or down 1, to trigger the code to run again; your breakpoint should get hit.
 										6) Export the subtree variable's data to a file, by running this in the dev-tools Console tab: \`RR().StartDownload(JSON.stringify(subtree, null, 2), "Export_" + Date.now() + ".json");\`
@@ -359,7 +347,7 @@ class ImportSubtreeUI extends BaseComponent<
 												This will start an import of all ${resources.length} resources (not just the ${selectedIRs_nodeAndRev.length} selected ones), run as a command-batch on the server.
 
 												If the import is large, this could take a long time. You can view the progress in the text of the "Import ALL (server) [X/X]" button.
-												
+
 												Note also: If you want to cancel the import, refresh the page while it's still running. (this will cancel the graphql subscription, causing the server to drop the operation)
 											`.AsMultiline(0),
 											onOK: async()=>{
