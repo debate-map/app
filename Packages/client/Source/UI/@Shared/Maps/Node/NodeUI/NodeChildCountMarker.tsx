@@ -17,7 +17,7 @@ export type NodeChildCountMarker_Props = {
 };
 
 export const NodeChildCountMarker = observer_mgl((props: NodeChildCountMarker_Props)=>{
-	const {map, path, childCount, childrenLoading, textOutline} = props;
+	const {map, path, childCount, childrenLoading, textOutline = "rgba(10,10,10,1)"} = props;
 	if (childCount == 0 && !childrenLoading) return null;
 
 	const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
@@ -55,5 +55,4 @@ export const NodeChildCountMarker = observer_mgl((props: NodeChildCountMarker_Pr
 			{showChangesMarker && <NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 		</Column>
 	);
-
 });
