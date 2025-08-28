@@ -24,7 +24,7 @@ type ChildLimitBar_Props = {
 	ref?: Ref<HTMLDivElement>,
 };
 
-export const ChildLimitBarFn = observer_mgl((props: ChildLimitBar_Props)=>{
+export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 	const {map, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo, ref} = props;
 	const {direction, showTarget_min, showTarget_actual, childCount} = childLimitInfo;
 	const nodeView = GetNodeView(map.id, path)!;
@@ -98,5 +98,4 @@ export const ChildLimitBarFn = observer_mgl((props: ChildLimitBar_Props)=>{
 				}}/>
 		</Row>
 	);
-
 });
