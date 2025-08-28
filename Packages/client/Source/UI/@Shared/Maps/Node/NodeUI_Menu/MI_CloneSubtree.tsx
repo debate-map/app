@@ -23,42 +23,38 @@ export class CloneSubtreeUIState {
 	expectedCloneCount?: number|n;
 }
 
-@Observer
-export class MI_CloneSubtree extends BaseComponent<MI_SharedProps, {}> {
-	render() {
-		const {map, node, path} = this.props;
-		if (map == null) return null;
-		if (!HasAdminPermissions(MeID())) return null;
-		//const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
+export const MI_CloneSubtree = observer_mgl((props: MI_SharedProps)=>{
+	const {map, path} = props;
+	if (map == null) return null;
+	if (!HasAdminPermissions(MeID())) return null;
 
-		// we "initiate a clone" for the "outer" argument node, if there's a box combining an argument and claim (this is how the dialog expects such a case)
-		const pathToClone = path;
-		const nodeToClone = GetNodeL3(pathToClone);
-		if (nodeToClone == null) return null; // node just deleted?
+	// we "initiate a clone" for the "outer" argument node, if there's a box combining an argument and claim (this is how the dialog expects such a case)
+	const pathToClone = path;
+	const nodeToClone = GetNodeL3(pathToClone);
+	if (nodeToClone == null) return null; // node just deleted?
 
-		const parentOfNodeToClone = GetParentNodeL3(pathToClone);
-		if (parentOfNodeToClone == null || nodeToClone.link == null) return null; // cannot clone a map's root-node (for now anyway)
+	const parentOfNodeToClone = GetParentNodeL3(pathToClone);
+	if (parentOfNodeToClone == null || nodeToClone.link == null) return null; // cannot clone a map's root-node (for now anyway)
 
-		const payload_initial: CloneSubtreePayload = {
-			parentNodeID: parentOfNodeToClone.id,
-			rootNodeID: nodeToClone.id,
-			maxDepth: 100,
-		};
-		const uiState_initial: CloneSubtreeUIState = {
-			expectedCloneCount: null,
-		};
+	const payload_initial: CloneSubtreePayload = {
+		parentNodeID: parentOfNodeToClone.id,
+		rootNodeID: nodeToClone.id,
+		maxDepth: 100,
+	};
+	const uiState_initial: CloneSubtreeUIState = {
+		expectedCloneCount: null,
+	};
 
-		return (
-			<VMenuItem text={<span>Clone subtree</span> as any}
-				style={liveSkin.Style_VMenuItem()} onClick={e=>{
-					if (e.button != 0) return;
-					if (MeID() == null) return ShowSignInPopup();
+	return (
+		<VMenuItem text={<span>Clone subtree</span> as any}
+			style={liveSkin.Style_VMenuItem()} onClick={e=>{
+				if (e.button != 0) return;
+				if (MeID() == null) return ShowSignInPopup();
 
-					ShowCloneSubtreeDialog(payload_initial, uiState_initial);
-				}}/>
-		);
-	}
-}
+				ShowCloneSubtreeDialog(payload_initial, uiState_initial);
+			}}/>
+	);
+})
 
 export type CloneSubtreeDialog_SharedProps = {
 	payload: CloneSubtreePayload,
