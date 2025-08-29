@@ -2,7 +2,7 @@ import {Column, Row} from "react-vcomponents";
 import {AddArgumentButton} from "UI/@Shared/Maps/Node/NodeUI/AddArgumentButton.js";
 import {NodeL3, Polarity, DMap, ChildGroup, NodeType} from "dm_common";
 import {useRef_nodeLeftColumn} from "tree-grapher";
-import {Ref, useCallback, useState} from "react";
+import {Ref, useCallback} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeLayoutConstants.js";
 import {observer_mgl} from "mobx-graphlink";
@@ -19,17 +19,16 @@ type Props = {
 	ref: Ref<HTMLDivElement>,
 }
 
-export const ArgumentsControlBarFn = observer_mgl((props: Props)=>{
+export const ArgumentsControlBar = observer_mgl((props: Props)=>{
 	const {map, node, path, treePath, inBelowGroup, group, childBeingAdded, ref} = props;
-	const [premiseTitle, setPremiseTitle] = useState("");
 
 	const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 		color: GetNodeColor({type: NodeType.claim}, "connector", false).css(),
 		gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 	}, {}, true);
 
-	const handleRef = useCallback((c: Row)=>{
-		const dom = c.root ? c.root : null;
+	const handleRef = useCallback((c: Row|n)=>{
+		const dom = c?.root || null;
 		ref_leftColumn(dom);
 		if (dom) {
 			dom["nodeGroup"] = ref_group.current;
