@@ -36,8 +36,8 @@ export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 		parentIsAbove: inBelowGroup,
 	});
 
-	const handleRef = useCallback((c: Row)=>{
-		const dom = c.root || null;
+	const handleRef = useCallback((c: Row|n)=>{
+		const dom = c?.root || null;
 		ref_leftColumn(dom);
 		if (dom) {
 			dom["nodeGroup"] = ref_group.current;
