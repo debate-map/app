@@ -14,7 +14,7 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "@apollo/client";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {MapUI} from "../Maps/MapUI.js";
+import {currentMapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
 import {observer_mgl} from "mobx-graphlink";
 import React from "react";
@@ -420,10 +420,7 @@ export function JumpToNode(mapID: string, path: string) {
 		ACTMapViewMerge(mapID, mapView);
 		//ACTMapViewMerge(mapID, mapView, false, false);
 
-		// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;
-		const mapUI = MapUI.CurrentMapUI;
-		if (mapUI) {
-			mapUI.StartLoadingScroll();
-		}
+		const mapUI = currentMapUI();
+		mapUI?.startLoadingScroll();
 	});
 }

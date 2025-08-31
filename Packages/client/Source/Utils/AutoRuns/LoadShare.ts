@@ -4,7 +4,7 @@ import {autorun, runInAction} from "mobx";
 import {GetAsync} from "mobx-graphlink";
 import {store} from "Store";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
-import {MapUI} from "UI/@Shared/Maps/MapUI.js";
+import {currentMapUI, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {AddNotificationMessage, RunInAction} from "web-vcore";
 import {AutoRun_HandleBail} from "./@Helpers.js";
@@ -53,11 +53,8 @@ async function LoadShare(shareID: string) {
 			if (share.mapID) {
 				ACTMapViewMerge(share.mapID, share.mapView!);
 
-				// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;
-				const mapUI = MapUI.CurrentMapUI;
-				if (mapUI) {
-					mapUI.StartLoadingScroll();
-				}
+				const mapUI = currentMapUI();
+				mapUI?.startLoadingScroll();
 			}
 
 			//if (store.main.shareBeingLoaded == shareID)

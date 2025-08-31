@@ -9,7 +9,7 @@ import {GetOpenMapID} from "Store/main";
 import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "mobx-graphlink";
 import {GetPathsWith1PlusFocusLevelAfterEffects, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph.js";
-import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI.js";
+import {ACTUpdateAnchorNodeAndViewOffset, currentMapUI} from "../MapUI.js";
 
 //let ignoreNextZoomChange = false;
 /** This component replaces the node-focusing portion of TimelineStepAffectApplier with a smoother variant of it, when the layout-helper map is loaded. (layout-helper is required for the smoothing) */
@@ -68,11 +68,11 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: DMap, map
 	if (mainGraph.containerEl == null) return null;
 	/*const scrollEl = mainGraph.getScrollElFromContainerEl(mainGraph.containerEl);
 	if (scrollEl == null) return null;*/
-	const mapUI = MapUI.CurrentMapUI;
+	const mapUI = currentMapUI();
 	if (mapUI == null) return null;
 
 	//const viewportSize = new Vector2(scrollEl.clientWidth, scrollEl.clientHeight);
-	const viewportEl = mapUI.mapUIEl!.parentElement!.parentElement!;
+	const viewportEl = mapUI.parentElement!.parentElement!;
 	const viewportSize = new Vector2(viewportEl.clientWidth, viewportEl.clientHeight);
 	// apply just enough zoom-out to be able to fit all of the focus-nodes within the viewport
 	const zoomRequired = Math.min(viewportSize.x / focusNodeRects_interpolated.width, viewportSize.y / focusNodeRects_interpolated.height);
@@ -84,7 +84,7 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: DMap, map
 		mapState.zoomLevel = newZoom;
 
 		//ScrollToPosition_Center(scrollEl!, focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
-		mapUI!.ScrollToPosition_Center(focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
+		mapUI.scrollToPosition_Center(focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
 
 		//await SleepAsync(1);
 		ACTUpdateAnchorNodeAndViewOffset(map.id);
