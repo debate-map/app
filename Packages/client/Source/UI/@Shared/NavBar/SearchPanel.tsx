@@ -17,52 +17,69 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {currentMapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
 import {observer_mgl} from "mobx-graphlink";
-import React from "react";
+import React, {useState} from "react";
 
 const columnWidths = [0.68, 0.2, 0.12];
 
-@Observer
-export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: false}, {} as {queryStr: string}) {
-	ClearResults() {
+export const SearchPanel = observer_mgl(()=>{
+	const [searchInProgress, setSearchInProgress] = useState(false);
+	const queryStrRef = React.useRef(store.main.search.queryStr);
+
+	const {searchResults_partialTerms} = store.main.search;
+	// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+	const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
+
+	let results_nodeL2s = searchResultIDs
+		.map(id=>GetNodeL2.CatchBail(null, id)) // catch bail per entry, so that we start showing the results even before we've loaded every result's data
+		.filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
+
+	// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
+	// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
+	if (searchResults_partialTerms.length) {
+		for (const term of searchResults_partialTerms) {
+			results_nodeL2s = results_nodeL2s.filter(a=>{
+				const titles = GetAllNodeRevisionTitles(a.current);
+				return titles.every(b=>b.toLowerCase().includes(term));
+			});
+		}
+	}
+	const results_nodeIDs = results_nodeL2s.filter(a=>a).map(a=>a.id).Distinct();
+
+	const clearResults = ()=>{
 		RunInAction("SearchPanel.ClearResults", ()=>{
 			store.main.search.searchResults_partialTerms = ea;
 			store.main.search.searchResults_nodeIDs = ea;
 		});
-	}
-	async PerformSearch() {
-		// first clear the old results
-		this.ClearResults();
+	};
 
-		this.SetState({searchInProgress: true});
+	const performSearch = async()=>{
+		// first clear the old results
+		clearResults();
+		setSearchInProgress(true);
 		try {
-			let {queryStr} = this.stash;
-			const unrestricted = queryStr.endsWith(" /unrestricted");
+			const unrestricted = queryStrRef.current.endsWith(" /unrestricted");
 			if (unrestricted) {
-				queryStr = queryStr.slice(0, -" /unrestricted".length);
+				queryStrRef.current = queryStrRef.current.slice(0, -" /unrestricted".length);
 			}
 
-			if (Validate("UUID", queryStr) == null) {
-				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
+			if (Validate("UUID", queryStrRef.current) == null) {
+				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStrRef.current));
 				if (nodeRevisionMatch) {
 					RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
-						//store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
 						store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.node];
 					});
 					return;
 				}
-				const node = await GetAsync(()=>GetNodeL2(queryStr));
+				const node = await GetAsync(()=>GetNodeL2(queryStrRef.current));
 				if (node) {
-					//const visibleNodeRevision = node.current;
 					RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
-						//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
-						//store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
 						store.main.search.searchResults_nodeIDs = [node.id];
 					});
 					return;
 				}
 			}
 
-			const searchTerms = GetSearchTerms_Advanced(queryStr);
+			const searchTerms = GetSearchTerms_Advanced(queryStrRef.current);
 			// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
 			if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
 			const queryStr_withoutPartialTerms = searchTerms.wholeTerms.join(" ");
@@ -94,107 +111,58 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: 
 			});
 		} finally {
 			// wait a moment before clearing search-in-progress marker (else it gets ignored, for early-return case -- presumably race condition with the set-true call above)
-			WaitXThenRun(0, ()=>this.SetState({searchInProgress: false}));
+			WaitXThenRun(0, ()=>setSearchInProgress(true));
 		}
-	}
+	};
 
-	render() {
-		const {searchInProgress} = this.state;
-		const {searchResults_partialTerms} = store.main.search;
-		// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
-		const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
-
-		let results_nodeL2s = searchResultIDs
-			.map(id=>GetNodeL2.CatchBail(null, id)) // catch bail per entry, so that we start showing the results even before we've loaded every result's data
-			.filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
-
-		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
-		// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
-		if (searchResults_partialTerms.length) {
-			for (const term of searchResults_partialTerms) {
-				results_nodeL2s = results_nodeL2s.filter(a=>{
-					const titles = GetAllNodeRevisionTitles(a.current);
-					return titles.every(b=>b.toLowerCase().includes(term));
-				});
-			}
-		}
-
-		const results_nodeIDs = results_nodeL2s.filter(a=>a).map(a=>a.id).Distinct();
-		const {queryStr} = store.main.search;
-
-		this.Stash({queryStr});
-		return (
-			<Column style={{
-				width: 750, padding: 5, borderRadius: "0 0 0 5px",
-				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
-			}}>
-				<Row center>
-					<TextInput style={{flex: 1}} value={queryStr}
-						instant // since enter-key needs value pre-blur
-						onChange={val=>{
-							RunInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
-						}}
-						onKeyDown={e=>{
-							if (e.keyCode == keycode.codes.enter) {
-								this.PerformSearch();
-							}
-						}}/>
-					<InfoButton ml={5} text={`
-						* Terms can be excluded from the search results be adding "-" to the start. (eg: climate change -solar)
-						* If you enter the exact ID of a node or node-revision, that matching entry will be shown.
-						* Advanced: If match-by-stem is insufficient, wildcards can be used for basic match-by-contains, but there must be at least one non-wildcard term. (eg: climate chang*)
-					`.AsMultiline(0)}/>
-					<Button ml={5} text="Search" onClick={()=>this.PerformSearch()}/>
+	return (
+		<Column style={{
+			width: 750, padding: 5, borderRadius: "0 0 0 5px",
+			background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
+		}}>
+			<Row center>
+				<TextInput style={{flex: 1}} value={queryStrRef.current}
+					instant // since enter-key needs value pre-blur
+					onChange={val=>{
+						RunInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
+					}}
+					onKeyDown={e=>{
+						if (e.keyCode == keycode.codes.enter) {
+							performSearch();
+						}
+					}}/>
+				<InfoButton ml={5} text={`
+					* Terms can be excluded from the search results be adding "-" to the start. (eg: climate change -solar)
+					* If you enter the exact ID of a node or node-revision, that matching entry will be shown.
+					* Advanced: If match-by-stem is insufficient, wildcards can be used for basic match-by-contains, but there must be at least one non-wildcard term. (eg: climate chang*)
+				`.AsMultiline(0)}/>
+				<Button ml={5} text="Search" onClick={()=>performSearch()}/>
+			</Row>
+			<Column mt={5} className="clickThrough" style={{height: 40, background: liveSkin.NavBarPanelBackgroundColor().darken(.1 * chroma_maxDarken).css(), borderRadius: 10}}>
+				<Row style={{height: 40, padding: 10}}>
+					<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 16}}>Title</span>
+					<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 16}}>Creator</span>
+					<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 16}}>Created at</span>
 				</Row>
-				{/* <Row style={{ fontSize: 18 }}>Search results ({results_nodeIDs.length})</Row> */}
-				<Column mt={5} className="clickThrough" style={{height: 40, background: liveSkin.NavBarPanelBackgroundColor().darken(.1 * chroma_maxDarken).css(), borderRadius: 10}}>
-					{/* <Row style={{ height: 40, padding: 10 }}>
-						<Pre>Sort by: </Pre>
-						<Select options={GetEntries(SortType, name => EnumNameToDisplayName(name))}
-							value={sortBy} onChange={val => store.dispatch(new ACTNodeListSortBySet({ mapID: map._id, sortBy: val }))}/>
-						<Row width={200} style={{ position: 'absolute', left: 'calc(50% - 100px)' }}>
-							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
-								enabled={page > 0} onClick={() => {
-									// store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: page - 1}));
-									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: page - 1 }));
-								}}/>
-							<Div ml={10} mr={7}>Page: </Div>
-							<TextInput mr={10} pattern="[0-9]+" style={{ width: 30 }} value={page + 1}
-								onChange={(val) => {
-									if (!IsNumberString(val)) return;
-									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage) }));
-								}}/>
-							<Button text={<Icon icon="arrow-right" size={15}/>} title="Next page"
-								enabled={page < lastPage} onClick={() => {
-									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: page + 1 }));
-								}}/>
-							</Row>
-					</Row> */}
-					<Row style={{height: 40, padding: 10}}>
-						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 16}}>Title</span>
-						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 16}}>Creator</span>
-						<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 16}}>Created at</span>
-					</Row>
-				</Column>
-				<ScrollView style={ES({flex: 1})} contentStyle={{paddingTop: 10}} onContextMenu={e=>{
-					if (e.nativeEvent["handled"]) return true;
-					e.preventDefault();
-				}}>
-					{searchInProgress && "Searching..."}
-					{!searchInProgress && <>
-						{results_nodeIDs.length == 0 && "No search results."}
-						{results_nodeIDs.length > 0 && results_nodeIDs.map((nodeID, index)=>{
-							return (
-								// <ErrorBoundary key={nodeID}>
-								<SearchResultRow key={nodeID} nodeID={nodeID} index={index}/>
-							);
-						})}
-					</>}
-				</ScrollView>
 			</Column>
-		);
-	}
-}
+			<ScrollView style={ES({flex: 1})} contentStyle={{paddingTop: 10}} onContextMenu={e=>{
+				if (e.nativeEvent["handled"]) return true;
+				e.preventDefault();
+			}}>
+				{searchInProgress && "Searching..."}
+				{!searchInProgress && <>
+					{results_nodeIDs.length == 0 && "No search results."}
+					{results_nodeIDs.length > 0 && results_nodeIDs.map((nodeID, index)=>{
+						return (
+							// <ErrorBoundary key={nodeID}>
+							<SearchResultRow key={nodeID} nodeID={nodeID} index={index}/>
+						);
+					})}
+				</>}
+			</ScrollView>
+		</Column>
+	);
+});
 
 export const MapPathResult = observer_mgl((props: {path: string})=>{
 	const {path: resultPath} = props;
@@ -352,7 +320,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 	}
 }
 
-export async function FindPathsFromMapRootsToX(targetNodeY: UUID, actionAfterEachDepthIteration: (upPathAttempts: string[], upPathCompletions: string[], depth: number)=>Promise<{breakIteration: boolean}>, searchDepth = 100) {
+export const FindPathsFromMapRootsToX = async(targetNodeY: UUID, actionAfterEachDepthIteration: (upPathAttempts: string[], upPathCompletions: string[], depth: number)=>Promise<{breakIteration: boolean}>, searchDepth = 100)=>{
 	const upPathCompletions = [] as string[];
 	let upPathAttempts = [`${targetNodeY}`];
 	for (let depth = 0; depth < searchDepth; depth++) {
@@ -386,9 +354,9 @@ export async function FindPathsFromMapRootsToX(targetNodeY: UUID, actionAfterEac
 		if (breakIteration) break;
 	}
 	return {upPathCompletions};
-}
+};
 
-export function JumpToNode(mapID: string, path: string) {
+export const JumpToNode = (mapID: string, path: string)=>{
 	RunInAction("JumpToNode", ()=>{
 		const pathNodeIDs = path.split("/");
 
@@ -423,4 +391,4 @@ export function JumpToNode(mapID: string, path: string) {
 		const mapUI = currentMapUI();
 		mapUI?.startLoadingScroll();
 	});
-}
+};
