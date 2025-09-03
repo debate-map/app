@@ -5,7 +5,6 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {DMap} from "dm_common";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 import {currentMapUI} from "../MapUI.js";
@@ -21,7 +20,6 @@ type Props = {
 export const ActionBar_Right = observer_mgl((props: Props)=>{
 	const {map, subNavBarWidth} = props;
 	const mapState = GetMapState.NN(map.id);
-	const mapView = GetMapView.NN(map.id);
 
 	const changeZoom = (newZoom: number)=>{
 		const oldZoom = mapState.zoomLevel;
@@ -40,10 +38,10 @@ export const ActionBar_Right = observer_mgl((props: Props)=>{
 			//         (thus I've removed the workaround in MapUI.tsx, which wasn't great since it reduced scroll performance when many nodes were open)
 			mapUI.scheduleAfterNextRender(()=>{
 				if (mapUI == null) return;
-				const oldDisplay = mapUI.style.display;
-				mapUI.style.display = "none"; // hides the element
-				mapUI.offsetHeight; // let's the browser "catch up" on the code so it gets redrawn
-				mapUI.style.display = oldDisplay; // shows the element again
+				const oldDisplay = mapUI.elem!.style.display;
+				mapUI.elem!.style.display = "none"; // hides the element
+				mapUI.elem!.offsetHeight; // let's the browser "catch up" on the code so it gets redrawn
+				mapUI.elem!.style.display = oldDisplay; // shows the element again
 				mapUI.adjustMapScrollToPreserveCenterPoint(mapCenter_unzoomed, newZoom);
 			});
 		});
@@ -76,5 +74,4 @@ export const ActionBar_Right = observer_mgl((props: Props)=>{
 			</Row>
 		</nav>
 	);
-
 });
