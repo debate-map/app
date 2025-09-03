@@ -38,7 +38,7 @@ type AudioPanel_Props = {
 	map: DMap,
 	timeline: Timeline
 };
-export const AudioPanelFn = observer_mgl((props: AudioPanel_Props)=>{
+export const AudioPanel = observer_mgl((props: AudioPanel_Props)=>{
 	const {map} = props;
 
 	const [parseData, setParseData] = useState<ParseData|null>(null);
