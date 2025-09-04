@@ -1,5 +1,5 @@
 import {ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, DMap, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem, GetFinalAccessPolicyForNewEntry} from "dm_common";
-import React from "react";
+import React, { Ref, useImperativeHandle } from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
 import {TextPlus} from "web-vcore";
@@ -12,11 +12,18 @@ import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUIBaseProps, useDetailsUI} from "../DetailsUI_Base.js";
 import {observer_mgl} from "mobx-graphlink";
 
-type MapDetailsUI_Props = DetailsUIBaseProps<DMap, {}>
+type MapDetailsUI_Props = DetailsUIBaseProps<DMap, {}> & {
+	ref?: Ref<MapDetailsUIElem>;
+}
+
+export type MapDetailsUIElem = {
+	getValidationError: ()=>string|n;
+	getNewData: ()=>DMap;
+}
 
 export const MapDetailsUI = observer_mgl((props: MapDetailsUI_Props)=>{
-	const {baseData, style, onChange, phase} = props;
-	const {newData, helpers} = useDetailsUI<DMap>({
+	const {baseData, style, onChange, phase, ref} = props;
+	const {newData, helpers, getNewData, getValidationError} = useDetailsUI<DMap>({
 		baseData,
 		phase,
 		onChange,
@@ -26,6 +33,11 @@ export const MapDetailsUI = observer_mgl((props: MapDetailsUI_Props)=>{
 
 	const splitAt = 160;
 	const width = 600;
+
+	useImperativeHandle(ref, ()=>({
+		getValidationError,
+		getNewData,
+	}), [getValidationError, getNewData]);
 
 	return (
 		<Column style={style}>
