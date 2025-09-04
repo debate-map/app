@@ -1,20 +1,16 @@
 import {Me} from "dm_common";
-import keycode from "keycode";
 import {hasHotReloaded} from "Main";
-import React, { useEffect } from "react";
+import React, {useEffect, useMemo, useRef} from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
-import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_Options, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
+import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_Options, LoadURL, PageContainer, RunInAction} from "web-vcore";
 import chroma from "chroma-js";
-import {Clone, E, SleepAsync, SleepAsyncUntil, Vector2} from "js-vextensions";
+import {Clone, E, SleepAsyncUntil, Vector2} from "js-vextensions";
 import {AsyncTrunk} from "mobx-sync";
-import {autorun, makeObservable, observable} from "mobx";
-import {deepObserve} from "mobx-utils";
+import {makeObservable, observable} from "mobx";
 import {DragDropContext as DragDropContext_Beautiful} from "@hello-pangea/dnd";
-import ReactDOM from "react-dom";
-import {ColorPickerBox, Column, Div, Text} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ColorPickerBox, Column, Text} from "react-vcomponents";
 import {VMenuLayer} from "react-vmenu";
 import {MessageBoxLayer} from "react-vmessagebox";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
@@ -41,128 +37,95 @@ import {observer_mgl} from "mobx-graphlink";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
-@Observer
-export class RootUIWrapper extends BaseComponent<{}, {}> {
-	constructor(props) {
-		super(props);
-		makeObservable(this);
+export const RootUIWrapper = observer_mgl(()=>{
+	const isMounted = useRef(false);
+	const self = useMemo(()=>{
+		return makeObservable({
+			storeReady: false,
+		}, {storeReady: observable});
+	}, []);
+
+	if (!isMounted.current){
+		(async()=>{
+			const trunk = new AsyncTrunk(store, {storage: localStorage});
+			if (startURL.GetQueryVar("clearState") == "true") {
+				console.log("Clearing state. State before clear:", Clone(store));
+				await trunk.clear();
+			}
+
+			// we start a mirror-generation here, but merely so that we can hook into its "onChange" event (to trigger another call to trunk.persist)
+			const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {
+				onChange: (sourceObj, mirrorObj)=>{
+					if (!self.storeReady) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
+					//changeCount++;
+					//console.log(`Mirror changed (${changeCount})! Possibly persisting... (ie. if cooldown has passed) @SourceObj:`, sourceObj, "@MirrorObj:", mirrorObj, "@MirrorObj_Old:", mirrorObj_old);
+					trunk.persist();
+				},
+			} as Partial<GetMirrorOfMobXTree_Options>);
+			const root = GetMirrorOfMobXTree(store, mirrorOpts);
+
+			// monkey-patch async-trunk's persist function to add throttling (else can majorly slow down the app in certain cases, eg. when loading maps with tons of nodes expanded)
+			trunk.persist = function() {
+				return (async()=>{
+					if (this.persistingScheduled) return;
+					this.persistingScheduled = true;
+
+					const lastPersistTime = this.lastPersistTime ?? 0;
+					if (Date.now() - lastPersistTime < 500) {
+						await SleepAsyncUntil(lastPersistTime + 500);
+					}
+
+					// now proceed with actual persisting
+					this.lastPersistTime = Date.now();
+					this.persistingScheduled = false;
+					try {
+						//console.log("Saving...");
+						const storeJSON = JSON.stringify(this.store);
+						await this.storage.setItem(this.storageKey, storeJSON);
+					} catch (reason) {
+						this.onError(reason);
+					}
+				})();
+			};
+
+			await trunk.init();
+			console.log("Loaded state:", Clone(store));
+
+			// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)
+			graph.options.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
+
+			if (!hasHotReloaded) {
+				LoadURL(startURL);
+			}
+
+			if (PROD && store.main.analyticsEnabled) {
+				console.log("Initialized Google Analytics.");
+			}
+
+			RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>self.storeReady = true);
+			console.log("Marked ready!:", self.storeReady);
+		})();
+
 	}
 
-	async ComponentWillMount() {
-		const trunk = new AsyncTrunk(store, {storage: localStorage});
-		if (startURL.GetQueryVar("clearState") == "true") {
-			console.log("Clearing state. State before clear:", Clone(store));
-			await trunk.clear();
-		}
-
-		// we start a mirror-generation here, but merely so that we can hook into its "onChange" event (to trigger another call to trunk.persist)
-		//let changeCount = 0;
-		const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {
-			onChange: (sourceObj, mirrorObj)=>{
-				if (!this.storeReady) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
-				//changeCount++;
-				//console.log(`Mirror changed (${changeCount})! Possibly persisting... (ie. if cooldown has passed) @SourceObj:`, sourceObj, "@MirrorObj:", mirrorObj, "@MirrorObj_Old:", mirrorObj_old);
-				trunk.persist();
-			},
-		} as Partial<GetMirrorOfMobXTree_Options>);
-		const root = GetMirrorOfMobXTree(store, mirrorOpts);
-		/*autorun(()=>{
-			const root = GetMirrorOfMobXTree_New(store, mirrorOpts);
-			//const root = GetMirrorOfMobXTree_New2(store, mirrorOpts).get();
-		});*/
-
-		// monkey-patch async-trunk's persist function to add throttling (else can majorly slow down the app in certain cases, eg. when loading maps with tons of nodes expanded)
-		trunk.persist = function() {
-			return (async()=>{
-				if (this.persistingScheduled) return;
-				this.persistingScheduled = true;
-
-				const lastPersistTime = this.lastPersistTime ?? 0;
-				if (Date.now() - lastPersistTime < 500) {
-					await SleepAsyncUntil(lastPersistTime + 500);
-				}
-
-				// now proceed with actual persisting
-				this.lastPersistTime = Date.now();
-				this.persistingScheduled = false;
-				try {
-					//console.log("Saving...");
-					const storeJSON = JSON.stringify(this.store);
-					await this.storage.setItem(this.storageKey, storeJSON);
-				} catch (reason) {
-					this.onError(reason);
-				}
-			})();
-		};
-
-		await trunk.init();
-		console.log("Loaded state:", Clone(store));
-
-		// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)
-		graph.options.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
-
-		// start auto-runs, now that store+firelink are created (and store has initialized -- not necessary, but nice)
-		//require("../Utils/AutoRuns");
-
-		if (!hasHotReloaded) {
-			LoadURL(startURL);
-		}
-		if (PROD && store.main.analyticsEnabled) {
-			console.log("Initialized Google Analytics.");
-			//ReactGA.initialize("UA-21256330-33", {debug: true});
-			//ReactGA.initialize("UA-21256330-33");
-
-			/* let url = VURL.FromLocationObject(State().router).toString(false);
-			ReactGA.set({page: url});
-			ReactGA.pageview(url || "/"); */
-		}
-
-		RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>this.storeReady = true);
-		//console.log("Marked ready!:", this.storeReady);
-	}
-	// use observable field for this rather than react state, since setState synchronously triggers rendering -- which breaks loading process above, when rendering fails
-	@observable storeReady = false;
-
-	render() {
-		const {storeReady} = this;
-		//console.log("StoreReady?:", storeReady);
-		// if (!g.storeRehydrated) return <div/>;
-		if (!storeReady) return null;
-
-		return (
-			<DragDropContext_Beautiful onDragEnd={OnDragEnd}>
-				<ApolloProvider client={apolloClient}>
-					<RootUI/>
-				</ApolloProvider>
-			</DragDropContext_Beautiful>
-		);
-	}
-
-	ComponentDidMount() {
-		/* if (DEV) {
-			setTimeout(() => {
-				G({ Perf: React.addons.Perf });
-				React.addons.Perf.start();
-			}, 100);
-		} */
-
-		// $(document).on('mousemove', '*', function(event, ui) {
+	useEffect(()=>{
+		console.log("RootUIWrapper mounted.");
+		isMounted.current = true;
 		document.addEventListener("mousemove", event=>{
 			if (event["handledGlobally"]) return;
 			event["handledGlobally"] = true;
-
 			g.mousePos = new Vector2(event.pageX, event.pageY);
 		});
 
 		document.addEventListener("keydown", event=>{
-			if (event.which == keycode.codes.ctrl) g.ctrlDown = true;
-			if (event.which == keycode.codes.shift) g.shiftDown = true;
-			if (event.which == keycode.codes.alt) g.altDown = true;
+			if (event.key === "Control") g.ctrlDown = true;
+			if (event.key === "Shift") g.shiftDown = true;
+			if (event.key === "Alt") g.altDown = true;
 		});
 		document.addEventListener("keyup", event=>{
-			if (event.which == keycode.codes.ctrl) g.ctrlDown = false;
-			if (event.which == keycode.codes.shift) g.shiftDown = false;
-			if (event.which == keycode.codes.alt) g.altDown = false;
+			if (event.key === "Control") g.ctrlDown = false;
+			if (event.key === "Shift") g.shiftDown = false;
+			if (event.key === "Alt") g.altDown = false;
 		});
 
 		// if in dev-mode, disable the body`s minHeight attribute
@@ -170,26 +133,36 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			document.body.style.minHeight = null as any;
 		}
 
-		// add Quicksand font // commented; we embed the css directly in index.html now (we're hosting fonts ourselves now, so can't use google's standardized css url; and embedding directly may speed font-loading)
-		/*const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
-		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head*/
-
 		if (SLMode) {
-			/*const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
-			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head*/
-
 			// css generated from: https://gwfh.mranftl.com/fonts/cinzel?subsets=latin,latin-ext
-			const styleEl = <style>{`
+			const styleEl = document.createElement("style");
+			styleEl.textContent = `
 				@font-face { /* cinzel-regular - latin_latin-ext */
 					font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
 					font-family: 'Cinzel'; font-style: normal; font-weight: 400;
 					src: url('/Fonts/cinzel-v23-latin_latin-ext-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 				}
-			`}</style>;
-			ReactDOM.render(ReactDOM.createPortal(styleEl, document.head), document.createElement("div")); // render directly into head
+			`;
+			document.head.appendChild(styleEl);
 		}
-	}
-}
+
+		return ()=>{
+			isMounted.current = false;
+		}
+	}, []);
+
+	const {storeReady} = self;
+	if (!storeReady) return null;
+
+	return (
+		<DragDropContext_Beautiful onDragEnd={OnDragEnd}>
+			<ApolloProvider client={apolloClient}>
+				<RootUI/>
+			</ApolloProvider>
+		</DragDropContext_Beautiful>
+	);
+
+})
 
 declare global {
 	var mousePos: Vector2;
