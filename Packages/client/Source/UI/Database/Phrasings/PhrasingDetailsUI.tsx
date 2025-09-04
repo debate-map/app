@@ -1,7 +1,7 @@
-import React, {useEffect, useRef} from "react";
+import React, {Ref, useEffect, useImperativeHandle, useRef} from "react";
 import {GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, E, WaitXThenRun, ObjectCE} from "js-vextensions";
 import {Column, Pre, RowLR, Select, TextArea, Row, Text} from "react-vcomponents";
-import {GetDOM, BaseComponentPlus} from "react-vextensions";
+import {GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {NodePhrasing, NodePhrasingType, DMap, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
@@ -9,14 +9,15 @@ import {ES} from "web-vcore";
 import {SLMode_GAD, SLMode_SFI} from "UI/@SL/SL";
 import {CreateAccessor} from "mobx-graphlink";
 import {RunCommand_AddNodePhrasing} from "Utils/DB/Command";
-import {TermAttachmentsUI} from "./TermAttachmentsUI";
-import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
+import {TermAttachmentsUI} from "./TermAttachmentsUI.js";
+import {PhrasingReferencesUI} from "./PhrasingReferencesUI.js";
 
 type Props = {
 	baseData: NodePhrasing_Embedded & {id?: string},
 	map: DMap|n, node: NodeL3, // node properties are used to constrain what phrasing options are available
 	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: NodePhrasing, error: string)=>void,
 	embeddedInNodeRevision?: boolean,
+	ref?: Ref<PhrasingDetailsUIElem>,
 };
 type State = {newData: NodePhrasing, dataError: string|n};
 export type PhrasingDetailsUI_SharedProps = Props & State & {splitAt: number, Change};
@@ -25,69 +26,89 @@ function OmitRef<T>(props: T): T {
 	return ObjectCE(props).ExcludeKeys("ref" as any) as T;
 }
 
-export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: CloneWithPrototypes(props.baseData)});
-		}
+export type PhrasingDetailsUIElem = HTMLDivElement & {
+	getNewData: ()=>NodePhrasing,
+	getValidationError: ()=>string|n,
+};
+
+export const PhrasingDetailsUI = ((props: Props)=>{
+	const {baseData, node, forNew, enabled = true, style, embeddedInNodeRevision, ref} = props;
+	const [{newData, dataError}, setState] = React.useState<State>({
+		newData: CloneWithPrototypes(baseData),
+		dataError: null
+	});
+
+	const internalRef = useRef<HTMLDivElement|n>(null);
+
+	const attachmentType = GetAttachmentType_Node(node);
+	let noteField_label = "Note";
+	if (SLMode_GAD) {
+		noteField_label = "Description";
+		/*noteField_label = embeddedInNodeRevision
+			? "Description" // main-phrasing uses the note-field for a "description" (since it can use references-attachment for references)
+			: "Reference"; // alt-phrasings uses the note-field to include a "reference"*/
 	}
-	OnChange() {
-		const {onChange} = this.props;
-		const newData = this.GetNewData();
-		const error = this.GetValidationError();
-		if (onChange) onChange(newData, error);
-		this.SetState({newData, dataError: error});
+
+	const onChange = ()=>{
+		const newData = getNewData();
+		const error = getValidationError();
+		if (props.onChange) props.onChange(newData, error);
+		setState({newData, dataError: error});
 	}
 
-	render() {
-		const {baseData, node, forNew, enabled, style, embeddedInNodeRevision} = this.props;
-		const {newData} = this.state;
-		const attachmentType = GetAttachmentType_Node(node);
-
-		const Change = (..._)=>this.OnChange();
-
-		let noteField_label = "Note";
-		if (SLMode_GAD) {
-			noteField_label = "Description";
-			/*noteField_label = embeddedInNodeRevision
-				? "Description" // main-phrasing uses the note-field for a "description" (since it can use references-attachment for references)
-				: "Reference"; // alt-phrasings uses the note-field to include a "reference"*/
-		}
-
-		const splitAt = 110;
-		const sharedProps = E(OmitRef(this.props), this.state, {splitAt, Change});
-		return (
-			<Column style={style}>
-				{!forNew && baseData.id != null &&
-					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				{forNew && node.link?.id != null &&
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Type: </Pre>
-					<Select options={GetEntries(NodePhrasingType)} enabled={false} style={ES({flex: 1})}
-						value={newData.type} onChange={val=>Change(newData.type = val)}/>
-				</RowLR>}
-				<TitleBase {...sharedProps}/>
-				{!SLMode_SFI && <OtherTitles {...sharedProps}/>}
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>{noteField_label}: </Pre>
-					<TextArea enabled={enabled} autoSize={true} style={E({flex: 1, minWidth: 0})}
-						value={newData.note} onChange={val=>Change(newData.note = val)}/>
-				</RowLR>
-				<TermAttachmentsUI {...sharedProps}/>
-				{newData.type == NodePhrasingType.web &&
-					<PhrasingReferencesUI {...sharedProps}/>}
-			</Column>
-		);
-	}
-	GetValidationError() {
+	const getValidationError = ()=>{
 		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
-	GetNewData() {
-		const {newData} = this.state;
+	const getNewData = ()=>{
 		return CloneWithPrototypes(newData) as NodePhrasing;
 	}
-}
+
+	const Change = (..._)=>onChange();
+	const splitAt = 110;
+	const sharedProps = E(OmitRef(props), {newData, dataError}, {splitAt, Change});
+
+	useEffect(()=>{
+		setState({
+			newData: CloneWithPrototypes(baseData),
+			dataError: null
+		});
+	}, [baseData]);
+
+	const handleRef = (c: Column|n)=>{
+		internalRef.current = c?.root;
+	}
+
+	useImperativeHandle(ref, ()=>{
+		const modifyElem = (el: HTMLDivElement|n)=>{
+			return el ? (Object.assign(el, {getValidationError, getNewData}) as PhrasingDetailsUIElem) : null
+		}
+		return modifyElem(internalRef.current)!;
+	}, [getValidationError, getNewData]);
+
+	return (
+		<Column style={style} ref={handleRef}>
+			{!forNew && baseData.id != null &&
+				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+			{forNew && node.link?.id != null &&
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>Type: </Pre>
+				<Select options={GetEntries(NodePhrasingType)} enabled={false} style={ES({flex: 1})}
+					value={newData.type} onChange={val=>Change(newData.type = val)}/>
+			</RowLR>}
+			<TitleBase {...sharedProps}/>
+			{!SLMode_SFI && <OtherTitles {...sharedProps}/>}
+			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>{noteField_label}: </Pre>
+				<TextArea enabled={enabled} autoSize={true} style={E({flex: 1, minWidth: 0})}
+					value={newData.note} onChange={val=>Change(newData.note = val)}/>
+			</RowLR>
+			<TermAttachmentsUI {...sharedProps}/>
+			{newData.type == NodePhrasingType.web &&
+				<PhrasingReferencesUI {...sharedProps}/>}
+		</Column>
+	);
+})
 
 const TitleBase = (props: PhrasingDetailsUI_SharedProps)=>{
 	const {forNew, splitAt, node} = props;
