@@ -21,6 +21,9 @@ export const MediaAttachmentEditorUI = observer_mgl((props: MediaAttachmentEdito
 		baseData,
 		phase,
 		onChange,
+		getValidationErrorExtras: ()=>{
+			return chainsEditorRef.current?.getValidationError();
+		}
 	});
 	const {Change, enabled} = helpers;
 	const image = Validate("UUID", newData.id) == null ? GetMedia(newData.id) : null;
