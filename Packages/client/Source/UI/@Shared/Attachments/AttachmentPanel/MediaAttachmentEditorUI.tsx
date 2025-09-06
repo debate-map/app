@@ -1,81 +1,81 @@
 import {E} from "js-vextensions";
 import {Column, Pre, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
 import {MediaAttachment, GetMedia, GetMediasByURL, HasModPermissions, MeID, GetUser, Media, AttachmentTarget} from "dm_common";
 import {Validate} from "mobx-graphlink";
-import {Link, Observer, InfoButton} from "web-vcore";
+import {Link, InfoButton} from "web-vcore";
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
-import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
+import {DetailsUIBaseProps, useDetailsUI} from "UI/@Shared/DetailsUI_Base.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {SourceChainsEditorUI, SourceChainsEditorUIElem} from "../../Maps/Node/SourceChainsEditorUI.js";
 import {observer_mgl} from "mobx-graphlink";
-import React from "react";
+import React, {useRef} from "react";
 
-@Observer
-export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, MediaAttachmentEditorUI, {target: AttachmentTarget}> {
-	scrollView: ScrollView;
-	chainsEditor: SourceChainsEditorUIElem|n;
-	render() {
-		const {style, target} = this.props;
-		const {newData} = this.state;
-		const {enabled, Change} = this.helpers;
-		const image = Validate("UUID", newData.id) == null ? GetMedia(newData.id) : null;
+type MediaAttachmentEditorUI_Props = DetailsUIBaseProps<MediaAttachment, {target: AttachmentTarget}>;
 
-		return (
-			<Column style={style}>
-				<Row>
-					<TextInput placeholder="Media ID or URL..." enabled={enabled} style={{width: "100%", borderRadius: "5px 5px 0 0"}}
-						value={newData.id} onChange={val=>Change(newData.id = val)}/>
-				</Row>
-				<Row style={{position: "relative", flex: 1}}>
-					<DropDown style={{flex: 1}}>
-						<DropDownTrigger>
-							<Button style={{height: "100%", borderRadius: "0 0 5px 5px", display: "flex", whiteSpace: "normal", padding: 5}}
-								text={image
-									? `${image.name}: ${image.url}`
-									: `(click to search/create)`}/>
-						</DropDownTrigger>
-						<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, width: 600, borderRadius: "0 5px 5px 5px", padding: image ? 10 : 0}}><Column>
-							{image &&
-							<Row>
-								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
-									s.main.page = "database";
-									s.main.database.subpage = "media";
-									s.main.database.selectedMediaID = image.id;
-								}}>
-									<Button text="Show details"/>
-								</Link>
-							</Row>}
-							{!image &&
-							<Column>
-								<MediaSearchOrCreateUI url={newData.id} enabled={enabled} onSelect={id=>Change(newData.id = id)}/>
-							</Column>}
-						</Column></DropDownContent>
-					</DropDown>
-				</Row>
-				{target == "node" &&
-				<Row center mt={5} style={{width: "100%"}}>
-					<CheckBox text="Captured" enabled={enabled} value={newData.captured} onChange={val=>Change(newData.captured = val)}/>
-					<InfoButton ml={5} text="Whether the image/video is claimed to be a capturing of real-world footage."/>
-				</Row>}
-				{target == "node" &&
-				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
-					<Pre>Preview width:</Pre>
-					<Spinner ml={5} max={100} enabled={enabled}
-						value={newData.previewWidth ?? 0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : undefined)}/>
-					<Pre>% (0 for auto)</Pre>
-				</Row>}
-				<Row mt={10}>
-					<SourceChainsEditorUI ref={c=>{this.chainsEditor = c}} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
-				</Row>
-			</Column>
-		);
-	}
-	GetValidationError_Extras() {
-		return this.chainsEditor?.getValidationError();
-	}
-}
+export const MediaAttachmentEditorUI = observer_mgl((props: MediaAttachmentEditorUI_Props)=>{
+	const {style, target, phase, onChange, baseData} = props;
+
+	const chainsEditorRef = useRef<SourceChainsEditorUIElem>(null);
+	const {newData, helpers} = useDetailsUI<MediaAttachment>({
+		baseData,
+		phase,
+		onChange,
+	});
+	const {Change, enabled} = helpers;
+	const image = Validate("UUID", newData.id) == null ? GetMedia(newData.id) : null;
+
+	return (
+		<Column style={style}>
+			<Row>
+				<TextInput placeholder="Media ID or URL..." enabled={enabled} style={{width: "100%", borderRadius: "5px 5px 0 0"}}
+					value={newData.id} onChange={val=>Change(newData.id = val)}/>
+			</Row>
+			<Row style={{position: "relative", flex: 1}}>
+				<DropDown style={{flex: 1}}>
+					<DropDownTrigger>
+						<Button style={{height: "100%", borderRadius: "0 0 5px 5px", display: "flex", whiteSpace: "normal", padding: 5}}
+							text={image
+								? `${image.name}: ${image.url}`
+								: `(click to search/create)`}/>
+					</DropDownTrigger>
+					<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, width: 600, borderRadius: "0 5px 5px 5px", padding: image ? 10 : 0}}><Column>
+						{image &&
+						<Row>
+							<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
+								s.main.page = "database";
+								s.main.database.subpage = "media";
+								s.main.database.selectedMediaID = image.id;
+							}}>
+								<Button text="Show details"/>
+							</Link>
+						</Row>}
+						{!image &&
+						<Column>
+							<MediaSearchOrCreateUI url={newData.id} enabled={enabled} onSelect={id=>Change(newData.id = id)}/>
+						</Column>}
+					</Column></DropDownContent>
+				</DropDown>
+			</Row>
+			{target == "node" &&
+			<Row center mt={5} style={{width: "100%"}}>
+				<CheckBox text="Captured" enabled={enabled} value={newData.captured} onChange={val=>Change(newData.captured = val)}/>
+				<InfoButton ml={5} text="Whether the image/video is claimed to be a capturing of real-world footage."/>
+			</Row>}
+			{target == "node" &&
+			<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+				<Pre>Preview width:</Pre>
+				<Spinner ml={5} max={100} enabled={enabled}
+					value={newData.previewWidth ?? 0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : undefined)}/>
+				<Pre>% (0 for auto)</Pre>
+			</Row>}
+			<Row mt={10}>
+				<SourceChainsEditorUI ref={chainsEditorRef} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+			</Row>
+		</Column>
+	);
+
+});
 
 type MediaSearchOrCreateUI_Props = {
 	url: string,
