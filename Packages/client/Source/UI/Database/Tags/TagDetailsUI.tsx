@@ -6,52 +6,53 @@ import {ES, InfoButton} from "web-vcore";
 import {Validate, observer_mgl} from "mobx-graphlink";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, NodeType, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
+import {DetailsUIBaseProps, DetailsUIBaseState, useDetailsUI} from "UI/@Shared/DetailsUI_Base";
 import {RunCommand_AddNodeTag} from "Utils/DB/Command";
 import React from "react";
 
-export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<NodeTag, TagDetailsUI> & DetailsUI_Base_State<NodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
-export class TagDetailsUI extends DetailsUI_Base<NodeTag, TagDetailsUI> {
-	render() {
-		const {baseData, style} = this.props;
-		const {newData} = this.state;
-		const {Change, creating, enabled} = this.helpers;
-		const compClass = GetTagCompClassByTag(newData);
+export type TagDetailsUI_SharedProps = DetailsUIBaseProps<NodeTag, {}> & DetailsUIBaseState<NodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
+type TagDetailsUI_Props = DetailsUIBaseProps<NodeTag, {}>;
 
-		//const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
-		const splitAt = 70;
-		const sharedProps: TagDetailsUI_SharedProps = E(this.props, this.state, {compClass, splitAt, Change, enabled});
-		return (
-			<Column style={style}>
-				{!creating &&
-					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
-				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Type: </Pre>
-					<Select options={TagComp_classes.filter(a=>a.key != "labels").map(a=>({name: a.displayName, value: a}))}
-						enabled={enabled} style={ES({flex: 1})}
-						value={compClass}
-						onChange={(newCompClass: TagComp_Class)=>{
-							delete newData[compClass.key];
-							newData[newCompClass.key] = new newCompClass();
-							Change();
-						}}/>
-					<InfoButton ml={5} text={compClass.description}/>
-				</RowLR>
-				{/*compClass == TagComp_Labels &&
-					<TagCompUI_Labels {...sharedProps}/>*/}
-				{compClass == TagComp_MirrorChildrenFromXToY &&
-					<TagCompUI_MirrorChildrenFromXToY {...sharedProps}/>}
-				{compClass == TagComp_XIsExtendedByY &&
-					<TagCompUI_XIsExtendedByY {...sharedProps}/>}
-				{compClass == TagComp_MutuallyExclusiveGroup &&
-					<TagCompUI_MutuallyExclusiveGroup {...sharedProps}/>}
-				{compClass == TagComp_RestrictMirroringOfX &&
-					<TagCompUI_RestrictMirroringOfX {...sharedProps}/>}
-				{compClass == TagComp_CloneHistory &&
-					<TagCompUI_CloneHistory {...sharedProps}/>}
-			</Column>
-		);
-	}
+export const TagDetailsUI = (props: TagDetailsUI_Props)=>{
+	const {baseData, style, onChange, phase} = props;
+	const {newData, helpers, dataError} = useDetailsUI<NodeTag>({
+		baseData,
+		onChange,
+		phase
+	});
+	const {Change, creating, enabled} = helpers;
+	const compClass = GetTagCompClassByTag(newData);
+
+	const splitAt = 70;
+	const sharedProps: TagDetailsUI_SharedProps = E(props, {newData, dataError}, {compClass, splitAt, Change, enabled});
+	return (
+		<Column style={style}>
+			{!creating &&
+				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
+			<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
+				<Pre>Type: </Pre>
+				<Select options={TagComp_classes.filter(a=>a.key != "labels").map(a=>({name: a.displayName, value: a}))}
+					enabled={enabled} style={ES({flex: 1})}
+					value={compClass}
+					onChange={(newCompClass: TagComp_Class)=>{
+						delete newData[compClass.key];
+						newData[newCompClass.key] = new newCompClass();
+						Change();
+					}}/>
+				<InfoButton ml={5} text={compClass.description}/>
+			</RowLR>
+			{compClass == TagComp_MirrorChildrenFromXToY &&
+				<TagCompUI_MirrorChildrenFromXToY {...sharedProps}/>}
+			{compClass == TagComp_XIsExtendedByY &&
+				<TagCompUI_XIsExtendedByY {...sharedProps}/>}
+			{compClass == TagComp_MutuallyExclusiveGroup &&
+				<TagCompUI_MutuallyExclusiveGroup {...sharedProps}/>}
+			{compClass == TagComp_RestrictMirroringOfX &&
+				<TagCompUI_RestrictMirroringOfX {...sharedProps}/>}
+			{compClass == TagComp_CloneHistory &&
+				<TagCompUI_CloneHistory {...sharedProps}/>}
+		</Column>
+	);
 }
 
 export const TagCompUI_MirrorChildrenFromXToY = (props: TagDetailsUI_SharedProps)=>{
