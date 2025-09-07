@@ -24,7 +24,7 @@ type NodeMathUI_Props = {
 	onTermClick: (termID: string)=>void, termsToSearchFor: Term[]
 }
 
-export const NodeMathUIF = (props: NodeMathUI_Props)=>{
+export const NodeMathUI = (props: NodeMathUI_Props)=>{
 	let {text, onTermHover, onTermClick, termsToSearchFor} = props;
 	const wrapperRef = useRef<HTMLSpanElement>(null);
 	text = PreProcessLatex(text);
