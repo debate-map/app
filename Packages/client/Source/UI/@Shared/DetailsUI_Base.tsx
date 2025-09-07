@@ -1,6 +1,5 @@
 import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "js-vextensions";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {BaseComponent, GetDOM} from "react-vextensions";
 
 export type DetailsUI_Phase = "create" | "edit" | "view";
 export type DetailsUIBaseProps<T, ExtraProps> = {
