@@ -83,7 +83,7 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapper_Props)=>{
 	graph_forLayoutHelper.containerPadding = containerPadding;
 
 	const mapView = GetMapView(mapID);
-	const rootNode = useMemo(()=>{
+	const rootNode = (()=>{
 		let result: NodeL3 | null | undefined = rootNode_passed;
 		if (result == null && map && map.rootNode) {
 		    result = GetNodeL3(`${map.rootNode}`);
@@ -93,7 +93,7 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapper_Props)=>{
 		    if (nodeID) result = GetNodeL3(`${nodeID}`);
 		}
 		return result ?? null;
-	}, [rootNode_passed, map, mapView]);
+	})();
 
 	if (mapView == null) return <MapUIWaitMessage message="Initializing map view..." />;
 	if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
