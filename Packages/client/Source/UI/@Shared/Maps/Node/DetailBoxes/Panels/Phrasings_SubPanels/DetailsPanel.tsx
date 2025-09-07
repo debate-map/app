@@ -1,6 +1,6 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
-import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
+import {PhrasingDetailsUIElem, PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates} from "web-vcore";
 import {E} from "js-vextensions";
 import {NodePhrasing, MeID, DMap, NodeL3, PERMISSIONS} from "dm_common";
@@ -17,7 +17,7 @@ type DetailsPanel_Phrasings_Props = {
 export const DetailsPanel_Phrasings = observer_mgl((props: DetailsPanel_Phrasings_Props)=>{
 	const {map, node, phrasing} = props;
 
-	const detailsUIRef = useRef<PhrasingDetailsUI>(null);
+	const detailsUIRef = useRef<PhrasingDetailsUIElem>(null);
 	const [dataError, setDataError] = useState<string|n>(null);
 	const creatorOrMod = PERMISSIONS.NodePhrasing.Access(MeID(), phrasing);
 
@@ -32,7 +32,7 @@ export const DetailsPanel_Phrasings = observer_mgl((props: DetailsPanel_Phrasing
 			{creatorOrMod &&
 				<Row mt={5}>
 					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-						const phrasingUpdates = GetUpdates(phrasing, detailsUIRef.current!.GetNewData());
+						const phrasingUpdates = GetUpdates(phrasing, detailsUIRef.current!.getNewData());
 						if (phrasingUpdates.VKeys().length) {
 							await RunCommand_UpdateNodePhrasing(E({id: phrasing.id, updates: phrasingUpdates}));
 						}
@@ -52,7 +52,6 @@ export const DetailsPanel_Phrasings = observer_mgl((props: DetailsPanel_Phrasing
 								}
 							`.AsMultiline(0),
 							onOK: async()=>{
-								//await new DeletePhrasing({id: phrasing.id}).RunOnServer();
 								await RunCommand_DeleteNodePhrasing({id: phrasing.id});
 							},
 						});

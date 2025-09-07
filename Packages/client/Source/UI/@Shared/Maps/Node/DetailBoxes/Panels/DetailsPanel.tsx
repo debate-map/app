@@ -34,7 +34,6 @@ type DetailsPanel_State = {
 
 export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 	const {show, map, node, path} = props;
-
 	const [state, setState] = useState<DetailsPanel_State>({
 		dataError: null,
 		saveState: "idle",
@@ -45,7 +44,6 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 	const link = GetLinkUnderParent(node.id, parentNode);
 
 	if (path.includes("/") && parentNode == null) return null;
-
 	const canEdit = PERMISSIONS.Node.Modify(MeID(), node);
 
 	return (
