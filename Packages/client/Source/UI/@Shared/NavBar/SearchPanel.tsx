@@ -2,9 +2,8 @@ import {SleepAsync, Vector2, WaitXThenRun, E, ea} from "js-vextensions";
 import keycode from "keycode";
 import moment from "moment";
 import {Button, Column, Div, Pre, Row, TextInput} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, ES, RunInAction, chroma_maxDarken} from "web-vcore";
+import {InfoButton, LogWarning, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
@@ -17,7 +16,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {currentMapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
 import {observer_mgl} from "mobx-graphlink";
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 const columnWidths = [0.68, 0.2, 0.12];
 
@@ -202,123 +201,119 @@ export const MapPathResult = observer_mgl((props: {path: string})=>{
 	);
 });
 
-@Observer
-export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, index: number}, {}) {
-	/* ComponentWillReceiveProps(props) {
-		const { nodeID, rootNodeID, findNode_state, findNode_node } = props;
-		if (findNode_node === nodeID) {
-			if (findNode_state === 'activating') {
-				store.dispatch(new ACTSet(a => a.main.search.findNode_state, 'active'));
-				this.StartFindingPathsFromXToY(rootNodeID, nodeID);
-			}
-		}
-	} */
-	StopSearch() {
+type SearchResultRow_Props = {
+	nodeID: string,
+	index: number
+};
+
+export const SearchResultRow = observer_mgl((props: SearchResultRow_Props)=>{
+	const {nodeID, index} = props;
+
+	const searchInProgressRef = useRef(false);
+	const isMounted = useRef(false);
+	const node = GetNodeL2(nodeID);
+	const creator = node ? GetUser(node.creator) : null;
+
+	const {findNode_state} = store.main.search;
+	const {findNode_node} = store.main.search;
+
+	const stopSearch = ()=>{
 		RunInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
 	}
 
-	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
-	// searchInProgress = false;
-	static searchInProgress = false;
-	render() {
-		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {nodeID, index} = this.props;
-		const node = GetNodeL2(nodeID);
-		const creator = node ? GetUser(node.creator) : null;
-
-		const {findNode_state} = store.main.search;
-		const {findNode_node} = store.main.search;
-		if (findNode_state === "activating" && findNode_node == nodeID && !SearchResultRow.searchInProgress) {
-			SearchResultRow.searchInProgress = true;
-			WaitXThenRun(0, ()=>{
-				RunInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
-				FindPathsFromMapRootsToX(nodeID, async(upPathAttempts, upPathCompletions, depth)=>{
-					RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
-						store.main.search.findNode_resultPaths = upPathCompletions.slice();
-						// "depth" is the layer-distance between X/origin-node and the last node whose parents have been acquired; so add 1 (since those parents are already integrated)
-						store.main.search.findNode_currentSearchDepth = depth + 1;
-					});
-
-					await SleepAsync(100);
-
-					// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
-					if (upPathAttempts.length == 0 || this.mounted === false) return {breakIteration: true};
-					// if search is marked as "starting to stop", actually stop search here by breaking the loop
-					if (store.main.search.findNode_state === "inactive") return {breakIteration: true};
-					return {breakIteration: false};
-				}).then(()=>{
-					this.StopSearch();
-					SearchResultRow.searchInProgress = false;
-				});
-			});
+	useEffect(()=>{
+		isMounted.current = true;
+		return ()=>{
+			isMounted.current = false;
 		}
-		const {findNode_resultPaths} = store.main.search;
-		const {findNode_currentSearchDepth} = store.main.search;
+	}, []);
 
-		// if (node == null) return <Row>Loading... (#{nodeID})</Row>;
-		if (node == null) return <Row></Row>;
+	if (findNode_state === "activating" && findNode_node == nodeID && !searchInProgressRef.current) {
+		searchInProgressRef.current = true;
+		WaitXThenRun(0, ()=>{
+			RunInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
+			FindPathsFromMapRootsToX(nodeID, async(upPathAttempts, upPathCompletions, depth)=>{
+				RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
+					store.main.search.findNode_resultPaths = upPathCompletions.slice();
+					// "depth" is the layer-distance between X/origin-node and the last node whose parents have been acquired; so add 1 (since those parents are already integrated)
+					store.main.search.findNode_currentSearchDepth = depth + 1;
+				});
 
-		const nodeL3 = AsNodeL3(node, null);
-		const path = `${node.id}`;
+				await SleepAsync(100);
 
-		const backgroundColor = GetNodeColor(nodeL3)/*.desaturate(0.5)*/.alpha(0.8);
-		const nodeTypeInfo = NodeType_Info.for[node.type];
-
-		return (
-			<Column style={{
-				display: "flex", flexDirection: "column", gap: 4,
-			}}>
-				<Row mt={index === 0 ? 0 : 5} className="useLightText cursorSet"
-					style={E(
-						{
-							padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-							color: liveSkin.NodeTextColor(),
-						},
-						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
-					)}
-					onMouseDown={e=>{
-						if (e.button !== 2) return false;
-						this.SetState({menuOpened: true});
-					}}>
-					<span style={{flex: columnWidths[0]}}>{GetNodeDisplayText(node, path)}</span>
-					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
-					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
-					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}}/>
-				</Row>
-				{findNode_node === nodeID &&
-					<Row style={{
-						justifyContent: "space-between",
-					}}>
-						<Div style={
-							{display: "flex", flexDirection: "row", alignItems: "center"}
-						}>
-							{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
-							{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
-						</Div>
-						<Div style={
-							{display: "flex", flexDirection: "row", alignItems: "center"}
-						}>
-							<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
-							<Button ml={5} text="Close" onClick={()=>{
-								RunInAction("SearchResultRow.Close", ()=>{
-									store.main.search.findNode_state = "inactive";
-									store.main.search.findNode_node = null;
-									store.main.search.findNode_resultPaths = [];
-									store.main.search.findNode_currentSearchDepth = 0;
-								});
-							}}/>
-						</Div>
-					</Row>}
-				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
-					return (
-						<MapPathResult key={resultPath} path={resultPath}/>
-					);
-				})}
-			</Column>
-		);
+				// if we have no more up-path-attempts to follow, or comp gets unmounted, start stopping search
+				if (upPathAttempts.length == 0 || !isMounted.current) return {breakIteration: true};
+				// if search is marked as "starting to stop", actually stop search here by breaking the loop
+				if (store.main.search.findNode_state === "inactive") return {breakIteration: true};
+				return {breakIteration: false};
+			}).then(()=>{
+				stopSearch();
+				searchInProgressRef.current = false;
+			});
+		});
 	}
-}
+	const {findNode_resultPaths} = store.main.search;
+	const {findNode_currentSearchDepth} = store.main.search;
+
+	if (node == null) return <Row></Row>;
+
+	const nodeL3 = AsNodeL3(node, null);
+	const path = `${node.id}`;
+
+	const backgroundColor = GetNodeColor(nodeL3)/*.desaturate(0.5)*/.alpha(0.8);
+	const nodeTypeInfo = NodeType_Info.for[node.type];
+
+	return (
+		<Column style={{
+			display: "flex", flexDirection: "column", gap: 4,
+		}}>
+			<Row mt={index === 0 ? 0 : 5} className="useLightText cursorSet"
+				style={E(
+					{
+						padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
+						color: liveSkin.NodeTextColor(),
+					},
+				)}
+				onMouseDown={e=>{
+					if (e.button !== 2) return false;
+				}}>
+				<span style={{flex: columnWidths[0]}}>{GetNodeDisplayText(node, path)}</span>
+				<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
+				<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
+				<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}}/>
+			</Row>
+			{findNode_node === nodeID &&
+				<Row style={{
+					justifyContent: "space-between",
+				}}>
+					<Div style={
+						{display: "flex", flexDirection: "row", alignItems: "center"}
+					}>
+						{findNode_state === "active" && <Pre>Finding in map... (depth: {findNode_currentSearchDepth})</Pre>}
+						{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
+					</Div>
+					<Div style={
+						{display: "flex", flexDirection: "row", alignItems: "center"}
+					}>
+						<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>stopSearch()}/>
+						<Button ml={5} text="Close" onClick={()=>{
+							RunInAction("SearchResultRow.Close", ()=>{
+								store.main.search.findNode_state = "inactive";
+								store.main.search.findNode_node = null;
+								store.main.search.findNode_resultPaths = [];
+								store.main.search.findNode_currentSearchDepth = 0;
+							});
+						}}/>
+					</Div>
+				</Row>}
+			{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
+				return (
+					<MapPathResult key={resultPath} path={resultPath}/>
+				);
+			})}
+		</Column>
+	);
+})
 
 export const FindPathsFromMapRootsToX = async(targetNodeY: UUID, actionAfterEachDepthIteration: (upPathAttempts: string[], upPathCompletions: string[], depth: number)=>Promise<{breakIteration: boolean}>, searchDepth = 100)=>{
 	const upPathCompletions = [] as string[];
