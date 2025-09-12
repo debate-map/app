@@ -24,7 +24,6 @@ export const MI_ImportSubtree = observer_mgl((props: MI_SharedProps)=>{
 		<>
 			<VMenuItem text="Import subtree" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 				if (e.button != 0) return;
-				let ui: ImportSubtreeUI|n;
 				const controller = ShowMessageBox({
 					title: `Import subtree`,
 					okButton: false, buttonBarStyle: {display: "none"},
@@ -42,7 +41,7 @@ export const MI_ImportSubtree = observer_mgl((props: MI_SharedProps)=>{
 							<style>{`
 								.ReactModal__Content:not(.neverMatch) { background-color: rgba(255,255,255,1) !important; }
 							`}</style>
-							<ImportSubtreeUI ref={c=>{ui = c}} {...sharedProps} {...{controller}}/>
+							<ImportSubtreeUI {...sharedProps} {...{controller}}/>
 						</>;
 					},
 				});
