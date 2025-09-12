@@ -1,5 +1,5 @@
 import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, IsNodeL2, IsNodeL3, NodeL3} from "dm_common";
-import React, {useMemo, useState} from "react";
+import React, {useState} from "react";
 import {store} from "Store/index.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";

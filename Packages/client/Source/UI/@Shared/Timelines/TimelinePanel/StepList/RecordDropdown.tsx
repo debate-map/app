@@ -15,7 +15,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
 import {ShowMessageBox} from "react-vmessagebox";
 import {OPFSDir_GetFileChildren} from "Utils/OPFS/ElectronOPFS.js";
 import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step.js";
-import {StepList} from "../StepList.js";
+import {StepList, getStepListInstance} from "../StepList.js";
 import {observer_mgl} from "mobx-graphlink";
 
 export const RecordDropdown = observer_mgl(()=>{
@@ -135,7 +135,7 @@ export const RecordDropdown = observer_mgl(()=>{
 				return void stopRecording();
 			}
 
-			StepList.instance?.AdjustTargetTimeByFrames(1);
+			getStepListInstance()?.adjustTargetTimeByFrames(1);
 		}
 	}
 
@@ -391,7 +391,7 @@ export const RecordDropdown = observer_mgl(()=>{
 						//if (mapState?.playingTimeline_time == null) return;
 						//if (newTime == -1) return;
 						const newTime = GetFrameNumberAsTimelineTime(val);
-						StepList.instance?.SetTargetTime(newTime, "setPosition");
+						getStepListInstance()?.setTargetTime(newTime, "setPosition");
 					}}/>
 					{uiState.recording_endFrame != -1 &&
 					<Text>/{uiState.recording_endFrame} (forced rerenders: {forcedRerenders})</Text>}
