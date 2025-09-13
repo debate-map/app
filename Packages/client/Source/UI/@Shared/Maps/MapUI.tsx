@@ -1,5 +1,5 @@
-import {GetMap, GetParentNodeL3, GetParentPath, DMap, MapView, NodeL3, NodeType_Info} from "dm_common";
-import React, {useCallback, useState} from "react";
+import {GetMap, DMap, MapView, NodeL3, NodeType_Info} from "dm_common";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
@@ -7,17 +7,33 @@ import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTake
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
-import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
-import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
-import {BaseComponent, FindReact, GetDOM} from "react-vextensions";
+import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, StoreAction} from "web-vcore";
+import {Assert, E, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Store/index.js";
 import {Padding} from "./MapUIWrapper.js";
-import {ExpandableBox} from "./Node/ExpandableBox.js";
-import {NodeBox} from "./Node/NodeBox.js";
 import {NodeUI} from "./Node/NodeUI.js";
-import {navBarHeight} from "../NavBar.js";
+import {observer_mgl} from "mobx-graphlink";
+
+let _currentMapUIHandle: MapUIHandle|n;
+type MapUIHandle = {
+	// if its mounted then it won't be null/undeffined
+	readonly elem: HTMLDivElement|n,
+	scrollToMakeRectVisible: (targetRect: VRect, padding: number, stopLoadingStoredScroll: boolean)=>void,
+	getMapCenter_AsUnzoomed: (zoomLevel: number)=>void,
+	adjustMapScrollToPreserveCenterPoint: (mapCenter: Vector2, zoomLevel: number)=>void,
+	scheduleAfterNextRender : (func: ()=>void)=>void,
+	startLoadingScroll : ()=>void,
+	scrollToPositionCenter: (posInContainer: Vector2)=>void,
+	getNodeBoxClosestToViewCenter: ()=>Element|n,
+}
+
+export const currentMapUI = ():MapUIHandle|n=>{
+	if (!_currentMapUIHandle) return null;
+	if (!_currentMapUIHandle.elem) return null;
+
+	return _currentMapUIHandle;
+}
 
 export function GetViewOffsetForNodeBox(nodeBoxEl: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
@@ -39,12 +55,12 @@ export const ACTUpdateAnchorNodeAndViewOffset = StoreAction((mapID: string)=>{
 	// CreateMapViewIfMissing(mapID);
 	/* let selectedNodePath = GetSelectedNodePath(mapID);
 	let anchorNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter(); */
-	const anchorNodeBox = MapUI.CurrentMapUI?.GetNodeBoxClosestToViewCenter();
+	const anchorNodeBox = currentMapUI()?.getNodeBoxClosestToViewCenter();
 	if (anchorNodeBox == null) return; // can happen if node was just deleted
 
-	const anchorNodePath = anchorNodeBox.props.path;
+	const anchorNodePath = anchorNodeBox.getAttribute("data-nodebox-path");
 	if (anchorNodePath == null) return; // can happen sometimes; not sure what causes
-	const viewOffset = GetViewOffsetForNodeBox(anchorNodeBox.DOM!);
+	const viewOffset = GetViewOffsetForNodeBox(anchorNodeBox);
 
 	ACTSetAnchorNodeAndViewOffset(mapID, anchorNodePath, viewOffset);
 });
@@ -71,320 +87,217 @@ type Props = {
 	// could recalc these here, but might as well get from wrapper (it handles it already, due to checking if needs to show the wait-messages)
 	map: DMap, mapState: MapState, mapView: MapView, rootNode: NodeL3,
 } & HTMLProps<"div">;
-@Observer
-export class MapUI extends BaseComponent<Props, {}> {
-	private static currentMapUI: MapUI|n;
-	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted && MapUI.currentMapUI.scrollView ? MapUI.currentMapUI : null; }
 
-	scrollView: ScrollView|n;
-	mapUIEl: HTMLDivElement|n;
-	downPos: Vector2|n;
-	render() {
-		const {mapID, rootNode: rootNode_passed, withinPage, padding, graphInfo, forLayoutHelper, map, mapState, mapView, rootNode, ...rest} = this.props;
+export const MapUI = observer_mgl((props: Props)=>{
+	const {mapID, rootNode: rootNode_passed, withinPage, graphInfo, forLayoutHelper, map, mapState, mapView, rootNode, ...rest} = props;
 
-		const [containerElResolved, setContainerElResolved] = useState(false);
-		const mapUI_ref = useCallback(c=>{
-			this.mapUIEl = c;
-			graphInfo.containerEl = c;
-			if (graphInfo.containerEl != null) setContainerElResolved(true);
-		}, [graphInfo]);
+	const [containerElResolved, setContainerElResolved] = useState(false);
+	const mountedRef = useRef(false);
+	const scrollViewRef = useRef<ScrollView>(null);
+	const mapUIElRef = useRef<HTMLDivElement>(null);
+	const downPosRef = useRef<Vector2>(null);
+	const lastScrolledToPathRef = useRef<string>("");
+	const funcsToRunAfterNextRenderRef = useRef<(() => void)[]>([]);
+	const mapUIHandleRef = useRef<MapUIHandle | null>(null);
 
-		const zoomLevel = mapState && mapState.zoomLevel != 1 ? mapState.zoomLevel : 1;
-		//graphInfo.contentScaling = zoomLevel;
-		//graphInfo.SetContentScaling(zoomLevel);
-		return (
-			<ScrollView {...rest} ref={c=>this.scrollView = c}
-				backgroundDrag={!mapState.subscriptionPaintMode} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
-				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
-				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-				contentOuterStyle={E(
-					// optimization for smoother scrolling [2024-02-28: confirmed to help]
-					// (note: keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization)
-					{willChange: "transform"}, // todo: maybe change to {willChange: "scroll-position"}
-					withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
-					withinPage && inFirefox && {overflow: "hidden"},
-				)}
-				onScrollEnd={pos=>{
-					ACTUpdateAnchorNodeAndViewOffset(map.id);
-				}}
-			>
-				<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
-				<style>{`
-				.MapUI {
-					display: inline-flex;
-					/*flex-wrap: wrap;*/
-				}
-				.MapUI.scrolling > * { pointer-events: none; }
-				`}</style>
-				<div className={`MapUI ${mapState.subscriptionPaintMode ? "PaintingCursor" : ""}`}
-					ref={mapUI_ref}
-					style={ES(
-						{
-							//position: "relative",
-							position: "absolute", left: 0, top: 0,
-							width: (1 / zoomLevel).ToPercentStr(), height: (1 / zoomLevel).ToPercentStr(),
-							/* display: "flex", */ whiteSpace: "nowrap",
-							//padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
-							alignItems: "center",
-							filter: GetMapUICSSFilter(),
-						},
-						//mapState.zoomLevel != 1 && {zoom: mapState.zoomLevel.ToPercentStr()},
-						mapState.zoomLevel != 1 && {
-							transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
-							transformOrigin: "0% 0%",
-						},
-					)}
-					onMouseDown={e=>{
-						this.downPos = new Vector2(e.clientX, e.clientY);
-						if (e.button == 2) { this.mapUIEl!.classList.add("scrolling"); }
-					}}
-					onMouseUp={e=>{
-						this.mapUIEl!.classList.remove("scrolling");
-					}}
-					onClick={e=>{
-						if (e.target != this.mapUIEl) return;
-						if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
-						if (GetSelectedNodePath(map.id)) {
-							ACTNodeSelect(map.id, null);
-							//UpdateAnchorNodeAndViewOffset(map._id);
-						}
-					}}
-					onContextMenu={e=>{
-						if (e.nativeEvent["handled"]) return true;
-						// block regular right-click actions on map background (so it doesn't conflict with custom right-click contents)
-						if (ShowHeader) {
-							e.preventDefault();
-						} else {
-							// if not in iframe, only block it if right-click was over a node-ui (one reason being that, in iframe, the native right-click menu is needed to press "Back")
-							const rightClickedOverNode = (e.nativeEvent.target as HTMLElement).closest(".NodeUI") != null;
-							if (rightClickedOverNode) {
-								e.preventDefault();
-							}
-						}
-					}}
-				>
-					{containerElResolved &&
-					<GraphContext.Provider value={graphInfo}>
-						{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
-						<ConnectorLinesUI/>
-						{/*playingTimeline != null && <TimelineIntroBox timeline={playingTimeline}/>*/}
-						<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"
-							standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth} forLayoutHelper={forLayoutHelper ?? false}/>
-						{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
-						{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
-							this.LoadScroll();
-						}}/>*/}
-						{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
-						<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
-							<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
-						</VMenuStub>}
-					</GraphContext.Provider>}
-				</div>
-			</ScrollView>
-		);
-	}
+	const getMap = useCallback(()=>{
+		return GetMap.CatchBail(null, mapID);
+	}, [mapID]);
 
-	get Map() {
-		return GetMap.CatchBail(null, this.props.mapID);
-	}
+	const loadAnchorNodeTimer = useRef(new Timer(100, ()=>{
+		if (!mountedRef.current) return loadAnchorNodeTimer.current.Stop();
 
-	async ComponentDidMount() {
-		const {forLayoutHelper} = this.props;
-		// don't set this map-ui as the "current/main one", if it's the "layout helper" map (ie. the hidden, secondary map used just for helping with layout calculations) 
-		if (!forLayoutHelper) {
-			MapUI.currentMapUI = this;
-		}
-
-		NodeUI.renderCount = 0;
-		/*NodeUI.lastRenderTime = Date.now();
-		let lastRenderCount = 0;*/
-
-		for (let i = 0; i < 30 && this.Map == null; i++) await SleepAsync(100);
-		if (this.Map == null) return;
-
-		this.StartLoadingScroll();
-	}
-	ComponentWillUnmount() {
-		if (MapUI.currentMapUI == this) {
-			MapUI.currentMapUI = null;
-		}
-	}
-
-	lastScrolledToPath: string;
-	loadAnchorNodeTimer = new Timer(100, ()=>{
-		if (!this.mounted) return this.loadAnchorNodeTimer.Stop();
-
-		const map = this.Map;
-		if (map == null) return this.loadAnchorNodeTimer.Stop();
-		const anchorNodePath = GetAnchorNodePath(map.id);
-		if (anchorNodePath == null) return this.loadAnchorNodeTimer.Stop();
+		const m = getMap();
+		if (!m) return loadAnchorNodeTimer.current.Stop();
+		const anchorNodePath = GetAnchorNodePath(m.id);
+		if (!anchorNodePath) return loadAnchorNodeTimer.current.Stop();
 
 		// if more nodes have been rendered, along the path to the focus-node
-		const foundBox = this.FindNodeBox(anchorNodePath, true);
-		const foundPath = foundBox ? foundBox.props.path : "";
-		if (foundPath.length > this.lastScrolledToPath.length) {
-			if (this.LoadStoredScroll()) {
-				this.lastScrolledToPath = foundPath;
+		const foundBox = findNodeBox(anchorNodePath, true);
+		const foundPath = foundBox?.getAttribute("data-nodebox-path") ?? "";
+		if (foundPath.length > lastScrolledToPathRef.current.length) {
+			if (loadStoredScroll()) {
+				lastScrolledToPathRef.current = foundPath;
 			}
 		}
 
-		// if (foundPath == anchorNodePath && this.scrollView) {
-		if (this.lastScrolledToPath == anchorNodePath && this.scrollView) {
-			this.OnLoadComplete();
-			return this.loadAnchorNodeTimer.Stop();
+		if (lastScrolledToPathRef.current == anchorNodePath && scrollViewRef.current) {
+			onLoadComplete();
+			return loadAnchorNodeTimer.current.Stop();
 		}
+	}));
+
+	const zoomLevel = mapState && mapState.zoomLevel != 1 ? mapState.zoomLevel : 1;
+
+	useEffect(()=>{
+		mountedRef.current = true;
+
+		// don't set this map-ui as the "current/main one", if it's the "layout helper" map (ie. the hidden, secondary map used just for helping with layout calculations)
+		if (!forLayoutHelper) {
+			mapUIHandleRef.current = {
+				get elem() {
+					return scrollViewRef.current?.ContentOuterDOM;
+				},
+				scrollToMakeRectVisible,
+				getMapCenter_AsUnzoomed,
+				adjustMapScrollToPreserveCenterPoint,
+				scheduleAfterNextRender,
+				startLoadingScroll,
+				scrollToPositionCenter,
+				getNodeBoxClosestToViewCenter
+			};
+			_currentMapUIHandle = mapUIHandleRef.current;
+		}
+
+		(async()=>{
+		    for (let i = 0; i < 30 && getMap() == null; i++) {
+		      await SleepAsync(100);
+		    }
+			if (getMap() == null) return;
+			startLoadingScroll();
+		})();
+
+		return ()=>{
+			mountedRef.current = false;
+			if (_currentMapUIHandle === mapUIHandleRef.current) {
+				_currentMapUIHandle = null;
+			}
+		}
+	},[]) // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(()=>{
+		const m = getMap();
+		if (m) {
+			SetMapVisitTimeForThisSession(m.id, Date.now());
+		}
+
+		funcsToRunAfterNextRenderRef.current.forEach(a=>a());
+		funcsToRunAfterNextRenderRef.current.length = 0;
 	});
-	StartLoadingScroll() {
-		/* let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
-		if (!playingTimeline) { */ // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
-		this.lastScrolledToPath = "";
-		this.loadAnchorNodeTimer.Start();
-	}
-	OnLoadComplete() {
-		console.log(`
-			NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / document.querySelectorAll(".NodeUI").length} per visible node)
-			TimeSincePageLoad: ${Date.now() - performance.timing.domComplete}ms
-		`.AsMultiline(0));
-		this.LoadStoredScroll();
+
+	const startLoadingScroll = ()=>{
+		lastScrolledToPathRef.current = "";
+		loadAnchorNodeTimer.current.Start();
 	}
 
-	// funcs to keep view-center while zooming
-	GetMapCenter_AsUnzoomed(zoomLevel: number) {
-		const scrollContainer = this.mapUIEl?.parentElement?.parentElement;
-		if (this.mapUIEl == null || scrollContainer == null) return null;
+	const onLoadComplete = ()=>{
+		// NOTE: there was some debug logging, but was removed due to moving to functional component
+		// (coz they werent' supported in functional component) maybe we need it back?
+		loadStoredScroll()
+	}
+
+	// to keep view-center while zooming
+	const getMapCenter_AsUnzoomed = (zoomLvl: number)=>{
+		const scrollContainer = mapUIElRef.current?.parentElement?.parentElement;
+		if (mapUIElRef.current == null || scrollContainer == null) return null;
 		const scrollContainerRect = GetViewportRect(scrollContainer);
-		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLevel);
+		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLvl);
 		const mapCenter = new Vector2(
-			(scrollContainer.scrollLeft / zoomLevel) + (scrollContainerSize_unzoomed.x / 2),
-			(scrollContainer.scrollTop / zoomLevel) + (scrollContainerSize_unzoomed.y / 2),
+			(scrollContainer.scrollLeft / zoomLvl) + (scrollContainerSize_unzoomed.x / 2),
+			(scrollContainer.scrollTop / zoomLvl) + (scrollContainerSize_unzoomed.y / 2),
 		);
 		return mapCenter;
-	}
-	AdjustMapScrollToPreserveCenterPoint(mapCenter: Vector2, zoomLevel: number) {
-		const scrollContainer = this.mapUIEl?.parentElement?.parentElement;
-		if (this.mapUIEl == null || scrollContainer == null) return;
+	};
+
+	const adjustMapScrollToPreserveCenterPoint = (mapCenter: Vector2, zoomLvl: number)=>{
+		const scrollContainer = mapUIElRef.current?.parentElement?.parentElement;
+		if (mapUIElRef.current == null || scrollContainer == null) return;
 		const scrollContainerRect = GetViewportRect(scrollContainer);
-		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLevel);
-		this.SetScroll_IfChanged(new Vector2(
-			(mapCenter.x - (scrollContainerSize_unzoomed.x / 2)) * zoomLevel,
-			(mapCenter.y - (scrollContainerSize_unzoomed.y / 2)) * zoomLevel,
+		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLvl);
+		setScrollIfChanged(new Vector2(
+			(mapCenter.x - (scrollContainerSize_unzoomed.x / 2)) * zoomLvl,
+			(mapCenter.y - (scrollContainerSize_unzoomed.y / 2)) * zoomLvl,
 		));
+	};
+
+	const scheduleAfterNextRender = (func: ()=>void)=>{
+		funcsToRunAfterNextRenderRef.current.push(func);
 	}
 
-	funcsToRunAfterNextRender = [] as (()=>void)[];
-	ScheduleAfterNextRender(func: ()=>void) {
-		this.funcsToRunAfterNextRender.push(func);
-	}
-	PostRender() {
-		const {withinPage} = this.props;
-		const map = this.Map;
-		/*if (withinPage && this.scrollView) {
-			this.scrollView.vScrollableDOM = $('#HomeScrollView').children('.content')[0];
-		}*/
-		if (map) {
-			SetMapVisitTimeForThisSession(map.id, Date.now());
-		}
-		this.funcsToRunAfterNextRender.forEach(a=>a());
-		this.funcsToRunAfterNextRender.length = 0;
-	}
+	const loadStoredScroll = ()=>{
+		const m = getMap();
+		if (!m || !scrollViewRef.current) return false;
 
-	// load scroll from store
-	LoadStoredScroll() {
-		const map = this.Map;
-		if (map == null) return false;
-		if (this.scrollView == null) return false;
 		// if user is already scrolling manually, don't interrupt (but count as successful scroll)
-		if (this.scrollView.state.scrollOp_bar) return true;
-		// if (this.scrollView.state.scrollOp_bar) return false;
+		if (scrollViewRef.current.state.scrollOp_bar) return true;
 
-		const anchorNode_target = GetAnchorNodePath(GetMapView(map.id)); // || map.rootNode.toString();
+		const anchorNode_target = GetAnchorNodePath(GetMapView(m.id));
 		if (anchorNode_target == null) return false;
-		// Log(`AnchorNode_target:${anchorNode_target}`);
-		return this.ScrollToNode(anchorNode_target);
-	}
 
-	GetNodeBoxes(filterOutInvisible = true) {
-		if (this.mapUIEl == null) return [];
+		return scrollToNode(anchorNode_target);
+	};
+
+	const getNodeBoxes = (filterOutInvisible = true)=>{
+		if (mapUIElRef.current == null) return [];
 		const selector = filterOutInvisible
 			//? `.NodeUI:not(.opacity0) > .NodeBox` // this doesn't work, since the opacity:0 is being set by the tree-grapher lib
 			? `.NodeUI:not([style*="opacity: 0"]) > .NodeBox`
 			: `.NodeBox`;
-		const nodeBoxes = Array.from(this.mapUIEl.querySelectorAll(selector)).map(nodeUI_boxEl=>{
-			const boxEl = FindReact(nodeUI_boxEl) as ExpandableBox;
-			const result = boxEl.props.parent as NodeBox;
-			Assert(result instanceof NodeBox);
-			return result;
-		});
-		return nodeBoxes;
-	}
-	GetNodeBoxClosestToViewCenter() {
-		const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-		const nodeBoxes = this.GetNodeBoxes();
-		return nodeBoxes.filter(box=>box.DOM != null).Min(box=>GetDistanceBetweenRectAndPoint(GetViewportRect(box.DOM!), viewCenter_onScreen));
-	}
-	FindNodeBox(nodePath: string, ifMissingFindAncestor = false, filterOutInvisible = true) {
-		const nodeBoxes = this.GetNodeBoxes(filterOutInvisible);
 
-		let targetNodeBox: NodeBox|n;
+		return Array.from(mapUIElRef.current.querySelectorAll(selector));
+	};
+
+	const getNodeBoxClosestToViewCenter = ():Element|n=>{
+		const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
+		const nodeBoxes = getNodeBoxes();
+		return nodeBoxes.filter(box=>box != null).Min(box=>GetDistanceBetweenRectAndPoint(GetViewportRect(box), viewCenter_onScreen));
+	};
+
+	const findNodeBox = (nodePath: string, ifMissingFindAncestor = false, filterOutInvisible = true)=>{
+		const nodeBoxes = getNodeBoxes(filterOutInvisible);
+
+		let targetNodeBox: Element|n;
 		let nextPathTry = nodePath;
 		while (targetNodeBox == null) {
-			targetNodeBox = nodeBoxes.FirstOrX(box=>box.props.path == nextPathTry);
+			targetNodeBox = nodeBoxes.FirstOrX(box=>{
+				const path = box.getAttribute("data-nodebox-path")!;
+				return path == nextPathTry;
+			});
 			// if finding ancestors is disabled, or there are no ancestors left, stop up-search
 			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;
 			nextPathTry = nextPathTry.slice(0, nextPathTry.lastIndexOf("/"));
 		}
-		// if (targetNodeUI == null) Log(`Failed to find node-box for: ${nodePath}`);
 		return targetNodeBox;
-	}
-	ScrollToNode(nodePath: string) {
-		const map = this.Map;
-		if (map == null) return;
+	};
 
-		const viewOffset_target = GetViewOffset(GetMapView(map.id)); // || new Vector2(200, 0);
-		// Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);
+	const scrollToNode = (nodePath: string)=>{
+		const m = getMap();
+		if (m == null) return;
+
+		const viewOffset_target = GetViewOffset(GetMapView(m.id));
 		if (nodePath == null || viewOffset_target == null) return true; // if invalid entry, count as success?
 
-		const anchorNodeBox = this.FindNodeBox(nodePath, true);
+		const anchorNodeBox = findNodeBox(nodePath, true);
 		if (anchorNodeBox == null) return false;
-		const anchorNodeBoxCenter = GetViewportRect(NN(GetDOM(anchorNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
-		this.ScrollToPosition_Center(anchorNodeBoxCenter.Plus(viewOffset_target));
+		const anchorNodeBoxCenter = GetViewportRect(NN(anchorNodeBox)).Center.Minus(GetViewportRect(NN(mapUIElRef.current)).Position);
+		scrollToPositionCenter(anchorNodeBoxCenter.Plus(viewOffset_target));
 		return true;
-	}
-	ScrollToPosition_Center(posInContainer: Vector2) {
-		const {withinPage} = this.props;
-		if (this.scrollView == null) return;
+	};
 
-		//const scrollContainerViewportSize = new Vector2(this.scrollView.vScrollableDOM.getBoundingClientRect().width, this.scrollView.vScrollableDOM.getBoundingClientRect().height);
-		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).Size;
-		//const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
-		//const topBarsHeight = navBarHeight + 30; // todo: replace with subNavBarHeight const from web-vcore (once updated)
+	const scrollToPositionCenter = (posInContainer: Vector2)=>{
+		if (!scrollViewRef.current) return;
 
-		const oldScroll = this.scrollView.GetScroll();
+		const scrollContainerViewportSize = GetViewportRect(scrollViewRef.current.ContentOuterDOM).Size;
+		const oldScroll = scrollViewRef.current.GetScroll();
 		const newScroll = new Vector2(
 			posInContainer.x - (scrollContainerViewportSize.x / 2),
 			posInContainer.y - (scrollContainerViewportSize.y / 2),
-
-			// scroll down a bit extra, such that node is center of window, not center of scroll-view container/viewport (I've tried both, and this way is more centered "perceptually")
-			// commented; this offset looks bad in recordings of just the map-view, so just disable the offset always (for consistency)
-			//(posInContainer.y - (scrollContainerViewportSize.y / 2)) + (topBarsHeight / 2),
 		);
+
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
-		this.SetScroll_IfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@center:", posInContainer.toString()));
-		// Log("Scrolling to position: " + newScroll);
 
-		/* if (nextPathTry == nodePath)
-			this.hasLoadedScroll = true; */
-	}
+		setScrollIfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@center:", posInContainer.toString()));
+	};
 
-	ScrollToMakeRectVisible(targetRect: VRect, padding = 0, stopLoadingStoredScroll = true) {
+	const scrollToMakeRectVisible = (targetRect: VRect, padding = 0, stopLoadingStoredScroll = true)=>{
 		if (padding != 0) targetRect = targetRect.Grow(padding);
-		if (this.scrollView == null || this.mapUIEl == null) return;
+		if (!scrollViewRef.current|| !mapUIElRef.current) return;
 
-		const mapUIBackgroundRect = GetViewportRect(this.mapUIEl);
-		const oldScroll = this.scrollView.GetScroll();
-		const viewportRect = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
+		const mapUIBackgroundRect = GetViewportRect(mapUIElRef.current);
+		const oldScroll = scrollViewRef.current.GetScroll();
+		const viewportRect = GetViewportRect(scrollViewRef.current.ContentOuterDOM).NewPosition(a=>a.Minus(mapUIBackgroundRect));
 
 		const newViewportRect = viewportRect.Clone();
 		if (targetRect.Left < newViewportRect.Left) newViewportRect.x = targetRect.x; // if target-rect extends further left, reposition left
@@ -394,34 +307,131 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const scrollNeededToEnactNewViewportRect = newViewportRect.Position.Minus(viewportRect.Position);
 		const newScroll = new Vector2(oldScroll).Plus(scrollNeededToEnactNewViewportRect);
-		this.SetScroll_IfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@TargetRect", targetRect.toString()));
+		setScrollIfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@TargetRect", targetRect.toString()));
 
 		// the loadAnchorNodeTimer keeps running until it scrolls to the stored "anchor node"
 		// if timeline is playing, anchor-node is concealed, so timer keeps running
 		// this conflicts with the timeline's scrolling, so cancel the load-stored-anchor-node timer
-		if (stopLoadingStoredScroll) this.loadAnchorNodeTimer.Stop();
-	}
+		if (stopLoadingStoredScroll) loadAnchorNodeTimer.current.Stop();
+	};
 
-	SetScroll_IfChanged(newScroll: Vector2, logFunc?: ()=>any) {
-		if (this.scrollView == null) return;
-		if (newScroll.Equals(this.scrollView.GetScroll())) return;
+	const setScrollIfChanged = (newScroll: Vector2, logFunc?: ()=>any)=>{
+		if (!scrollViewRef.current) return;
+		if (newScroll.Equals(scrollViewRef.current.GetScroll())) return;
 
-		// when scroll-pos is actually applied to element, the browser (Chrome v120 anyway) floors the values, so we need to use the floored values for comparing
-		//if (newScroll.NewX(x=>Math.floor(x)).NewY(y=>Math.floor(y)).Equals(this.scrollView.GetScroll())) return;
-		const existingScroll = this.scrollView.GetScroll();
+		const existingScroll = scrollViewRef.current.GetScroll();
 		if (newScroll.x.Distance(existingScroll.x) < 1 && newScroll.y.Distance(existingScroll.y) < 1) return;
 
 		logFunc?.();
-		this.scrollView.SetScroll(newScroll);
-	}
-}
+		scrollViewRef.current.SetScroll(newScroll);
+	};
+
+	const handleMapUIRef = useCallback((c: HTMLDivElement)=>{
+		mapUIElRef.current = c;
+		graphInfo.containerEl = c;
+		if (graphInfo.containerEl != null) setContainerElResolved(true);
+	}, [graphInfo]);
+
+	console.log("MapUI render");
+
+	return (
+		<ScrollView {...rest}
+			ref={v=>scrollViewRef.current = v}
+			backgroundDrag={!mapState.subscriptionPaintMode}
+			backgroundDragMatchFunc={a=>a == scrollViewRef.current?.ContentOuterDOM || a == scrollViewRef.current?.ContentOuterDOM || a == mapUIElRef.current}
+			style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
+			scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+			contentOuterStyle={E(
+				// optimization for smoother scrolling [2024-02-28: confirmed to help]
+				// (note: keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization)
+				{willChange: "transform"}, // todo: maybe change to {willChange: "scroll-position"}
+				withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
+				withinPage && inFirefox && {overflow: "hidden"},
+			)}
+			onScrollEnd={()=>{
+				ACTUpdateAnchorNodeAndViewOffset(map.id);
+			}}
+		>
+			<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
+			<style>{`
+			.MapUI {
+				display: inline-flex;
+				/*flex-wrap: wrap;*/
+			}
+			.MapUI.scrolling > * { pointer-events: none; }
+			`}</style>
+			{
+			<div className={`MapUI ${mapState.subscriptionPaintMode ? "PaintingCursor" : ""}`}
+				ref={handleMapUIRef}
+				style={ES(
+					{
+						position: "absolute", left: 0, top: 0,
+						width: (1 / zoomLevel).ToPercentStr(), height: (1 / zoomLevel).ToPercentStr(),
+						whiteSpace: "nowrap", alignItems: "center", filter: GetMapUICSSFilter(),
+					},
+					mapState.zoomLevel != 1 && {
+						transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
+						transformOrigin: "0% 0%",
+					},
+				)}
+				onMouseDown={e=>{
+					downPosRef.current = new Vector2(e.clientX, e.clientY);
+					if (e.button == 2) { mapUIElRef.current!.classList.add("scrolling"); }
+				}}
+				onMouseUp={()=>{
+					mapUIElRef.current!.classList.remove("scrolling");
+				}}
+				onClick={e=>{
+					if (e.target != mapUIElRef.current) return;
+					if (downPosRef.current && new Vector2(e.clientX, e.clientY).DistanceTo(downPosRef.current) >= 3) return;
+					if (GetSelectedNodePath(map.id)) {
+						ACTNodeSelect(map.id, null);
+					}
+				}}
+				onContextMenu={e=>{
+					if (e.nativeEvent["handled"]) return true;
+					// block regular right-click actions on map background (so it doesn't conflict with custom right-click contents)
+					if (ShowHeader) {
+						e.preventDefault();
+					} else {
+						// if not in iframe, only block it if right-click was over a node-ui (one reason being that, in iframe, the native right-click menu is needed to press "Back")
+						const rightClickedOverNode = (e.nativeEvent.target as HTMLElement).closest(".NodeUI") != null;
+						if (rightClickedOverNode) {
+							e.preventDefault();
+						}
+					}
+				}}
+			>
+				{containerElResolved &&
+				<GraphContext.Provider value={graphInfo}>
+					{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
+					<ConnectorLinesUI/>
+					<NodeUI
+							indexInNodeList={0}
+							map={map}
+							node={rootNode}
+							path={(Assert(rootNode.id != null), rootNode.id.toString())}
+							treePath="0"
+							standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth}
+							forLayoutHelper={forLayoutHelper ?? false}
+						/>
+					{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
+					<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
+						<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
+					</VMenuStub>}
+				</GraphContext.Provider>}
+			</div>
+			}
+		</ScrollView>
+	);
+});
 
 window.addEventListener("beforeunload", ()=>{
 	const mapID = GetOpenMapID();
 	SetMapVisitTimeForThisSession(mapID, Date.now());
 });
 
-function SetMapVisitTimeForThisSession(mapID: string|n, time: number) {
+const SetMapVisitTimeForThisSession = (mapID: string|n, _time: number)=>{
 	if (mapID == null) return;
 	const lastMapViewTimes = FromJSON(localStorage.getItem(`lastMapViewTimes_${mapID}`) || `[${Date.now()}]`) as number[];
 
@@ -436,4 +446,4 @@ function SetMapVisitTimeForThisSession(mapID: string|n, time: number) {
 	localStorage.setItem(`lastMapViewTimes_${mapID}`, ToJSON(lastMapViewTimes));
 	mapsViewedThisSession[mapID] = true;
 	G({mapsViewedThisSession});
-}
+};
