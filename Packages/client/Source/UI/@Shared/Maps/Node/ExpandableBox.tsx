@@ -1,7 +1,7 @@
 import {Button, Div, Row} from "react-vcomponents";
 import {cssHelper} from "react-vextensions";
 import {Assert} from "js-vextensions";
-import React, {Ref, useMemo, useRef} from "react";
+import React, {HTMLAttributes, Ref, useMemo, useRef} from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, RunInAction_Set} from "web-vcore";
@@ -12,6 +12,7 @@ import {SubscriptionLevel} from "dm_common";
 import {NOTIFICATION_BELL_WIDTH} from "./NodeLayoutConstants.js";
 import {observer_mgl} from "mobx-graphlink";
 
+type DivDataAttrs = { [K in `data-${string}`]?: string | number | boolean | undefined };
 export type ExpandableBox_Props = {
 	className?: string,
 	width: number|string|n,
@@ -21,25 +22,32 @@ export type ExpandableBox_Props = {
 	outlineThickness?: number|n,
 	roundedTopLeftCorner?: boolean,
 	padding: number | string,
-	style?,
-	onClick?,
-	onDirectClick?,
+	style?: any,
+	onClick?: any,
+	onDirectClick?: any,
 	onMouseEnter?: Function,
 	onMouseLeave?: Function,
 	backgroundFillPercent: number,
 	backgroundColor: chroma.Color,
 	markerPercent: number|n,
-	text,
-	onTextHolderClick?,
-	textHolderStyle?,
-	beforeChildren?,
-	afterChildren?,
+	text: any,
+	onTextHolderClick?: any,
+	textHolderStyle?: any,
+	beforeChildren?: any,
+	afterChildren?: any,
 	expanded: boolean,
-	toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?, isExpandButtonForNodeChildren: boolean,
+	toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?: any, isExpandButtonForNodeChildren: boolean,
 	showNotificationButton?: boolean,
 	notificationLevel: SubscriptionLevel,
 	onToggleNotifications?: ()=>void;
 	ref?: Ref<HTMLDivElement>,
+	/*
+     * Extra DOM props to spread onto the root <div>.
+     * Currently used to attach custom data-* attributes (eg. the `path` prop from NodeBox),
+     * so that other parts of the app (like MapUI) can later query the DOM
+     * and recover this metadata
+     */
+	dataAttrs?: DivDataAttrs,
 };
 
 const ValidateProps = (props: ExpandableBox_Props)=>{
@@ -55,7 +63,7 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 	const {className, width, widthOverride, innerWidth, outlineColor, outlineThickness = 1, roundedTopLeftCorner = true, padding, style,
 		onClick, onDirectClick, onMouseEnter, onMouseLeave, backgroundFillPercent, backgroundColor, markerPercent, text, onTextHolderClick,
 		textHolderStyle, beforeChildren, afterChildren, expanded, toggleExpanded, expandButtonStyle, isExpandButtonForNodeChildren, ref,
-		showNotificationButton = false, onToggleNotifications, notificationLevel = "none", ...rest} = props;
+		showNotificationButton = false, onToggleNotifications, notificationLevel = "none", dataAttrs, ...rest} = props;
 
 	const textHolderRef = useRef<HTMLDivElement>(null);
 	const expandButtonRef = useRef<Button>(null);
@@ -64,10 +72,16 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 	const {key, css} = cssHelper(self);
 
 	return (
-		<div ref={ref} className={key("ExpandableBox", className)}
+		<div ref={ref}
+			className={key("ExpandableBox", className)}
 			style={css({display: "flex", position: "relative", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}),
 				cursor: "default", width: widthOverride ?? width, boxShadow: `rgba(0,0,0,.5) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`}, style)}
-			onClick={onClick} onMouseEnter={onMouseEnter as any} onMouseLeave={onMouseLeave as any} {...rest}>
+			onClick={onClick}
+			onMouseEnter={onMouseEnter as any}
+			onMouseLeave={onMouseLeave as any}
+			{...dataAttrs}
+			{...rest}
+		>
 			{beforeChildren}
 			<Row className={key("ExpandableBox_mainContent")}
 				style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}), cursor: "pointer"})}
