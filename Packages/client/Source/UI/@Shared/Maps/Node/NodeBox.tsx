@@ -82,7 +82,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const rootRef = useRef<HTMLDivElement>(null);
 	const leftPanelRef = useRef<HTMLDivElement>(null);
 	const bottomPanelRef = useRef<HTMLElement>(null);
-	const titlePanelRef = useRef<TitlePanelElement|n>(null);
+	const titlePanelRef = useRef<TitlePanelElement>(null);
 
 	// TODO: replace this system by just using the new IsMouseEnterReal and IsMouseLeaveReal functions
 	const checkStillHoveredTimer = useRef<Timer|n>(new Timer(100, ()=>{
@@ -260,7 +260,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		});
 	}, [node.id]);
 
-	const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && titlePanelRef.current && titlePanelRef.current.onDoubleClick(), []);
+	const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && titlePanelRef?.current?.isMounted && titlePanelRef.current.onDoubleClick(), []);
 
 	const toggleExpanded = useCallback(e=>{
 		const newExpanded = !expanded;

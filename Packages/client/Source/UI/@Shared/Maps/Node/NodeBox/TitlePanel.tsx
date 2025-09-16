@@ -35,7 +35,7 @@ type Props = {
 	indexInNodeList: number,
 	style: React.CSSProperties,
 	dragHandleProps: DraggableProvidedDragHandleProps|n,
-	ref?: Ref<TitlePanelElement|n>,
+	ref?: Ref<TitlePanelElement>,
 	setParentState?: (state: any)=>void,
 } & Omit<HTMLProps_Fixed<"div">, "ref">;
 
@@ -46,7 +46,8 @@ type State = {
 	applyingEdit: boolean,
 };
 
-export type TitlePanelElement = HTMLElement & {
+export type TitlePanelElement = {
+	get isMounted(): boolean,
 	onDoubleClick: ()=>void,
 };
 
@@ -138,13 +139,12 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 	}
 
 	useImperativeHandle(ref, ()=>{
-		const el = rowRef.current;
-		if (el) {
-			const elExt = el as TitlePanelElement;
-			elExt.onDoubleClick = onDoubleClick;
-			return elExt;
-		}
-		return null as any;
+		return {
+			get isMounted() {
+				return isMountedRef.current;
+			},
+			onDoubleClick,
+		};
 	}, [onDoubleClick]);
 
 	return (
