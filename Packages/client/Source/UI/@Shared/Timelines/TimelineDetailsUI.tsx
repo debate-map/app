@@ -7,7 +7,8 @@ import {RunCommand_UpdateTimeline} from "Utils/DB/Command";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 
-export type TimelineDetailsUIElem = HTMLDivElement & {
+export type TimelineDetailsUIElem = {
+	get isMounted(): boolean,
 	getValidationError: () => any
 	getNewData: () => Timeline
 };
@@ -35,12 +36,16 @@ export const TimelineDetailsUI = (props: TimelineDetailsUI_Props)=>{
 		return CloneWithPrototypes(newData) as Timeline;
 	}
 
-	const modifyElem = (el: HTMLDivElement|n)=>{
-		return el ? (Object.assign(el, {getValidationError, getNewData}) as TimelineDetailsUIElem) : null
+	const createElem = ()=>{
+		return {
+			get isMounted() { return internalRef.current != null; },
+			getValidationError,
+			getNewData,
+		}
 	}
 
 	const Change = (..._)=>{
-		if (onChange) onChange(getNewData(), modifyElem(internalRef.current)!);
+		if (onChange) onChange(getNewData(), createElem());
 		reRender();
 	};
 
@@ -49,7 +54,7 @@ export const TimelineDetailsUI = (props: TimelineDetailsUI_Props)=>{
 	}, [baseData]);
 
 	useImperativeHandle(ref, ()=>{
-		return modifyElem(internalRef.current)!;
+		return createElem();
 	});
 
 	const splitAt = 120;
@@ -114,7 +119,7 @@ export const TimelineDetailsEditor = (props: {timeline: Timeline, editing: boole
 	}
 
 	const onLeftClick = async()=>{
-		const updates = GetUpdates(timeline, detailsUIRef.current?.getNewData()).ExcludeKeys("steps");
+		const updates = GetUpdates(timeline, detailsUIRef.current?.isMounted && detailsUIRef.current.getNewData()).ExcludeKeys("steps");
 		RunCommand_UpdateTimeline({id: timeline.id, updates});
 	}
 
