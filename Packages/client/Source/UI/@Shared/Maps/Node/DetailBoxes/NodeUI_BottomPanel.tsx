@@ -109,12 +109,8 @@ export const NodeUI_BottomPanel = observer_mgl((props: Props)=>{
 		uiRoot = el!;
 
 		if (!ref) return;
-		if (typeof ref === "function") {
-			ref(el);
-		} else {
-			ref.current = el;
-		}
-
+		if (typeof ref === "function") ref(el)
+		else ref.current = el
 	};
 
 	return MaybeCreatePortal(

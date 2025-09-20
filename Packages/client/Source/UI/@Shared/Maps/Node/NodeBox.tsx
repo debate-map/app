@@ -451,11 +451,9 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 			rootRef.current = c;
 
 			if (!ref) return;
-			if (typeof ref === "function") {
-				ref(c);
-			} else {
-				ref.current = c;
-			}
+			if (typeof ref === "function") ref(c);
+			else ref.current = c;
+
 		}, [dragInfo?.provided]);
 
 		return (

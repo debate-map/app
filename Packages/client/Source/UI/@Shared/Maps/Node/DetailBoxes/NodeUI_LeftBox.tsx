@@ -86,13 +86,10 @@ export const NodeUI_LeftBox = observer_mgl((props: Props)=>{
 	const handleRef = useCallback((el: HTMLDivElement | null)=>{
 		rootRef.current = el;
 
-		if (ref) {
-			if (typeof ref === "function") {
-				ref(el);
-			} else {
-				ref.current = el;
-			}
-		}
+		if (!ref) return;
+		if (typeof ref === "function") ref(el)
+		else ref.current = el
+
 	}, [ref]);
 
 	return MaybeCreatePortal(
