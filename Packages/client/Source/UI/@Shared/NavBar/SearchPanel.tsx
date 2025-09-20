@@ -24,26 +24,6 @@ export const SearchPanel = observer_mgl(()=>{
 	const [searchInProgress, setSearchInProgress] = useState(false);
 	const queryStrRef = React.useRef(store.main.search.queryStr);
 
-	const {searchResults_partialTerms} = store.main.search;
-	// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
-	const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
-
-	let results_nodeL2s = searchResultIDs
-		.map(id=>GetNodeL2.CatchBail(null, id)) // catch bail per entry, so that we start showing the results even before we've loaded every result's data
-		.filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
-
-	// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
-	// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
-	if (searchResults_partialTerms.length) {
-		for (const term of searchResults_partialTerms) {
-			results_nodeL2s = results_nodeL2s.filter(a=>{
-				const titles = GetAllNodeRevisionTitles(a.current);
-				return titles.every(b=>b.toLowerCase().includes(term));
-			});
-		}
-	}
-	const results_nodeIDs = results_nodeL2s.filter(a=>a).map(a=>a.id).Distinct();
-
 	const clearResults = ()=>{
 		RunInAction("SearchPanel.ClearResults", ()=>{
 			store.main.search.searchResults_partialTerms = ea;
@@ -56,13 +36,14 @@ export const SearchPanel = observer_mgl(()=>{
 		clearResults();
 		setSearchInProgress(true);
 		try {
-			const unrestricted = queryStrRef.current.endsWith(" /unrestricted");
+			let queryStr = queryStrRef.current;
+			const unrestricted = queryStr.endsWith(" /unrestricted");
 			if (unrestricted) {
-				queryStrRef.current = queryStrRef.current.slice(0, -" /unrestricted".length);
+				queryStr = queryStr.slice(0, -" /unrestricted".length);
 			}
 
 			if (Validate("UUID", queryStrRef.current) == null) {
-				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStrRef.current));
+				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 				if (nodeRevisionMatch) {
 					RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
 						store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.node];
@@ -102,17 +83,39 @@ export const SearchPanel = observer_mgl(()=>{
 					searchLimit: 100,
 				}},
 			});
-			const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
 
+			const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
 			RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 				store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
 				store.main.search.searchResults_nodeIDs = foundNodeIDs;
 			});
 		} finally {
 			// wait a moment before clearing search-in-progress marker (else it gets ignored, for early-return case -- presumably race condition with the set-true call above)
-			WaitXThenRun(0, ()=>setSearchInProgress(true));
+			WaitXThenRun(0, ()=>setSearchInProgress(false));
 		}
 	};
+
+	const {searchResults_partialTerms} = store.main.search;
+	// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+	const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
+
+	let results_nodeL2s = searchResultIDs
+		.map(id=>GetNodeL2.CatchBail(null, id)) // catch bail per entry, so that we start showing the results even before we've loaded every result's data
+		.filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
+
+	// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
+	// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
+	if (searchResults_partialTerms.length) {
+		for (const term of searchResults_partialTerms) {
+			results_nodeL2s = results_nodeL2s.filter(a=>{
+				const titles = GetAllNodeRevisionTitles(a.current);
+				return titles.every(b=>b.toLowerCase().includes(term));
+			});
+		}
+	}
+	const results_nodeIDs = results_nodeL2s.filter(a=>a).map(a=>a.id).Distinct();
+	const queryStr = store.main.search.queryStr;
+	queryStrRef.current = queryStr;
 
 	return (
 		<Column style={{
@@ -120,7 +123,7 @@ export const SearchPanel = observer_mgl(()=>{
 			background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 		}}>
 			<Row center>
-				<TextInput style={{flex: 1}} value={queryStrRef.current}
+				<TextInput style={{flex: 1}} value={queryStr}
 					instant // since enter-key needs value pre-blur
 					onChange={val=>{
 						RunInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
