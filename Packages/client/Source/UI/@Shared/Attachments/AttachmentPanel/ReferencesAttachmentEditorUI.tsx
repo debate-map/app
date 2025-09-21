@@ -16,7 +16,8 @@ export const ReferencesAttachmentEditorUI = (props: DetailsUIBaseProps<Reference
 			CleanUpdatedReferencesAttachment(v);
 		},
 		getValidationErrorExtras: ()=>{
-			return chainsEditorRef.current?.getValidationError();
+			const el = chainsEditorRef.current;
+			return el?.isMounted && el.getValidationError();
 		}
 	});
 	const {enabled, Change} = helpers;
