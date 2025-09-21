@@ -33,7 +33,8 @@ type State = {
 	newLinkData: NodeLink
 };
 
-export type NodeDetailsUIElem = HTMLDivElement & {
+export type NodeDetailsUIElem = {
+	get isModified(): boolean,
 	getValidationError: () => any,
 	getNewData: () => NodeL1,
 	getNewRevisionData: () => NodeRevision,
@@ -55,9 +56,17 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 		newLinkData: Clone(baseLinkData),
 	});
 
+	const isMountedRef = useRef(false);
 	const didTriggerOnChange = useRef(false);
 	const internalRef = useRef<HTMLDivElement|n>(null);
 	const [_,reRender] = useReducer(x=>x+1, 0);
+
+	useEffect(()=>{
+		isMountedRef.current = true;
+		return ()=>{
+			isMountedRef.current = false;
+		}
+	})
 
 	const getValidationError = ()=>{
 		return GetErrorMessagesUnderElement(internalRef.current)[0];
@@ -76,12 +85,20 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 		return CloneWithPrototypes(state.newLinkData) as NodeLink;
 	}
 
-	const modifyElem = (el: HTMLDivElement|n)=>{
-		return el ? (Object.assign(el, {getValidationError, getNewRevisionData, getNewData, getNewLinkData}) as NodeDetailsUIElem) : null
+	const createElem = ()=>{
+		return {
+			get isModified() {
+				return isMountedRef.current;
+			},
+			getValidationError,
+			getNewRevisionData,
+			getNewData,
+			getNewLinkData
+		};
 	}
 
 	const Change = (..._)=>{
-		if (onChange) { onChange(getNewData(), getNewRevisionData(), getNewLinkData(), modifyElem(internalRef.current)!)}
+		if (onChange) { onChange(getNewData(), getNewRevisionData(), getNewLinkData(), createElem())}
 		reRender()
 	};
 
@@ -90,7 +107,7 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 		didTriggerOnChange.current = true;
 
 		// trigger on-change once, to check for validation-error
-		if (onChange) onChange(getNewData(), getNewRevisionData(), getNewLinkData(), modifyElem(internalRef.current)!);
+		if (onChange) onChange(getNewData(), getNewRevisionData(), getNewLinkData(), createElem()!);
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state])
@@ -107,7 +124,7 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 	}, [baseData])
 
 	useImperativeHandle(ref, ()=>{
-		return modifyElem(internalRef.current)!;
+		return createElem();
 	});
 
 	const policy = GetAccessPolicy(state?.newData.accessPolicy);
