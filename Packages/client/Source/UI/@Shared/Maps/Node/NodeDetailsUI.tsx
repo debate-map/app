@@ -34,7 +34,7 @@ type State = {
 };
 
 export type NodeDetailsUIElem = {
-	get isModified(): boolean,
+	get isMounted(): boolean,
 	getValidationError: () => any,
 	getNewData: () => NodeL1,
 	getNewRevisionData: () => NodeRevision,
@@ -87,7 +87,7 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 
 	const createElem = ()=>{
 		return {
-			get isModified() {
+			get isMounted() {
 				return isMountedRef.current;
 			},
 			getValidationError,
