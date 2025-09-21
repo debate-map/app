@@ -22,7 +22,8 @@ export const MediaAttachmentEditorUI = observer_mgl((props: MediaAttachmentEdito
 		phase,
 		onChange,
 		getValidationErrorExtras: ()=>{
-			return chainsEditorRef.current?.getValidationError();
+			const el = chainsEditorRef.current;
+			return el?.isMounted && el.getValidationError();
 		}
 	});
 	const {Change, enabled} = helpers;

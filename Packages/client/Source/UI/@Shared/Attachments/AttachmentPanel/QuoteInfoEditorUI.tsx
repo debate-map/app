@@ -16,7 +16,10 @@ export const QuoteInfoEditorUI = (props: DetailsUIBaseProps<QuoteAttachment, {}>
 		phase,
 		onChange,
 		getNewDataPostProcess: nD=>CleanUpdatedQuoteAttachment(nD),
-		getValidationErrorExtras: ()=>chainsEditorRef.current?.getValidationError(),
+		getValidationErrorExtras: ()=>{
+			const el = chainsEditorRef.current;
+			return el?.isMounted && el.getValidationError();
+		}
 	});
 	const {Change, enabled} = helpers;
 

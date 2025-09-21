@@ -18,7 +18,8 @@ type SourceChainsEditorUI_Props = {
 	ref?: Ref<SourceChainsEditorUIElem>,
 };
 
-export type SourceChainsEditorUIElem = HTMLDivElement & {
+export type SourceChainsEditorUIElem = {
+	get isMounted(): boolean,
 	getValidationError: () => any,
 	getNewData: () => SourceChain[],
 }
@@ -33,8 +34,12 @@ export const SourceChainsEditorUI = (props: SourceChainsEditorUI_Props)=>{
 	const internalRef = useRef<HTMLDivElement|n>(null);
 	const [_, reRender] = useReducer(a=>a+1, 0);
 
-	const modifyElem = (el: HTMLDivElement|n)=>{
-		return el ? (Object.assign(el, {getValidationError, getNewData}) as SourceChainsEditorUIElem) : null
+	const createElem = ()=>{
+		return {
+			get isMounted() {return internalRef.current != null;},
+			getValidationError,
+			getNewData,
+		}
 	}
 
 	const getValidationError = ()=>{
@@ -79,7 +84,7 @@ export const SourceChainsEditorUI = (props: SourceChainsEditorUI_Props)=>{
 	}, [baseData]);
 
 	useImperativeHandle(ref, ()=>{
-		return modifyElem(internalRef.current)!;
+		return createElem();
 	});
 
 	const splitAt = 100; // , width = 600;
