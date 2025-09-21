@@ -38,7 +38,7 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 		dataError: null,
 		saveState: "idle",
 	});
-	const detailsUIRref = useRef<NodeDetailsUIElem>(null);
+	const detailsUIref = useRef<NodeDetailsUIElem>(null);
 
 	const parentNode = GetParentNodeL3(path);
 	const link = GetLinkUnderParent(node.id, parentNode);
@@ -48,11 +48,11 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 
 	return (
 		<Column style={{position: "relative", display: show ? null : "none"}}>
-			<NodeDetailsUI ref={detailsUIRref} map={map} parent={parentNode} baseData={node} baseRevisionData={node.current}
+			<NodeDetailsUI ref={detailsUIref} map={map} parent={parentNode} baseData={node} baseRevisionData={node.current}
 				baseLinkData={link} forNew={false} enabled={canEdit} onChange={()=>{
 					setState(prevState=>({
 						...prevState,
-						dataError: detailsUIRref.current!.getValidationError(),
+						dataError: detailsUIref.current!.getValidationError(),
 					}));
 				}}
 			/>
@@ -62,7 +62,7 @@ export const DetailsPanel = observer_mgl((props: DetailsPanel_Props)=>{
 					<Button text="Save" enabled={state.dataError == null} title={state.dataError} onLeftClick={async()=>{
 						setState(prevState=>({...prevState, saveState: "saving"}));
 
-						const newRevision = detailsUIRref.current!.getNewRevisionData();
+						const newRevision = detailsUIref.current!.getNewRevisionData();
 						const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 						RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						setState(prevState=>({...prevState, saveState: "success"}));
