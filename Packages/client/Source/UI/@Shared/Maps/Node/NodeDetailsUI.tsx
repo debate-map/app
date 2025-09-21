@@ -66,7 +66,7 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 		return ()=>{
 			isMountedRef.current = false;
 		}
-	})
+	}, [])
 
 	const getValidationError = ()=>{
 		return GetErrorMessagesUnderElement(internalRef.current)[0];
