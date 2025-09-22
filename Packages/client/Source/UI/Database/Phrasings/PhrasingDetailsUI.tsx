@@ -26,7 +26,8 @@ function OmitRef<T>(props: T): T {
 	return ObjectCE(props).ExcludeKeys("ref" as any) as T;
 }
 
-export type PhrasingDetailsUIElem = HTMLDivElement & {
+export type PhrasingDetailsUIElem = {
+	get isMounted(): boolean,
 	getNewData: ()=>NodePhrasing,
 	getValidationError: ()=>string|n,
 };
@@ -57,7 +58,7 @@ export const PhrasingDetailsUI = ((props: Props)=>{
 	}
 
 	const getValidationError = ()=>{
-		return GetErrorMessagesUnderElement(GetDOM(this))[0];
+		return GetErrorMessagesUnderElement(internalRef.current)[0];
 	}
 
 	const getNewData = ()=>{
@@ -80,11 +81,12 @@ export const PhrasingDetailsUI = ((props: Props)=>{
 	}
 
 	useImperativeHandle(ref, ()=>{
-		const modifyElem = (el: HTMLDivElement|n)=>{
-			return el ? (Object.assign(el, {getValidationError, getNewData}) as PhrasingDetailsUIElem) : null
-		}
-		return modifyElem(internalRef.current)!;
-	}, [getValidationError, getNewData]);
+		return {
+			get isMounted() {return internalRef.current != null;},
+			getNewData,
+			getValidationError,
+		};
+	}, [getNewData]);
 
 	return (
 		<Column style={style} ref={handleRef}>

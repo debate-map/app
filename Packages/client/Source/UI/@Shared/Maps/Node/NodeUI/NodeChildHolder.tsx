@@ -1,23 +1,16 @@
-import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, DMap, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, IsSLModeOrLayout, DMap, NodeL3, Polarity} from "dm_common";
 import * as React from "react";
-import {useCallback} from "react";
 import {store} from "Store";
-import {GetChildLimitInfoAtLocation, UseForcedExpandForPath} from "Store/main/maps.js";
-import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {GetChildLimitInfoAtLocation} from "Store/main/maps.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {StripesCSS} from "tree-grapher";
-import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {TreeGraphDebug} from "Utils/UI/General.js";
-import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
-import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
+import {WaitXThenRun_Deduped} from "web-vcore";
+import {E, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "@hello-pangea/dnd";
 import {Column} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
-import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
 import {GetMeasurementInfoForNode} from "./NodeMeasurer.js";
 import {observer_mgl} from "mobx-graphlink";
@@ -61,7 +54,9 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 		placeholderRect: null,
 	});
 
-	const rootRef = useRef<HTMLDivElement>(null);
+	const initialSpanRef = useRef<HTMLSpanElement>(null);
+	const lastSpanRef = useRef<HTMLSpanElement>(null);
+
 	const argumentsControlBarRef = useRef<HTMLDivElement>(null);
 	const childBoxes = useRef<{[key: number]: NodeUIElem}>({});
 	const isMounted = useRef(false);
@@ -113,27 +108,32 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 	const checkForLocalChanges = ()=>{
 		const {parentNode: node, onSizesChange} = props;
 
-		////const height = GetDOM(this)!.getBoundingClientRect().height;
-		//const height = this.DOM_HTML.offsetHeight;
-		//const dividePoint = this.GetDividePoint();
-		//if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
-		//	MaybeLog(
-		//		a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-		//		()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`,
-		//	);
+		let height = 0;
+		if (initialSpanRef.current && lastSpanRef.current) {
+			let el: HTMLElement | null = initialSpanRef.current.nextElementSibling as HTMLElement;
+        	while (el && el !== lastSpanRef.current) {
+        	    height += el.offsetHeight;
+        	    el = el.nextElementSibling as HTMLElement;
+        	}
+		}
+		const dividePoint = getDividePoint();
+		if (height != lastHeight.current || dividePoint != lastDividePoint.current) {
+			//MaybeLog(
+				//a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				//()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`,
+			//);
+			// this.UpdateState(true);
+			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
+		}
+		lastHeight.current = height;
+		lastDividePoint.current = dividePoint;
 
-		//	// this.UpdateState(true);
-		//	if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
-		//}
-		//this.lastHeight = height;
-		//this.lastDividePoint = dividePoint;
-
-		//const orderStr = this.ChildOrderStr;
-		//if (orderStr != this.lastOrderStr) {
-		//	// this.OnChildHeightOrPosOrOrderChange();
-		//	// this.ReportDividePointChange();
-		//}
-		//this.lastOrderStr = orderStr;
+		const orderStr = childOrderStr();
+		if (orderStr != lastOrderStr.current) {
+			// this.OnChildHeightOrPosOrOrderChange();
+			// this.ReportDividePointChange();
+		}
+		lastOrderStr.current = orderStr;
 	}
 
 	const playback = GetPlaybackInfo();
@@ -197,12 +197,9 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 		// wrap in func, so the execution-orders always match the display-orders (so that tree-path is correct)
 		const getLimitBar = ()=>{
 			return <ChildLimitBar key="limit-bar" {...{
-				map,
-				node: parentNode,
-				path: parentPath,
+				map, node: parentNode, path: parentPath,
 				treePath: `${parentTreePath}/${nextChildFullIndex++}`,
-				inBelowGroup: belowNodeUI ?? false,
-				childrenWidthOverride,
+				inBelowGroup: belowNodeUI ?? false, childrenWidthOverride,
 				childLimitInfo: ncToShowHere_thisGroup.childLimitInfo,
 			}}/>;
 		};
@@ -212,8 +209,6 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 			const showLimitBarHere = index == indexOfOutermostVisibleChild && showLimitBar;
 
 			const getNodeUI = ()=>{
-				//ref={UseCallback(c=>childBoxes.current[child.id] = c, [child.id, childBoxes.current])} // eslint-disable-line
-				//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(childHolderComp, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 				return <NodeUI key={child.id}
 					ref={c=>{childBoxes.current[child.id] = c}}
 					indexInNodeList={index} map={map} node={child}
@@ -286,7 +281,7 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 	const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath, childGroup: group});
 	return (
 		<>
-			<span/>
+			<span ref={initialSpanRef} style={{display: "none"}}/>
 			{!separateChildren && RenderPolarityGroup("all")}
 			{separateChildren && RenderPolarityGroup("up")}
 			{showArgumentsControlBar_final &&
@@ -297,7 +292,7 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 				/>
 			}
 			{separateChildren && RenderPolarityGroup("down")}
-			<span/>
+			<span ref={lastSpanRef} style={{display: "none"}}/>
 		</>
 	);
 });
