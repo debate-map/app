@@ -1,5 +1,4 @@
-import {UserRow} from "UI/Database/Users.js";
-import {chroma_maxDarken, inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
+import {chroma_maxDarken, inFirefox, NavBarButton_FakeClass, SubNavBar_FakeClass, SubNavBarButton_FakeClass} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import chroma from "chroma-js";
 import {addHook_css} from "react-vextensions";
@@ -39,7 +38,7 @@ export class SLSkin extends DMSkin {
 	override RawCSS_Freeform() {
 		return `
 			${super.RawCSS_Freeform()}
-			
+
 			/* overrides */
 			.NodeBox > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
 				color: ${this.NodeTextColor().css()} !important;
@@ -52,14 +51,14 @@ export class SLSkin extends DMSkin {
 	}
 	override CSSHooks_Freeform() {
 		super.CSSHooks_Freeform();
-		addHook_css(NavBarButton, ctx=>{
+		addHook_css(NavBarButton_FakeClass, ctx=>{
 			if (ctx.callIndex == 0) {
 				ctx.styleArgs.push({
 					color: "rgb(0,0,0)",
 				});
 			}
 		});
-		addHook_css(SubNavBar, ctx=>{
+		addHook_css(SubNavBar_FakeClass, ctx=>{
 			if (ctx.key == "root") {
 				ctx.styleArgs.push({
 					zIndex: zIndexes.navBar,
@@ -74,7 +73,7 @@ export class SLSkin extends DMSkin {
 				});
 			}
 		});
-		addHook_css(SubNavBarButton, ctx=>{
+		addHook_css(SubNavBarButton_FakeClass, ctx=>{
 			if (ctx.callIndex == 0) {
 				ctx.styleArgs.push({
 					//background: this.MainBackgroundColor().css(),
