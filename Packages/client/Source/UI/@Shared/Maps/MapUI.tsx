@@ -15,8 +15,8 @@ import {Padding} from "./MapUIWrapper.js";
 import {NodeUI} from "./Node/NodeUI.js";
 import {observer_mgl} from "mobx-graphlink";
 
-let _currentMapUIHandle: MapUIHandle|n;
-export type MapUIHandle = {
+let _currentMapUIElem: MapUIElem|n;
+export type MapUIElem = {
 	// if its mounted then it won't be null/undeffined
 	readonly elem: HTMLDivElement|n,
 	scrollToMakeRectVisible: (targetRect: VRect, padding: number, stopLoadingStoredScroll: boolean)=>void,
@@ -29,11 +29,11 @@ export type MapUIHandle = {
 	findNodeBox: (nodePath: string, ifMissingFindAncestor?: boolean, filterOutInvisible?: boolean) => n|Element,
 }
 
-export const currentMapUI = ():MapUIHandle|n=>{
-	if (!_currentMapUIHandle) return null;
-	if (!_currentMapUIHandle.elem) return null;
+export const currentMapUI = ():MapUIElem|n=>{
+	if (!_currentMapUIElem) return null;
+	if (!_currentMapUIElem.elem) return null;
 
-	return _currentMapUIHandle;
+	return _currentMapUIElem;
 }
 
 export function GetViewOffsetForNodeBox(nodeBoxEl: Element) {

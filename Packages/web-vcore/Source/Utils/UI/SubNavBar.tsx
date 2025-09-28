@@ -52,6 +52,7 @@ export const SubNavBar = observer(({fullWidth, children}: {fullWidth?: boolean} 
 	);
 });
 
+export class SubNavBarButton_FakeClass extends React.Component {}
 export const SubNavBarButton = observer(
 	({
 		page, subpage, text, actionFuncIfAlreadyActive, to, style, ...rest
@@ -61,8 +62,7 @@ export const SubNavBarButton = observer(
 	} & ComponentPropsWithoutRef<typeof Link>
 	)=>{
 		const self = useMemo(()=>{
-			class SubNavBarButton_FakeClass {}
-			return new SubNavBarButton_FakeClass() as ReactInstance;
+			return new SubNavBarButton_FakeClass({}) as ReactInstance;
 		}, []);
 
 		const currentSubpage = manager.store.main[page].subpage ?? manager.pageTree.children[page]?.DefaultChild;

@@ -11,10 +11,10 @@ import {ES, css2} from "./Styles.js";
 
 // todo: someday move the NavBar comp itself here (probably)
 
+export class NavBarButton_FakeClass extends React.Component {}
 export const NavBarButton = observer(({page, subpage, text, active, style, onClick, children}: {page?: string|n, subpage?: string, text?: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & PropsWithChildren)=>{
 	const self = useMemo(()=>{
-		class NavBarButton_FakeClass {}
-		return new NavBarButton_FakeClass() as ReactInstance;
+		return new NavBarButton_FakeClass({}) as ReactInstance;
 	}, []);
 	// let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
 	// let {_radiumStyleState} = this.state as any;
