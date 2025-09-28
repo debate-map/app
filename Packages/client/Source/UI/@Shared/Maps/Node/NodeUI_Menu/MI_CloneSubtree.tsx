@@ -1,15 +1,11 @@
-import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNodeL3, GetParentNodeL3, HasAdminPermissions, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {GetNodeL3, GetParentNodeL3, HasAdminPermissions, MeID} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {InfoButton, Observer} from "web-vcore";
 import {gql} from "@apollo/client";
-import {GetEntries, GetValues, ModifyString} from "js-vextensions";
-import {SlicePath, observer_mgl} from "mobx-graphlink";
-import {observer} from "mobx-react";
-import {Button, Column, Row, RowLR, Select, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {observer_mgl} from "mobx-graphlink";
+import {Button, Column, Row, Text} from "react-vcomponents";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -79,7 +75,7 @@ export async function ShowCloneSubtreeDialog(payload_initial: CloneSubtreePayloa
 		title: "Clone subtree", cancelButton: true,
 		message: observer_mgl(()=>{
 			return (
-				<Column ref={c=>root = c} style={{width: 1000}}>
+				<Column ref={c=>{root = c}} style={{width: 1000}}>
 					<Row style={{whiteSpace: "pre-wrap"}}>{`
 						Are you sure you want to clone this entire subtree?
 						* This process cannot (easily) be undone, and could result in more nodes being cloned than intended. (eg. if the root-node of some other map were linked within this subtree)
