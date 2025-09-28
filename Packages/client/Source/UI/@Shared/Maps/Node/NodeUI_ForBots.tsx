@@ -3,7 +3,6 @@ import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";
 import {Pre, Row} from "react-vcomponents";
-import {GetInnerComp} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./DetailBoxes/Panels/DetailsPanel.js";
@@ -11,7 +10,7 @@ import {OthersPanel} from "./DetailBoxes/Panels/OthersPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {NodeBox} from "./NodeBox.js";
-import React, {useRef} from "react";
+import React from "react";
 
 export type NodeUI_ForBotsProps = {
 	map: DMap,
@@ -19,8 +18,6 @@ export type NodeUI_ForBotsProps = {
 };
 
 export const NodeUI_ForBots = ({map, node}: NodeUI_ForBotsProps)=>{
-	const innerUIRef = useRef<NodeBox|null>(null);
-
 	const mapView = GetMapView(GetOpenMapID()!);
 	const nodeParents = GetNodeParentsL2(node.id) as NodeL2[];
 	const nodeChildren = GetNodeChildrenL2(node.id) as NodeL2[];
@@ -59,7 +56,6 @@ export const NodeUI_ForBots = ({map, node}: NodeUI_ForBotsProps)=>{
             <article>
 				Main box:
                 <NodeBox
-                    ref={c=>(innerUIRef.current = GetInnerComp(c))}
                     indexInNodeList={0}
                     map={map}
                     node={nodeL3}
