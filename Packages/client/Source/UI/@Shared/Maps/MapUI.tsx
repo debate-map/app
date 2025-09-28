@@ -16,7 +16,7 @@ import {NodeUI} from "./Node/NodeUI.js";
 import {observer_mgl} from "mobx-graphlink";
 
 let _currentMapUIHandle: MapUIHandle|n;
-type MapUIHandle = {
+export type MapUIHandle = {
 	// if its mounted then it won't be null/undeffined
 	readonly elem: HTMLDivElement|n,
 	scrollToMakeRectVisible: (targetRect: VRect, padding: number, stopLoadingStoredScroll: boolean)=>void,
@@ -26,6 +26,7 @@ type MapUIHandle = {
 	startLoadingScroll : ()=>void,
 	scrollToPositionCenter: (posInContainer: Vector2)=>void,
 	getNodeBoxClosestToViewCenter: ()=>Element|n,
+	findNodeBox: (nodePath: string, ifMissingFindAncestor?: boolean, filterOutInvisible?: boolean) => n|Element,
 }
 
 export const currentMapUI = ():MapUIHandle|n=>{
@@ -144,7 +145,8 @@ export const MapUI = observer_mgl((props: Props)=>{
 				scheduleAfterNextRender,
 				startLoadingScroll,
 				scrollToPositionCenter,
-				getNodeBoxClosestToViewCenter
+				getNodeBoxClosestToViewCenter,
+				findNodeBox
 			};
 			_currentMapUIHandle = mapUIHandleRef.current;
 		}
