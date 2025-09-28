@@ -1,15 +1,14 @@
-import {Assert, E, GetEntries, NN, OmitIfFalsy} from "js-vextensions";
-import {runInAction} from "mobx";
+import {Assert, E, GetEntries} from "js-vextensions";
 import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, NodeLink, DMap, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry, NewChildConfig, GetDisplayTextForNewChildConfig} from "dm_common";
-import {BailError, CatchBail, GetAsync, observer_mgl} from "mobx-graphlink";
-import {observer} from "mobx-react";
+import {InfoButton, Link, RunInAction} from "web-vcore";
+import {NodeType, NodeLink, DMap, GetAccessPolicy, NodeL1, ClaimForm, GetMap, NodeRevision, ArgumentType, NodeRevision_titlePattern, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry, NewChildConfig, GetDisplayTextForNewChildConfig} from "dm_common";
+import {GetAsync, observer_mgl} from "mobx-graphlink";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
-import {NodeDetailsUI} from "../../NodeDetailsUI.js";
+import {NodeDetailsUI, NodeDetailsUIElem} from "../../NodeDetailsUI.js";
+import React from "react";
 
 export class AddChildHelper {
 	constructor(public payload: {parentPath: string, config: NewChildConfig, title: string, userID: string, mapID: string|n}) {}
@@ -149,7 +148,7 @@ export async function ShowAddChildDialog(parentPath: string, config: NewChildCon
 	if (prep.canceled) return;
 
 	let root;
-	let nodeEditorUI: NodeDetailsUI|n;
+	let nodeEditorUI: NodeDetailsUIElem|n;
 	const Change = (..._)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
@@ -184,7 +183,7 @@ export async function ShowAddChildDialog(parentPath: string, config: NewChildCon
 
 			const advanced = store.main.maps.addChildDialog.advanced;
 			return (
-				<Column ref={c=>root = c} style={{width: 600}}>
+				<Column ref={c=>{root = c}} style={{width: 600}}>
 					{config.childType == NodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 					<Row center mb={5}>
 						{config.childType == NodeType.argument && advanced &&
@@ -206,7 +205,7 @@ export async function ShowAddChildDialog(parentPath: string, config: NewChildCon
 					</Row>}
 					{tab == AddChildDialogTab.Argument &&
 					<>
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: 0}} map={map} parent={prep.parentNode}
+						<NodeDetailsUI ref={c=>{nodeEditorUI}} style={{padding: 0}} map={map} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {
@@ -246,7 +245,7 @@ export async function ShowAddChildDialog(parentPath: string, config: NewChildCon
 								}}/>}
 						</>}
 						{config.childType != NodeType.argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: config.childType == NodeType.claim ? "5px 0 0 0" : 0}} map={map} parent={prep.parentNode}
+						<NodeDetailsUI ref={c=>{nodeEditorUI = c}} style={{padding: config.childType == NodeType.claim ? "5px 0 0 0" : 0}} map={map} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {

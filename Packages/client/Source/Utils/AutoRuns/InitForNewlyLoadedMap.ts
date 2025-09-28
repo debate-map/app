@@ -3,7 +3,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, GetAnchorNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {ACTSetAnchorNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
+import {ACTSetAnchorNodeAndViewOffset, currentMapUI} from "UI/@Shared/Maps/MapUI.js";
 import {RunInAction} from "web-vcore";
 import {Assert, NN, Vector2} from "js-vextensions";
 import {GetAsync} from "mobx-graphlink";
@@ -70,10 +70,10 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	RunInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>NN(mapState).initDone = true);
 
 	// probably temp (find more elegant way)
-	const mapUI = MapUI.CurrentMapUI;
+	const mapUI = currentMapUI();
 	//console.log('MapUI:', mapUI);
 	if (mapUI) {
-		mapUI.StartLoadingScroll();
+		mapUI.startLoadingScroll();
 	}
 
 	return true;

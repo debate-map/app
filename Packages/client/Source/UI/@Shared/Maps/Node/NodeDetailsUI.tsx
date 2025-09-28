@@ -24,7 +24,7 @@ type Props = {
 	enabled?: boolean,
 	style?: React.CSSProperties,
 	onChange?: (newData: NodeL1, newRevisionData: NodeRevision, newLinkData: NodeLink, component: NodeDetailsUIElem)=>void,
-	ref: Ref<NodeDetailsUIElem>,
+	ref?: Ref<NodeDetailsUIElem>,
 };
 
 type State = {
