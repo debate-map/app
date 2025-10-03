@@ -27,6 +27,7 @@ export type MapUIElem = {
 	scrollToPositionCenter: (posInContainer: Vector2)=>void,
 	getNodeBoxClosestToViewCenter: ()=>Element|n,
 	findNodeBox: (nodePath: string, ifMissingFindAncestor?: boolean, filterOutInvisible?: boolean) => n|Element,
+	loadStoredScroll: ()=>boolean | undefined,
 }
 
 export const currentMapUI = ():MapUIElem|n=>{
@@ -99,7 +100,7 @@ export const MapUI = observer_mgl((props: Props)=>{
 	const downPosRef = useRef<Vector2>(null);
 	const lastScrolledToPathRef = useRef<string>("");
 	const funcsToRunAfterNextRenderRef = useRef<(() => void)[]>([]);
-	const mapUIHandleRef = useRef<MapUIHandle | null>(null);
+	const mapUIHandleRef = useRef<MapUIElem>(null);
 
 	const getMap = useCallback(()=>{
 		return GetMap.CatchBail(null, mapID);
@@ -146,9 +147,11 @@ export const MapUI = observer_mgl((props: Props)=>{
 				startLoadingScroll,
 				scrollToPositionCenter,
 				getNodeBoxClosestToViewCenter,
-				findNodeBox
+				findNodeBox,
+				loadStoredScroll
+
 			};
-			_currentMapUIHandle = mapUIHandleRef.current;
+			_currentMapUIElem = mapUIHandleRef.current;
 		}
 
 		(async()=>{
@@ -161,8 +164,8 @@ export const MapUI = observer_mgl((props: Props)=>{
 
 		return ()=>{
 			mountedRef.current = false;
-			if (_currentMapUIHandle === mapUIHandleRef.current) {
-				_currentMapUIHandle = null;
+			if (_currentMapUIElem === mapUIHandleRef.current) {
+				_currentMapUIElem = null;
 			}
 		}
 	},[]) // eslint-disable-line react-hooks/exhaustive-deps

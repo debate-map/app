@@ -308,9 +308,9 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 
 	// maybe temp (maybe find another way)
 	// const mapUI = FindReact($('.MapUI')[0]) as MapUI;
-	const MapUI = require("UI/@Shared/Maps/MapUI").MapUI as typeof import("UI/@Shared/Maps/MapUI").MapUI; // late-import, to not violate "no importing UI files from other files" rule
-	const mapUI = MapUI.CurrentMapUI;
+	const currentMapUI = require("UI/@Shared/Maps/MapUI").currentMapUI as typeof import("UI/@Shared/Maps/MapUI").currentMapUI; // late-import, to not violate "no importing UI files from other files" rule
+	const mapUI = currentMapUI();
 	if (mapUI) {
-		mapUI.LoadStoredScroll();
+		mapUI.loadStoredScroll();
 	}
 });

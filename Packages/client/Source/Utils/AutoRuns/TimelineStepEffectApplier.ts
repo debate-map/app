@@ -1,19 +1,14 @@
-import {autorun, action} from "mobx";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {GetOpenMapID} from "Store/main";
 import {ACTNodeExpandedSet, GetNodeViewsAlongPath, GetNodeViewsBelowPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
-import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
-import {SleepAsync, Vector2, VRect, WaitXThenRun} from "js-vextensions";
-import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
-import {GetDOM} from "react-vextensions";
+import {ACTUpdateAnchorNodeAndViewOffset, MapUIElem, currentMapUI} from "UI/@Shared/Maps/MapUI.js";
+import {SleepAsync, Vector2, VRect} from "js-vextensions";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
-import {SlicePath, GetAsync, RunInAction} from "mobx-graphlink";
-import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, DMap, GetNodeEffects, NodeView} from "dm_common";
-import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
+import {SlicePath, RunInAction} from "mobx-graphlink";
+import {DMap} from "dm_common";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
-import {GetPathsWith1PlusFocusLevelAfterEffects, GetPlaybackEffects, GetPlaybackEffectsReached, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
-import {AutoRun_HandleBail} from "./@Helpers";
+import {GetPathsWith1PlusFocusLevelAfterEffects, GetPlaybackEffectsReached, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
+import {AutoRun_HandleBail} from "./@Helpers.js";
 
 /*function AreSetsEqual(setA, setB) {
 	return setA.size === setB.size && [...setA].every((value) => setB.has(value));
@@ -23,7 +18,7 @@ import {AutoRun_HandleBail} from "./@Helpers";
  * The functions in this file apply *some* of the effects from the timeline, to the map:
  * * Apply the "base expanding/collapsing" of nodes. (ie. makes the show-children arrow button show as expanded; node-hiding also occurs within accessor tree though, in GetNodeChildrenL3_Advanced)
  * * Does scrolling to the current playback focus-nodes, IF the layout-helper-map is disabled.
- * 
+ *
  * Note: This is not the only place where effects are applied to the map. See also:
  * * TimelineEffectApplier_Smooth: Applies scrolling and zooming effects, smoothly, IF the layout-helper-map is enabled.
  * * GetNodeChildrenL3_Advanced: Does filtering on children, to hide nodes that should not be visible at the current point in playback.
@@ -104,26 +99,24 @@ function ExpandToNodes(mapID: string, paths: string[]) {
 }
 
 async function FocusOnNodes(mapID: string, paths: string[]) {
-	let mapUI: MapUI|n;
+	let mapUI: MapUIElem|n;
 	for (let i = 0; i < 30 && mapUI == null; i++) {
 		if (i > 0) await SleepAsync(100);
-		mapUI = MapUI.CurrentMapUI;
+		mapUI = currentMapUI();
 	}
 	if (mapUI == null) {
 		console.log("Failed to find MapUI to apply scroll to.");
 		return;
 	}
 
-	let nodeBoxes: NodeBox[] = [];
+	let nodeBoxes: Element[] = [];
 	for (let i = 0; i < 30 && nodeBoxes.length < paths.length; i++) {
 		if (i > 0) await SleepAsync(100);
-		nodeBoxes = paths.map(path=>mapUI!.FindNodeBox(path)).filter(nodeBox=>{
+		nodeBoxes = paths.map(path=>mapUI!.findNodeBox(path)).filter(nodeBox=>{
 			if (nodeBox == null) return false;
-			const dom = GetDOM(nodeBox);
-			if (dom == null) return false;
-			if (dom.parentElement!.style.opacity == "0" || dom.parentElement!.style.left == "") return false;
+			if (nodeBox.parentElement!.style.opacity == "0" || nodeBox.parentElement!.style.left == "") return false;
 			return true;
-		}) as NodeBox[];
+		}) as Element[];
 	}
 	if (nodeBoxes.length == 0) {
 		console.log("Failed to find any of the NodeBoxes to apply scroll to. Paths:", paths);
@@ -132,10 +125,9 @@ async function FocusOnNodes(mapID: string, paths: string[]) {
 
 	let focusNodeRectsMerged: VRect|n;
 	for (const box of nodeBoxes) {
-		const boxDom = GetDOM(box);
-		if (boxDom == null) continue;
+		if (box == null) continue;
 		// const boxPos = GetViewportRect(GetDOM(box)).Center.Minus(GetViewportRect(mapUI.mapUIEl).Position);
-		const boxRect = GetViewportRect(boxDom).NewPosition(a=>a.Minus(GetViewportRect(mapUI!.mapUIEl!).Position));
+		const boxRect = GetViewportRect(box).NewPosition(a=>a.Minus(GetViewportRect(mapUI!.elem!).Position));
 		focusNodeRectsMerged = focusNodeRectsMerged ? focusNodeRectsMerged.Encapsulating(boxRect) : boxRect;
 	}
 	if (focusNodeRectsMerged == null) return;
@@ -143,7 +135,7 @@ async function FocusOnNodes(mapID: string, paths: string[]) {
 	const mapState = GetMapState.NN(mapID);
 	const nodeBoxesMerged_sizeWhenUnscaled = focusNodeRectsMerged.Size.DividedBy(mapState.zoomLevel);
 
-	const viewportEl = mapUI.mapUIEl!.parentElement!.parentElement!;
+	const viewportEl = mapUI.elem!.parentElement!.parentElement!;
 	const viewportSize = new Vector2(viewportEl.clientWidth, viewportEl.clientHeight);
 	// apply just enough zoom-out to be able to fit all of the focus-nodes within the viewport
 	const zoomRequired = Math.min(viewportSize.x / nodeBoxesMerged_sizeWhenUnscaled.x, viewportSize.y / nodeBoxesMerged_sizeWhenUnscaled.y);
@@ -159,6 +151,6 @@ async function FocusOnNodes(mapID: string, paths: string[]) {
 	// mapUI.ScrollToPosition(new Vector2((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
 	mapUI.ScrollToPosition_Center(nodeBoxPositionAverage.Plus(-250, 0)); */
 	//mapUI.ScrollToMakeRectVisible(nodeBoxesMerged, 100);
-	mapUI.ScrollToPosition_Center(focusNodeRectsMerged.Center);
+	mapUI.scrollToPositionCenter(focusNodeRectsMerged.Center);
 	ACTUpdateAnchorNodeAndViewOffset(mapID);
 }
