@@ -1793,7 +1793,7 @@ __metadata:
     stream-chain: "npm:^2.2.5"
     stream-json: "npm:^1.8.0"
     sync-directory: "npm:^2.2.22"
-    tree-grapher: "npm:0.0.12"
+    tree-grapher: "git+https://github.com/rishadbaniya/tree-grapher.git#d20febe5fd2787a817473e100be23831ad71092a"
     ts-loader: "npm:9.2.3"
     ts-node: "npm:^10.9.2"
     ts-node-dev: "npm:2.0.0"
@@ -13509,18 +13509,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-vmarkdown@npm:1.0.4":
-  version: 1.0.4
-  resolution: "react-vmarkdown@npm:1.0.4"
+"react-vmarkdown@git+https://github.com/rishadbaniya/react-vmarkdown.git#77c55ece7e186df28ace9316dd35dbf8b10f3a3d":
+  version: 1.0.5
+  resolution: "react-vmarkdown@https://github.com/rishadbaniya/react-vmarkdown.git#commit=77c55ece7e186df28ace9316dd35dbf8b10f3a3d"
   dependencies:
     classnames: "npm:^2.3.1"
     codemirror: "npm:^5.62.2"
   peerDependencies:
-    react: ^17.0.0
-    react-dom: ^17.0.0
+    react: ^19.0.0
+    react-dom: ^19.0.0
     react-vcomponents: ^1.0.0
     react-vextensions: ^1.0.0
-  checksum: 084e34b9d0dba6b474ea21451bb3ca4c27f5dafa945956607f0c8b1b601fcc6b4a487097700baa14a777d155ee133f11d62f13768b9c955714487165234b2935
+  checksum: 1867abfc9c5a4daf8626272f868020e8fcc9564b0cec7c8ca092c3e42c8fb38dd70fa31619df258597d27e8000bb0d8942b54ab4c000bc40280d24061e8a4d97
   languageName: node
   linkType: hard
 
@@ -15922,24 +15922,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tree-grapher@npm:0.0.12":
-  version: 0.0.12
-  resolution: "tree-grapher@npm:0.0.12"
+"tree-grapher@git+https://github.com/rishadbaniya/tree-grapher.git#d20febe5fd2787a817473e100be23831ad71092a":
+  version: 0.0.13
+  resolution: "tree-grapher@https://github.com/rishadbaniya/tree-grapher.git#commit=d20febe5fd2787a817473e100be23831ad71092a"
   dependencies:
     "@types/d3-hierarchy": "npm:^3.0.2"
     d3-hierarchy: "npm:^3.1.1"
     js-vextensions: "npm:1.0.73"
     mobx: "npm:^6.3.13"
-    mobx-react: "npm:^7.6.0"
-    react: "npm:^17.0.2"
-    react-dom: "npm:^17.0.2"
-    use-callback-ref: "npm:^1.2.5"
+    mobx-react: "npm:^9.2.1"
+    react: "npm:^19.0.0"
+    react-dom: "npm:^19.0.0"
+    use-callback-ref: "npm:^1.3.3"
     use-resize-observer: "npm:^8.0.0"
     use-state-with-deps: "npm:^1.1.1"
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 4a29a612769de17ecc53a8f0b307b2a673a05b81d009389ea97d994c35e2ccb356e7d45d6d2ec13606c29441c3353367627e03a715ce93678be9f959d61ea32f
+    react: ^19.0.0
+    react-dom: ^19.0.0
+  checksum: 957523fc8af18226ea8e674f4d8a5b9255b9a3837196f7557edf1b028196c2c224d78d46eae8e1c9e03bf28421f70e45f8202698ed60d00369fa070e757aeb28
   languageName: node
   linkType: hard
 
@@ -16682,7 +16682,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-callback-ref@npm:^1.2.5":
+"use-callback-ref@npm:^1.3.3":
   version: 1.3.3
   resolution: "use-callback-ref@npm:1.3.3"
   dependencies:
@@ -17022,7 +17022,7 @@ __metadata:
     react-uplot: "npm:0.0.9"
     react-vcomponents: "npm:1.0.47"
     react-vextensions: "npm:1.0.23"
-    react-vmarkdown: "npm:1.0.4"
+    react-vmarkdown: "git+https://github.com/rishadbaniya/react-vmarkdown.git#77c55ece7e186df28ace9316dd35dbf8b10f3a3d"
     react-vmenu: "npm:1.0.17"
     react-vmessagebox: "npm:1.0.19"
     react-vscrollview: "npm:1.0.15"
