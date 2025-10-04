@@ -6,6 +6,7 @@
 		"baseUrl": "Source", // probably todo: comment this, to require relative imports, to be consistent with the output-as-esm packages
 		"resolveJsonModule": true,
 		"outDir": "Source_JS",
+		"skipLibCheck": true,
 
 		// compilation
 		"esModuleInterop": true,

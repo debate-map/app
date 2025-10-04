@@ -68,15 +68,18 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		);
 	}
 
-	ComponentDidMount() {
-		// if in dev-mode, disable the body`s minHeight attribute
-		if (DEV) {
-			document.body.style.minHeight = null as any;
-		}
+	componentDidMount() {
+	    // if in dev-mode, disable the body's minHeight attribute
+	    if (DEV) {
+			document.body.style.minHeight = "";
+	    }
 
-		// add Quicksand font, from google-fonts // todo: probably switch to use locally-hosted font, as done for "client" package
-		const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />;
-		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head
+	    // add Quicksand font, from google-fonts
+	    // todo: probably switch to use locally-hosted font, as done for "client" package
+	    const linkEl = document.createElement("link");
+	    linkEl.href = "//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap";
+	    linkEl.rel = "stylesheet";
+	    document.head.appendChild(linkEl);
 	}
 }
 
