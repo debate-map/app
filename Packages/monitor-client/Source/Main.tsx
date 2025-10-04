@@ -1,4 +1,4 @@
-import "./Utils/PreRunners/Start_0";
+import "./Utils/PreRunners/Start_0.js";
 import {VURL} from "js-vextensions";
 import {createRoot} from "react-dom/client";
 import React from "react";
