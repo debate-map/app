@@ -161,7 +161,7 @@ export class ImportSubtreeUI extends BaseComponent<
 										Obtain this subtree-json by:
 										1) In the old, firestore-based version of Debate Map, right click the subtree you want, and press "Export subtree".
 										2) Set your settings, press "Get data", then wait a few seconds for the data to be retrieved.
-										3) Open dev-tools panel, open Source tab, press ctrl+o, type "MI_ExportSubtree.js", and open the file found. (if not found, turn on "Enable JavaScript source maps" in dev-tools F1/options panel) 
+										3) Open dev-tools panel, open Source tab, press ctrl+o, type "MI_ExportSubtree.js", and open the file found. (if not found, turn on "Enable JavaScript source maps" in dev-tools F1/options panel)
 										4) Place a breakpoint on line 70 (right after the "var subtree = ..." line), by clicking on the line-number label.
 										5) Change the "Base export depth" up or down 1, to trigger the code to run again; your breakpoint should get hit.
 										6) Export the subtree variable's data to a file, by running this in the dev-tools Console tab: \`RR().StartDownload(JSON.stringify(subtree, null, 2), "Export_" + Date.now() + ".json");\`
@@ -293,7 +293,7 @@ export class ImportSubtreeUI extends BaseComponent<
 												This will start an import of all ${resources.length} resources (not just the ${selectedIRs_nodeAndRev.length} selected ones), run as a command-batch on the server.
 
 												If the import is large, this could take a long time. You can view the progress in the text of the "Import ALL (server) [X/X]" button.
-												
+
 												Note also: If you want to cancel the import, refresh the page while it's still running. (this will cancel the graphql subscription, causing the server to drop the operation)
 											`.AsMultiline(0),
 											onOK: async()=>{
@@ -412,7 +412,7 @@ export class ImportSubtreeUI extends BaseComponent<
 
 			// if insert path is resolved, then create the selected-resource's node itself
 			await CreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
-			RunInAction_Set("MI_ImportSubtree.nodeCreationTimer.tickCompletion", ()=>{
+			RunInAction_Set(()=>{
 				uiState.selectedImportResources.delete(res);
 			});
 			this.TriggerSearchesToRerun();
