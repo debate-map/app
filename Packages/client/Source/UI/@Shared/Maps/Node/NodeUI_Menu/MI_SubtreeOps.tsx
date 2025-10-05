@@ -14,11 +14,10 @@ export const MI_SubtreeOps = observer_mgl((props: MI_SharedProps)=>{
 	return (
 		<VMenuItem text="Export subtree (+other ops)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 			if (e.button != 0) return;
-			let ui: SubtreeOpsDialog|n;
 			const controller = ShowMessageBox({
 				title: `Subtree operations, for nodes under: "${GetNodeDisplayText(node, path, map)}"`,
 				okButton: false, buttonBarStyle: {display: "none"},
-				message: ()=><SubtreeOpsDialog ref={c=>{ui = c}} {...sharedProps} controller={controller}/>,
+				message: ()=><SubtreeOpsDialog {...sharedProps} controller={controller}/>,
 			});
 		}}/>
 	);
