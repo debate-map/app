@@ -13482,9 +13482,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-vcomponents@npm:1.0.47":
-  version: 1.0.47
-  resolution: "react-vcomponents@npm:1.0.47"
+"react-vcomponents@git+https://github.com/rishadbaniya/react-vcomponents.git#d88e5c58b19083e8ceaeeeb776626e6d9f335e82":
+  version: 1.0.48
+  resolution: "react-vcomponents@https://github.com/rishadbaniya/react-vcomponents.git#commit=d88e5c58b19083e8ceaeeeb776626e6d9f335e82"
   dependencies:
     classnames: "npm:^2.2.5"
     keycode: "npm:^2.2.0"
@@ -13493,7 +13493,7 @@ __metadata:
     react: ^19.0.0
     react-dom: ^19.0.0
     react-vextensions: ^1.0.19
-  checksum: 862666752f4a72e1e5a05bedc4985048fbc0f4f83ffeb884cb7ca27aa4f7c4b1b905d6784bf98910578695ccd6aba588fa1571c6652a7b12493f8ad6257bab23
+  checksum: 712e5ad5eba5cc112f2413b44a87d81b11ae61c83641fdc1ae974d04b998d5db37f329fbb307f2d8c9ca750ce324e7f11584dfaceb94075032663f6f15129ccd
   languageName: node
   linkType: hard
 
@@ -17020,7 +17020,7 @@ __metadata:
     react-dom: "npm:19.0.0"
     react-markdown: "npm:10.1.0"
     react-uplot: "npm:0.0.9"
-    react-vcomponents: "npm:1.0.47"
+    react-vcomponents: "git+https://github.com/rishadbaniya/react-vcomponents.git#d88e5c58b19083e8ceaeeeb776626e6d9f335e82"
     react-vextensions: "npm:1.0.23"
     react-vmarkdown: "git+https://github.com/rishadbaniya/react-vmarkdown.git#77c55ece7e186df28ace9316dd35dbf8b10f3a3d"
     react-vmenu: "npm:1.0.17"

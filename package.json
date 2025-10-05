@@ -64,7 +64,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-uplot": "0.0.9",
-    "react-vcomponents": "1.0.47",
+    "react-vcomponents": "git+https://github.com/rishadbaniya/react-vcomponents.git#d88e5c58b19083e8ceaeeeb776626e6d9f335e82",
     "react-vextensions": "1.0.23",
     "react-vmarkdown": "git+https://github.com/rishadbaniya/react-vmarkdown.git#77c55ece7e186df28ace9316dd35dbf8b10f3a3d",
     "react-vmenu": "1.0.17",

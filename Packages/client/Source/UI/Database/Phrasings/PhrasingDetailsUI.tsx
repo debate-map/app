@@ -116,13 +116,13 @@ const TitleBase = (props: PhrasingDetailsUI_SharedProps)=>{
 	const {forNew, splitAt, node} = props;
 	const attachmentType = GetAttachmentType_Node(node);
 
-	const inputRef = useRef<any>(null);
+	const inputRef = useRef<TextArea>(null);
 
 	useEffect(()=>{
 	    if (!forNew) return;
 	    WaitXThenRun(0, ()=>{
-			const el = inputRef.current?.DOM_HTML ?? inputRef.current;
-			el?.focus?.();
+			let el = inputRef.current?.root;
+			if (el) el.focus();
 	    });
 	}, [forNew]);
 
@@ -191,7 +191,7 @@ const OtherTitles = (props: PhrasingDetailsUI_SharedProps)=>{
 
 type TitleKeyProps = {
 	titleKey: TitleKey,
-	innerRef?: any,
+	innerRef?: Ref<TextArea>,
 } & PhrasingDetailsUI_SharedProps;
 
 const TitleInput = ({titleKey, newData, node, enabled, Change, innerRef}: TitleKeyProps)=>{
