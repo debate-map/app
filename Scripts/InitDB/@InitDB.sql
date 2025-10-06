@@ -19,6 +19,7 @@ begin;
 	\ir Tables/nodeRevisions.sql
 	\ir Tables/nodes.sql
 	\ir Tables/nodeTags.sql
+	\ir Tables/nodeLabels.sql
 	\ir Tables/shares.sql
 	\ir Tables/terms.sql
 	\ir Tables/timelines.sql
