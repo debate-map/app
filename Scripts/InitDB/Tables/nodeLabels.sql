@@ -3,6 +3,7 @@ CREATE TABLE app."nodeLabels" (
     "label" text NOT NULL,
     CONSTRAINT "node_labels_pk" PRIMARY KEY ("id")
 );
+ALTER TABLE app."nodeLabels" ADD CONSTRAINT "node_labels_label_uniq" UNIQUE ("label");
 CREATE INDEX "idx_nodeLabels_label" ON app."nodeLabels" ("label");
 
 -- M:N relationship table between nodeLabel and node
