@@ -38,6 +38,7 @@ pub mod commands {
 	pub mod add_node_phrasing;
 	pub mod add_node_revision;
 	pub mod add_node_tag;
+    pub mod add_node_label;
 	pub mod add_notification;
 	pub mod add_share;
 	pub mod add_subscription;
@@ -123,6 +124,7 @@ pub mod node_phrasings;
 pub mod node_ratings;
 pub mod node_revisions;
 pub mod node_tags;
+pub mod node_labels;
 pub mod nodes;
 pub mod notifications;
 pub mod shares;
