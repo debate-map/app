@@ -266,3 +266,20 @@ export function RunCommand_DeleteSubtree(inputFields: {mapId?: string|n, rootNod
 		});
 	});
 }
+
+export type AddNodeLabelInput = {
+	nodeId: string,
+	label: string,
+}
+
+export const RunCommand_AddNodeLabel = async (inputFields: AddNodeLabelInput)=>{
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: AddNodeLabelInput!) {
+				addNodeLabel(input: $input) { nodeId, label }
+			}
+		`,
+		variables: {input: inputFields},
+	});
+	result.data.addNodeLabel as { inserted: boolean }
+};
