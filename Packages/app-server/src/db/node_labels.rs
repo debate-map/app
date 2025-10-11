@@ -15,34 +15,16 @@ use super::general::subtree_collector::params;
 
 const DEFAULT_LABELS_FETCH_LIMIT: i64 = 30;
 
-#[derive(Serialize)]
-pub struct NodeLabel {
-    pub id: String,
-    pub label: String,
-}
-
-impl TryFrom<Row> for NodeLabel {
-    type Error = Error;
-    fn try_from(row: Row) -> Result<Self, Error> {
-        Ok(Self {
-            id: row.try_get("id")?,
-            label: row.try_get("label")?,
-        })
-    }
-}
-
 #[derive(SimpleObject, Serialize, Deserialize, Clone)]
-pub struct NodeLabelExt {
-    pub id: String,
+pub struct NodeLabel {
     pub label: String,
     /// Total no. of nodes that have used this label
     pub usage_count: i64,
 }
 
-impl NodeLabelExt {
+impl NodeLabel {
     pub fn from_row(row: &Row) -> anyhow::Result<Self> {
         Ok(Self {
-            id: row.try_get("id")?,
             label: row.try_get("label")?,
             usage_count: row.try_get("cnt")?,
         })
@@ -53,16 +35,16 @@ impl NodeLabelExt {
 pub struct NodeLabelsInput {
     /// The maximum number of labels to return, default is [DEFAULT_LABELS_FETCH_LIMIT]
     limit: Option<i64>,
-    /// A search query to filter labels by. If provided, only labels containing this string will be returned
+    /// Text to filter labels by. If provided, only labels containing this string will be returned
     /// else we'll return the most used labels
-    query: Option<String>,
+    search_text: Option<String>,
 }
 
 impl Default for NodeLabelsInput {
     fn default() -> Self {
         Self {
             limit : Some(DEFAULT_LABELS_FETCH_LIMIT),
-            query : None
+            search_text : None
         }
     }
 }
@@ -72,7 +54,7 @@ pub struct QueryShard_NodeLabel;
 
 #[Object]
 impl QueryShard_NodeLabel {
-    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: Option<NodeLabelsInput>) -> Result<Vec<NodeLabelExt>, GQLError> {
+    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: Option<NodeLabelsInput>) -> Result<Vec<NodeLabel>, GQLError> {
         let filter = match filter {
             Some(filter) => filter,
             None => {
@@ -84,22 +66,36 @@ impl QueryShard_NodeLabel {
         let mut anchor = DataAnchorFor1::empty();
         let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
 
-        match filter.query {
-            Some(_query) => {
-                Ok(vec![])
+        match filter.search_text {
+            Some(search_text) => {
+                let like_pattern = format!("{}%", search_text);
+                let query = r#"
+                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    FROM app."node_label" l
+                    WHERE lower(l."label") LIKE lower($1)
+                    GROUP BY l."label"
+                    ORDER BY cnt DESC, l."label" ASC
+                    LIMIT $2;
+                "#;
+
+                let rows: Vec<Row> = ctx.tx
+                    .query_raw(query, params(&[&like_pattern, &limit]))
+                    .await?
+                    .try_collect()
+                    .await?;
+
+                let usages: Vec<NodeLabel> = rows.iter().map(|r| NodeLabel::from_row(r).unwrap()).collect();
+                Ok(usages)
             },
             None => {
                 let query = r#"
-                    SELECT l."id", l."label", COUNT(*) AS cnt
-                    FROM app."label_node" j
-                    JOIN app."nodeLabels" l ON l."id" = j."nodeLabelId"
-                    GROUP BY l."id", l."label"
-                    ORDER BY cnt DESC
-                    LIMIT $1
+                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    FROM app."node_label" l
+                    GROUP BY l."label" ORDER BY cnt DESC, l."label" ASC LIMIT $1;
                 "#;
 
                 let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&limit])).await?.try_collect().await?;
-                let usages: Vec<NodeLabelExt> = rows.iter().map(|row| NodeLabelExt::from_row(row).unwrap()).collect();
+                let usages: Vec<NodeLabel> = rows.iter().map(|row| NodeLabel::from_row(row).unwrap()).collect();
 
                 Ok(usages)
             }
