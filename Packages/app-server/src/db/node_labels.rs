@@ -33,20 +33,12 @@ impl NodeLabel {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeLabelsInput {
-    /// The maximum number of labels to return, default is [DEFAULT_LABELS_FETCH_LIMIT]
-    limit: Option<i64>,
+    limit: i64,
     /// Text to filter labels by. If provided, only labels containing this string will be returned
     /// else we'll return the most used labels
     search_text: Option<String>,
-}
-
-impl Default for NodeLabelsInput {
-    fn default() -> Self {
-        Self {
-            limit : Some(DEFAULT_LABELS_FETCH_LIMIT),
-            search_text : None
-        }
-    }
+    /// If provided, only labels used by the specified node will be returned
+    node_id: Option<String>,
 }
 
 #[derive(Default)]
@@ -54,51 +46,68 @@ pub struct QueryShard_NodeLabel;
 
 #[Object]
 impl QueryShard_NodeLabel {
-    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: Option<NodeLabelsInput>) -> Result<Vec<NodeLabel>, GQLError> {
-        let filter = match filter {
-            Some(filter) => filter,
-            None => {
-                NodeLabelsInput::default()
-            }
-        };
-        let limit = filter.limit.unwrap_or(DEFAULT_LABELS_FETCH_LIMIT);
-
+    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: NodeLabelsInput) -> Result<Vec<NodeLabel>, GQLError> {
+        let limit = filter.limit;
         let mut anchor = DataAnchorFor1::empty();
         let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
 
-        match filter.search_text {
-            Some(search_text) => {
-                let like_pattern = format!("{}%", search_text);
+        let rows: Vec<Row> = match (filter.search_text.as_ref(), filter.node_id.as_ref()) {
+            (Some(search_text), Some(node_id)) => {
+                let like_pattern = format!("{search_text}%");
                 let query = r#"
                     SELECT l."label", COUNT(*)::bigint AS cnt
-                    FROM app."node_label" l
-                    WHERE lower(l."label") LIKE lower($1)
+                    FROM app."nodeToLabel" l
+                    WHERE l."label" LIKE $1
+                      AND l."nodeId" = $2
+                    GROUP BY l."label"
+                    ORDER BY cnt DESC, l."label" ASC
+                    LIMIT $3;
+                "#;
+                ctx.tx.query_raw(query, params(&[&like_pattern, node_id, &limit])).await?.try_collect().await?
+            }
+
+            (None, Some(node_id)) => {
+                let query = r#"
+                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    FROM app."nodeToLabel" l
+                    WHERE l."nodeId" = $1
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label" ASC
                     LIMIT $2;
                 "#;
+                ctx.tx.query_raw(query, params(&[node_id, &limit])).await?.try_collect().await?
+            }
 
-                let rows: Vec<Row> = ctx.tx
-                    .query_raw(query, params(&[&like_pattern, &limit]))
-                    .await?
-                    .try_collect()
-                    .await?;
-
-                let usages: Vec<NodeLabel> = rows.iter().map(|r| NodeLabel::from_row(r).unwrap()).collect();
-                Ok(usages)
-            },
-            None => {
+            (Some(search_text), None) => {
+                let like_pattern = format!("{search_text}%");
                 let query = r#"
                     SELECT l."label", COUNT(*)::bigint AS cnt
-                    FROM app."node_label" l
-                    GROUP BY l."label" ORDER BY cnt DESC, l."label" ASC LIMIT $1;
+                    FROM app."nodeToLabel" l
+                    WHERE l."label" LIKE $1
+                    GROUP BY l."label"
+                    ORDER BY cnt DESC, l."label" ASC
+                    LIMIT $2;
                 "#;
-
-                let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&limit])).await?.try_collect().await?;
-                let usages: Vec<NodeLabel> = rows.iter().map(|row| NodeLabel::from_row(row).unwrap()).collect();
-
-                Ok(usages)
+                ctx.tx.query_raw(query, params(&[&like_pattern, &limit])).await?.try_collect().await?
             }
-        }
+
+            (None, None) => {
+                let query = r#"
+                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    FROM app."nodeToLabel" l
+                    GROUP BY l."label"
+                    ORDER BY cnt DESC, l."label" ASC
+                    LIMIT $1;
+                "#;
+                ctx.tx.query_raw(query, params(&[&limit])).await?.try_collect().await?
+            }
+        };
+
+        let usages: Vec<NodeLabel> = rows.iter()
+            .map(|r| NodeLabel::from_row(r).unwrap())
+            .collect();
+
+        Ok(usages)
+
     }
 }
