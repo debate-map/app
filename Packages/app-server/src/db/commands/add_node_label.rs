@@ -21,8 +21,9 @@ pub struct AddNodeLabelInput {
 }
 
 #[derive(SimpleObject, Debug)]
-pub struct AddNodeLabelResult{
-    pub usage_count: i64,
+pub struct AddNodeLabelResult {
+    /// Whether a new label was actually added (true) or if the label already existed on that node (false)
+    pub inserted: bool,
 }
 
 #[derive(Default)]
@@ -37,37 +38,29 @@ impl MutationShard_AddNodeLabel {
 
 pub async fn add_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeLabelInput, _extras: NoExtras) -> Result<AddNodeLabelResult, Error> {
     let AddNodeLabelInput { label, node_id} = input;
-    let usage_count : i64 = {
-        let query = r#"
+    let inserted : bool = {
+         let query = r#"
             WITH n AS (
                 SELECT 1 FROM app."nodes" WHERE "id" = $1 FOR SHARE
             ),
             ins AS (
-                INSERT INTO app."nodeLabels" ("id","label")
-                SELECT $2, $3
+                INSERT INTO app."nodeToLabel" ("nodeId","label","createdAt","creator")
+                SELECT $1, $2, $3, $4
                 FROM n
-                ON CONFLICT ("label")
-                DO UPDATE SET "label" = EXCLUDED."label"
-                RETURNING "id"
-            ),
-            link AS (
-                INSERT INTO app."label_node" ("nodeLabelId","nodeId","createdAt","creator")
-                SELECT ins."id", $1, $4, $5
-                FROM ins
-                RETURNING "nodeLabelId"
+                ON CONFLICT ("nodeId","label") DO NOTHING
+                RETURNING 1
             )
-            SELECT COUNT(*)::BIGINT AS "usage_count"
-            FROM app."label_node"
-            WHERE "nodeLabelId" = (SELECT "nodeLabelId" FROM link)
+            SELECT EXISTS(SELECT 1 FROM ins) AS "inserted"
+            FROM n
         "#;
 
-        let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&node_id, &new_uuid_v4_as_b64(), &label, &time_since_epoch_ms_i64(), &actor.id.to_string()])).await?.try_collect().await?;
+        let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&node_id, &label, &time_since_epoch_ms_i64(), &actor.id.to_string()])).await?.try_collect().await?;
         match rows.len() {
             0 => bail!("Node with ID {node_id} does not exist"),
-            1 => rows[0].try_get("usage_count")?,
+            1 => rows[0].try_get("inserted")?,
             _ => bail!("Unexpectedly got multiple rows when trying to add node label '{label}'"),
         }
     };
 
-    Ok(AddNodeLabelResult { usage_count })
+    Ok(AddNodeLabelResult { inserted })
 }
