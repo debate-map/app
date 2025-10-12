@@ -53,6 +53,7 @@ use crate::db::commands::update_timeline_step::MutationShard_UpdateTimelineStep;
 use crate::db::commands::update_user::MutationShard_UpdateUser;
 use crate::db::commands::update_user_hidden::MutationShard_UpdateUserHidden;
 use crate::db::commands::add_node_label::MutationShard_AddNodeLabel;
+use crate::db::commands::delete_node_label::MutationShard_DeleteNodeLabel;
 use crate::db::feedback_proposals::{QueryShard_Proposal, SubscriptionShard_Proposal};
 use crate::db::feedback_user_infos::{QueryShard_UserInfo, SubscriptionShard_UserInfo};
 use crate::db::general::backups::QueryShard_General_Backups;
@@ -141,7 +142,7 @@ wrap_slow_macros! {
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
-	QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators,
+	QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators, QueryShard_NodeLabel,
 	// table-specific
 	QueryShard_User, QueryShard_UserHidden,
 	QueryShard_GlobalData,
@@ -156,7 +157,7 @@ pub struct QueryRoot(
 	//QueryShard_RunCommandBatch,
 	QueryShard_Proposal,
 	QueryShard_UserInfo,
-	QueryShard_Node, QueryShard_NodeLink, QueryShard_NodeEdit, QueryShard_NodePhrasing, QueryShard_NodeRating, QueryShard_NodeRevision, QueryShard_NodeTag, QueryShard_NodeLabel,
+	QueryShard_Node, QueryShard_NodeLink, QueryShard_NodeEdit, QueryShard_NodePhrasing, QueryShard_NodeRating, QueryShard_NodeRevision, QueryShard_NodeTag,
 	QueryShard_Share,
 );
 
@@ -182,6 +183,7 @@ pub struct MutationRoot(
 	MutationShard_TransferNodes,
 	MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
     MutationShard_AddNodeLabel,
+    MutationShard_DeleteNodeLabel
 );
 
 #[derive(MergedSubscription, Default)]

@@ -56,6 +56,7 @@ pub mod commands {
 	pub mod delete_node_rating;
 	pub mod delete_node_revision;
 	pub mod delete_node_tag;
+    pub mod delete_node_label;
 	pub mod delete_share;
 	pub mod delete_term;
 	pub mod delete_timeline;
