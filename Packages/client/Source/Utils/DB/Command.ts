@@ -277,7 +277,7 @@ export const RunCommand_AddNodeLabel = async (inputFields: AddNodeLabelInput)=>{
 	const result = await apolloClient.mutate({
 		mutation: gql`
 			mutation($input: AddNodeLabelInput!) {
-				addNodeLabel(input: $input) { nodeId, label }
+				addNodeLabel(input: $input) { inserted }
 			}
 		`,
 		variables: {input: inputFields},
@@ -289,7 +289,7 @@ export const RunCommand_DeleteNodeLabel = async (inputFields: DeleteNodeLabelInp
 	const result = await apolloClient.mutate({
 		mutation: gql`
 			mutation($input: DeleteNodeLabelInput!) {
-				deleteNodeLabel(input: $input) { nodeId, label }
+				deleteNodeLabel(input: $input) { __typename }
 			}
 		`,
 		variables: {input: inputFields},
