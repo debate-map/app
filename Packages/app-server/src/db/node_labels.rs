@@ -55,7 +55,7 @@ impl QueryShard_NodeLabel {
             (Some(search_text), Some(node_id)) => {
                 let like_pattern = format!("{search_text}%");
                 let query = r#"
-                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
                     FROM app."nodeToLabel" l
                     WHERE l."label" LIKE $1
                       AND l."nodeId" = $2
@@ -65,23 +65,22 @@ impl QueryShard_NodeLabel {
                 "#;
                 ctx.tx.query_raw(query, params(&[&like_pattern, node_id, &limit])).await?.try_collect().await?
             }
-
             (None, Some(node_id)) => {
                 let query = r#"
-                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    SELECT l."label", COUNT(DISTINCT n."nodeId")::bigint AS cnt
                     FROM app."nodeToLabel" l
+                    JOIN app."nodeToLabel" n USING ("label")
                     WHERE l."nodeId" = $1
                     GROUP BY l."label"
-                    ORDER BY cnt DESC, l."label" ASC
+                    ORDER BY cnt DESC, l."label"
                     LIMIT $2;
                 "#;
                 ctx.tx.query_raw(query, params(&[node_id, &limit])).await?.try_collect().await?
             }
-
             (Some(search_text), None) => {
                 let like_pattern = format!("{search_text}%");
                 let query = r#"
-                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
                     FROM app."nodeToLabel" l
                     WHERE l."label" LIKE $1
                     GROUP BY l."label"
@@ -90,10 +89,9 @@ impl QueryShard_NodeLabel {
                 "#;
                 ctx.tx.query_raw(query, params(&[&like_pattern, &limit])).await?.try_collect().await?
             }
-
             (None, None) => {
                 let query = r#"
-                    SELECT l."label", COUNT(*)::bigint AS cnt
+                    SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
                     FROM app."nodeToLabel" l
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label" ASC

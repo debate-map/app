@@ -282,7 +282,8 @@ export const RunCommand_AddNodeLabel = async (inputFields: AddNodeLabelInput)=>{
 		`,
 		variables: {input: inputFields},
 	});
-	result.data.addNodeLabel as {inserted: boolean}
+
+	return result.data.addNodeLabel as {inserted: boolean};
 };
 
 export const RunCommand_DeleteNodeLabel = async (inputFields: DeleteNodeLabelInput)=>{
