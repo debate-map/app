@@ -4,7 +4,7 @@ CREATE TABLE app."nodeToLabel" (
     "label" text NOT NULL,
     "createdAt" bigint NOT NULL,
     "creator" text NOT NULL,
-    CONSTRAINT "node_to_label_pk" PRIMARY KEY ("nodeId", "label"),
+    CONSTRAINT "node_to_label_pk" PRIMARY KEY ("nodeId", "label", "creator"),
     CONSTRAINT "node_to_label_node_fkey" FOREIGN KEY ("nodeId") REFERENCES app.nodes(id) ON DELETE CASCADE
 );
 

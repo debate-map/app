@@ -47,7 +47,7 @@ pub async fn add_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: b
                 INSERT INTO app."nodeToLabel" ("nodeId","label","createdAt","creator")
                 SELECT $1, $2, $3, $4
                 FROM n
-                ON CONFLICT ("nodeId","label") DO NOTHING
+                ON CONFLICT ("nodeId","label","creator") DO NOTHING
                 RETURNING 1
             )
             SELECT EXISTS(SELECT 1 FROM ins) AS "inserted"
