@@ -29,16 +29,29 @@ pub struct DeleteNodeLabelInput {
 
 #[derive(SimpleObject, Debug)]
 pub struct DeleteNodeLabelResult {
-    #[graphql(name = "_useTypenameFieldInstead")] __: String,
+    /// Whether at least one creator still has this label on this node(on which the label was deleted)
+    pub still_creator_left: bool,
 }
 
 }
 
 pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodeLabelInput, _extras: NoExtras) -> anyhow::Result<DeleteNodeLabelResult> {
     let DeleteNodeLabelInput { node_id, label } = input;
+
     let query = r#"
-        DELETE FROM app."nodeToLabel" WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3
-        RETURNING 1
+        WITH del AS (
+          DELETE FROM app."nodeToLabel"
+          WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3 -- ::uuid if needed
+          RETURNING 1
+        ),
+        remaining AS (
+          SELECT EXISTS(
+            SELECT 1 FROM app."nodeToLabel"
+            WHERE "nodeId" = $1 AND "label" = $2
+          ) AS still_creator_left
+        )
+        SELECT EXISTS(SELECT 1 FROM del) AS deleted_self, r.still_creator_left
+        FROM remaining r;
     "#;
 
     let rows: Vec<Row> = ctx.tx
@@ -47,9 +60,12 @@ pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root
         .try_collect()
         .await?;
 
-    if rows.is_empty() {
+    let deleted_self: bool = rows[0].try_get("deleted_self")?;
+    let still_creator_left: bool = rows[0].try_get("still_creator_left")?;
+
+    if !deleted_self {
         bail!("Node with ID {node_id} does not exist or label not found for this creator");
     }
 
-    Ok(DeleteNodeLabelResult { __: gql_placeholder() })
+    Ok(DeleteNodeLabelResult { still_creator_left })
 }
