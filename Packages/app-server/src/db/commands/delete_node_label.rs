@@ -34,34 +34,22 @@ pub struct DeleteNodeLabelResult {
 
 }
 
-pub async fn delete_node_label(ctx: &AccessorContext<'_>, _actor: &User, _is_root: bool, input: DeleteNodeLabelInput, _extras: NoExtras) -> anyhow::Result<DeleteNodeLabelResult> {
+pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodeLabelInput, _extras: NoExtras) -> anyhow::Result<DeleteNodeLabelResult> {
     let DeleteNodeLabelInput { node_id, label } = input;
     let query = r#"
-        WITH n AS (
-            SELECT 1
-            FROM app."nodes"
-            WHERE "id" = $1
-            FOR KEY SHARE
-        ),
-        del AS (
-            DELETE FROM app."nodeToLabel" t
-            USING n
-            WHERE t."nodeId" = $1 AND t."label" = $2
-            RETURNING 1
-        )
-        SELECT EXISTS(SELECT 1 FROM del) AS "deleted"
-        FROM n
+        DELETE FROM app."nodeToLabel" WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3
+        RETURNING 1
     "#;
 
     let rows: Vec<Row> = ctx.tx
-        .query_raw(query, params(&[&node_id, &label]))
+        .query_raw(query, params(&[&node_id, &label, &actor.id.to_string()]))
         .await?
         .try_collect()
         .await?;
 
-    match rows.len() {
-        0 => bail!("Node with ID {node_id} does not exist"),
-        1 => Ok(DeleteNodeLabelResult { __: gql_placeholder() }),
-        _ => bail!("Unexpectedly got multiple rows when trying to delete node label '{label}'"),
+    if rows.is_empty() {
+        bail!("Node with ID {node_id} does not exist or label not found for this creator");
     }
+
+    Ok(DeleteNodeLabelResult { __: gql_placeholder() })
 }
