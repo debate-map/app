@@ -41,17 +41,16 @@ pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root
     let query = r#"
         WITH del AS (
           DELETE FROM app."nodeToLabel"
-          WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3 -- ::uuid if needed
+          WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3
           RETURNING 1
-        ),
-        remaining AS (
-          SELECT EXISTS(
-            SELECT 1 FROM app."nodeToLabel"
-            WHERE "nodeId" = $1 AND "label" = $2
-          ) AS still_creator_left
         )
-        SELECT EXISTS(SELECT 1 FROM del) AS deleted_self, r.still_creator_left
-        FROM remaining r;
+        SELECT
+          EXISTS(SELECT 1 FROM del) AS deleted_self,
+          EXISTS(
+            SELECT 1
+            FROM app."nodeToLabel"
+            WHERE "nodeId" = $1 AND "label" = $2 AND "creator" <> $3
+          ) AS still_creator_left;
     "#;
 
     let rows: Vec<Row> = ctx.tx
