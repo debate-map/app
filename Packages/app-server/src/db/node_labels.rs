@@ -11,6 +11,7 @@ use crate::utils::db::filter::FilterInput;
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx;
+use super::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx;
 use super::general::subtree_collector::params;
 
 const DEFAULT_LABELS_FETCH_LIMIT: i64 = 30;
@@ -20,6 +21,9 @@ pub struct NodeLabel {
     pub label: String,
     /// Total no. of nodes that have used this label
     pub usage_count: i64,
+    /// Whether the current user is the creator of this label
+    /// if the user has provided a node id in [NodeLabelsInput] to filter by (otherwise this will always be None)
+    pub is_creator: Option<bool>,
 }
 
 impl NodeLabel {
@@ -27,6 +31,7 @@ impl NodeLabel {
         Ok(Self {
             label: row.try_get("label")?,
             usage_count: row.try_get("cnt")?,
+            is_creator: row.try_get("is_creator").ok(),
         })
     }
 }
@@ -51,6 +56,14 @@ impl QueryShard_NodeLabel {
         let mut anchor = DataAnchorFor1::empty();
         let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
 
+        // we only use actor information to determine whether they're the creator of a label or not(when a node_id is provided),
+        // but this isn't crucial information, if it's being accessed publicly, we can put out the actor as empty string
+        // which will basically result in is_creator to be false
+        let actor = match get_user_info_from_gql_ctx(gql_ctx, &ctx).await{
+            Ok(user) => user.id.to_string(),
+            Err(_) => String::from(""),
+        };
+
         let rows: Vec<Row> = match (filter.search_text.as_ref(), filter.node_id.as_ref()) {
             (Some(search_text), Some(node_id)) => {
                 let like_pattern = format!("{search_text}%");
@@ -67,15 +80,17 @@ impl QueryShard_NodeLabel {
             }
             (None, Some(node_id)) => {
                 let query = r#"
-                    SELECT l."label", COUNT(DISTINCT n."nodeId")::bigint AS cnt
+                    SELECT l."label",
+                           COUNT(DISTINCT n."nodeId")::bigint AS cnt,
+                           BOOL_OR(l."creator" = $2) AS is_creator
                     FROM app."nodeToLabel" l
                     JOIN app."nodeToLabel" n USING ("label")
                     WHERE l."nodeId" = $1
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label"
-                    LIMIT $2;
+                    LIMIT $3;
                 "#;
-                ctx.tx.query_raw(query, params(&[node_id, &limit])).await?.try_collect().await?
+                ctx.tx.query_raw(query, params(&[node_id, &actor, &limit])).await?.try_collect().await?
             }
             (Some(search_text), None) => {
                 let like_pattern = format!("{search_text}%");

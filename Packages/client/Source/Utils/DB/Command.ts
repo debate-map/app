@@ -271,7 +271,12 @@ export type AddNodeLabelInput = {
 	nodeId: string,
 	label: string,
 }
-export type DeleteNodeLabelInput = AddNodeLabelInput;
+
+export type DeleteNodeLabelInput = {
+	nodeId: string,
+	label: string,
+	forAllCreators: boolean,
+};
 
 export const RunCommand_AddNodeLabel = async (inputFields: AddNodeLabelInput)=>{
 	const result = await apolloClient.mutate({
@@ -290,10 +295,11 @@ export const RunCommand_DeleteNodeLabel = async (inputFields: DeleteNodeLabelInp
 	const result = await apolloClient.mutate({
 		mutation: gql`
 			mutation($input: DeleteNodeLabelInput!) {
-				deleteNodeLabel(input: $input) { __typename }
+				deleteNodeLabel(input: $input) { stillCreatorLeft }
 			}
 		`,
 		variables: {input: inputFields},
 	});
-	result.data.addNodeLabel as {}
+
+	return result.data.deleteNodeLabel as {stillCreatorLeft: boolean};
 };
