@@ -42,7 +42,7 @@ export const SearchPanel = observer_mgl(()=>{
 				queryStr = queryStr.slice(0, -" /unrestricted".length);
 			}
 
-			if (Validate("UUID", queryStrRef.current) == null) {
+			if (Validate("UUID", queryStr) == null) {
 				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 				if (nodeRevisionMatch) {
 					RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
@@ -50,7 +50,7 @@ export const SearchPanel = observer_mgl(()=>{
 					});
 					return;
 				}
-				const node = await GetAsync(()=>GetNodeL2(queryStrRef.current));
+				const node = await GetAsync(()=>GetNodeL2(queryStr));
 				if (node) {
 					RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 						store.main.search.searchResults_nodeIDs = [node.id];
