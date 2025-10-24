@@ -44,7 +44,7 @@ pub async fn add_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: b
                 SELECT 1 FROM app."nodes" WHERE "id" = $1 FOR SHARE
             ),
             ins AS (
-                INSERT INTO app."nodeToLabel" ("nodeId","label","createdAt","creator")
+                INSERT INTO app."nodeLabels" ("nodeId","label","createdAt","creator")
                 SELECT $1, $2, $3, $4
                 FROM n
                 ON CONFLICT ("nodeId","label","creator") DO NOTHING

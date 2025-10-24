@@ -44,14 +44,14 @@ pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root
 	    ensure!(is_user_admin(actor), "Only admins can delete labels for all creators in a node");
         let query_all = r#"
             WITH del AS (
-              DELETE FROM app."nodeToLabel"
+              DELETE FROM app."nodeLabels"
               WHERE "nodeId" = $1 AND "label" = $2
               RETURNING 1
             )
             SELECT
               EXISTS(SELECT 1 FROM del) AS deleted_any,
               EXISTS(
-                SELECT 1 FROM app."nodeToLabel"
+                SELECT 1 FROM app."nodeLabels"
                 WHERE "nodeId" = $1 AND "label" = $2
               ) AS still_creator_left;
         "#;
@@ -74,7 +74,7 @@ pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root
     }else {
         let query = r#"
             WITH del AS (
-              DELETE FROM app."nodeToLabel"
+              DELETE FROM app."nodeLabels"
               WHERE "nodeId" = $1 AND "label" = $2 AND "creator" = $3
               RETURNING 1
             )
@@ -82,7 +82,7 @@ pub async fn delete_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root
               EXISTS(SELECT 1 FROM del) AS deleted_self,
               EXISTS(
                 SELECT 1
-                FROM app."nodeToLabel"
+                FROM app."nodeLabels"
                 WHERE "nodeId" = $1 AND "label" = $2 AND "creator" <> $3
               ) AS still_creator_left;
         "#;

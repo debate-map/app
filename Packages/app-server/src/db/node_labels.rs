@@ -69,7 +69,7 @@ impl QueryShard_NodeLabel {
                 let like_pattern = format!("{search_text}%");
                 let query = r#"
                     SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
-                    FROM app."nodeToLabel" l
+                    FROM app."nodeLabels" l
                     WHERE l."label" LIKE $1
                       AND l."nodeId" = $2
                     GROUP BY l."label"
@@ -83,8 +83,8 @@ impl QueryShard_NodeLabel {
                     SELECT l."label",
                            COUNT(DISTINCT n."nodeId")::bigint AS cnt,
                            BOOL_OR(l."creator" = $2) AS is_creator
-                    FROM app."nodeToLabel" l
-                    JOIN app."nodeToLabel" n USING ("label")
+                    FROM app."nodeLabels" l
+                    JOIN app."nodeLabels" n USING ("label")
                     WHERE l."nodeId" = $1
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label"
@@ -96,7 +96,7 @@ impl QueryShard_NodeLabel {
                 let like_pattern = format!("{search_text}%");
                 let query = r#"
                     SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
-                    FROM app."nodeToLabel" l
+                    FROM app."nodeLabels" l
                     WHERE l."label" LIKE $1
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label" ASC
@@ -107,7 +107,7 @@ impl QueryShard_NodeLabel {
             (None, None) => {
                 let query = r#"
                     SELECT l."label", COUNT(DISTINCT l."nodeId")::bigint AS cnt
-                    FROM app."nodeToLabel" l
+                    FROM app."nodeLabels" l
                     GROUP BY l."label"
                     ORDER BY cnt DESC, l."label" ASC
                     LIMIT $1;
