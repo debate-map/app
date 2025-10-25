@@ -22,7 +22,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::{pin::Pin, task::Poll, time::Duration};
 use tracing::info;
-
 use crate::db::_general::GenericMutation_Result;
 use crate::db::commands::clone_subtree::clone_subtree;
 use crate::db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx;
@@ -56,11 +55,52 @@ pub struct SearchGloballyInput {
 	alt_phrasing_rank_factor: Option<f64>,
 	quote_rank_factor: Option<f64>,
 }
+
+impl SearchGloballyInput {
+    /// Extracts the label search term from the query (if present at the front) and mutates `self.query` to remove it.
+    ///
+    /// Supported label formats:
+    /// - `label:someLabel` OR `label: someLabel`
+    /// - `label:"some label with spaces"` OR `label: "some label with spaces"`
+    /// and anythiing beyond this is kept in `self.query`.
+    pub fn extract_label(&mut self) -> Option<String> {
+        let query = self.query.trim();
+
+        if let Some(after_prefix) = query.strip_prefix("label:") {
+            let rest = after_prefix.trim_start();
+
+            let (label, remaining) = if let Some(after_quote) = rest.strip_prefix('"') {
+                if let Some(end_idx) = after_quote.find('"') {
+                    let (label, after_label) = after_quote.split_at(end_idx);
+                    (label.trim().to_string(), after_label[1..].trim_start().to_string())
+                } else {
+                    (after_quote.trim().to_string(), String::new())
+                }
+            } else {
+                let mut parts = rest.splitn(2, ' ');
+                let label = parts.next().unwrap_or_default().trim().to_string();
+                let remaining = parts.next().unwrap_or("").trim().to_string();
+                (label, remaining)
+            };
+
+            self.query = remaining;
+            return if label.is_empty() { None } else { Some(label) };
+        }
+
+        None
+    }
+}
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct SearchGloballyResult {
 	node_id: String,
 	rank: f64,
 	r#type: String,
+    /// Highlighted snippet of matched text
+    /// can be empty when:
+    ///   - the search query (q.q) was NULL (label-only search)
+    /// SQL uses COALESCE to ensure this is never NULL
+    /// Eg. "this is <b>searched text</b> found"
 	found_text: String,
 	node_text: String,
 }
@@ -99,7 +139,8 @@ pub struct SearchForExternalIdsResult {
 pub struct QueryShard_General_Search;
 #[Object]
 impl QueryShard_General_Search {
-	async fn search_globally(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchGloballyInput) -> Result<Vec<SearchGloballyResult>, GQLError> {
+	async fn search_globally(&self, gql_ctx: &async_graphql::Context<'_>, mut input: SearchGloballyInput) -> Result<Vec<SearchGloballyResult>, GQLError> {
+        let label = input.extract_label();
 		let start = time_since_epoch_ms_i64();
 		let SearchGloballyInput { query, search_limit, search_offset, alt_phrasing_rank_factor, quote_rank_factor } = input;
 		let search_limit_i32 = search_limit as i32;
@@ -117,9 +158,19 @@ impl QueryShard_General_Search {
 			let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
 			//let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, true, IsolationLevel::ReadCommitted).await?;
 			info!("Test3:{}", time_since_epoch_ms_i64() - start);
-			let rows_test = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5)"#, params(&[
-				&query, &search_limit_i32, &search_offset_i32, &alt_phrasing_rank_factor_f64, &quote_rank_factor_f64,
-			])).await;
+			let rows_test = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5, $6)"#, params(&[
+				&query,
+                match label{
+                    Some(ref label) => label,
+                    None => &None::<String>,
+                },
+                &search_limit_i32,
+                &search_offset_i32,
+                &alt_phrasing_rank_factor_f64,
+                &quote_rank_factor_f64,]
+                )
+            ).await;
+
 			info!("Test3.5:{}", time_since_epoch_ms_i64() - start);
 			let rows: Vec<Row> = rows_test?.try_collect().await?;
 			info!("Test4:{}", time_since_epoch_ms_i64() - start);
