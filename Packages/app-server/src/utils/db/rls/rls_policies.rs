@@ -33,6 +33,7 @@ use crate::{
 		timelines::Timeline,
 		user_hiddens::UserHidden,
 		users::User,
+        node_labels::NodeLabel,
 	},
 	links::db_live_cache::get_access_policy_cached,
 };
@@ -136,6 +137,12 @@ impl UsesRLS for NodeRevision {
 impl UsesRLS for NodeTag {
 	fn can_access_cached(&self, user_id: Option<&str>) -> bool {
 		is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+	}
+}
+impl UsesRLS for NodeLabel {
+	fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        // TODO: make it similar to NodeTag when implementing access policies for NodeLabels
+		is_user_admin_or_creator(user_id, &self.creator)
 	}
 }
 impl UsesRLS for TimelineStep {

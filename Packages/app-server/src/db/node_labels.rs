@@ -1,4 +1,4 @@
-use futures_util::TryStreamExt;
+use futures_util::{stream, Stream, TryFutureExt, TryStreamExt};
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::{async_graphql, GQLError};
@@ -8,16 +8,37 @@ use rust_shared::tokio_postgres::{IsolationLevel, Row};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::gql_set_impl;
 use crate::utils::db::filter::FilterInput;
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx;
 use super::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx;
 use super::general::subtree_collector::params;
+use rust_shared::{SubError};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
+use rust_shared::rust_macros::wrap_slow_macros;
 
 const DEFAULT_LABELS_FETCH_LIMIT: i64 = 30;
 
+wrap_slow_macros! {
+
 #[derive(SimpleObject, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct NodeLabel {
+    pub id: String,
+    pub created_at: i64,
+    pub creator: String,
+    pub label: String,
+    pub node_id: String,
+}
+
+impl From<Row> for NodeLabel {
+	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(SimpleObject, Serialize, Deserialize, Clone)]
+pub struct NodeLabelExt {
     pub label: String,
     /// Total no. of nodes that have used this label
     pub usage_count: i64,
@@ -26,7 +47,7 @@ pub struct NodeLabel {
     pub is_creator: Option<bool>,
 }
 
-impl NodeLabel {
+impl NodeLabelExt {
     pub fn from_row(row: &Row) -> anyhow::Result<Self> {
         Ok(Self {
             label: row.try_get("label")?,
@@ -51,7 +72,7 @@ pub struct QueryShard_NodeLabel;
 
 #[Object]
 impl QueryShard_NodeLabel {
-    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: NodeLabelsInput) -> Result<Vec<NodeLabel>, GQLError> {
+    async fn nodeLabels(&self, gql_ctx: &Context<'_>, filter: NodeLabelsInput) -> Result<Vec<NodeLabelExt>, GQLError> {
         let limit = filter.limit;
         let mut anchor = DataAnchorFor1::empty();
         let ctx = AccessorContext::new_read_base(&mut anchor, Some(gql_ctx), &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, false, IsolationLevel::ReadCommitted).await?;
@@ -116,11 +137,27 @@ impl QueryShard_NodeLabel {
             }
         };
 
-        let usages: Vec<NodeLabel> = rows.iter()
-            .map(|r| NodeLabel::from_row(r).unwrap())
+        let usages: Vec<NodeLabelExt> = rows.iter()
+            .map(|r| NodeLabelExt::from_row(r).unwrap())
             .collect();
 
         Ok(usages)
-
     }
+}
+
+gql_set_impl!(NodeLabel);
+
+#[derive(Default)]
+pub struct SubscriptionShard_NodeLabel;
+
+#[Subscription]
+impl SubscriptionShard_NodeLabel {
+    async fn nodeLabels<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeLabel, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodeLabel, GQLSet_NodeLabel>(ctx, "nodeLabels", filter, None).await
+    }
+    async fn nodeLabel<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeLabel>, SubError>> + 'a {
+        handle_generic_gql_doc_subscription::<NodeLabel>(ctx, "nodeLabels", id).await
+    }
+}
+
 }

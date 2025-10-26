@@ -18,6 +18,7 @@ import {GlobalData} from "./DB/globalData/@GlobalData.js";
 import {Timeline, TimelineStep} from "./DB.js";
 import {Notification} from "./DB/notifications/@Notification.js";
 import {Subscription} from "./DB/subscriptions/@Subscription.js";
+import {NodeLabel} from "./DB/nodeLabels/@NodeLabel.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface UT_DBShape extends GraphDBShape {}
@@ -53,6 +54,7 @@ export class GraphDBShape {
 	nodePhrasings = DefineCollection(NodePhrasing);
 	nodeLinks = DefineCollection(NodeLink);
 	nodeTags = DefineCollection(NodeTag);
+	nodeLabels = DefineCollection(NodeLabel);
 	notifications = DefineCollection(Notification);
 	shares = DefineCollection(Share);
 	subscriptions = DefineCollection(Subscription);

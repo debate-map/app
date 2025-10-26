@@ -41,11 +41,11 @@ pub async fn add_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: b
     let inserted : bool = {
          let query = r#"
             WITH n AS (
-                SELECT 1 FROM app."nodes" WHERE "id" = $1 FOR SHARE
+                SELECT 1 FROM app."nodes" WHERE "id" = $2 FOR SHARE
             ),
             ins AS (
-                INSERT INTO app."nodeLabels" ("nodeId","label","createdAt","creator")
-                SELECT $1, $2, $3, $4
+                INSERT INTO app."nodeLabels" ("id", "nodeId", "label", "createdAt", "creator")
+                SELECT $1, $2, $3, $4, $5
                 FROM n
                 ON CONFLICT ("nodeId","label","creator") DO NOTHING
                 RETURNING 1
@@ -54,7 +54,7 @@ pub async fn add_node_label(ctx: &AccessorContext<'_>, actor: &User, _is_root: b
             FROM n
         "#;
 
-        let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&node_id, &label, &time_since_epoch_ms_i64(), &actor.id.to_string()])).await?.try_collect().await?;
+        let rows: Vec<Row> = ctx.tx.query_raw(query, params(&[&new_uuid_v4_as_b64(), &node_id, &label, &time_since_epoch_ms_i64(), &actor.id.to_string()])).await?.try_collect().await?;
         match rows.len() {
             0 => bail!("Node with ID {node_id} does not exist"),
             1 => rows[0].try_get("inserted")?,

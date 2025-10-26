@@ -80,7 +80,7 @@ use crate::db::timeline_steps::{QueryShard_TimelineStep, SubscriptionShard_Timel
 use crate::db::timelines::{QueryShard_Timeline, SubscriptionShard_Timeline};
 use crate::db::user_hiddens::{QueryShard_UserHidden, SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, SubscriptionShard_User};
-use crate::db::node_labels::QueryShard_NodeLabel;
+use crate::db::node_labels::{QueryShard_NodeLabel, SubscriptionShard_NodeLabel};
 use crate::router::route_path;
 use crate::store::live_queries::LQStorageArc;
 use crate::store::storage::AppStateArc;
@@ -204,6 +204,7 @@ pub struct SubscriptionRoot(
 	SubscriptionShard_Proposal,
 	SubscriptionShard_UserInfo,
 	SubscriptionShard_Node, SubscriptionShard_NodeLink, SubscriptionShard_NodeEdit, SubscriptionShard_NodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_NodeRevision, SubscriptionShard_NodeTag,
+    SubscriptionShard_NodeLabel,
 	SubscriptionShard_Share,
 );
 

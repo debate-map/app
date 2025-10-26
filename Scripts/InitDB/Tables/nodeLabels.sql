@@ -1,5 +1,6 @@
 -- M:N relationship table between node and label(text)
 CREATE TABLE app."nodeLabels" (
+    "id" text NOT NULL,
     "nodeId" text NOT NULL,
     "label" text NOT NULL,
     "createdAt" bigint NOT NULL,
