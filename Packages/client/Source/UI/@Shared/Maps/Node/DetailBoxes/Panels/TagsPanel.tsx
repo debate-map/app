@@ -78,31 +78,22 @@ const LabelDropdownContent = ({label, usageCount, onClick}: LabelDropdownContent
     );
 };
 
-const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
-	const dropDownRef = useRef<DropDown>(null);
+export type LabelInputAndDropdown_Props = {
+	onLabelChange: (newLabel: string) => void;
+	// labels we want to exclude from the dropdown (e.g. already added labels)
+	excludeLabelsInDropdown?: Set<string>;
+}
 
+export const LabelInputAndDropdown = ({onLabelChange, excludeLabelsInDropdown}: LabelInputAndDropdown_Props) => {
+    const [fetchingLabels, setFetchingLabels] = useState(false);
+	const [searchResult, setSearchResult] = useState<Map<string, NodeLabel>|n>(null);
+
+	const dropDownRef = useRef<DropDown>(null);
 	const reqIdRef = useRef(0);
 	const debounceRef = useRef<NodeJS.Timeout>(null);
+	const [label, setLabel] = useState("");
 
-    const [fetchingLabels, setFetchingLabels] = useState({
-		all: false, // for all the labels for this specific node
-		search: false // for search results when Countadding a new label
-	});
-	const [fetchAllResults, setFetchAllResults] = useState<Map<string, NodeLabel>|n>(null);
-	const [searchResult, setSearchResult] = useState<Map<string, NodeLabel>|n>(null);
-	const [addLabelMode, setAddLabelMode] = useState(false);
-	const [newLabelText, setNewLabelText] = useState("");
-	const [saving, setSaving] = useState(false);
-
-	const fetchAllLabelsForNode = async () => {
-	    setFetchingLabels(prev=>({...prev, all: true}));
-	    try {
-	        const res = await fetchNodeLabels(node.id, null);
-	        setFetchAllResults(res);
-	    } finally {
-	        setFetchingLabels(prev=>({...prev, all: false}));
-	    }
-	};
+	const excludedLabels = excludeLabelsInDropdown ?? new Set<string>();
 
 	// we'll debounce the search input to avoid excessive requests (in case the user types quickly),
 	// and also use a reqId to ignore stale results (if the results come back out-of-order, if one comes late)
@@ -110,17 +101,85 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 		debounceRef.current && clearTimeout(debounceRef.current);
 	    debounceRef.current = setTimeout(async () => {
 	        const id = ++reqIdRef.current;
-	        setFetchingLabels(f => ({ ...f, search: true }));
+	        setFetchingLabels(true);
 	        try {
 	            const res = await fetchNodeLabels(null, text);
 				// we'll ignore stale response
 	            if (id !== reqIdRef.current) return;
 	            setSearchResult(res);
 	        } finally {
-	            if (id === reqIdRef.current)
-	                setFetchingLabels(f => ({ ...f, search: false }));
+	            if (id === reqIdRef.current) setFetchingLabels(false);
 	        }
 	    }, 250);
+	};
+
+	return (
+		<DropDown ref={dropDownRef}>
+		<DropDownTrigger>
+			<TextInput
+				ml={5}
+				instant={true}
+				value={label}
+				onChange={(val)=>{
+					val = val.toLowerCase();
+					fetchLabelsForSearch(val.trim());
+					setLabel(val.toLowerCase())
+					onLabelChange(val);
+				}}
+				onFocus={()=>{
+					if (label.trim().length == 0) {
+						fetchLabelsForSearch("");
+					}
+				}}
+			/>
+		</DropDownTrigger>
+		<DropDownContent style={{ zIndex: zIndexes.dropdown, width: 240, padding: 0, border: "none"}}>
+		    <Column>
+		        {fetchingLabels || searchResult == null ? (
+					// only showing this when search text is empty, btw we can also do this while typing but the user input is faster than fetching speed, so it would be a lot of flickering
+					label.length === 0 && <Row p={2} style={{justifyContent: "center", alignItems: "center"}}>"Loading popular labels..."</Row>
+		        ) : (
+		            <ScrollView style={{maxHeight: 200, height: "100%"}}>
+						{
+							[...searchResult.values()].map((nodeLabel, index)=>{
+								if (!excludedLabels.has(nodeLabel.label.toLowerCase())){
+									return <LabelDropdownContent
+										key={index}
+										label={nodeLabel.label}
+										onClick={()=>{
+											if (MeID() == null) return ShowSignInPopup();
+											setLabel(nodeLabel.label);
+											onLabelChange(nodeLabel.label);
+											dropDownRef.current?.Hide();
+										}}
+										usageCount={nodeLabel.usageCount}
+									/>;
+								}
+							})
+						}
+		            </ScrollView>
+		        )}
+		    </Column>
+		</DropDownContent>
+		</DropDown>
+	);
+}
+
+const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
+    const [fetchingAllLabels, setFetchingAllLabels] = useState(false);
+	const [fetchAllResults, setFetchAllResults] = useState<Map<string, NodeLabel>|n>(null);
+	const [addLabelMode, setAddLabelMode] = useState(false);
+	const [newLabelText, setNewLabelText] = useState("");
+	const [saving, setSaving] = useState(false);
+
+	const fetchAllLabelsForNode = async () => {
+	    setFetchingAllLabels(true);
+	    try {
+	        const res = await fetchNodeLabels(node.id, null);
+	        setFetchAllResults(res);
+	    } finally {
+	        setFetchingAllLabels(false);
+	    }
 	};
 
 	const addLabel = async (label: string, fromTextInput: boolean)=>{
@@ -145,7 +204,6 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 		});
 
 		let res = await RunCommand_DeleteNodeLabel({nodeId: node.id, label, forAllCreators});
-
 		if (!res.stillCreatorLeft){
 			setFetchAllResults(prev=>{
 				if (prev == null) return prev;
@@ -160,7 +218,7 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 		fetchAllLabelsForNode();
 	}, [node.id]);
 
-	if (fetchAllResults == null || fetchingLabels.all) {
+	if (fetchAllResults == null || fetchingAllLabels) {
 		return <Row mt={5} style={{flexWrap: "wrap", gap: 5, justifyContent: "center"}}>
 			Loading...
 		</Row>;
@@ -175,53 +233,7 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 					}}/>}
 					{addLabelMode &&
 					<>
-						<DropDown ref={dropDownRef}>
-							<DropDownTrigger>
-								<TextInput ml={5} instant={true} value={newLabelText}
-									onChange={(val)=>{
-										val = val.toLowerCase();
-										fetchLabelsForSearch(val.trim());
-										setNewLabelText(val.toLowerCase())
-									}}
-									onFocus={()=>{
-										if (newLabelText.trim().length == 0) {
-											fetchLabelsForSearch("");
-										}
-									}}
-									onBlur={()=>{
-										console.log("onBlur");
-									}}
-								/>
-							</DropDownTrigger>
-							<DropDownContent style={{ zIndex: zIndexes.dropdown, width: 240, padding: 0, border: "none"}}>
-							    <Column>
-							        {fetchingLabels.search || searchResult == null ? (
-										// only showing this when search text is empty, btw we can also do this while typing but the user input is faster than fetching speed, so it would be a lot of flickering
-										newLabelText.length === 0 && <Row p={2} style={{justifyContent: "center", alignItems: "center"}}>"Loading popular labels..."</Row>
-							        ) : (
-							            <ScrollView style={{maxHeight: 200, height: "100%"}}>
-											{
-												[...searchResult.values()].map((nodeLabel, index)=>{
-													//  we'll only include those labels that arent already applied to the node
-													if (!fetchAllResults.get(nodeLabel.label)){
-														return <LabelDropdownContent
-															key={index}
-															label={nodeLabel.label}
-															onClick={()=>{
-																if (MeID() == null) return ShowSignInPopup();
-																setNewLabelText(nodeLabel.label);
-																dropDownRef.current?.Hide();
-															}}
-															usageCount={nodeLabel.usageCount}
-														/>;
-													}
-												})
-											}
-							            </ScrollView>
-							        )}
-							    </Column>
-							</DropDownContent>
-						</DropDown>
+						<LabelInputAndDropdown onLabelChange={label=>{setNewLabelText(label.toLowerCase())}} excludeLabelsInDropdown={new Set([...fetchAllResults.keys()])} />
 						<Button ml={5} p="3px 7px" text={saving ? "Saving..." : "Add"} enabled={newLabelText.trim().length > 0 && !fetchAllResults.get(newLabelText) && !saving} onClick={()=>{
 							addLabel(newLabelText, true);
 							setAddLabelMode(false);
@@ -265,7 +277,6 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 					})
 				}
 			</Row>
-
 		</>
 	}
 
