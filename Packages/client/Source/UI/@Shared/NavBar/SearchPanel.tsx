@@ -136,6 +136,7 @@ export const SearchPanel = observer_mgl(()=>{
 				<InfoButton ml={5} text={`
 					* Terms can be excluded from the search results be adding "-" to the start. (eg: climate change -solar)
 					* If you enter the exact ID of a node or node-revision, that matching entry will be shown.
+					* To search nodes with a specific label, use 'label:labelname' or 'label:"multi word label name"', followed by an optional query (e.g., label:environment climate change)
 					* Advanced: If match-by-stem is insufficient, wildcards can be used for basic match-by-contains, but there must be at least one non-wildcard term. (eg: climate chang*)
 				`.AsMultiline(0)}/>
 				<Button ml={5} text="Search" onClick={()=>performSearch()}/>
