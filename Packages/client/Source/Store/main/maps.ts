@@ -1,4 +1,4 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap, NodeLabel} from "dm_common";
 import {makeObservable, observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
 import {ignore, version} from "mobx-sync";
@@ -75,17 +75,21 @@ export class NodeStyleRule {
 	@O ifType: NodeStyleRule_IfType;
 	@O.ref if_lastEditorIs: NodeStyleRuleComp_LastEditorIs;
 	@O.ref if_accessPolicyDoesNotMatch: NodeStyleRuleComp_AccessPolicyDoesNotMatch;
+	@O.ref if_hasLabel: NodeStyleRuleComp_HasLabel;
 
 	@O thenType: NodeStyleRule_ThenType;
 	@O then_setBackgroundColor: NodeStyleRuleComp_SetBackgroundColor;
 
 	// need Partial<NodeL3>, since can be called from GetNodeColor
-	DoesIfCheckPass(node: Partial<NodeL3>) {
+	DoesIfCheckPass(node: Partial<NodeL3>, nodeLabels?: NodeLabel[]) {
 		if (this.ifType == NodeStyleRule_IfType.lastEditorIs) {
 			return node.current?.creator != null && node.current?.creator == this.if_lastEditorIs.user;
 		}
 		if (this.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch) {
 			return node.accessPolicy && !this.if_accessPolicyDoesNotMatch.policyIDs.includes(node.accessPolicy);
+		}
+		if (this.ifType == NodeStyleRule_IfType.hasLabel) {
+			return nodeLabels && nodeLabels.some(nodeLabel=>nodeLabel.label === this.if_hasLabel.label && nodeLabel.nodeId === node.id);
 		}
 		AssertUnreachable(this.ifType);
 	}
@@ -94,16 +98,25 @@ export class NodeStyleRule {
 export enum NodeStyleRule_IfType {
 	"lastEditorIs" = "lastEditorIs",
 	"accessPolicyDoesNotMatch" = "accessPolicyDoesNotMatch",
+	"hasLabel" = "hasLabel",
 }
+
 export const NodeStyleRule_IfType_displayTexts = {
 	[NodeStyleRule_IfType.lastEditorIs]: "node's last editor is",
 	[NodeStyleRule_IfType.accessPolicyDoesNotMatch]: "node's access-policy does not match",
+	[NodeStyleRule_IfType.hasLabel]: "node has label",
 };
+
 export class NodeStyleRuleComp_LastEditorIs {
 	user: string;
 }
+
 export class NodeStyleRuleComp_AccessPolicyDoesNotMatch {
 	policyIDs: (string|null)[] = [];
+}
+
+export class NodeStyleRuleComp_HasLabel {
+	label: string
 }
 
 export enum NodeStyleRule_ThenType {

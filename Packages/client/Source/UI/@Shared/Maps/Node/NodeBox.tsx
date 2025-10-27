@@ -1,4 +1,4 @@
-import {GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
+import {GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS, GetNodeLabels} from "dm_common";
 import React, {Ref, useCallback, useContext, useEffect, useReducer, useRef, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -181,7 +181,8 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		}
 	})
 
-	const backgroundColor = GetNodeColor(node);
+	const nodeLabels = GetNodeLabels(node.id);
+	const backgroundColor = GetNodeColor(node, "background", true, nodeLabels);
 	let outlineColor = GetChangeTypeOutlineColor(changeType);
 	let outlineThickness = 1;
 

@@ -3,7 +3,7 @@ import {NodeStyleRule, NodeStyleRule_ThenType} from "Store/main/maps";
 import {GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetPlaybackVisiblePaths} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {SLMode} from "UI/@SL/SL";
-import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeType, Polarity} from "dm_common";
+import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeLabel, NodeType, Polarity} from "dm_common";
 import {Assert, CE} from "js-vextensions";
 import {AssertUnreachable, Chroma_Safe, HSLA} from "web-vcore";
 import chroma from "chroma-js";
@@ -18,7 +18,7 @@ export function FixColor(color: chroma.Color) {
 	return color;
 }
 
-export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "background" | "connector" = "background", allowOverrides = true): chroma.Color {
+export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "background" | "connector" = "background", allowOverrides = true, nodeLabels?: NodeLabel[]): chroma.Color {
 	let result: chroma.Color;
 
 	if (node.type == NodeType.category || node.type == NodeType.comment) result = Chroma_Safe("hsl(210,10%,24%)");
@@ -60,7 +60,7 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 				if (!rule.enabled) continue;
 				if (rule.thenType != NodeStyleRule_ThenType.setBackgroundColor) continue;
 
-				if (CE(rule).Cast(NodeStyleRule).DoesIfCheckPass(node)) {
+				if (CE(rule).Cast(NodeStyleRule).DoesIfCheckPass(node, nodeLabels)) {
 					result = Chroma_Safe(rule.then_setBackgroundColor.color);
 				}
 			}

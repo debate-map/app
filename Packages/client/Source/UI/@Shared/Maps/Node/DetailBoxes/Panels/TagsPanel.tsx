@@ -65,33 +65,46 @@ type LabelDropdownContent_Props = {
 const LabelDropdownContent = ({label, usageCount, onClick}: LabelDropdownContent_Props) => {
     const [hovered, setHovered] = useState(false);
     return (
-        <Row p={4} pl={10} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+        <Row
+            p={4}
+            pl={10}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
             onClick={onClick}
             style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                cursor: 'pointer', backgroundColor: hovered ? 'rgba(0,0,0,0.2)' : 'transparent',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                backgroundColor: hovered ? 'rgba(255,255,255,0.7)' : 'white',
+                color: '#000000',
+                borderRadius: 4,
             }}
         >
-            <div style={{ fontWeight: 500 }}>{label}</div>
-            <div>&nbsp;({usageCount})</div>
+            <div style={{fontWeight: 500}}>{label}</div>
+            <div style={{opacity: 0.7}}>({usageCount})</div>
         </Row>
     );
 };
 
 export type LabelInputAndDropdown_Props = {
-	onLabelChange: (newLabel: string) => void;
-	// labels we want to exclude from the dropdown (e.g. already added labels)
+    initialLabel?: string;
+	/** Whenever the text in the input changes(could be by typing or selecting from dropdown) */
+	onLabelInputChange?:(newLabel: string) => void;
+	/** When a label is selected from the dropdown */
+	onLabelSelect?:(selectedLabel: string) => void;
+	/** labels we want to exclude from the dropdown (e.g. already added labels) */
 	excludeLabelsInDropdown?: Set<string>;
 }
 
-export const LabelInputAndDropdown = ({onLabelChange, excludeLabelsInDropdown}: LabelInputAndDropdown_Props) => {
+export const LabelInputAndDropdown = ({initialLabel, onLabelInputChange, onLabelSelect, excludeLabelsInDropdown}: LabelInputAndDropdown_Props) => {
     const [fetchingLabels, setFetchingLabels] = useState(false);
 	const [searchResult, setSearchResult] = useState<Map<string, NodeLabel>|n>(null);
 
 	const dropDownRef = useRef<DropDown>(null);
 	const reqIdRef = useRef(0);
 	const debounceRef = useRef<NodeJS.Timeout>(null);
-	const [label, setLabel] = useState("");
+	const [label, setLabel] = useState(initialLabel ?? "");
 
 	const excludedLabels = excludeLabelsInDropdown ?? new Set<string>();
 
@@ -124,7 +137,7 @@ export const LabelInputAndDropdown = ({onLabelChange, excludeLabelsInDropdown}: 
 					val = val.toLowerCase();
 					fetchLabelsForSearch(val.trim());
 					setLabel(val.toLowerCase())
-					onLabelChange(val);
+					onLabelInputChange && onLabelInputChange(val);
 				}}
 				onFocus={()=>{
 					if (label.trim().length == 0) {
@@ -137,7 +150,7 @@ export const LabelInputAndDropdown = ({onLabelChange, excludeLabelsInDropdown}: 
 		    <Column>
 		        {fetchingLabels || searchResult == null ? (
 					// only showing this when search text is empty, btw we can also do this while typing but the user input is faster than fetching speed, so it would be a lot of flickering
-					label.length === 0 && <Row p={2} style={{justifyContent: "center", alignItems: "center"}}>"Loading popular labels..."</Row>
+					label.length === 0 && <Row p={2} style={{justifyContent: "center", alignItems: "center", backgroundColor: "white", color: "black"}}>"Loading popular labels..."</Row>
 		        ) : (
 		            <ScrollView style={{maxHeight: 200, height: "100%"}}>
 						{
@@ -149,7 +162,8 @@ export const LabelInputAndDropdown = ({onLabelChange, excludeLabelsInDropdown}: 
 										onClick={()=>{
 											if (MeID() == null) return ShowSignInPopup();
 											setLabel(nodeLabel.label);
-											onLabelChange(nodeLabel.label);
+											onLabelInputChange && onLabelInputChange(nodeLabel.label);
+											onLabelSelect && onLabelSelect(nodeLabel.label);
 											dropDownRef.current?.Hide();
 										}}
 										usageCount={nodeLabel.usageCount}
@@ -233,7 +247,7 @@ const LabelsPanel = observer_mgl(({node}: {node: NodeL3})=>{
 					}}/>}
 					{addLabelMode &&
 					<>
-						<LabelInputAndDropdown onLabelChange={label=>{setNewLabelText(label.toLowerCase())}} excludeLabelsInDropdown={new Set([...fetchAllResults.keys()])} />
+						<LabelInputAndDropdown onLabelInputChange={label=>{setNewLabelText(label.toLowerCase())}} excludeLabelsInDropdown={new Set([...fetchAllResults.keys()])} />
 						<Button ml={5} p="3px 7px" text={saving ? "Saving..." : "Add"} enabled={newLabelText.trim().length > 0 && !fetchAllResults.get(newLabelText) && !saving} onClick={()=>{
 							addLabel(newLabelText, true);
 							setAddLabelMode(false);

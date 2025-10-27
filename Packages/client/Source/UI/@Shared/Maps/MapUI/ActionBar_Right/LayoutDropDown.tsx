@@ -3,7 +3,7 @@ import {SLMode} from "UI/@SL/SL.js";
 import {Button_SL} from "UI/@SL/SLButton.js";
 import {store} from "Store";
 import {BuildErrorWrapperComp, Chroma, Chroma_Safe, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
-import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
+import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_HasLabel, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
 import {GetUser, DMap, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React, {Fragment} from "react";
 import {GetEntries, StartDownload} from "js-vextensions";
@@ -16,6 +16,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel.js";
 import {currentMapUI} from "../../MapUI.js";
 import {observer_mgl} from "mobx-graphlink";
+import { LabelInputAndDropdown } from "../../Node/DetailBoxes/Panels/TagsPanel.js";
 
 const changesSince_options = [] as {name: string, value: string}[];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
@@ -268,6 +269,8 @@ const StyleRuleUI = observer_mgl((props: StyleRuleUI_Props)=>{
 								rule.if_lastEditorIs ??= new NodeStyleRuleComp_LastEditorIs();
 							} else if (rule.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch) {
 								rule.if_accessPolicyDoesNotMatch ??= new NodeStyleRuleComp_AccessPolicyDoesNotMatch();
+							} else if (rule.ifType == NodeStyleRule_IfType.hasLabel) {
+								rule.if_hasLabel ??= new NodeStyleRuleComp_HasLabel();
 							}
 						});
 					}}/>
@@ -275,6 +278,9 @@ const StyleRuleUI = observer_mgl((props: StyleRuleUI_Props)=>{
 					<UserPicker value={rule.if_lastEditorIs.user} onChange={val=>ChangeIfBlock(()=>rule.if_lastEditorIs.user = val)}>
 						{text=><Button ml={5} text={text} style={{width: "100%"}}/>}
 					</UserPicker>}
+					{rule.ifType === NodeStyleRule_IfType.hasLabel && <LabelInputAndDropdown initialLabel={rule.if_hasLabel ? rule.if_hasLabel.label : "" } onLabelSelect={label=>{
+						ChangeIfBlock(()=>rule.if_hasLabel.label = label);
+					}}/>}
 					{rule.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch &&
 						<Text ml={5}>any policy in the following list...</Text>}
 				</Row>
