@@ -95,7 +95,7 @@ export function GetRatingTypesForNode(node: NodeL2): RatingTypeInfo[] {
 	if (node.type == NodeType.comment) {
 		return [];
 	}
-	AssertUnreachable(node.type);
+	return AssertUnreachable(node.type);
 }
 export const GetMainRatingType = CreateAccessor((node: NodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
