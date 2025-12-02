@@ -1,4 +1,4 @@
-import {Assert, VURL, ModifyString, ATS, ToInt} from "js-vextensions";
+import {Assert, VURL, ModifyString, ATS, ToInt, ToBool} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
@@ -247,6 +247,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;
 			else if (param.name == "env") store.main.envOverride = param.value == "null" ? null : param.value;
 			else if (param.name == "db") store.main.dbOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "internalCrawler") store.main.internalCrawlerMode = param.value == "1";
 			//else if (param.name == "dbVersion") store.main.dbVersionOverride = param.value == "null" ? null : param.value;
 			else if (param.name == "analytics") store.main.analyticsEnabled = param.value == "1";
 			else if (param.name == "s") {
@@ -363,7 +364,7 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 	// a default-child is only used (ie. removed from url) if there are no path-nodes after it
 	/*if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
 	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;*/
-	// nowadays, we only remove the page and subpage for the /home/home path (it's not worth making urls more brittle just for slightly shorter urls) 
+	// nowadays, we only remove the page and subpage for the /home/home path (it's not worth making urls more brittle just for slightly shorter urls)
 	if (page == "home" && subpage == "home") newURL.pathNodes.length = 0;
 
 	Assert(!newURL.pathNodes.Any(a=>a == "/"), `A path-node cannot be just "/". @url(${newURL})`);
@@ -373,6 +374,7 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "0");
 	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
 	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
+	if (s.main.internalCrawlerMode) newURL.SetQueryVar("internalCrawler", "1");
 	//if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
 	/* if (mapID && includeMapViewStr) {
 		newURL.SetQueryVar('view', GetMapViewStr(mapID));
