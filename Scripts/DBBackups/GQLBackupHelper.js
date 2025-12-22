@@ -7,6 +7,7 @@ const {pick} = require("stream-json/filters/Pick");
 const cloneable = require("cloneable-readable")
 const paths = require("path");
 const ora = require("ora-classic");
+const {CurrentTime_SafeStr, WaitForEnterKeyThenExit, OpenFolderInExplorer} = require("./Utils.js");
 
 require("dotenv").config({path: `${__dirname}/../../.env`});
 
@@ -25,9 +26,6 @@ function GetInvalidJWTErrorMessage(jwtTokenEnvVarName, jwtMissing) {
 		2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
 	`.trim();
 }
-
-// keep this func aligned with the one in PGDumpBackupHelper.js
-const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 
 // declaration + main function
 // ==========
@@ -100,7 +98,7 @@ program
 			const folderPathAbsolute = paths.resolve(`${__dirname}/../../${backupFolder_final_relToRepoRoot}`);
 			const filePath = paths.join(`${folderPathAbsolute}/${CurrentTime_SafeStr()}.sql`); // normalize slashes
 
-			const saveSpinner = ora("Saving DB dump to file...").start();
+			saveSpinner = ora("Saving DB dump to file...").start();
 
 			const writeIssue = await WriteStreamContentsToFileStream(pgdumpResponseBody, filePath);
 			if (writeIssue != null) {
@@ -125,11 +123,7 @@ program
 			saveSpinner.succeed(`Database backup saved to file: ${filePath} (time: ${((Date.now() - startTime) / 1000).toFixed(1)}s)`);
 
 			// open file explorer (cross platform) to path above:
-			if (process.platform === "win32") {
-				child_process.exec(`start "" "${folderPathAbsolute}"`);
-			} else {
-				child_process.exec(`open "${folderPathAbsolute}"`);
-			}
+			OpenFolderInExplorer(folderPathAbsolute);
 
 			return void WaitForEnterKeyThenExit(0);
 		} catch (ex) {
@@ -175,10 +169,3 @@ program.on("command:*", ()=>{
 });
 
 program.parse(process.argv);
-
-function WaitForEnterKeyThenExit(code) {
-	console.log("Press any key to exit...");
-	process.stdin.setRawMode(true);
-	process.stdin.resume();
-	process.stdin.on("data", ()=>process.exit(code));
-}

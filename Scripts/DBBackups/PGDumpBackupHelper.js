@@ -5,6 +5,7 @@ const net = require("net");
 const path = require("path");
 const fs = require("fs");
 const {Command} = require("commander");
+const {CurrentTime_SafeStr, WaitForEnterKeyThenExit, OpenFolderInExplorer} = require("./Utils.js");
 
 // Example usages:
 // * Powershell (using env var): $env:PGPASSWORD="your-password-here"; node ./Scripts/DBBackups/PGDumpBackupHelper.js --backup-dir ../Others/@Backups/DBDumps_ovh --pg-dump-path ../Others/@Backups/DBDumps_ovh/postgresql-15.7-2-windows-x64-binaries/pgsql/bin/pg_dump.exe
@@ -74,9 +75,6 @@ async function waitForPort(port, maxWaitSeconds = 30) {
 	return false;
 }
 
-// keep this func aligned with the one in GQLBackupHelper.js
-const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
-
 // main function
 // ==========
 
@@ -91,7 +89,7 @@ async function main() {
 	} else {
 		console.log("\x1b[36m%s\x1b[0m", `Port ${config.localPort} is available, creating port-forward...`);
 
-		// Start port-forward using npm script
+		// start port-forward using npm script
 		portForwardProcess = spawn("npm", ["start", "backend.forward_remote"], {
 			stdio: ["ignore", "pipe", "pipe"],
 			shell: true
@@ -110,7 +108,8 @@ async function main() {
 		console.log("\x1b[36m%s\x1b[0m", "Waiting for port-forward to establish...");
 		const ready = await waitForPort(config.localPort);
 		if (!ready) {
-			throw new Error(`Port-forward did not establish within 30 seconds`);
+			console.error("\x1b[31m%s\x1b[0m", `Port-forward did not establish within 30 seconds`);
+			return void WaitForEnterKeyThenExit(1);
 		}
 
 		console.log("\x1b[32m%s\x1b[0m", "Port-forward established successfully!");
@@ -170,9 +169,14 @@ async function main() {
 			console.log("\x1b[32m%s\x1b[0m", `Backup size: ${fileSizeMB} MB`);
 		}
 
+		// open file explorer (cross-platform) to the backup folder
+		const folderPathAbsolute = path.resolve(config.backupDir);
+		OpenFolderInExplorer(folderPathAbsolute);
+
+		return void WaitForEnterKeyThenExit(0);
 	} catch (error) {
 		console.error("\n\x1b[31m%s\x1b[0m", `Error occurred: ${error.message}`);
-		process.exit(1);
+		return void WaitForEnterKeyThenExit(1);
 	} finally {
 		// cleanup: stop port-forward if we created it
 		if (portForwardProcess) {
@@ -186,5 +190,5 @@ async function main() {
 // run main function
 main().catch(error=>{
 	console.error("\x1b[31m%s\x1b[0m", `Fatal error: ${error.message}`);
-	process.exit(1);
+	return void WaitForEnterKeyThenExit(1);
 });
