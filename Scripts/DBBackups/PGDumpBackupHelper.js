@@ -7,8 +7,8 @@ const fs = require("fs");
 const {Command} = require("commander");
 
 // Example usages:
-// * Powershell (using env var): $env:PGPASSWORD="put the password here"; node ./Scripts/DBBackups/PGDumpBackupHelper.js --backup-dir ../Others/@Backups/DBDumps_ovh --pg-dump-path ../Others/@Backups/DBDumps_ovh/postgresql-15.7-2-windows-x64-binaries/pgsql/bin/pg_dump.exe
-// * Powershell (using base64): node ./Scripts/DBBackups/PGDumpBackupHelper.js --backup-dir ../Others/@Backups/DBDumps_ovh --pg-dump-path ../Others/@Backups/DBDumps_ovh/postgresql-15.7-2-windows-x64-binaries/pgsql/bin/pg_dump.exe --password-base64 "cHV0IHRoZSBwYXNzd29yZCBoZXJl"
+// * Powershell (using env var): $env:PGPASSWORD="your-password-here"; node ./Scripts/DBBackups/PGDumpBackupHelper.js --backup-dir ../Others/@Backups/DBDumps_ovh --pg-dump-path ../Others/@Backups/DBDumps_ovh/postgresql-15.7-2-windows-x64-binaries/pgsql/bin/pg_dump.exe
+// * Powershell (using base64): node ./Scripts/DBBackups/PGDumpBackupHelper.js --backup-dir ../Others/@Backups/DBDumps_ovh --pg-dump-path ../Others/@Backups/DBDumps_ovh/postgresql-15.7-2-windows-x64-binaries/pgsql/bin/pg_dump.exe --password-base64 "your-encoded-password-here"
 //   (To encode password to base64, use in powershell: `$env:PGPASSWORD="your-password-here"; node -e "console.log(Buffer.from(process.env.PGPASSWORD).toString('base64'))"` or in browser devtools: `btoa('your-password-here')`)
 
 // parse command line arguments using commander
