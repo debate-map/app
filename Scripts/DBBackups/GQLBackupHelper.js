@@ -4,11 +4,14 @@ const child_process = require("child_process");
 const {chain} = require("stream-chain");
 const {parser} = require("stream-json");
 const {pick} = require("stream-json/filters/Pick");
-const cloneable = require('cloneable-readable')
+const cloneable = require("cloneable-readable")
 const paths = require("path");
 const ora = require("ora-classic");
 
 require("dotenv").config({path: `${__dirname}/../../.env`});
+
+// utils
+// ==========
 
 function GetInvalidJWTErrorMessage(jwtTokenEnvVarName, jwtMissing) {
 	const reasonMessage = jwtMissing
@@ -22,6 +25,12 @@ function GetInvalidJWTErrorMessage(jwtTokenEnvVarName, jwtMissing) {
 		2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
 	`.trim();
 }
+
+// keep this func aligned with the one in PGDumpBackupHelper.js
+const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
+
+// declaration + main function
+// ==========
 
 const program = require("commander");
 program
@@ -88,13 +97,12 @@ program
 				firstMillionChars += chunk;
 			});
 
-			const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 			const folderPathAbsolute = paths.resolve(`${__dirname}/../../${backupFolder_final_relToRepoRoot}`);
 			const filePath = paths.join(`${folderPathAbsolute}/${CurrentTime_SafeStr()}.sql`); // normalize slashes
 
 			const saveSpinner = ora("Saving DB dump to file...").start();
 
-			let writeIssue = await WriteStreamContentsToFileStream(pgdumpResponseBody, filePath);
+			const writeIssue = await WriteStreamContentsToFileStream(pgdumpResponseBody, filePath);
 			if (writeIssue != null) {
 				// for write issue of contents simply being empty, check for graphql/server errors in the response instead
 				// (this error-processing route will error if run on a stream that has the full dbdump contents present, due to it not using streaming of the contents)
