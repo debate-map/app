@@ -212,10 +212,16 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	if (UseForcedExpandForPath(path, false)) expanded = true;
 
 	const onMouseEnter = useCallback(e=>{
+		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
+		// which we dont need at all(since we'll be representing each node as a clickable link)
+		if (store.main.internalCrawlerMode) {
+			return;
+		}
+
 		if (!IsMouseEnterReal(e, rootRef.current!)) return;
 		setState(prevState=>({
 			...prevState,
-			hovered: true,
+			hovered: true
 		}));
 		checkStillHoveredTimer.current?.Start();
 	}, []);
@@ -233,6 +239,13 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 	const onClick = useCallback(e=>{
 		if ((e.nativeEvent as any).ignore) return;
+
+		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
+		// which we dont need at all(since we'll be representing each node as a clickable link)
+		if (store.main.internalCrawlerMode) {
+			return;
+		}
+
 		if (useLocalPanelState && !local_nodeView.selected) {
 			UpdateLocalNodeView({selected: true});
 			return;
