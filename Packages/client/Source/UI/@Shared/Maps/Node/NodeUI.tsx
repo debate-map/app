@@ -225,8 +225,6 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	// we exclude premise and comment children from this expand-to-show count, because these are shown in other places (premises as vertically-below the node, and comments in the node's "Comments" panel)
 	const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? nodeChildrenToShow.Exclude(...ncToShow_generic) : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
-	console.log(childrenShownByNodeExpandButton);
-
 	const playback = GetPlaybackInfo();
 	const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;
 
