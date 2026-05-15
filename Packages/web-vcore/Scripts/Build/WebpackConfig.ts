@@ -394,7 +394,7 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 						if (startPoint != -1 && endPoint != -1 && wvcSymlinked) {
 							console.log("Found wvc Main.scss file. Applying fixes, since wvc is symlinked.");
 							const wvcPart = content.slice(startPoint, endPoint);
-							const wvcPart_fixed = wvcPart.replace(/@import "~/g, "@import \"~web-vcore/node_modules/");
+							const wvcPart_fixed = wvcPart.replace(/@import "/g, "@import \"web-vcore/node_modules/");
 							return content.slice(0, startPoint) + wvcPart_fixed + content.slice(endPoint);
 						}*/
 
