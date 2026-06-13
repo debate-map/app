@@ -2,7 +2,7 @@ import {CanGetBasicPermissions, GetFullNameP, GetTerms, MeID, PERMISSIONS, Term,
 import React, {useEffect, useState} from "react";
 import {store} from "Store";
 import {GetSelectedTerm, GetSelectedTermID} from "Store/main/database";
-import {ES, GetUpdates, RunInAction, chroma_maxDarken} from "web-vcore";
+import {ES, GetUpdates, Link, RunInAction, chroma_maxDarken} from "web-vcore";
 import {Assert, E} from "js-vextensions";
 import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -20,6 +20,7 @@ export const TermsUI = observer_mgl(()=>{
 	const userID = MeID();
 	const terms = GetTerms();
 	const selectedTerm = GetSelectedTerm();
+	const internalCrawlerMode = store.main.internalCrawlerMode;
 
 	const permissionsModify = selectedTerm != null && PERMISSIONS.Term.Modify(userID, selectedTerm);
 	const permissionsDelete = selectedTerm != null && PERMISSIONS.Term.Delete(userID, selectedTerm);
@@ -52,7 +53,7 @@ export const TermsUI = observer_mgl(()=>{
 					if ((e.target as HTMLElement|n)?.parentElement != e.currentTarget) return; // temp; till react-vscrollview updated to accept "content_onClick" prop
 					RunInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
 				}}>
-					{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={GetSelectedTermID() == term.id}/>)}
+					{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={GetSelectedTermID() == term.id} internalCrawlerMode={internalCrawlerMode}/>)}
 				</ScrollView>
 			</Column>
             <ScrollView style={{
@@ -99,16 +100,16 @@ export const TermsUI = observer_mgl(()=>{
 	)
 })
 
-export const TermUI = (({term, first, selected}:{term: Term, first: boolean, selected: boolean})=>{
-	return (
+export const TermUI = (({term, first, selected, internalCrawlerMode}: {term: Term, first: boolean, selected: boolean, internalCrawlerMode: boolean})=>{
+	const termRow = (
 		<Row mt={first ? 0 : 5} className="cursorSet"
 			style={E(
 				{padding: 5, background: liveSkin.BasePanelBackgroundColor().darken(.05 * chroma_maxDarken).css(), borderRadius: 5, cursor: "pointer"},
 				selected && {background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).css()},
 			)}
-			onClick={()=>{
+			onClick={!internalCrawlerMode ? ()=>{
 				RunInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);
-			}}>
+			} : undefined}>
 			<div>
 				<span style={{fontWeight: "bold"}}>{GetFullNameP(term)}<sup>{term.id.substr(0, 2)}</sup>: </span>
 				<span>{term.definition}</span>
@@ -118,6 +119,21 @@ export const TermUI = (({term, first, selected}:{term: Term, first: boolean, sel
 				<Pre>#{term.id.slice(0, 4)}</Pre>
 			</Span>
 		</Row>
+	);
+
+	if (!internalCrawlerMode) return termRow;
+	return (
+		// in crawler mode, expose each term as a real anchor, link applies this actionFunc
+		// to a store mirror to derive href from the normal url generation logic.
+		<Link actionFunc={s=>{
+				s.main.page = "database";
+				s.main.database.subpage = "terms";
+				s.main.database.selectedTermID = term.id;
+			}}
+			style={{display: "block", color: "inherit", textDecoration: "none"}}
+		>
+			{termRow}
+		</Link>
 	);
 })
 
