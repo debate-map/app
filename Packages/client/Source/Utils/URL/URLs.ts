@@ -1,4 +1,4 @@
-import {Assert, VURL, ModifyString, ATS, ToInt, ToBool} from "js-vextensions";
+import {Assert, VURL, ModifyString, ATS, ToInt} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
@@ -242,6 +242,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 
 		// load query-vars
 		store.main.urlOtherFlags = [];
+		store.main.internalCrawlerMode = false;
 		for (const param of url.queryVars) {
 			// special flags (regular ones have handling in the path-specific branches)
 			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;

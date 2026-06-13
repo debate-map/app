@@ -31,7 +31,7 @@ export class MainState {
 
 	/* Mode used to turn the site into more internal crawler friendly(internal crawler is simply a crawler that we use to bake the site
 	into static html files), which can be used in JS disabled environment, better indexing */
-	@O accessor internalCrawlerMode = false;
+	@O @ignore accessor internalCrawlerMode = false;
 	@O accessor analyticsEnabled = true;
 	@O accessor blockMobXUnsubscribing = false;
 	@O accessor blockCacheClearing = false;

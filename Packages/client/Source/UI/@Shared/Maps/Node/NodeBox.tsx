@@ -198,12 +198,13 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 	const pathNodeIDs = GetPathNodeIDs(path);
 	const selected = nodeView?.selected || false;
+	const internalCrawlerMode = store.main.internalCrawlerMode;
 	const leftPanelPinned = nodeView?.leftPanelPinned ?? false;
 	const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 	const toolbarShow = toolbarItemsToShow.length > 0;
 	const toolbar_hasRightAnchoredItems = toolbarItemsToShow.filter(a=>a.panel != "prefix").length > 0;
-	const panelToShow = (selected || hovered) ? ((leftPanelHovered && lastHoveredPanel) || nodeView?.openPanel || lastHoveredPanel) : undefined;
-	const leftPanelShow = (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
+	const panelToShow = !internalCrawlerMode && (selected || hovered) ? ((leftPanelHovered && lastHoveredPanel) || nodeView?.openPanel || lastHoveredPanel) : undefined;
+	const leftPanelShow = !internalCrawlerMode && (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
 	const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 	const subPanelShow = attachments_forSubPanel.length > 0;
 	const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -214,7 +215,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const onMouseEnter = useCallback(e=>{
 		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
 		// which we dont need at all(since we'll be representing each node as a clickable link)
-		if (store.main.internalCrawlerMode) {
+		if (internalCrawlerMode) {
 			return;
 		}
 
@@ -224,7 +225,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 			hovered: true
 		}));
 		checkStillHoveredTimer.current?.Start();
-	}, []);
+	}, [internalCrawlerMode]);
 
 	const onMouseLeave = UseCallback(e=>{
 		if (!IsMouseLeaveReal(e, rootRef.current!)) return;
@@ -242,7 +243,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
 		// which we dont need at all(since we'll be representing each node as a clickable link)
-		if (store.main.internalCrawlerMode) {
+		if (internalCrawlerMode) {
 			return;
 		}
 
@@ -256,7 +257,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		if (!nodeView?.selected && map) {
 			ACTNodeSelect(map.id, path);
 		}
-	}, [UpdateLocalNodeView, graph, local_nodeView.selected, map, nodeView?.selected, path, treePath, useLocalPanelState]);
+	}, [UpdateLocalNodeView, graph, internalCrawlerMode, local_nodeView.selected, map, nodeView?.selected, path, treePath, useLocalPanelState]);
 
 	if (usePortalForDetailBoxes) {
 		UseDocumentEventListener("click", e=>{
