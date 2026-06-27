@@ -328,7 +328,7 @@ export const MapUI = observer_mgl((props: Props)=>{
 		if (newScroll.x.Distance(existingScroll.x) < 1 && newScroll.y.Distance(existingScroll.y) < 1) return;
 
 		logFunc?.();
-		scrollViewRef.current.SetScroll(newScroll);
+		requestAnimationFrame(()=>scrollViewRef.current?.SetScroll(newScroll));
 	};
 
 	const handleMapUIRef = useCallback((c: HTMLDivElement)=>{
