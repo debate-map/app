@@ -1,0 +1,63 @@
+# Site origin/scope. Use http://localhost:5101 for local dev.
+root_url: http://localhost:5101
+
+# Crawl seeds. Remove this to start at root_url.
+start_paths:
+  - /database
+  - /database/users
+  - /database/terms
+
+# Max Chrome tabs. Tabs open on demand as queued work grows, then stay alive.
+# Lower counts retire extra tabs after their current page.
+crawler_count: 15
+
+# Retry a page this many times before skipping it.
+max_retries: 3
+
+# Output dir. Resumed by default; pass --force-restart to delete and rebuild it.
+base_output_dir: ./static
+
+# Local preview server for files as they are baked.
+serve:
+  enabled: true
+  host: 127.0.0.1
+  port: 8787
+
+visit_policy:
+  # Added when visiting each accepted URL.
+  query_params:
+    db: prod
+    internalCrawler: "1"
+
+  # Optional allowlist. Rule kinds: exact, starts_with, contains, ends_with.
+  # Empty means every same-origin path is allowed.
+  allow_paths:
+    - kind: exact
+      value: /database
+    - kind: exact
+      value: /database/users
+    - kind: starts_with
+      value: /database/users/
+    - kind: exact
+      value: /database/terms
+    - kind: starts_with
+      value: /database/terms/
+
+  # Same-page route groups still bake each child URL as its own static file.
+  # When the parent discovers matching child links, it reserves those URLs and
+  # bakes them in the same tab by switching SPA routes instead of reloading.
+  # This keeps fast in-page states like term details out of the normal tab pool.
+  same_page_route_groups:
+    - parent: /database/terms
+      # Up to this many tabs may process this parent group's child routes.
+      max_tabs: 5
+      # Each tab claims this many child routes before asking for more.
+      batch_size: 20
+      child_paths:
+        - kind: starts_with
+          value: /database/terms/
+
+  # Optional denylist; overrides allow_paths.
+  # exclude_paths:
+  #   - kind: starts_with
+  #     value: /draft
