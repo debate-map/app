@@ -164,9 +164,10 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			}
 		} else if (page == "debates") {
 			const urlStr = url.pathNodes[1];
-			const match = urlStr && urlStr.match(/([A-Za-z0-9_-]+)$/);
-			mapID = match ? match[1] : null;
-
+			// keep list mode path backed so the crawler treats featured/all as distinct pages.
+			const isAllList = urlStr == "all";
+			mapID = isAllList ? null : (urlStr?.match(/([A-Za-z0-9_-]+)$/)?.[1] ?? null);
+			store.main.debates.listType = isAllList ? "all" : "featured";
 			store.main.debates.selectedMapID = mapID!;
 		} else if (page == "global") {
 			/* if (subpage == 'map') {
@@ -319,6 +320,9 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			// newURL.pathNodes.push(mapID+"");
 			const urlStr = GetURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
+		} else if (s.main.debates.listType == "all") {
+			// featured is the default list route, so only all needs an explicit path segment.
+			newURL.pathNodes.push("all");
 		}
 	}
 	/*if (page == "global" && subpage == "map") {
