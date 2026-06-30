@@ -320,8 +320,8 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			// newURL.pathNodes.push(mapID+"");
 			const urlStr = GetURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
-		} else if (s.main.debates.listType == "all") {
-			// featured is the default list route, so only all needs an explicit path segment.
+		} else if (s.main.internalCrawlerMode && s.main.debates.listType == "all") {
+			// keep normal list switching spa-only; only crawler mode needs the all route.
 			newURL.pathNodes.push("all");
 		}
 	}
