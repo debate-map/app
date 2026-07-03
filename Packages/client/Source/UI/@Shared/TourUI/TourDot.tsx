@@ -93,9 +93,6 @@ export const TourDot = observer_mgl((props: TourDotProps)=>{
 	const [popupOpen, setPopupOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// if already completed and popup not currently open, render nothing
-	if (uiState[stateKey] != null && !popupOpen) return null;
-
 	useEffect(()=>{
 		// only use this effect when tour-entry popup is open
 		if (!popupOpen) return;
@@ -110,6 +107,9 @@ export const TourDot = observer_mgl((props: TourDotProps)=>{
 		document.addEventListener("click", listener);
 		return ()=>document.removeEventListener("click", listener);
 	}, [popupOpen]);
+
+	// if already completed and popup not currently open, render nothing
+	if (uiState[stateKey] != null && !popupOpen) return null;
 
 	return (
 		<>
