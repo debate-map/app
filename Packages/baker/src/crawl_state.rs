@@ -37,6 +37,8 @@ pub struct CrawlConfigSignature {
 pub struct SamePageRouteGroupSignature {
 	pub parent_url: String,
 	pub child_paths: Vec<PathRuleSignature>,
+	#[serde(default)]
+	pub lane_path_segment_count: Option<usize>,
 }
 
 #[derive(Clone, Debug)]

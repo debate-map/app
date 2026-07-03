@@ -84,19 +84,29 @@ pub struct SamePageRouteGroup {
 	pub child_paths: Vec<PathRule>,
 	pub max_tabs: usize,
 	pub batch_size: usize,
+	pub lane_path_segment_count: Option<usize>,
 }
 
 impl SamePageRouteGroup {
-	fn key(&self) -> String {
-		self.parent.as_str().to_string()
-	}
-
 	pub fn matches_parent(&self, url: &Url) -> bool {
 		same_origin(&self.parent, url) && self.parent.path() == url.path()
 	}
 
 	pub fn matches_child(&self, url: &Url) -> bool {
 		same_origin(&self.parent, url) && self.child_paths.iter().any(|rule| rule.matches(url.path()))
+	}
+
+	pub fn lane_key(&self, url: &Url) -> String {
+		let mut key_url = self.parent.clone();
+		key_url.set_query(None);
+		key_url.set_fragment(None);
+
+		if let Some(segment_count) = self.lane_path_segment_count {
+			let path_segments = url.path_segments().map(|segments| segments.take(segment_count).collect::<Vec<_>>()).unwrap_or_default();
+			key_url.set_path(&format!("/{}", path_segments.join("/")));
+		}
+
+		key_url.as_str().to_string()
 	}
 
 	pub fn parent_url_for_visit(&self, child_url: &Url) -> Url {
@@ -134,20 +144,20 @@ impl<'a> VisitUrlBuilder<'a> {
 struct SamePageBatchTracker;
 
 impl SamePageBatchTracker {
-	fn active_count(frontier: &Frontier, group: &SamePageRouteGroup) -> usize {
-		frontier.same_page_active_batches.get(&group.key()).copied().unwrap_or_default()
+	fn active_count(frontier: &Frontier, lane_key: &str) -> usize {
+		frontier.same_page_active_batches.get(lane_key).copied().unwrap_or_default()
 	}
 
-	fn is_at_capacity(frontier: &Frontier, group: &SamePageRouteGroup) -> bool {
-		Self::active_count(frontier, group) >= group.max_tabs
+	fn is_at_capacity(frontier: &Frontier, group: &SamePageRouteGroup, url: &Url) -> bool {
+		Self::active_count(frontier, &group.lane_key(url)) >= group.max_tabs
 	}
 
-	fn increment(frontier: &mut Frontier, group_key: String) {
-		*frontier.same_page_active_batches.entry(group_key).or_default() += 1;
+	fn increment(frontier: &mut Frontier, lane_key: String) {
+		*frontier.same_page_active_batches.entry(lane_key).or_default() += 1;
 	}
 
-	fn decrement(frontier: &mut Frontier, group: &SamePageRouteGroup) {
-		Self::decrement_by_key(&mut frontier.same_page_active_batches, &group.key());
+	fn decrement(frontier: &mut Frontier, lane_key: &str) {
+		Self::decrement_by_key(&mut frontier.same_page_active_batches, lane_key);
 	}
 
 	fn decrement_by_key(active_batches: &mut HashMap<String, usize>, group_key: &str) {
@@ -176,7 +186,7 @@ impl<'a> VisitScheduler<'a> {
 		self.frontier.to_visit.iter().find_map(|url| {
 			let group = self.same_page_group_for_url(url);
 			match group {
-				Some(group) if SamePageBatchTracker::is_at_capacity(self.frontier, group) => None,
+				Some(group) if SamePageBatchTracker::is_at_capacity(self.frontier, group, url) => None,
 				_ => Some((url, group)),
 			}
 		})
@@ -184,17 +194,18 @@ impl<'a> VisitScheduler<'a> {
 
 	fn queued_work_units(&self) -> usize {
 		let mut regular_count = 0;
-		let mut same_page_group_queued_counts = vec![0usize; self.same_page_route_groups.len()];
+		let mut same_page_lane_queued_counts = HashMap::<(usize, String), usize>::new();
 
 		for url in &self.frontier.to_visit {
 			if let Some(group_index) = self.same_page_group_index_for_url(url) {
-				same_page_group_queued_counts[group_index] += 1;
+				let group = &self.same_page_route_groups[group_index];
+				*same_page_lane_queued_counts.entry((group_index, group.lane_key(url))).or_default() += 1;
 			} else {
 				regular_count += 1;
 			}
 		}
 
-		regular_count + same_page_group_queued_counts.into_iter().zip(self.same_page_route_groups).map(|(queued_count, group)| self.group_work_units(queued_count, group)).sum::<usize>()
+		regular_count + same_page_lane_queued_counts.into_iter().map(|((group_index, lane_key), queued_count)| self.group_work_units(queued_count, &self.same_page_route_groups[group_index], &lane_key)).sum::<usize>()
 	}
 
 	fn same_page_group_for_url(&self, url: &Url) -> Option<&'a SamePageRouteGroup> {
@@ -205,12 +216,12 @@ impl<'a> VisitScheduler<'a> {
 		self.same_page_route_groups.iter().position(|group| group.matches_child(url))
 	}
 
-	fn group_work_units(&self, queued_count: usize, group: &SamePageRouteGroup) -> usize {
+	fn group_work_units(&self, queued_count: usize, group: &SamePageRouteGroup, lane_key: &str) -> usize {
 		if queued_count == 0 {
 			return 0;
 		}
 
-		let active_count = SamePageBatchTracker::active_count(self.frontier, group);
+		let active_count = SamePageBatchTracker::active_count(self.frontier, lane_key);
 		let available_tabs = group.max_tabs.saturating_sub(active_count);
 		let needed_batches = queued_count.div_ceil(group.batch_size);
 		needed_batches.min(available_tabs)
@@ -386,19 +397,19 @@ impl GlobalVisitState {
 
 	pub fn take_to_visit_with_groups(&self, same_page_route_groups: &[SamePageRouteGroup]) -> anyhow::Result<VisitQueueState> {
 		let mut frontier = self.frontier.lock().unwrap();
-		if let Some((url, same_page_group_key)) = self.scheduler(&frontier, same_page_route_groups).next_available_url().map(|(url, group)| (url.clone(), group.map(|group| group.key()))) {
+		if let Some((url, same_page_lane_key)) = self.scheduler(&frontier, same_page_route_groups).next_available_url().map(|(url, group)| (url.clone(), group.map(|group| group.lane_key(url)))) {
 			frontier.to_visit.remove(&url);
 			frontier.visiting.insert(url.clone());
-			if let Some(group_key) = &same_page_group_key {
-				SamePageBatchTracker::increment(&mut frontier, group_key.clone());
+			if let Some(lane_key) = &same_page_lane_key {
+				SamePageBatchTracker::increment(&mut frontier, lane_key.clone());
 			}
 			if let Err(err) = self.save_frontier(&frontier) {
 				frontier.visiting.remove(&url);
 				frontier.to_visit.insert(url.clone());
-				if let Some(group_key) = &same_page_group_key {
-					SamePageBatchTracker::decrement_by_key(&mut frontier.same_page_active_batches, group_key);
+				if let Some(lane_key) = &same_page_lane_key {
+					SamePageBatchTracker::decrement_by_key(&mut frontier.same_page_active_batches, lane_key);
 				}
-				return Err(err).with_context(|| format!("save started URL {}", url));
+				return Err(err).with_context(|| format!("save started URL {url}"));
 			}
 
 			Ok(VisitQueueState::Ready(self.url_for_visit(&url)))
@@ -416,13 +427,13 @@ impl GlobalVisitState {
 		Ok(self.record_links([], urls)?.reserved_urls)
 	}
 
-	pub fn reserve_matching_same_page_children(&self, group: &SamePageRouteGroup, limit: usize) -> anyhow::Result<Vec<Url>> {
+	pub fn reserve_matching_same_page_children(&self, group: &SamePageRouteGroup, lane_key: &str, limit: usize) -> anyhow::Result<Vec<Url>> {
 		if limit == 0 {
 			return Ok(Vec::new());
 		}
 
 		let mut frontier = self.frontier.lock().unwrap();
-		let reserved_urls = frontier.to_visit.iter().filter(|url| group.matches_child(url)).take(limit).cloned().collect::<Vec<_>>();
+		let reserved_urls = frontier.to_visit.iter().filter(|url| group.matches_child(url) && group.lane_key(url) == lane_key).take(limit).cloned().collect::<Vec<_>>();
 
 		for url in &reserved_urls {
 			frontier.to_visit.remove(url);
@@ -442,9 +453,9 @@ impl GlobalVisitState {
 		Ok(reserved_urls.iter().map(|url| self.url_for_visit(url)).collect())
 	}
 
-	pub fn release_same_page_batch(&self, group: &SamePageRouteGroup) {
+	pub fn release_same_page_batch(&self, lane_key: &str) {
 		let mut frontier = self.frontier.lock().unwrap();
-		SamePageBatchTracker::decrement(&mut frontier, group);
+		SamePageBatchTracker::decrement(&mut frontier, lane_key);
 	}
 
 	fn url_for_visit(&self, url: &Url) -> Url {
@@ -502,7 +513,7 @@ impl GlobalVisitState {
 				} else {
 					frontier.failures.remove(&normalized_url);
 				}
-				return Err(err).with_context(|| format!("save failed URL {}", normalized_url));
+				return Err(err).with_context(|| format!("save failed URL {normalized_url}"));
 			}
 
 			return Ok(action);
@@ -534,7 +545,7 @@ impl GlobalVisitState {
 					frontier.failures.insert(normalized_url.clone(), failure);
 				}
 				frontier.visiting.insert(normalized_url.clone());
-				return Err(err).with_context(|| format!("save visited URL {}", normalized_url));
+				return Err(err).with_context(|| format!("save visited URL {normalized_url}"));
 			}
 		}
 
@@ -648,7 +659,13 @@ mod tests {
 	fn same_page_children_count_as_one_work_unit() {
 		let root = Url::parse("https://debatemap.app").unwrap();
 		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![]));
-		let group = SamePageRouteGroup { parent: root.join("/database/terms").unwrap(), child_paths: vec![PathRule::StartsWith("/database/terms/".into())], max_tabs: 1, batch_size: 20 };
+		let group = SamePageRouteGroup {
+			parent: root.join("/database/terms").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/database/terms/".into())],
+			max_tabs: 1,
+			batch_size: 20,
+			lane_path_segment_count: None,
+		};
 
 		state.add_many_to_visit([root.join("/database").unwrap(), root.join("/database/terms/a").unwrap(), root.join("/database/terms/b").unwrap()]).unwrap();
 
@@ -659,13 +676,19 @@ mod tests {
 	fn reserves_matching_same_page_children_as_a_batch() {
 		let root = Url::parse("https://debatemap.app").unwrap();
 		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![("db".into(), "prod".into())]));
-		let group = SamePageRouteGroup { parent: root.join("/database/terms").unwrap(), child_paths: vec![PathRule::StartsWith("/database/terms/".into())], max_tabs: 1, batch_size: 20 };
+		let group = SamePageRouteGroup {
+			parent: root.join("/database/terms").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/database/terms/".into())],
+			max_tabs: 1,
+			batch_size: 20,
+			lane_path_segment_count: None,
+		};
 		let child_a = root.join("/database/terms/a").unwrap();
 		let child_b = root.join("/database/terms/b").unwrap();
 		let other = root.join("/database").unwrap();
 		state.add_many_to_visit([child_a.clone(), child_b.clone(), other.clone()]).unwrap();
 
-		let reserved = state.reserve_matching_same_page_children(&group, group.batch_size).unwrap();
+		let reserved = state.reserve_matching_same_page_children(&group, &group.lane_key(&child_a), group.batch_size).unwrap();
 
 		assert_eq!(reserved.len(), 2);
 		assert!(reserved.iter().all(|url| url.query() == Some("db=prod")));
@@ -679,7 +702,13 @@ mod tests {
 	fn same_page_work_units_respect_max_tabs_and_batch_size() {
 		let root = Url::parse("https://debatemap.app").unwrap();
 		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![]));
-		let group = SamePageRouteGroup { parent: root.join("/database/terms").unwrap(), child_paths: vec![PathRule::StartsWith("/database/terms/".into())], max_tabs: 4, batch_size: 20 };
+		let group = SamePageRouteGroup {
+			parent: root.join("/database/terms").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/database/terms/".into())],
+			max_tabs: 4,
+			batch_size: 20,
+			lane_path_segment_count: None,
+		};
 
 		state.add_many_to_visit((0..100).map(|index| root.join(&format!("/database/terms/{index}")).unwrap())).unwrap();
 
@@ -690,11 +719,17 @@ mod tests {
 	fn same_page_batch_reservation_respects_limit() {
 		let root = Url::parse("https://debatemap.app").unwrap();
 		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![]));
-		let group = SamePageRouteGroup { parent: root.join("/database/terms").unwrap(), child_paths: vec![PathRule::StartsWith("/database/terms/".into())], max_tabs: 4, batch_size: 2 };
+		let group = SamePageRouteGroup {
+			parent: root.join("/database/terms").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/database/terms/".into())],
+			max_tabs: 4,
+			batch_size: 2,
+			lane_path_segment_count: None,
+		};
 		let child_urls = (0..5).map(|index| root.join(&format!("/database/terms/{index}")).unwrap()).collect::<Vec<_>>();
 
 		state.add_many_to_visit(child_urls.clone()).unwrap();
-		let reserved = state.reserve_matching_same_page_children(&group, group.batch_size).unwrap();
+		let reserved = state.reserve_matching_same_page_children(&group, &group.lane_key(&child_urls[0]), group.batch_size).unwrap();
 
 		assert_eq!(reserved.len(), 2);
 		let frontier = state.frontier.lock().unwrap();
@@ -707,15 +742,51 @@ mod tests {
 	fn same_page_take_respects_active_batch_limit() {
 		let root = Url::parse("https://debatemap.app").unwrap();
 		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![]));
-		let group = SamePageRouteGroup { parent: root.join("/database/terms").unwrap(), child_paths: vec![PathRule::StartsWith("/database/terms/".into())], max_tabs: 1, batch_size: 20 };
+		let group = SamePageRouteGroup {
+			parent: root.join("/database/terms").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/database/terms/".into())],
+			max_tabs: 1,
+			batch_size: 20,
+			lane_path_segment_count: None,
+		};
 
 		state.add_many_to_visit([root.join("/database/terms/a").unwrap(), root.join("/database/terms/b").unwrap()]).unwrap();
 
-		assert!(matches!(state.take_to_visit_with_groups(std::slice::from_ref(&group)).unwrap(), VisitQueueState::Ready(_)));
+		let first_url = match state.take_to_visit_with_groups(std::slice::from_ref(&group)).unwrap() {
+			VisitQueueState::Ready(url) => url,
+			other => panic!("expected ready url, got {other:?}"),
+		};
 		assert!(matches!(state.take_to_visit_with_groups(std::slice::from_ref(&group)).unwrap(), VisitQueueState::Waiting));
 
-		state.release_same_page_batch(&group);
+		state.release_same_page_batch(&group.lane_key(&first_url));
 		assert!(matches!(state.take_to_visit_with_groups(&[group]).unwrap(), VisitQueueState::Ready(_)));
+	}
+
+	#[test]
+	fn same_page_lane_key_allows_distinct_map_tabs() {
+		let root = Url::parse("https://debatemap.app").unwrap();
+		let state = GlobalVisitState::new(VisitPolicy::new(root.clone(), vec![], vec![], vec![]));
+		let group = SamePageRouteGroup {
+			parent: root.join("/debates").unwrap(),
+			child_paths: vec![PathRule::StartsWith("/debates/".into())],
+			max_tabs: 1,
+			batch_size: 20,
+			lane_path_segment_count: Some(2),
+		};
+
+		state.add_many_to_visit([root.join("/debates/map-a").unwrap(), root.join("/debates/map-a/child").unwrap(), root.join("/debates/map-b").unwrap()]).unwrap();
+
+		let first_url = match state.take_to_visit_with_groups(std::slice::from_ref(&group)).unwrap() {
+			VisitQueueState::Ready(url) => url,
+			other => panic!("expected first ready url, got {other:?}"),
+		};
+		let second_url = match state.take_to_visit_with_groups(std::slice::from_ref(&group)).unwrap() {
+			VisitQueueState::Ready(url) => url,
+			other => panic!("expected second ready url, got {other:?}"),
+		};
+
+		assert_ne!(group.lane_key(&first_url), group.lane_key(&second_url));
+		assert!(matches!(state.take_to_visit_with_groups(&[group]).unwrap(), VisitQueueState::Waiting));
 	}
 
 	#[test]

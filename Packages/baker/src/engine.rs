@@ -59,7 +59,15 @@ impl CrawlerEngineConfig {
 			allow_paths: self.visit_policy.allow_paths.iter().map(path_rule_signature).collect(),
 			exclude_paths: self.visit_policy.exclude_paths.iter().map(path_rule_signature).collect(),
 			query_params: self.visit_policy.query_params.clone(),
-			same_page_route_groups: self.same_page_route_groups.iter().map(|group| SamePageRouteGroupSignature { parent_url: group.parent.as_str().to_string(), child_paths: group.child_paths.iter().map(path_rule_signature).collect() }).collect(),
+			same_page_route_groups: self
+				.same_page_route_groups
+				.iter()
+				.map(|group| SamePageRouteGroupSignature {
+					parent_url: group.parent.as_str().to_string(),
+					child_paths: group.child_paths.iter().map(path_rule_signature).collect(),
+					lane_path_segment_count: group.lane_path_segment_count,
+				})
+				.collect(),
 			max_retries: self.max_retries,
 		}
 	}

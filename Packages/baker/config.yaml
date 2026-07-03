@@ -6,6 +6,7 @@ start_paths:
   - /database
   - /database/users
   - /database/terms
+  - /debates
 
 # Max Chrome tabs. Tabs open on demand as queued work grows, then stay alive.
 # Lower counts retire extra tabs after their current page.
@@ -42,6 +43,10 @@ visit_policy:
       value: /database/terms
     - kind: starts_with
       value: /database/terms/
+    - kind: exact
+      value: /debates
+    - kind: starts_with
+      value: /debates/
 
   # Same-page route groups still bake each child URL as its own static file.
   # When the parent discovers matching child links, it reserves those URLs and
@@ -56,6 +61,12 @@ visit_policy:
       child_paths:
         - kind: starts_with
           value: /database/terms/
+    - parent: /debates
+      max_tabs: 1
+      lane_path_segment_count: 2
+      child_paths:
+        - kind: starts_with
+          value: /debates/
 
   # Optional denylist; overrides allow_paths.
   # exclude_paths:

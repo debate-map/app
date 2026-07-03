@@ -39,7 +39,11 @@ fn is_file_like_path(path: &str) -> bool {
 		return false;
 	};
 
-	!path.ends_with('/') && last_segment.contains('.')
+	let Some(extension) = Path::new(last_segment).extension().and_then(|ext| ext.to_str()) else {
+		return false;
+	};
+
+	!path.ends_with('/') && matches!(extension.to_ascii_lowercase().as_str(), "css" | "gif" | "htm" | "html" | "ico" | "jpeg" | "jpg" | "js" | "json" | "map" | "otf" | "png" | "svg" | "ttf" | "txt" | "wasm" | "webp" | "woff" | "woff2" | "xml")
 }
 
 #[cfg(test)]
@@ -57,6 +61,7 @@ mod tests {
 		assert_eq!(output_for("/database"), PathBuf::from("static/database/index.html"));
 		assert_eq!(output_for("/database/"), PathBuf::from("static/database/index.html"));
 		assert_eq!(output_for("/database/users/abc"), PathBuf::from("static/database/users/abc/index.html"));
+		assert_eq!(output_for("/debates/how-old-is-the-universe.abc123"), PathBuf::from("static/debates/how-old-is-the-universe.abc123/index.html"));
 	}
 
 	#[test]
@@ -76,6 +81,7 @@ mod tests {
 		assert_eq!(route("/database"), "/database/");
 		assert_eq!(route("/database/"), "/database/");
 		assert_eq!(route("/database/users/abc"), "/database/users/abc/");
+		assert_eq!(route("/debates/how-old-is-the-universe.abc123"), "/debates/how-old-is-the-universe.abc123/");
 		assert_eq!(route("/robots.txt"), "/robots.txt");
 	}
 }

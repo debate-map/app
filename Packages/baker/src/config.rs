@@ -39,6 +39,8 @@ pub struct SamePageRouteGroupConfig {
 	#[serde(default = "default_same_page_batch_size")]
 	pub batch_size: usize,
 	#[serde(default)]
+	pub lane_path_segment_count: Option<usize>,
+	#[serde(default)]
 	pub child_paths: Vec<PathRuleConfig>,
 }
 
@@ -152,6 +154,9 @@ impl SamePageRouteGroupConfig {
 	fn into_same_page_route_group(self, root: &Url) -> anyhow::Result<SamePageRouteGroup> {
 		validate_positive("same_page_route_groups.max_tabs", self.max_tabs)?;
 		validate_positive("same_page_route_groups.batch_size", self.batch_size)?;
+		if let Some(lane_path_segment_count) = self.lane_path_segment_count {
+			validate_positive("same_page_route_groups.lane_path_segment_count", lane_path_segment_count)?;
+		}
 
 		if self.child_paths.is_empty() {
 			bail!("same-page route group for parent {} must define at least one child path rule", self.parent);
@@ -160,7 +165,7 @@ impl SamePageRouteGroupConfig {
 		let parent = root.join(&self.parent).with_context(|| format!("resolve same-page parent {} against root_url {root}", self.parent))?;
 		let child_paths = self.child_paths.into_iter().map(PathRuleConfig::into_path_rule).collect();
 
-		Ok(SamePageRouteGroup { parent, child_paths, max_tabs: self.max_tabs, batch_size: self.batch_size })
+		Ok(SamePageRouteGroup { parent, child_paths, max_tabs: self.max_tabs, batch_size: self.batch_size, lane_path_segment_count: self.lane_path_segment_count })
 	}
 }
 
@@ -201,18 +206,24 @@ mod tests {
 		let engine_config = config.into_engine_config().unwrap();
 
 		assert_eq!(engine_config.visit_policy.root.as_str(), "http://localhost:5101/");
-		assert_eq!(engine_config.start_urls.len(), 3);
+		assert_eq!(engine_config.start_urls.len(), 4);
 		assert_eq!(engine_config.start_urls[0].as_str(), "http://localhost:5101/database");
 		assert_eq!(engine_config.start_urls[1].as_str(), "http://localhost:5101/database/users");
 		assert_eq!(engine_config.start_urls[2].as_str(), "http://localhost:5101/database/terms");
+		assert_eq!(engine_config.start_urls[3].as_str(), "http://localhost:5101/debates");
 		assert_eq!(engine_config.visit_policy.query_params.len(), 2);
-		assert_eq!(engine_config.visit_policy.allow_paths.len(), 5);
+		assert_eq!(engine_config.visit_policy.allow_paths.len(), 7);
 		assert_eq!(engine_config.visit_policy.exclude_paths.len(), 0);
-		assert_eq!(engine_config.same_page_route_groups.len(), 1);
+		assert_eq!(engine_config.same_page_route_groups.len(), 2);
 		assert_eq!(engine_config.same_page_route_groups[0].parent.as_str(), "http://localhost:5101/database/terms");
 		assert_eq!(engine_config.same_page_route_groups[0].max_tabs, 5);
 		assert_eq!(engine_config.same_page_route_groups[0].batch_size, 20);
 		assert_eq!(engine_config.same_page_route_groups[0].child_paths.len(), 1);
+		assert_eq!(engine_config.same_page_route_groups[1].parent.as_str(), "http://localhost:5101/debates");
+		assert_eq!(engine_config.same_page_route_groups[1].max_tabs, 1);
+		assert_eq!(engine_config.same_page_route_groups[1].batch_size, DEFAULT_SAME_PAGE_BATCH_SIZE);
+		assert_eq!(engine_config.same_page_route_groups[1].lane_path_segment_count, Some(2));
+		assert_eq!(engine_config.same_page_route_groups[1].child_paths.len(), 1);
 		assert_eq!(engine_config.max_retries, DEFAULT_MAX_RETRIES);
 		assert!(engine_config.serve.enabled);
 		assert_eq!(engine_config.serve.host, "127.0.0.1");

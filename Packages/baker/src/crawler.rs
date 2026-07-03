@@ -150,11 +150,12 @@ impl CrawlerTab {
 
 	fn process_url(&self, url: Url) {
 		if let Some(group) = self.same_page_group_for_child(&url).cloned() {
+			let lane_key = group.lane_key(&url);
 			if let Err(err) = self.process_same_page_child_batch(url.clone(), &group) {
 				error!("{err}");
 				self.re_add_failed_visit(url, &err.to_string());
 			}
-			self.visit_state.release_same_page_batch(&group);
+			self.visit_state.release_same_page_batch(&lane_key);
 			return;
 		}
 
@@ -166,20 +167,28 @@ impl CrawlerTab {
 
 	fn process_same_page_child_batch(&self, first_url: Url, group: &SamePageRouteGroup) -> anyhow::Result<()> {
 		let mut batch_urls = vec![first_url];
-		let mut sibling_urls = self.visit_state.reserve_matching_same_page_children(group, group.batch_size.saturating_sub(1)).with_context(|| format!("reserve queued same-page children for parent {}", group.parent.as_str()))?;
-		batch_urls.append(&mut sibling_urls);
+		let lane_key = group.lane_key(&batch_urls[0]);
 
-		info!("Processing {} same-page child route(s) under {} in one tab", batch_urls.len(), group.parent.as_str());
+		loop {
+			let mut sibling_urls = self.visit_state.reserve_matching_same_page_children(group, &lane_key, group.batch_size.saturating_sub(batch_urls.len())).with_context(|| format!("reserve queued same-page children for parent {}", group.parent.as_str()))?;
+			batch_urls.append(&mut sibling_urls);
 
-		for url in batch_urls {
-			self.process_same_page_child_url(url);
+			if batch_urls.is_empty() {
+				break;
+			}
+
+			info!("Processing {} same-page child route(s) under {} in one tab", batch_urls.len(), group.parent.as_str());
+
+			for url in batch_urls.drain(..) {
+				self.process_same_page_child_url(url);
+			}
 		}
 
 		Ok(())
 	}
 
 	fn process_same_page_child_url(&self, url: Url) {
-		if let Err(err) = self.render_and_mark_visited(url.clone()) {
+		if let Err(err) = self.process_regular_url(url.clone()) {
 			error!("{err}");
 			self.re_add_failed_visit(url, &err.to_string());
 		}
@@ -196,11 +205,6 @@ impl CrawlerTab {
 		self.mark_visited(url.clone()).with_context(|| format!("mark {} as visited", url.as_str()))?;
 
 		Ok(())
-	}
-
-	fn render_and_mark_visited(&self, url: Url) -> anyhow::Result<()> {
-		self.render_url(&url)?;
-		self.mark_visited(url.clone()).with_context(|| format!("mark {} as visited", url.as_str()))
 	}
 
 	fn re_add_failed_visit(&self, url: Url, error: &str) {

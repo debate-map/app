@@ -4,7 +4,6 @@ use headless_chrome::protocol::cdp::Page::{self, CaptureSnapshotFormatOption};
 use serde_json::Value;
 use std::thread::sleep;
 use std::time::Duration;
-use tracing::info;
 use url::Url;
 
 const TOTAL_READINESS_CHECKS: usize = 100;
@@ -13,11 +12,10 @@ const READINESS_POLL_INTERVAL: Duration = Duration::from_millis(500);
 const POST_NAVIGATION_RENDER_DELAY: Duration = Duration::from_secs(3);
 const SPA_NAVIGATION_RENDER_DELAY: Duration = Duration::from_millis(500);
 
-pub fn wait_until_ready(tab: &Tab, url: &Url) -> anyhow::Result<()> {
+pub fn wait_until_ready(tab: &Tab, _url: &Url) -> anyhow::Result<()> {
 	tab.wait_until_navigated().context("wait for navigation")?;
 	sleep(POST_NAVIGATION_RENDER_DELAY);
-	wait_for_stable_readiness(tab)?;
-	prepare_route(tab, url)
+	wait_for_stable_readiness(tab)
 }
 
 pub fn switch_same_page_route(tab: &Tab, url: &Url) -> anyhow::Result<()> {
@@ -50,8 +48,7 @@ pub fn switch_same_page_route(tab: &Tab, url: &Url) -> anyhow::Result<()> {
 	}
 
 	sleep(SPA_NAVIGATION_RENDER_DELAY);
-	wait_for_stable_readiness(tab)?;
-	prepare_route(tab, url)
+	wait_for_stable_readiness(tab)
 }
 
 pub fn extract_links(tab: &Tab) -> anyhow::Result<Vec<String>> {
@@ -159,62 +156,4 @@ fn readiness_state(tab: &Tab) -> anyhow::Result<String> {
 	}
 
 	Ok(state)
-}
-
-fn prepare_route(tab: &Tab, url: &Url) -> anyhow::Result<()> {
-	if url.path() == "/debates" {
-		expand_debates_index(tab)
-	} else if url.path().starts_with("/debates/") {
-		expand_debate_detail(tab)
-	} else {
-		Ok(())
-	}
-}
-
-fn expand_debates_index(tab: &Tab) -> anyhow::Result<()> {
-	info!("At /debates page, attempting to click 'All' button to show all debates");
-	let elements = tab.find_elements("div.ButtonBar_OptionUI")?;
-	for el in elements {
-		if let Ok(text) = el.get_inner_text()
-			&& text.trim_start().starts_with("All")
-		{
-			el.click()?;
-			sleep(Duration::from_secs(25));
-			return Ok(());
-		}
-	}
-
-	Err(anyhow!("No element starting with 'All' found"))
-}
-
-fn expand_debate_detail(tab: &Tab) -> anyhow::Result<()> {
-	loop {
-		let js = r#"
-            (() => {
-                const boxes = document.querySelectorAll('div.ExpandableBox_mainContent');
-                let clicked = 0;
-                boxes.forEach(box => {
-                    const btn = box.querySelector('div.Button');
-                    if (btn && btn.textContent.trim() === '>') {
-                        btn.click();
-                        clicked++;
-                    }
-                });
-                return clicked;
-            })();
-        "#;
-
-		let res = tab.evaluate(js, true)?;
-		let clicked = res.value.and_then(|v| v.as_i64()).unwrap_or(0);
-
-		if clicked == 0 {
-			info!("No more expandable boxes found");
-			break;
-		}
-
-		info!("Expanded {} boxes, waiting 60s for next batch", clicked);
-		sleep(Duration::from_secs(60));
-	}
-
-	Ok(())
 }
