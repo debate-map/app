@@ -169,6 +169,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			mapID = isAllList ? null : (urlStr?.match(/([A-Za-z0-9_-]+)$/)?.[1] ?? null);
 			store.main.debates.listType = isAllList ? "all" : "featured";
 			store.main.debates.selectedMapID = mapID!;
+			store.main.debates.focusedNodePath = mapID ? (url.pathNodes.slice(2).join("/") || null) : null;
 		} else if (page == "global") {
 			/* if (subpage == 'map') {
 				mapID = globalMapID;
@@ -320,6 +321,9 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			// newURL.pathNodes.push(mapID+"");
 			const urlStr = GetURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
+			if (s.main.internalCrawlerMode && s.main.debates.focusedNodePath) {
+				newURL.pathNodes.push(...s.main.debates.focusedNodePath.split("/").filter(a=>a));
+			}
 		} else if (s.main.internalCrawlerMode && s.main.debates.listType == "all") {
 			// keep normal list switching spa-only; only crawler mode needs the all route.
 			newURL.pathNodes.push("all");
