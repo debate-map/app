@@ -207,6 +207,9 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 	const pathHasCycle = nodeIDsInPath.Distinct().length != nodeIDsInPath.length;
 	if (pathHasCycle) return false; // never force-expand a path that has a cycle
 
+	const crawlerFocusPath = GetDebateMapCrawlerFocusPath();
+	if (crawlerFocusPath && (path == crawlerFocusPath || crawlerFocusPath.startsWith(`${path}/`))) return true;
+
 	//if (forLayoutHelperMap) return true;
 	if (forLayoutHelperMap) {
 		// optimization; have layout-helper map only force-expand nodes that are shown at some point during the active playback/timeline (helpful for huge maps, for which each video only shows a portion)
@@ -233,6 +236,17 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 		}
 	}
 	return false;
+});
+
+export const GetDebateMapCrawlerFocusPath = CreateAccessor(()=>{
+	if (!store.main.internalCrawlerMode || store.main.page != "debates") return null;
+	const map = GetMap(GetOpenMapID());
+	const rootNodeID = map?.rootNode;
+	if (rootNodeID == null) return null;
+
+	const focusedNodePath = store.main.debates.focusedNodePath;
+	const focusedNodeIDs = focusedNodePath?.split("/").filter(a=>a) ?? [];
+	return [rootNodeID, ...focusedNodeIDs].join("/");
 });
 
 export class ChildLimitInfo {
@@ -277,7 +291,8 @@ export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map
 	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);
 	const showAll_forForcedExpand_vertical_forPlayback = GetPlaybackInfo() != null && !forLayoutHelperMap; // if playback is active, do forced vertical-expand (ie. no child-limit-bar) for all nodes in main map-ui
-	const showAll = showAll_regular || showAll_forForcedExpand || showAll_forForcedExpand_vertical_forPlayback;
+	const showAll_forInternalCrawler = store.main.internalCrawlerMode; // in crawler mode, render every child link on visible nodes(so crawler doesnt has to click to expand each node, which would be slow and tedious)
+	const showAll = showAll_regular || showAll_forForcedExpand || showAll_forForcedExpand_vertical_forPlayback || showAll_forInternalCrawler;
 
 	const parentNodeView = GetNodeView(map.id, parentPath);
 	const childLayout = GetChildLayout_Final(parentNode.current, map);

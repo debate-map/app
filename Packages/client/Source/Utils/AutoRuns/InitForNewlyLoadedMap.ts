@@ -1,4 +1,5 @@
 import {GetMap, GetNodeLinks, GetNodeL2, MapView, Me} from "dm_common";
+import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
@@ -41,8 +42,10 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		}*/
 	});
 
+	// in crawler mode, map expansion comes only from the focused slice url.
+	const defaultExpandDepth = store.main.internalCrawlerMode ? 0 : map.defaultExpandDepth;
 	let pathsToExpand = [map.rootNode];
-	for (let depth = 0; depth < map.defaultExpandDepth; depth++) {
+	for (let depth = 0; depth < defaultExpandDepth; depth++) {
 		const newPathsToExpand = [] as string[];
 		for (const path of pathsToExpand) {
 			const nodeID = path.split("/").Last();
