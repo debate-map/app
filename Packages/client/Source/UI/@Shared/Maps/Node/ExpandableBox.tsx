@@ -67,6 +67,7 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 
 	const textHolderRef = useRef<HTMLDivElement>(null);
 	const expandButtonRef = useRef<Button>(null);
+	const showExpandButton = isExpandButtonForNodeChildren || !store.main.internalCrawlerMode;
 
 	const self = useMemo(()=>new ExpandableBox_FakeClass({}), []);
 	const {key, css} = cssHelper(self);
@@ -89,7 +90,7 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 			>
 				<div ref={textHolderRef} onClick={onTextHolderClick} style={ES(
 					{
-						position: "relative", width: "calc(100% - 17px)", padding,
+						position: "relative", width: showExpandButton ? "calc(100% - 17px)" : "100%", padding,
 						paddingRight: showNotificationButton ? NOTIFICATION_BELL_WIDTH : undefined,
 						// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 					},
@@ -144,7 +145,7 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 						</button>
 					</Div>}
 				</div>
-				<Button ref={expandButtonRef}
+				{showExpandButton && <Button ref={expandButtonRef}
 					text={<>
 						{expanded ? "<" : ">"}
 						{!expanded && isExpandButtonForNodeChildren &&
@@ -170,6 +171,7 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 						}
 						return toggleExpanded(e);
 					}}/>
+				}
 			</Row>
 			{afterChildren}
 		</div>

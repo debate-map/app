@@ -47,8 +47,10 @@ export const RootUIWrapper = observer_mgl(()=>{
 
 	if (!isMounted.current){
 		(async()=>{
+			// crawler pages must be url-driven, so don't load or write browser-saved state.
+			const useStoredState = startURL.GetQueryVar("internalCrawler") != "1";
 			const trunk = new AsyncTrunk(store, {storage: localStorage});
-			if (startURL.GetQueryVar("clearState") == "true") {
+			if (useStoredState && startURL.GetQueryVar("clearState") == "true") {
 				console.log("Clearing state. State before clear:", Clone(store));
 				await trunk.clear();
 			}
@@ -56,6 +58,7 @@ export const RootUIWrapper = observer_mgl(()=>{
 			// we start a mirror-generation here, but merely so that we can hook into its "onChange" event (to trigger another call to trunk.persist)
 			const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {
 				onChange: (sourceObj, mirrorObj)=>{
+					if (!useStoredState) return;
 					if (!self.storeReady) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
 					//changeCount++;
 					//console.log(`Mirror changed (${changeCount})! Possibly persisting... (ie. if cooldown has passed) @SourceObj:`, sourceObj, "@MirrorObj:", mirrorObj, "@MirrorObj_Old:", mirrorObj_old);
@@ -88,7 +91,9 @@ export const RootUIWrapper = observer_mgl(()=>{
 				})();
 			};
 
-			await trunk.init();
+			if (useStoredState) {
+				await trunk.init();
+			}
 			console.log("Loaded state:", Clone(store));
 
 			// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)

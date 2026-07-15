@@ -56,32 +56,21 @@ mod tests {
 	}
 
 	#[test]
-	fn extensionless_routes_are_written_as_directory_indexes() {
-		assert_eq!(output_for("/"), PathBuf::from("static/index.html"));
-		assert_eq!(output_for("/database"), PathBuf::from("static/database/index.html"));
-		assert_eq!(output_for("/database/"), PathBuf::from("static/database/index.html"));
-		assert_eq!(output_for("/database/users/abc"), PathBuf::from("static/database/users/abc/index.html"));
-		assert_eq!(output_for("/debates/how-old-is-the-universe.abc123"), PathBuf::from("static/debates/how-old-is-the-universe.abc123/index.html"));
-	}
+	fn maps_urls_to_static_files_and_routes() {
+		let cases = [
+			("/", "static/index.html", "/"),
+			("/database", "static/database/index.html", "/database/"),
+			("/database/", "static/database/index.html", "/database/"),
+			("/database/users/abc", "static/database/users/abc/index.html", "/database/users/abc/"),
+			("/debates/how-old-is-the-universe.abc123", "static/debates/how-old-is-the-universe.abc123/index.html", "/debates/how-old-is-the-universe.abc123/"),
+			("/robots.txt", "static/robots.txt", "/robots.txt"),
+			("/assets/app.css", "static/assets/app.css", "/assets/app.css"),
+		];
 
-	#[test]
-	fn file_like_routes_keep_their_filename() {
-		assert_eq!(output_for("/robots.txt"), PathBuf::from("static/robots.txt"));
-		assert_eq!(output_for("/assets/app.css"), PathBuf::from("static/assets/app.css"));
-	}
-
-	#[test]
-	fn static_route_paths_point_to_directory_indexes() {
-		let route = |path: &str| {
+		for (path, output, route) in cases {
 			let url = Url::parse(&format!("https://debatemap.app{path}")).unwrap();
-			static_route_path(&url)
-		};
-
-		assert_eq!(route("/"), "/");
-		assert_eq!(route("/database"), "/database/");
-		assert_eq!(route("/database/"), "/database/");
-		assert_eq!(route("/database/users/abc"), "/database/users/abc/");
-		assert_eq!(route("/debates/how-old-is-the-universe.abc123"), "/debates/how-old-is-the-universe.abc123/");
-		assert_eq!(route("/robots.txt"), "/robots.txt");
+			assert_eq!(output_for(path), PathBuf::from(output));
+			assert_eq!(static_route_path(&url), route);
+		}
 	}
 }

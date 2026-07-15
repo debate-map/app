@@ -1,12 +1,11 @@
 use crate::output_path::html_output_path;
-use crate::visit::{DEFAULT_MAX_RETRIES, Frontier, VisitFailure};
+use crate::visit::{Frontier, PathRule, VisitFailure};
 use anyhow::{Context, bail};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::warn;
 use url::Url;
@@ -15,69 +14,21 @@ const STATE_DIR: &str = ".baker";
 const STATE_FILE: &str = "crawl-state.json";
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PathRuleSignature {
-	pub kind: String,
-	pub value: String,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CrawlConfigSignature {
 	pub root_url: String,
 	pub start_urls: Vec<String>,
-	pub allow_paths: Vec<PathRuleSignature>,
-	pub exclude_paths: Vec<PathRuleSignature>,
+	pub allow_paths: Vec<PathRule>,
+	pub exclude_paths: Vec<PathRule>,
 	pub query_params: Vec<(String, String)>,
-	#[serde(default)]
-	pub same_page_route_groups: Vec<SamePageRouteGroupSignature>,
-	#[serde(default = "default_max_retries")]
+	pub isolated_crawl_groups: Vec<IsolatedCrawlGroupSignature>,
 	pub max_retries: usize,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct SamePageRouteGroupSignature {
+pub struct IsolatedCrawlGroupSignature {
 	pub parent_url: String,
-	pub child_paths: Vec<PathRuleSignature>,
-	#[serde(default)]
-	pub lane_path_segment_count: Option<usize>,
-}
-
-#[derive(Clone, Debug)]
-struct CrawlStatePaths {
-	base_output_dir: PathBuf,
-}
-
-impl CrawlStatePaths {
-	fn new(base_output_dir: &Path) -> Self {
-		Self { base_output_dir: base_output_dir.to_path_buf() }
-	}
-
-	fn state_dir(&self) -> PathBuf {
-		self.base_output_dir.join(STATE_DIR)
-	}
-
-	fn snapshot_path(&self) -> PathBuf {
-		self.state_dir().join(STATE_FILE)
-	}
-
-	fn has_resume_state(&self) -> bool {
-		self.snapshot_path().exists()
-	}
-
-	fn html_output_path(&self, url: &Url) -> PathBuf {
-		html_output_path(&self.base_output_dir, url)
-	}
-
-	fn full_output_path(&self, output_path: &Path) -> PathBuf {
-		if output_path.is_absolute() {
-			output_path.to_path_buf()
-		} else {
-			self.base_output_dir.join(output_path)
-		}
-	}
-
-	fn relative_output_path(&self, output_path: &Path) -> PathBuf {
-		output_path.strip_prefix(&self.base_output_dir).unwrap_or(output_path).to_path_buf()
-	}
+	pub child_path_prefix: String,
+	pub group_path_segment_count: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -120,42 +71,47 @@ impl CrawlStateSnapshot {
 		Self { config, pages }
 	}
 
-	fn from_json_file(path: &Path, expected_config: &CrawlConfigSignature) -> anyhow::Result<Self> {
-		let text = fs::read_to_string(path).with_context(|| format!("read crawler state file {}", path.display()))?;
-		let snapshot = serde_json::from_str::<Self>(&text).with_context(|| format!("parse crawler state file {}", path.display()))?;
-		snapshot.validate(expected_config)?;
-		Ok(snapshot)
-	}
-
-	fn validate(&self, expected_config: &CrawlConfigSignature) -> anyhow::Result<()> {
-		if &self.config != expected_config {
-			bail!("crawler resume state was created for a different crawl config; use --force-restart to start fresh");
-		}
-
-		Ok(())
-	}
-
-	fn into_frontier(self, paths: &CrawlStatePaths, source_path: &Path) -> anyhow::Result<Frontier> {
-		let mut frontier = Frontier::new();
+	fn into_frontier(self, base_output_dir: &Path, source_path: &Path) -> anyhow::Result<Frontier> {
+		let mut frontier = Frontier::default();
 		let mut seen_urls = HashSet::new();
 
 		for page in self.pages {
-			page.apply_to_frontier(paths, source_path, &mut frontier, &mut seen_urls)?;
+			let url = Url::parse(&page.url).with_context(|| format!("parse URL from crawler state {}", source_path.display()))?;
+			if !seen_urls.insert(url.clone()) {
+				bail!("crawler state contains duplicate page {}", url);
+			}
+
+			if page.attempts > 0 || page.last_error.is_some() {
+				frontier.failures.insert(url.clone(), VisitFailure { attempts: page.attempts, last_error: page.last_error.unwrap_or_default() });
+			}
+
+			match page.status {
+				CrawlPageStatus::Queued | CrawlPageStatus::InProgress => {
+					frontier.to_visit.insert(url);
+				},
+				CrawlPageStatus::Ready => {
+					let default_output = html_output_path(base_output_dir, &url);
+					let output_path = page.output_path.map(PathBuf::from).unwrap_or_else(|| default_output.strip_prefix(base_output_dir).unwrap_or(&default_output).to_path_buf());
+					frontier.failures.remove(&url);
+					frontier.visited.insert(url.clone());
+					frontier.visited_outputs.insert(url, output_path);
+				},
+				CrawlPageStatus::Failed => {
+					frontier.failures.entry(url).or_default();
+				},
+			}
 		}
 
 		Ok(frontier)
 	}
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct CrawlPageSnapshot {
 	url: String,
 	status: CrawlPageStatus,
-	#[serde(skip_serializing_if = "Option::is_none")]
 	output_path: Option<String>,
-	#[serde(default, skip_serializing_if = "CrawlPageSnapshot::is_zero")]
 	attempts: usize,
-	#[serde(default, skip_serializing_if = "Option::is_none")]
 	last_error: Option<String>,
 }
 
@@ -169,52 +125,9 @@ impl CrawlPageSnapshot {
 			last_error: failure.and_then(|failure| if failure.last_error.is_empty() { None } else { Some(failure.last_error.clone()) }),
 		}
 	}
-
-	fn apply_to_frontier(self, paths: &CrawlStatePaths, source_path: &Path, frontier: &mut Frontier, seen_urls: &mut HashSet<Url>) -> anyhow::Result<()> {
-		let url = self.parse_url(source_path)?;
-		if !seen_urls.insert(url.clone()) {
-			bail!("crawler state contains duplicate page {}", url);
-		}
-
-		if self.attempts > 0 || self.last_error.is_some() {
-			frontier.failures.insert(url.clone(), VisitFailure { attempts: self.attempts, last_error: self.last_error.unwrap_or_default() });
-		}
-
-		match self.status {
-			CrawlPageStatus::Queued => {
-				frontier.to_visit.insert(url);
-			},
-			CrawlPageStatus::InProgress => {
-				frontier.to_visit.insert(url);
-			},
-			CrawlPageStatus::Ready => {
-				let output_path = self.output_path.map(PathBuf::from).unwrap_or_else(|| paths.relative_output_path(&paths.html_output_path(&url)));
-				frontier.failures.remove(&url);
-				frontier.visited.insert(url.clone());
-				frontier.visited_outputs.insert(url, output_path);
-			},
-			CrawlPageStatus::Failed => {
-				frontier.to_visit.remove(&url);
-				frontier.visiting.remove(&url);
-				frontier.visited.remove(&url);
-				frontier.visited_outputs.remove(&url);
-				frontier.failures.entry(url).or_default();
-			},
-		}
-
-		Ok(())
-	}
-
-	fn parse_url(&self, source_path: &Path) -> anyhow::Result<Url> {
-		Url::parse(&self.url).with_context(|| format!("parse URL from crawler state {}", source_path.display()))
-	}
-
-	fn is_zero(value: &usize) -> bool {
-		*value == 0
-	}
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 enum CrawlPageStatus {
 	Queued,
@@ -224,26 +137,26 @@ enum CrawlPageStatus {
 }
 
 pub struct CrawlStateStore {
-	paths: CrawlStatePaths,
+	base_output_dir: PathBuf,
+	snapshot_path: PathBuf,
 	config: CrawlConfigSignature,
-	write_lock: Mutex<()>,
 }
 
 impl CrawlStateStore {
 	pub fn has_resume_state(base_output_dir: &Path) -> bool {
-		CrawlStatePaths::new(base_output_dir).has_resume_state()
+		Self::state_path(base_output_dir).exists()
 	}
 
-	pub fn start_fresh(base_output_dir: &Path, config: CrawlConfigSignature) -> anyhow::Result<Arc<Self>> {
-		let store = Arc::new(Self::new(base_output_dir, config)?);
+	pub fn start_fresh(base_output_dir: &Path, config: CrawlConfigSignature) -> anyhow::Result<Self> {
+		let store = Self::new(base_output_dir, config)?;
 		store.save_snapshot(&CrawlStateSnapshot::empty(store.config.clone()))?;
 		Ok(store)
 	}
 
-	pub fn resume(base_output_dir: &Path, config: CrawlConfigSignature) -> anyhow::Result<(Arc<Self>, Frontier)> {
-		let store = Arc::new(Self::new(base_output_dir, config)?);
+	pub fn resume(base_output_dir: &Path, config: CrawlConfigSignature) -> anyhow::Result<(Self, Frontier)> {
+		let store = Self::new(base_output_dir, config)?;
 		let mut frontier = store.load_frontier()?;
-		ResumeReconciler::new(&store.paths).reconcile(&mut frontier);
+		store.reconcile(&mut frontier);
 		store.save_frontier(&frontier)?;
 		Ok((store, frontier))
 	}
@@ -254,121 +167,75 @@ impl CrawlStateStore {
 	}
 
 	fn new(base_output_dir: &Path, config: CrawlConfigSignature) -> anyhow::Result<Self> {
-		let paths = CrawlStatePaths::new(base_output_dir);
-		fs::create_dir_all(paths.state_dir()).with_context(|| format!("create crawler state dir {}", paths.state_dir().display()))?;
+		let snapshot_path = Self::state_path(base_output_dir);
+		let state_dir = snapshot_path.parent().context("crawler state path has no parent")?;
+		fs::create_dir_all(state_dir).with_context(|| format!("create crawler state dir {}", state_dir.display()))?;
 
-		Ok(Self { paths, config, write_lock: Mutex::new(()) })
+		Ok(Self { base_output_dir: base_output_dir.to_path_buf(), snapshot_path, config })
 	}
 
 	fn load_frontier(&self) -> anyhow::Result<Frontier> {
-		let snapshot_path = self.paths.snapshot_path();
-		if snapshot_path.exists() {
-			let snapshot = CrawlStateSnapshot::from_json_file(&snapshot_path, &self.config)?;
-			return snapshot.into_frontier(&self.paths, &snapshot_path);
+		if !self.snapshot_path.exists() {
+			bail!("no crawler resume state found at {}; use --force-restart to start fresh", self.snapshot_path.display());
 		}
 
-		bail!("no crawler resume state found at {}; use --force-restart to start fresh", snapshot_path.display());
+		let text = fs::read_to_string(&self.snapshot_path).with_context(|| format!("read crawler state file {}", self.snapshot_path.display()))?;
+		let snapshot: CrawlStateSnapshot = serde_json::from_str(&text).with_context(|| format!("parse crawler state file {}", self.snapshot_path.display()))?;
+		if snapshot.config != self.config {
+			bail!("crawler resume state was created for a different crawl config; use --force-restart to start fresh");
+		}
+
+		snapshot.into_frontier(&self.base_output_dir, &self.snapshot_path)
 	}
 
 	fn save_snapshot(&self, snapshot: &CrawlStateSnapshot) -> anyhow::Result<()> {
-		let _guard = self.write_lock.lock().unwrap();
-		SnapshotStateFile::new(self.paths.snapshot_path()).write(snapshot).with_context(|| format!("write crawler state {}", self.paths.snapshot_path().display()))
-	}
-}
-
-struct SnapshotStateFile {
-	path: PathBuf,
-}
-
-impl SnapshotStateFile {
-	fn new(path: PathBuf) -> Self {
-		Self { path }
-	}
-
-	fn write(&self, snapshot: &CrawlStateSnapshot) -> anyhow::Result<()> {
-		let parent = self.path.parent().with_context(|| format!("state path has no parent: {}", self.path.display()))?;
-		fs::create_dir_all(parent).with_context(|| format!("create dir {}", parent.display()))?;
-
-		let file_name = self.path.file_name().and_then(|name| name.to_str()).unwrap_or(STATE_FILE);
+		let parent = self.snapshot_path.parent().with_context(|| format!("state path has no parent: {}", self.snapshot_path.display()))?;
+		let file_name = self.snapshot_path.file_name().and_then(|name| name.to_str()).unwrap_or(STATE_FILE);
 		let tmp_path = parent.join(format!(".{file_name}.tmp-{}-{}", std::process::id(), now_nanos()));
-
 		let mut bytes = serde_json::to_vec_pretty(snapshot).context("serialize crawler state")?;
 		bytes.push(b'\n');
 
-		let write_result = (|| -> anyhow::Result<()> {
+		let result = (|| -> anyhow::Result<()> {
 			let mut file = File::create(&tmp_path).with_context(|| format!("create {}", tmp_path.display()))?;
 			file.write_all(&bytes).with_context(|| format!("write {}", tmp_path.display()))?;
 			file.sync_all().with_context(|| format!("sync {}", tmp_path.display()))?;
-			fs::rename(&tmp_path, &self.path).with_context(|| format!("rename {} to {}", tmp_path.display(), self.path.display()))?;
-			Ok(())
+			fs::rename(&tmp_path, &self.snapshot_path).with_context(|| format!("rename {} to {}", tmp_path.display(), self.snapshot_path.display()))
 		})();
 
-		if write_result.is_err() {
-			let _ = fs::remove_file(&tmp_path);
+		if result.is_err() {
+			let _ = fs::remove_file(tmp_path);
 		}
 
-		write_result
-	}
-}
-
-struct ResumeReconciler<'a> {
-	paths: &'a CrawlStatePaths,
-}
-
-impl<'a> ResumeReconciler<'a> {
-	fn new(paths: &'a CrawlStatePaths) -> Self {
-		Self { paths }
+		result.with_context(|| format!("write crawler state {}", self.snapshot_path.display()))
 	}
 
 	fn reconcile(&self, frontier: &mut Frontier) {
-		self.requeue_interrupted_pages(frontier);
-		self.requeue_failed_pages(frontier);
-		self.requeue_ready_pages_missing_output(frontier);
-	}
-
-	fn requeue_interrupted_pages(&self, frontier: &mut Frontier) {
-		for url in frontier.visiting.drain().collect::<Vec<_>>() {
-			if !frontier.visited.contains(&url) {
-				frontier.to_visit.insert(url);
-			}
-		}
-	}
-
-	fn requeue_failed_pages(&self, frontier: &mut Frontier) {
-		for url in frontier.failures.keys().cloned().collect::<Vec<_>>() {
-			if !frontier.visited.contains(&url) && !frontier.visiting.contains(&url) {
-				if let Some(failure) = frontier.failures.get_mut(&url) {
-					failure.attempts = 0;
-				}
+		for (url, failure) in &mut frontier.failures {
+			if !frontier.visited.contains(url) {
+				failure.attempts = 0;
 				warn!("Requeueing previously failed page {} for resume", url);
-				frontier.to_visit.insert(url);
+				frontier.to_visit.insert(url.clone());
 			}
 		}
-	}
 
-	fn requeue_ready_pages_missing_output(&self, frontier: &mut Frontier) {
 		for url in frontier.visited.iter().cloned().collect::<Vec<_>>() {
-			let current_html_path = self.paths.html_output_path(&url);
-			let stored_output_path = frontier.visited_outputs.get(&url).cloned().unwrap_or_else(|| self.paths.relative_output_path(&current_html_path));
-			let stored_output_path = self.paths.full_output_path(&stored_output_path);
+			let output_path = html_output_path(&self.base_output_dir, &url);
 
-			if !current_html_path.exists() {
-				warn!("Requeueing {} because ready output {} is missing", url, current_html_path.display());
+			if !output_path.exists() {
+				warn!("Requeueing {} because ready output {} is missing", url, output_path.display());
 				frontier.visited.remove(&url);
 				frontier.visited_outputs.remove(&url);
 				frontier.to_visit.insert(url);
 			} else {
-				if stored_output_path != current_html_path && stored_output_path.exists() {
-					warn!("Ignoring stale ready output {} for {}; current output is {}", stored_output_path.display(), url, current_html_path.display());
-				}
-				frontier.visited_outputs.insert(url, self.paths.relative_output_path(&current_html_path));
+				let relative_path = output_path.strip_prefix(&self.base_output_dir).unwrap_or(&output_path).to_path_buf();
+				frontier.visited_outputs.insert(url, relative_path);
 			}
 		}
 	}
-}
 
-fn default_max_retries() -> usize {
-	DEFAULT_MAX_RETRIES
+	fn state_path(base_output_dir: &Path) -> PathBuf {
+		base_output_dir.join(STATE_DIR).join(STATE_FILE)
+	}
 }
 
 fn now_nanos() -> u128 {
@@ -378,17 +245,16 @@ fn now_nanos() -> u128 {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use std::path::Path;
 
 	fn signature() -> CrawlConfigSignature {
 		CrawlConfigSignature {
 			root_url: "https://debatemap.app/".into(),
 			start_urls: vec!["https://debatemap.app/database".into()],
-			allow_paths: vec![PathRuleSignature { kind: "starts_with".into(), value: "/database".into() }],
+			allow_paths: vec![PathRule::StartsWith("/database".into())],
 			exclude_paths: vec![],
 			query_params: vec![("db".into(), "prod".into())],
-			same_page_route_groups: vec![],
-			max_retries: DEFAULT_MAX_RETRIES,
+			isolated_crawl_groups: vec![],
+			max_retries: 3,
 		}
 	}
 
@@ -396,129 +262,40 @@ mod tests {
 		std::env::temp_dir().join(format!("debatemap-baker-{name}-{}-{}", std::process::id(), now_nanos()))
 	}
 
-	fn database_url() -> Url {
-		Url::parse("https://debatemap.app/database").unwrap()
-	}
-
-	fn state_paths(output_dir: &Path) -> CrawlStatePaths {
-		CrawlStatePaths::new(output_dir)
-	}
-
-	fn save_frontier(output_dir: &Path, frontier: &Frontier) {
-		let store = CrawlStateStore::start_fresh(output_dir, signature()).unwrap();
-		store.save_frontier(frontier).unwrap();
-	}
-
 	#[test]
-	fn resume_requeues_interrupted_pages() {
-		let output_dir = temp_output_dir("interrupted");
-		let url = database_url();
+	fn resume_reconciles_the_frontier() {
+		let output_dir = temp_output_dir("resume");
+		let interrupted = Url::parse("https://debatemap.app/database/interrupted").unwrap();
+		let failed = Url::parse("https://debatemap.app/database/failed").unwrap();
+		let ready = Url::parse("https://debatemap.app/database/ready").unwrap();
+		let missing = Url::parse("https://debatemap.app/database/missing").unwrap();
+		let ready_output = html_output_path(&output_dir, &ready);
+		fs::create_dir_all(ready_output.parent().unwrap()).unwrap();
+		fs::write(&ready_output, "page").unwrap();
+
 		let mut frontier = Frontier::new();
-		frontier.visiting.insert(url.clone());
-		save_frontier(&output_dir, &frontier);
+		frontier.visiting.insert(interrupted.clone());
+		frontier.failures.insert(failed.clone(), VisitFailure { attempts: 3, last_error: "permanent failure".into() });
+		frontier.visited.extend([ready.clone(), missing.clone()]);
+		frontier.visited_outputs.insert(ready.clone(), PathBuf::from("old/ready.html"));
+		frontier.visited_outputs.insert(missing.clone(), PathBuf::from("old/missing.html"));
 
-		let (_store, frontier) = CrawlStateStore::resume(&output_dir, signature()).unwrap();
-
-		assert!(frontier.to_visit.contains(&url));
-		assert!(frontier.visiting.is_empty());
-		assert!(frontier.visited.is_empty());
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn resume_requeues_ready_pages_when_output_is_missing() {
-		let output_dir = temp_output_dir("missing-output");
-		let url = database_url();
-		let mut frontier = Frontier::new();
-		frontier.visited.insert(url.clone());
-		frontier.visited_outputs.insert(url.clone(), PathBuf::from("database/index.html"));
-		save_frontier(&output_dir, &frontier);
-
-		let (_store, frontier) = CrawlStateStore::resume(&output_dir, signature()).unwrap();
-
-		assert!(frontier.to_visit.contains(&url));
-		assert!(!frontier.visited.contains(&url));
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn resume_keeps_ready_pages_when_current_output_exists() {
-		let output_dir = temp_output_dir("current-output");
-		let url = database_url();
-		let mut frontier = Frontier::new();
-		frontier.visited.insert(url.clone());
-		frontier.visited_outputs.insert(url.clone(), PathBuf::from("database/index.html"));
-		fs::create_dir_all(output_dir.join("database")).unwrap();
-		fs::write(output_dir.join("database").join("index.html"), "page").unwrap();
-		save_frontier(&output_dir, &frontier);
-
-		let (_store, frontier) = CrawlStateStore::resume(&output_dir, signature()).unwrap();
-
-		assert!(!frontier.to_visit.contains(&url));
-		assert!(frontier.visited.contains(&url));
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn resume_rejects_mismatched_config() {
-		let output_dir = temp_output_dir("mismatched-config");
 		let config = signature();
-		let mut other_config = config.clone();
-		other_config.start_urls = vec!["https://debatemap.app/other".into()];
+		let store = CrawlStateStore::start_fresh(&output_dir, config.clone()).unwrap();
+		store.save_frontier(&frontier).unwrap();
 
-		drop(CrawlStateStore::start_fresh(&output_dir, config).unwrap());
+		let (_store, resumed) = CrawlStateStore::resume(&output_dir, config.clone()).unwrap();
+		assert!(resumed.visiting.is_empty());
+		assert!(resumed.to_visit.is_superset(&HashSet::from([interrupted, failed.clone(), missing.clone()])));
+		assert_eq!(resumed.failures.get(&failed), Some(&VisitFailure { attempts: 0, last_error: "permanent failure".into() }));
+		assert!(resumed.visited.contains(&ready));
+		assert!(!resumed.visited.contains(&missing));
+		assert_eq!(resumed.visited_outputs.get(&ready), Some(&ready_output.strip_prefix(&output_dir).unwrap().to_path_buf()));
 
-		let err = match CrawlStateStore::resume(&output_dir, other_config) {
-			Ok(_) => panic!("resume should reject mismatched config"),
-			Err(err) => err,
-		};
-
+		let mut changed_config = config;
+		changed_config.start_urls.push("https://debatemap.app/database/other".into());
+		let err = CrawlStateStore::resume(&output_dir, changed_config).err().unwrap();
 		assert!(err.to_string().contains("different crawl config"));
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn resume_requeues_exhausted_failures() {
-		let output_dir = temp_output_dir("exhausted-failure");
-		let url = database_url();
-		let mut frontier = Frontier::new();
-		frontier.failures.insert(url.clone(), VisitFailure { attempts: DEFAULT_MAX_RETRIES, last_error: "permanent failure".into() });
-		save_frontier(&output_dir, &frontier);
-
-		let (_store, frontier) = CrawlStateStore::resume(&output_dir, signature()).unwrap();
-
-		assert!(frontier.to_visit.contains(&url));
-		assert!(!frontier.visiting.contains(&url));
-		assert_eq!(frontier.failures.get(&url).unwrap().attempts, 0);
-		assert_eq!(frontier.failures.get(&url).unwrap().last_error, "permanent failure");
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn state_file_is_a_single_snapshot() {
-		let output_dir = temp_output_dir("single-snapshot");
-		let url = database_url();
-		let store = CrawlStateStore::start_fresh(&output_dir, signature()).unwrap();
-
-		let mut frontier = Frontier::new();
-		frontier.to_visit.insert(url.clone());
-		store.save_frontier(&frontier).unwrap();
-		frontier.to_visit.remove(&url);
-		frontier.visiting.insert(url);
-		store.save_frontier(&frontier).unwrap();
-
-		let snapshot_text = fs::read_to_string(state_paths(&output_dir).snapshot_path()).unwrap();
-		let snapshot: CrawlStateSnapshot = serde_json::from_str(&snapshot_text).unwrap();
-		let snapshot_json: serde_json::Value = serde_json::from_str(&snapshot_text).unwrap();
-
-		assert!(snapshot_json.get("version").is_none());
-		assert_eq!(snapshot.pages.len(), 1);
-		assert_eq!(snapshot.pages[0].status, CrawlPageStatus::InProgress);
 
 		fs::remove_dir_all(output_dir).unwrap();
 	}

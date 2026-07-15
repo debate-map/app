@@ -1,6 +1,6 @@
 use crate::page;
 use crate::page_baker::PageBaker;
-use crate::visit::{FailedVisitAction, GlobalVisitState, SamePageRouteGroup, VisitQueueState};
+use crate::visit::{CrawlQueue, FailedVisitAction, GlobalVisitState, IsolatedCrawlGroup, IsolatedCrawlGroups, VisitQueueState};
 use anyhow::{Context, bail};
 use headless_chrome::Tab;
 use std::path::PathBuf;
@@ -18,13 +18,14 @@ pub struct CrawlerTab {
 	tab: Arc<Tab>,
 	visit_state: Arc<GlobalVisitState>,
 	page_baker: PageBaker,
-	same_page_route_groups: Vec<SamePageRouteGroup>,
-	loaded_same_page_parent: Mutex<Option<Url>>,
+	isolated_crawl_groups: IsolatedCrawlGroups,
+	queue: CrawlQueue,
+	loaded_isolated_group: Mutex<Option<String>>,
 }
 
 impl CrawlerTab {
-	pub fn new(tab: Arc<Tab>, visit_state: Arc<GlobalVisitState>, base_output_dir: PathBuf, same_page_route_groups: Vec<SamePageRouteGroup>) -> Self {
-		CrawlerTab { tab, visit_state, page_baker: PageBaker::new(base_output_dir), same_page_route_groups, loaded_same_page_parent: Mutex::new(None) }
+	pub fn new(tab: Arc<Tab>, visit_state: Arc<GlobalVisitState>, base_output_dir: PathBuf, isolated_crawl_groups: IsolatedCrawlGroups, queue: CrawlQueue) -> Self {
+		CrawlerTab { tab, visit_state, page_baker: PageBaker::new(base_output_dir), isolated_crawl_groups, queue, loaded_isolated_group: Mutex::new(None) }
 	}
 
 	pub fn spawn_thread_and_run(self: Arc<Self>, worker_id: usize, should_retire: Arc<AtomicBool>) -> JoinHandle<()> {
@@ -61,87 +62,68 @@ impl CrawlerTab {
 	}
 
 	fn render_url(&self, url: &Url) -> anyhow::Result<()> {
-		if let Some(group) = self.same_page_group_for_child(url).cloned() {
-			self.ensure_same_page_parent_loaded(&group, url)?;
-			info!("Rendering {} through same-page parent {}", url.as_str(), group.parent.as_str());
-			page::switch_same_page_route(&self.tab, url).with_context(|| format!("switch SPA route to {}", url.as_str()))?;
+		if let Some(group) = self.isolated_group_for_child(url).cloned() {
+			self.ensure_isolated_group_loaded(&group, url)?;
+			if group.group_url_for_visit(url) == *url {
+				return Ok(());
+			}
+			info!("Rendering {} through isolated group {}", url.as_str(), group.group_key(url));
+			page::switch_isolated_route(&self.tab, url).with_context(|| format!("switch SPA route to {}", url.as_str()))?;
 			return Ok(());
 		}
 
-		{
-			let mut loaded_parent = self.loaded_same_page_parent.lock().unwrap();
-			*loaded_parent = None;
-		}
-
+		self.set_loaded_isolated_group(None);
 		self.navigate_wait_and_prepare(url)?;
-
-		if let Some(group) = self.same_page_group_for_parent(url) {
-			let mut loaded_parent = self.loaded_same_page_parent.lock().unwrap();
-			*loaded_parent = Some(group.parent.clone());
-		}
-
 		Ok(())
 	}
 
-	fn ensure_same_page_parent_loaded(&self, group: &SamePageRouteGroup, child_url: &Url) -> anyhow::Result<()> {
-		let parent_is_loaded = self.loaded_same_page_parent.lock().unwrap().as_ref() == Some(&group.parent);
-		if parent_is_loaded {
+	fn ensure_isolated_group_loaded(&self, group: &IsolatedCrawlGroup, child_url: &Url) -> anyhow::Result<()> {
+		let group_key = group.group_key(child_url);
+		if self.loaded_isolated_group.lock().unwrap().as_ref() == Some(&group_key) {
 			return Ok(());
 		}
 
-		{
-			let mut loaded_parent = self.loaded_same_page_parent.lock().unwrap();
-			*loaded_parent = None;
-		}
-
+		self.set_loaded_isolated_group(None);
 		let parent_url = group.parent_url_for_visit(child_url);
-		info!("Loading same-page parent {} before child {}", parent_url.as_str(), child_url.as_str());
+		let group_url = group.group_url_for_visit(child_url);
+		info!("Loading isolated parent {} before group {}", parent_url.as_str(), group_url.as_str());
 		self.navigate_wait_and_prepare(&parent_url)?;
-
-		let mut loaded_parent = self.loaded_same_page_parent.lock().unwrap();
-		*loaded_parent = Some(group.parent.clone());
+		if group_url != parent_url {
+			page::switch_isolated_route(&self.tab, &group_url).with_context(|| format!("initialize isolated group {}", group_url.as_str()))?;
+		}
+		self.set_loaded_isolated_group(Some(group_key));
 
 		Ok(())
 	}
 
-	fn same_page_group_for_child(&self, url: &Url) -> Option<&SamePageRouteGroup> {
-		self.same_page_route_groups.iter().find(|group| group.matches_child(url))
+	fn set_loaded_isolated_group(&self, group_key: Option<String>) {
+		*self.loaded_isolated_group.lock().unwrap() = group_key;
 	}
 
-	fn same_page_group_for_parent(&self, url: &Url) -> Option<&SamePageRouteGroup> {
-		self.same_page_route_groups.iter().find(|group| group.matches_parent(url))
+	fn isolated_group_for_child(&self, url: &Url) -> Option<&IsolatedCrawlGroup> {
+		self.isolated_crawl_groups.group_for_child(url)
 	}
 
-	fn record_discovered_links(&self, url: &Url, links: Vec<Url>) -> anyhow::Result<()> {
-		let Some(group) = self.same_page_group_for_parent(url) else {
-			let recorded_links = self.visit_state.record_links(links, []).with_context(|| format!("record discovered links from {}", url.as_str()))?;
-			if !recorded_links.queued_urls.is_empty() {
-				info!("Discovered {} regular link(s) from {}", recorded_links.queued_urls.len(), url.as_str());
-			}
-			return Ok(());
-		};
-
-		let mut same_page_children = Vec::new();
-		let mut regular_links = Vec::new();
-		for link in links {
-			if group.matches_child(&link) {
-				same_page_children.push(link);
-			} else {
-				regular_links.push(link);
-			}
+	fn record_discovered_links(&self, url: &Url, mut links: Vec<Url>, branch: Option<&IsolatedCrawlGroup>) -> anyhow::Result<Option<Url>> {
+		let extracted_count = links.len();
+		links.retain(|link| self.isolated_group_for_child(link).is_none_or(|group| !group.has_repeated_descendant_segment(link)));
+		let cyclic_count = extracted_count - links.len();
+		if cyclic_count > 0 {
+			warn!("Skipped {} cyclic isolated link(s) from {}", cyclic_count, url.as_str());
 		}
 
-		let recorded_links = self.visit_state.record_links(regular_links.into_iter().chain(same_page_children), []).with_context(|| format!("record discovered links from {}", url.as_str()))?;
-		let same_page_count = recorded_links.queued_urls.iter().filter(|url| group.matches_child(url)).count();
-		let regular_count = recorded_links.queued_urls.len() - same_page_count;
+		let preferred_urls = branch.into_iter().flat_map(|group| links.iter().filter(|link| group.is_descendant(url, link)).cloned()).collect::<Vec<_>>();
+		let (queued_urls, reserved_url) = self.visit_state.add_many_to_visit_reserving_first(links, preferred_urls).with_context(|| format!("record discovered links from {}", url.as_str()))?;
+		let isolated_count = queued_urls.iter().filter(|url| self.isolated_group_for_child(url).is_some()).count();
+		let regular_count = queued_urls.len() - isolated_count;
 		if regular_count > 0 {
 			info!("Discovered {} regular link(s) from {}", regular_count, url.as_str());
 		}
-		if same_page_count > 0 {
-			info!("Queued {} same-page child link(s) from {}", same_page_count, url.as_str());
+		if isolated_count > 0 {
+			info!("Queued {} isolated child link(s) from {}", isolated_count, url.as_str());
 		}
 
-		Ok(())
+		Ok(reserved_url)
 	}
 
 	fn extract_link_urls(&self, url: &Url) -> anyhow::Result<Vec<Url>> {
@@ -149,61 +131,65 @@ impl CrawlerTab {
 	}
 
 	fn process_url(&self, url: Url) {
-		if let Some(group) = self.same_page_group_for_child(&url).cloned() {
-			let lane_key = group.lane_key(&url);
-			if let Err(err) = self.process_same_page_child_batch(url.clone(), &group) {
-				error!("{err}");
-				self.re_add_failed_visit(url, &err.to_string());
+		if let Some(group) = self.isolated_group_for_child(&url).cloned() {
+			let group_key = group.group_key(&url);
+			if let Err(err) = self.process_isolated_group(url.clone(), &group) {
+				let error = format!("{err:#}");
+				error!("{error}");
+				self.re_add_failed_visit(url, &error);
 			}
-			self.visit_state.release_same_page_batch(&lane_key);
+			self.visit_state.release_isolated_tab(&group, &group_key);
 			return;
 		}
 
 		if let Err(err) = self.process_regular_url(url.clone()) {
-			error!("{err}");
-			self.re_add_failed_visit(url, &err.to_string());
+			let error = format!("{err:#}");
+			error!("{error}");
+			self.re_add_failed_visit(url, &error);
 		}
 	}
 
-	fn process_same_page_child_batch(&self, first_url: Url, group: &SamePageRouteGroup) -> anyhow::Result<()> {
-		let mut batch_urls = vec![first_url];
-		let lane_key = group.lane_key(&batch_urls[0]);
-
-		loop {
-			let mut sibling_urls = self.visit_state.reserve_matching_same_page_children(group, &lane_key, group.batch_size.saturating_sub(batch_urls.len())).with_context(|| format!("reserve queued same-page children for parent {}", group.parent.as_str()))?;
-			batch_urls.append(&mut sibling_urls);
-
-			if batch_urls.is_empty() {
-				break;
-			}
-
-			info!("Processing {} same-page child route(s) under {} in one tab", batch_urls.len(), group.parent.as_str());
-
-			for url in batch_urls.drain(..) {
-				self.process_same_page_child_url(url);
+	fn process_isolated_group(&self, first_url: Url, group: &IsolatedCrawlGroup) -> anyhow::Result<()> {
+		let mut next_url = Some(first_url);
+		while let Some(url) = next_url {
+			info!("Processing isolated child route {} under {}", url.as_str(), group.parent.as_str());
+			match self.process_isolated_url(url.clone(), group) {
+				Ok(reserved_child) => next_url = reserved_child,
+				Err(err) => {
+					let error = format!("{err:#}");
+					error!("{error}");
+					self.re_add_failed_visit(url, &error);
+					next_url = None;
+				},
 			}
 		}
 
 		Ok(())
 	}
 
-	fn process_same_page_child_url(&self, url: Url) {
-		if let Err(err) = self.process_regular_url(url.clone()) {
-			error!("{err}");
-			self.re_add_failed_visit(url, &err.to_string());
+	fn process_isolated_url(&self, url: Url, group: &IsolatedCrawlGroup) -> anyhow::Result<Option<Url>> {
+		self.process_and_bake(&url, Some(group))
+	}
+
+	fn process_and_bake(&self, url: &Url, branch: Option<&IsolatedCrawlGroup>) -> anyhow::Result<Option<Url>> {
+		self.render_url(url)?;
+
+		let link_urls = self.extract_link_urls(url)?;
+		let reserved_child = self.record_discovered_links(url, link_urls, branch)?;
+
+		info!("All links extracted from {}, marking it as visited", url.as_str());
+		if let Err(err) = self.mark_visited(url.clone()) {
+			if let Some(child) = &reserved_child {
+				self.visit_state.release_reserved_visit(child).with_context(|| format!("release reserved child {}", child.as_str()))?;
+			}
+			return Err(err).with_context(|| format!("mark {} as visited", url.as_str()));
 		}
+
+		Ok(reserved_child)
 	}
 
 	fn process_regular_url(&self, url: Url) -> anyhow::Result<()> {
-		self.render_url(&url)?;
-
-		let link_urls = self.extract_link_urls(&url)?;
-		self.record_discovered_links(&url, link_urls)?;
-
-		info!("All links extracted from {}, marking it as visited", url.as_str());
-
-		self.mark_visited(url.clone()).with_context(|| format!("mark {} as visited", url.as_str()))?;
-
+		self.process_and_bake(&url, None)?;
 		Ok(())
 	}
 
@@ -219,11 +205,11 @@ impl CrawlerTab {
 	pub fn run(&self, worker_id: usize, should_retire: Arc<AtomicBool>) {
 		loop {
 			if should_retire.load(Ordering::Relaxed) {
-				info!("Crawler worker {worker_id} retiring");
+				info!("{:?} crawler worker {worker_id} retiring", self.queue);
 				break;
 			}
 
-			match self.visit_state.take_to_visit_with_groups(&self.same_page_route_groups) {
+			match self.visit_state.take_to_visit_from(self.queue, &self.isolated_crawl_groups) {
 				Ok(VisitQueueState::Ready(url)) => self.process_url(url),
 				Ok(VisitQueueState::Waiting) => {
 					sleep(Duration::from_secs(1));
@@ -236,6 +222,6 @@ impl CrawlerTab {
 			}
 		}
 
-		info!("Crawler worker {worker_id} stopped");
+		info!("{:?} crawler worker {worker_id} stopped", self.queue);
 	}
 }

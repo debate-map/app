@@ -2,7 +2,9 @@ use crate::output_path::static_route_path;
 use anyhow::{Context, anyhow, bail};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
-use std::collections::{HashMap, HashSet};
+use regex::{Regex, RegexBuilder};
+use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -20,6 +22,7 @@ struct ResourcePart {
 	part: MhtmlPart,
 	asset_path: PathBuf,
 	asset_ref: String,
+	bytes: Vec<u8>,
 }
 
 struct MhtmlArchive {
@@ -44,32 +47,24 @@ impl MhtmlArchive {
 
 		Ok(String::from_utf8_lossy(&decode_body(&root_part)?).into_owned())
 	}
-
-	fn into_resource_parts(self) -> Vec<MhtmlPart> {
-		self.parts
-	}
 }
 
 struct ResourcePlanner<'a> {
 	asset_dir: &'a Path,
-	html_parent: &'a Path,
 	base_output_dir: &'a Path,
 }
 
 impl<'a> ResourcePlanner<'a> {
-	fn new(asset_dir: &'a Path, html_parent: &'a Path, base_output_dir: &'a Path) -> Self {
-		Self { asset_dir, html_parent, base_output_dir }
-	}
-
 	fn plan(&self, parts: Vec<MhtmlPart>) -> anyhow::Result<Vec<ResourcePart>> {
-		let mut used_names = HashSet::new();
 		let mut resources = Vec::with_capacity(parts.len());
 
-		for (index, part) in parts.into_iter().enumerate() {
-			let filename = unique_filename(preferred_filename(&part, index), extension_for_content_type(&part.content_type), &mut used_names);
+		for part in parts {
+			let bytes = decode_body(&part).with_context(|| format!("decode MHTML part {}", part.content_location.as_deref().unwrap_or("<unknown>")))?;
+			// ponytail: decoded bytes are sufficient for one fixed app build; hash rewritten dependency graphs if resources become context-dependent.
+			let filename = format!("{:x}.{}", Sha256::digest(&bytes), extension_for_content_type(&part.content_type));
 			let asset_path = self.asset_dir.join(filename);
-			let asset_ref = absolute_web_path(self.base_output_dir, &asset_path).or_else(|_| relative_path(self.html_parent, &asset_path))?;
-			resources.push(ResourcePart { part, asset_path, asset_ref });
+			let asset_ref = absolute_web_path(self.base_output_dir, &asset_path)?;
+			resources.push(ResourcePart { part, asset_path, asset_ref, bytes });
 		}
 
 		Ok(resources)
@@ -104,43 +99,28 @@ impl ReferenceRewriter {
 	}
 }
 
-struct NavigationRewriter<'a> {
-	page_url: &'a Url,
-}
-
-impl<'a> NavigationRewriter<'a> {
-	fn new(page_url: &'a Url) -> Self {
-		Self { page_url }
-	}
-
-	fn rewrite(&self, html: &mut String) {
-		*html = rewrite_tag_attribute_urls(html, "a", "href", self.page_url);
-		*html = rewrite_tag_attribute_urls(html, "form", "action", self.page_url);
-	}
-}
-
-struct MhtmlConverter<'a> {
+pub(crate) struct MhtmlConverter<'a> {
 	html_out_path: &'a Path,
 	base_output_dir: &'a Path,
 	page_url: &'a Url,
 }
 
 impl<'a> MhtmlConverter<'a> {
-	fn new(html_out_path: &'a Path, base_output_dir: &'a Path, page_url: &'a Url) -> Self {
+	pub(crate) fn new(html_out_path: &'a Path, base_output_dir: &'a Path, page_url: &'a Url) -> Self {
 		Self { html_out_path, base_output_dir, page_url }
 	}
 
-	fn write(&self, mhtml: &str) -> anyhow::Result<()> {
+	pub(crate) fn write(&self, mhtml: &str) -> anyhow::Result<()> {
 		let mut archive = MhtmlArchive::parse(mhtml)?;
 		let mut html = archive.take_root_html()?;
 
 		let html_parent = self.html_out_path.parent().ok_or_else(|| anyhow!("HTML output path has no parent: {}", self.html_out_path.display()))?;
 		fs::create_dir_all(html_parent).with_context(|| format!("create dir {}", html_parent.display()))?;
 
-		let asset_dir = asset_dir_for_html(self.html_out_path);
+		let asset_dir = self.base_output_dir.join("_assets");
 		fs::create_dir_all(&asset_dir).with_context(|| format!("create asset dir {}", asset_dir.display()))?;
 
-		let resources = ResourcePlanner::new(&asset_dir, html_parent, self.base_output_dir).plan(archive.into_resource_parts())?;
+		let resources = ResourcePlanner { asset_dir: &asset_dir, base_output_dir: self.base_output_dir }.plan(archive.parts)?;
 		let reference_rewriter = ReferenceRewriter::from_resources(&resources);
 
 		for resource in &resources {
@@ -148,45 +128,43 @@ impl<'a> MhtmlConverter<'a> {
 		}
 
 		reference_rewriter.rewrite(&mut html);
-		NavigationRewriter::new(self.page_url).rewrite(&mut html);
-		write_atomic(self.html_out_path, html.as_bytes()).with_context(|| format!("write {}", self.html_out_path.display()))?;
+		html = rewrite_tag_attribute_urls(&html, "a", "href", self.page_url);
+		html = rewrite_tag_attribute_urls(&html, "form", "action", self.page_url);
+		Self::write_atomic(self.html_out_path, html.as_bytes()).with_context(|| format!("write {}", self.html_out_path.display()))?;
 
 		Ok(())
 	}
 
 	fn write_resource(&self, resource: &ResourcePart, reference_rewriter: &ReferenceRewriter) -> anyhow::Result<()> {
-		let bytes = decode_body(&resource.part).with_context(|| format!("decode MHTML part {}", resource.part.content_location.as_deref().unwrap_or("<unknown>")))?;
-		let bytes = if is_text_resource(&resource.part.content_type) {
-			let mut text = String::from_utf8_lossy(&bytes).into_owned();
+		if resource.asset_path.exists() {
+			return Ok(());
+		}
+
+		if is_text_resource(&resource.part.content_type) {
+			let mut text = String::from_utf8_lossy(&resource.bytes).into_owned();
 			reference_rewriter.rewrite(&mut text);
-			text.into_bytes()
-		} else {
-			bytes
-		};
+			return Self::write_atomic(&resource.asset_path, text.as_bytes()).with_context(|| format!("write {}", resource.asset_path.display()));
+		}
 
-		write_atomic(&resource.asset_path, &bytes).with_context(|| format!("write {}", resource.asset_path.display()))
-	}
-}
-
-pub fn write_html_from_mhtml(mhtml: &str, html_out_path: &Path, base_output_dir: &Path, page_url: &Url) -> anyhow::Result<()> {
-	MhtmlConverter::new(html_out_path, base_output_dir, page_url).write(mhtml)
-}
-
-fn write_atomic(path: &Path, bytes: &[u8]) -> anyhow::Result<()> {
-	let parent = path.parent().ok_or_else(|| anyhow!("output path has no parent: {}", path.display()))?;
-	fs::create_dir_all(parent).with_context(|| format!("create dir {}", parent.display()))?;
-
-	let file_name = path.file_name().and_then(|name| name.to_str()).unwrap_or("output");
-	let nanos = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
-	let tmp_path = parent.join(format!(".{file_name}.tmp-{}-{nanos}", std::process::id()));
-
-	fs::write(&tmp_path, bytes).with_context(|| format!("write {}", tmp_path.display()))?;
-	if let Err(err) = fs::rename(&tmp_path, path) {
-		let _ = fs::remove_file(&tmp_path);
-		return Err(err).with_context(|| format!("rename {} to {}", tmp_path.display(), path.display()));
+		Self::write_atomic(&resource.asset_path, &resource.bytes).with_context(|| format!("write {}", resource.asset_path.display()))
 	}
 
-	Ok(())
+	fn write_atomic(path: &Path, bytes: &[u8]) -> anyhow::Result<()> {
+		let parent = path.parent().ok_or_else(|| anyhow!("output path has no parent: {}", path.display()))?;
+		fs::create_dir_all(parent).with_context(|| format!("create dir {}", parent.display()))?;
+
+		let file_name = path.file_name().and_then(|name| name.to_str()).unwrap_or("output");
+		let nanos = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
+		let tmp_path = parent.join(format!(".{file_name}.tmp-{}-{nanos}", std::process::id()));
+
+		fs::write(&tmp_path, bytes).with_context(|| format!("write {}", tmp_path.display()))?;
+		if let Err(err) = fs::rename(&tmp_path, path) {
+			let _ = fs::remove_file(&tmp_path);
+			return Err(err).with_context(|| format!("rename {} to {}", tmp_path.display(), path.display()));
+		}
+
+		Ok(())
+	}
 }
 
 fn extract_boundary(mhtml: &str) -> anyhow::Result<String> {
@@ -326,8 +304,9 @@ fn absolute_web_path(base_output_dir: &Path, to_path: &Path) -> anyhow::Result<S
 fn rewrite_tag_attribute_urls(input: &str, tag_name: &str, attr_name: &str, page_url: &Url) -> String {
 	let mut out = String::with_capacity(input.len());
 	let mut cursor = 0;
+	let tag_start_regex = tag_start_regex(tag_name);
 
-	while let Some(tag_start) = find_next_tag_start(input, tag_name, cursor) {
+	while let Some(tag_start) = tag_start_regex.find_at(input, cursor).map(|match_| match_.start()) {
 		out.push_str(&input[cursor..tag_start]);
 
 		let Some(tag_end_rel) = input[tag_start..].find('>') else {
@@ -396,20 +375,9 @@ fn rewrite_attr_in_tag(tag: &str, attr_name: &str, page_url: &Url) -> String {
 	out
 }
 
-fn find_next_tag_start(input: &str, tag_name: &str, from: usize) -> Option<usize> {
-	let mut cursor = from;
-	while cursor < input.len() {
-		let relative = input[cursor..].find('<')?;
-		let tag_start = cursor + relative;
-		let name_start = tag_start + 1;
-		let name_end = name_start + tag_name.len();
-		if name_end <= input.len() && input[name_start..name_end].eq_ignore_ascii_case(tag_name) && input.as_bytes().get(name_end).is_some_and(|byte| matches!(byte, b'>' | b'/' | b' ' | b'\t' | b'\r' | b'\n')) {
-			return Some(tag_start);
-		}
-		cursor = name_start;
-	}
-
-	None
+fn tag_start_regex(tag_name: &str) -> Regex {
+	let pattern = format!(r"<{}(?:[>/\s])", regex::escape(tag_name));
+	RegexBuilder::new(&pattern).case_insensitive(true).build().expect("static tag-start regex should compile")
 }
 
 fn find_ascii_case_insensitive(haystack: &str, needle: &str) -> Option<usize> {
@@ -453,58 +421,6 @@ fn same_origin(left: &Url, right: &Url) -> bool {
 	left.scheme() == right.scheme() && left.host_str() == right.host_str() && left.port_or_known_default() == right.port_or_known_default()
 }
 
-fn asset_dir_for_html(html_out_path: &Path) -> PathBuf {
-	let mut asset_dir = html_out_path.to_path_buf();
-	let file_stem = html_out_path.file_stem().and_then(|stem| stem.to_str()).unwrap_or("page");
-	asset_dir.set_file_name(format!("{file_stem}.assets"));
-	asset_dir
-}
-
-fn relative_path(from_dir: &Path, to_path: &Path) -> anyhow::Result<String> {
-	let relative = to_path.strip_prefix(from_dir).with_context(|| format!("make {} relative to {}", to_path.display(), from_dir.display()))?;
-	Ok(relative.to_string_lossy().replace('\\', "/"))
-}
-
-fn preferred_filename(part: &MhtmlPart, index: usize) -> String {
-	let content_location = part.content_location.as_deref().unwrap_or("");
-	let raw = if let Some(stripped) = content_location.strip_prefix("cid:") {
-		stripped.split('@').next().unwrap_or(stripped).to_string()
-	} else if let Ok(url) = Url::parse(content_location) {
-		url.path_segments().and_then(|mut segments| segments.next_back()).filter(|segment| !segment.is_empty()).unwrap_or("asset").to_string()
-	} else {
-		content_location.rsplit('/').next().filter(|segment| !segment.is_empty()).unwrap_or("asset").to_string()
-	};
-
-	let sanitized = sanitize_filename(&raw);
-	if sanitized.is_empty() {
-		format!("asset-{index:04}")
-	} else {
-		format!("asset-{index:04}-{sanitized}")
-	}
-}
-
-fn unique_filename(mut filename: String, extension: &str, used_names: &mut HashSet<String>) -> String {
-	if Path::new(&filename).extension().is_none() {
-		filename.push('.');
-		filename.push_str(extension);
-	}
-
-	let original = filename.clone();
-	let mut counter = 1;
-	while !used_names.insert(filename.clone()) {
-		let stem = Path::new(&original).file_stem().and_then(|stem| stem.to_str()).unwrap_or("asset");
-		let ext = Path::new(&original).extension().and_then(|ext| ext.to_str()).unwrap_or(extension);
-		filename = format!("{stem}-{counter}.{ext}");
-		counter += 1;
-	}
-
-	filename
-}
-
-fn sanitize_filename(raw: &str) -> String {
-	raw.chars().map(|ch| if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_') { ch } else { '-' }).collect::<String>().trim_matches('-').to_string()
-}
-
 fn extension_for_content_type(content_type: &str) -> &'static str {
 	match content_type {
 		"text/css" => "css",
@@ -531,16 +447,10 @@ fn is_text_resource(content_type: &str) -> bool {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use std::time::{SystemTime, UNIX_EPOCH};
-
-	fn temp_output_dir(name: &str) -> PathBuf {
-		let nanos = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-		std::env::temp_dir().join(format!("debatemap-baker-mhtml-{name}-{}-{nanos}", std::process::id()))
-	}
 
 	#[test]
-	fn converts_mhtml_cid_parts_to_html_assets() {
-		let output_dir = temp_output_dir("cid-assets");
+	fn converts_chrome_mhtml_to_static_html_and_shared_assets() {
+		let output_dir = std::env::temp_dir().join(format!("debatemap-baker-mhtml-{}-{}", std::process::id(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
 		let html_path = output_dir.join("database").join("index.html");
 		let mhtml = r#"From: <Saved by Blink>
 Snapshot-Content-Location: https://debatemap.app/database?db=prod
@@ -555,7 +465,7 @@ Content-ID: <frame@mhtml.blink>
 Content-Transfer-Encoding: quoted-printable
 Content-Location: https://debatemap.app/database?db=prod
 
-<!DOCTYPE html><html><head><link rel=3D"stylesheet" href=3D"cid:style@mhtml.blink"></head><body><main>Loaded</main></body></html>
+<!DOCTYPE html><html><head><link rel=3D"stylesheet" href=3D"cid:style@mhtml.blink"><link rel=3D"icon" href=3D"https://debatemap.app/Images/Logo/Icon_Square.png"></head><body><main>Loaded x <− y</main><a href=3D"https://debatemap.app/database/users/user-1?db=3Dprod#node">User</a><a href=3D"https://example.com/user?db=3Dprod">External</a><form action=3D"/database/terms?db=3Dprod"></form></body></html>
 ------Boundary
 Content-Type: text/css
 Content-Transfer-Encoding: quoted-printable
@@ -572,50 +482,26 @@ Zm9udA==
 "#;
 
 		let page_url = Url::parse("https://debatemap.app/database?db=prod").unwrap();
-		write_html_from_mhtml(mhtml, &html_path, &output_dir, &page_url).unwrap();
+		MhtmlConverter::new(&html_path, &output_dir, &page_url).write(mhtml).unwrap();
 
 		let html = fs::read_to_string(&html_path).unwrap();
-		assert!(html.contains("Loaded"));
-		assert!(html.contains("/database/index.assets/"));
+		assert!(html.contains("Loaded x <− y"));
+		assert!(html.contains("/_assets/"));
 		assert!(!html.contains("cid:style"));
-
-		let css_path = fs::read_dir(output_dir.join("database").join("index.assets")).unwrap().map(|entry| entry.unwrap().path()).find(|path| path.extension().is_some_and(|ext| ext == "css")).unwrap();
-		let css = fs::read_to_string(css_path).unwrap();
-		assert!(!css.contains("cid:font"));
-		assert!(css.contains("/database/index.assets/"));
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
-
-	#[test]
-	fn rewrites_same_origin_anchor_links_to_static_routes() {
-		let output_dir = temp_output_dir("navigation-links");
-		let html_path = output_dir.join("database").join("index.html");
-		let mhtml = r#"From: <Saved by Blink>
-Snapshot-Content-Location: https://debatemap.app/database?db=prod
-MIME-Version: 1.0
-Content-Type: multipart/related;
-	type="text/html";
-	boundary="----Boundary"
-
-------Boundary
-Content-Type: text/html
-Content-Transfer-Encoding: quoted-printable
-Content-Location: https://debatemap.app/database?db=prod
-
-<!DOCTYPE html><html><body><a href=3D"https://debatemap.app/database/users/UFe6WoIIJoeiOMVXJEIWAV0aj2z2?db=3Dprod">User</a><a href=3D"https://example.com/database/users/abc?db=3Dprod">External</a><link rel=3D"icon" href=3D"https://debatemap.app/Images/Logo/Icon_Square.png"></body></html>
-------Boundary--
-"#;
-
-		let page_url = Url::parse("https://debatemap.app/database?db=prod").unwrap();
-		write_html_from_mhtml(mhtml, &html_path, &output_dir, &page_url).unwrap();
-
-		let html = fs::read_to_string(&html_path).unwrap();
-		assert!(html.contains(r#"href="/database/users/UFe6WoIIJoeiOMVXJEIWAV0aj2z2/""#));
-		assert!(html.contains(r#"href="https://example.com/database/users/abc?db=prod""#));
+		assert!(html.contains(r#"href="/database/users/user-1/#node""#));
+		assert!(html.contains(r#"href="https://example.com/user?db=prod""#));
 		assert!(html.contains(r#"href="https://debatemap.app/Images/Logo/Icon_Square.png""#));
-		assert!(!html.contains("https://debatemap.app/database/users"));
-		assert!(!html.contains("?db=prod\">User"));
+		assert!(html.contains(r#"action="/database/terms/""#));
+
+		let asset_dir = output_dir.join("_assets");
+		let css_path = fs::read_dir(&asset_dir).unwrap().map(|entry| entry.unwrap().path()).find(|path| path.extension().is_some_and(|extension| extension == "css")).unwrap();
+		let css = fs::read_to_string(&css_path).unwrap();
+		assert!(!css.contains("cid:font"));
+		assert!(css.contains("/_assets/"));
+
+		let second_html_path = output_dir.join("database").join("second").join("index.html");
+		MhtmlConverter::new(&second_html_path, &output_dir, &page_url).write(mhtml).unwrap();
+		assert_eq!(fs::read_dir(asset_dir).unwrap().count(), 2);
 
 		fs::remove_dir_all(output_dir).unwrap();
 	}

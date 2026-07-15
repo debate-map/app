@@ -1,0 +1,43 @@
+# single-map crawl config for local debate-slice testing.
+root_url: http://localhost:5101
+
+start_paths:
+  - /debates
+
+query_params:
+  db: prod
+  internalCrawler: "1"
+
+# Maximum crawler tabs: 1 regular + (1 active isolated group * 8 tabs) = 9.
+regular_crawler_count: 1
+max_retries: 3
+base_output_dir: ./static-how-old-universe
+
+serve:
+  enabled: true
+  host: 127.0.0.1
+  port: 8787
+
+visit_policy:
+  allow_paths:
+    - kind: exact
+      value: /debates
+    - kind: exact
+      value: /debates/all
+    - kind: exact
+      value: /debates/SC8x0d_SQqOdFdadhFcqhQ
+    - kind: starts_with
+      value: /debates/SC8x0d_SQqOdFdadhFcqhQ/
+    - kind: exact
+      value: /debates/how-old-is-the-universe.SC8x0d_SQqOdFdadhFcqhQ
+    - kind: starts_with
+      value: /debates/how-old-is-the-universe.SC8x0d_SQqOdFdadhFcqhQ/
+
+  isolated_crawl_groups:
+    max_active_groups: 1
+    max_tabs_per_group: 8
+    routes:
+      # Every tab loads /debates once, enters its derived /debates/X group through
+      # the SPA, then processes distinct descendants claimed from one frontier.
+      - parent: /debates
+        child_depth: 1

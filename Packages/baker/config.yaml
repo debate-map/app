@@ -1,3 +1,9 @@
+# Local preview server for files as they are baked.
+serve:
+  enabled: true
+  host: 127.0.0.1
+  port: 8787
+
 # Site origin/scope. Use http://localhost:5101 for local dev.
 root_url: http://localhost:5101
 
@@ -8,9 +14,19 @@ start_paths:
   - /database/terms
   - /debates
 
-# Max Chrome tabs. Tabs open on demand as queued work grows, then stay alive.
-# Lower counts retire extra tabs after their current page.
-crawler_count: 15
+# Added to every accepted URL when the browser visits it. These select the
+# production dataset and expose crawlable SPA links without changing URL scope.
+query_params:
+  db: prod
+  internalCrawler: "1"
+
+# Dedicated Chrome tabs for URLs that do not belong to an isolated group.
+# This value is hot-reloaded; lowering it retires surplus regular tabs after
+# their current page. Isolated tabs are configured separately below.
+#
+# Maximum crawler tabs = regular_crawler_count + (isolated_crawl_groups.max_active_groups * isolated_crawl_groups.max_tabs_per_group)
+# This config: 3 + (3 * 4) = 15 maximum crawler tabs.
+regular_crawler_count: 3
 
 # Retry a page this many times before skipping it.
 max_retries: 3
@@ -18,18 +34,7 @@ max_retries: 3
 # Output dir. Resumed by default; pass --force-restart to delete and rebuild it.
 base_output_dir: ./static
 
-# Local preview server for files as they are baked.
-serve:
-  enabled: true
-  host: 127.0.0.1
-  port: 8787
-
 visit_policy:
-  # Added when visiting each accepted URL.
-  query_params:
-    db: prod
-    internalCrawler: "1"
-
   # Optional allowlist. Rule kinds: exact, starts_with, contains, ends_with.
   # Empty means every same-origin path is allowed.
   allow_paths:
@@ -48,25 +53,30 @@ visit_policy:
     - kind: starts_with
       value: /debates/
 
-  # Same-page route groups still bake each child URL as its own static file.
-  # When the parent discovers matching child links, it reserves those URLs and
-  # bakes them in the same tab by switching SPA routes instead of reloading.
-  # This keeps fast in-page states like term details out of the normal tab pool.
-  same_page_route_groups:
-    - parent: /database/terms
-      # Up to this many tabs may process this parent group's child routes.
-      max_tabs: 5
-      # Each tab claims this many child routes before asking for more.
-      batch_size: 20
-      child_paths:
-        - kind: starts_with
-          value: /database/terms/
-    - parent: /debates
-      max_tabs: 1
-      lane_path_segment_count: 2
-      child_paths:
-        - kind: starts_with
-          value: /debates/
+  # Isolated crawl groups move matching child routes into a worker pool separate
+  # from regular crawlers. Routes are grouped by parent and child_depth; tabs in
+  # the same derived group share work so every discovered URL is baked once.
+  # Example: /database/terms/... can be one group while /debates/X/... and
+  # /debates/Y/... are two other groups running at the same time.
+  isolated_crawl_groups:
+    # Maximum derived groups running simultaneously across all routes below.
+    # Example: terms, debate X, and debate Y may run; debate Z waits for a slot.
+    max_active_groups: 3
+    # Maximum tabs working inside each active group.
+    # Example: up to 4 tabs divide the queued URLs belonging to debate X.
+    max_tabs_per_group: 4
+    # URL families that should use the isolated worker pool.
+    # Example: only descendants of /database/terms and /debates match here.
+    routes:
+      # Base path used to derive the terms group. The parent itself remains regular.
+      - parent: /database/terms
+        # Depth 0 uses /database/terms as every terms-group tab's starting view.
+        child_depth: 0
+      # Base path used to derive debate groups. The parent itself remains regular.
+      - parent: /debates
+        # Depth 1 makes every X-group tab enter /debates/X through the /debates
+        # SPA first; /debates/Y is a separate group with the same bootstrap flow.
+        child_depth: 1
 
   # Optional denylist; overrides allow_paths.
   # exclude_paths:

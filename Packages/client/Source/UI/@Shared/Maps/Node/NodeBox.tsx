@@ -10,7 +10,7 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, IsDoubleClick, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
+import {DragInfo, IsDoubleClick, Link, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import {E, GetPercentFromXToY, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {SlicePath} from "mobx-graphlink";
 import {Draggable} from "@hello-pangea/dnd";
@@ -400,6 +400,20 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 			{toolbarShow && node.type != NodeType.argument && <>{toolbarElement}{titlePanel}</>}
 		</>;
 
+		// expose crawler anchors in the expand slot only, so node controls don't become links.
+		const mapID = map?.id;
+		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && store.main.page == "debates" && mapID != null && mapID == store.main.debates.selectedMapID && !forLayoutHelper ? mapID : null;
+		const crawlerNodeLink_path = path.split("/").slice(1).join("/") || null;
+		const crawlerNodeLink = crawlerNodeLink_mapID &&
+			<Link text="" actionFunc={s=>{
+					s.main.page = "debates";
+					s.main.debates.selectedMapID = crawlerNodeLink_mapID;
+					s.main.debates.focusedNodePath = crawlerNodeLink_path;
+				}}
+				onClick={e=>e.stopPropagation()}
+				style={{display: "block", position: "absolute", top: 0, right: 0, bottom: 0, width: 17, zIndex: 3, cursor: "pointer"}}
+			/>;
+
 		const textElements = <>
 			{toolbarAndTitleElements}
 			{subPanelShow && <SubPanel node={node} toolbarShowing={toolbarShow}/>}
@@ -407,6 +421,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		</>;
 
 		const beforeChildrenElements = <>
+			{crawlerNodeLink}
 			{ leftPanelShow &&
 				<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}}
 					local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}

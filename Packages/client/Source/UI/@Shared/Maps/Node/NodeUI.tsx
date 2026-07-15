@@ -257,6 +257,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 		<>
 			<Column ref={handleColumnRef}
 				className={["NodeUI", "innerBoxColumn", "clickThrough"].filter(a=>a).join(" ")}
+				data-internal-crawler-loading={store.main.internalCrawlerMode && !forLayoutHelper && IsSpecialEmptyArray(nodeChildrenToShow) ? "true" : undefined}
 				style={css(
 					{
 						position: "absolute",

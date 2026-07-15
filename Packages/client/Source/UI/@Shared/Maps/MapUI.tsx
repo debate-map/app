@@ -1,5 +1,6 @@
 import {GetMap, DMap, MapView, NodeL3, NodeType_Info} from "dm_common";
 import React, {useCallback, useEffect, useRef, useState} from "react";
+import {store} from "Store";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
@@ -92,6 +93,8 @@ type Props = {
 
 export const MapUI = observer_mgl((props: Props)=>{
 	const {mapID, rootNode: rootNode_passed, withinPage, graphInfo, forLayoutHelper, map, mapState, mapView, rootNode, ...rest} = props;
+	// when baked, these custom scrollbars look usable but are just dead.
+	const hideScrollBars = withinPage || store.main.internalCrawlerMode;
 
 	const [containerElResolved, setContainerElResolved] = useState(false);
 	const mountedRef = useRef(false);
@@ -345,7 +348,7 @@ export const MapUI = observer_mgl((props: Props)=>{
 			backgroundDrag={!mapState.subscriptionPaintMode}
 			backgroundDragMatchFunc={a=>a == scrollViewRef.current?.ContentOuterDOM || a == scrollViewRef.current?.ContentOuterDOM || a == mapUIElRef.current}
 			style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
-			scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+			scrollHBarStyle={E({height: 10}, hideScrollBars && {display: "none"})} scrollVBarStyle={E({width: 10}, hideScrollBars && {display: "none"})}
 			contentOuterStyle={E(
 				// optimization for smoother scrolling [2024-02-28: confirmed to help]
 				// (note: keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization)

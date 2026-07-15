@@ -1,6 +1,6 @@
 use crate::browser::BrowserSession;
 use crate::crawler::CrawlerTab;
-use crate::visit::{GlobalVisitState, SamePageRouteGroup};
+use crate::visit::{CrawlQueue, GlobalVisitState, IsolatedCrawlGroups};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -8,16 +8,17 @@ use std::thread::JoinHandle;
 use tracing::{error, info};
 
 pub struct WorkerPool {
+	queue: CrawlQueue,
 	workers: Vec<CrawlerWorker>,
 	next_worker_id: usize,
 }
 
 impl WorkerPool {
-	pub fn new() -> Self {
-		Self { workers: Vec::new(), next_worker_id: 0 }
+	pub fn new(queue: CrawlQueue) -> Self {
+		Self { queue, workers: Vec::new(), next_worker_id: 0 }
 	}
 
-	pub fn sync(&mut self, browser: &BrowserSession, visit_state: Arc<GlobalVisitState>, base_output_dir: &Path, same_page_route_groups: &[SamePageRouteGroup], max_worker_count: usize, queued_work_units: usize) -> anyhow::Result<()> {
+	pub fn sync(&mut self, browser: &BrowserSession, visit_state: Arc<GlobalVisitState>, base_output_dir: &Path, isolated_crawl_groups: &IsolatedCrawlGroups, max_worker_count: usize, queued_work_units: usize) -> anyhow::Result<()> {
 		self.reap_finished_workers();
 
 		let accepting_count = self.accepting_worker_count();
@@ -28,7 +29,7 @@ impl WorkerPool {
 
 		let target_count = queued_work_units.min(max_worker_count).max(accepting_count);
 		for _ in 0..(target_count - accepting_count) {
-			self.spawn_worker(browser, visit_state.clone(), base_output_dir, same_page_route_groups)?;
+			self.spawn_worker(browser, visit_state.clone(), base_output_dir, isolated_crawl_groups)?;
 		}
 
 		Ok(())
@@ -40,7 +41,7 @@ impl WorkerPool {
 		}
 
 		while let Some(worker) = self.workers.pop() {
-			worker.join_and_close();
+			worker.join_and_close(self.queue);
 		}
 	}
 
@@ -48,48 +49,34 @@ impl WorkerPool {
 		self.workers.iter().filter(|worker| worker.accepts_new_work()).count()
 	}
 
-	fn spawn_worker(&mut self, browser: &BrowserSession, visit_state: Arc<GlobalVisitState>, base_output_dir: &Path, same_page_route_groups: &[SamePageRouteGroup]) -> anyhow::Result<()> {
+	fn spawn_worker(&mut self, browser: &BrowserSession, visit_state: Arc<GlobalVisitState>, base_output_dir: &Path, isolated_crawl_groups: &IsolatedCrawlGroups) -> anyhow::Result<()> {
 		let id = self.next_worker_id;
 		self.next_worker_id += 1;
 
-		let crawler_tab = Arc::new(CrawlerTab::new(browser.new_tab()?, visit_state, base_output_dir.to_path_buf(), same_page_route_groups.to_vec()));
+		let crawler_tab = Arc::new(CrawlerTab::new(browser.new_tab()?, visit_state, base_output_dir.to_path_buf(), isolated_crawl_groups.clone(), self.queue));
 		self.workers.push(CrawlerWorker::start(id, crawler_tab));
-		info!("Started crawler worker {id}");
+		info!("Started {:?} crawler worker {id}", self.queue);
 
 		Ok(())
 	}
 
 	fn retire_surplus_workers(&self, surplus_count: usize) {
-		let mut remaining = surplus_count;
-		for worker in self.workers.iter().rev() {
-			if remaining == 0 {
-				break;
-			}
-
-			if worker.accepts_new_work() {
-				worker.request_retire();
-				remaining -= 1;
-				info!("Asked crawler worker {} to retire", worker.id);
-			}
+		for worker in self.workers.iter().rev().filter(|worker| worker.accepts_new_work()).take(surplus_count) {
+			worker.request_retire();
+			info!("Asked {:?} crawler worker {} to retire", self.queue, worker.id);
 		}
 	}
 
 	fn reap_finished_workers(&mut self) {
 		let mut index = 0;
 		while index < self.workers.len() {
-			if self.workers[index].is_finished() {
+			if self.workers[index].handle.is_finished() {
 				let worker = self.workers.swap_remove(index);
-				worker.join_and_close();
+				worker.join_and_close(self.queue);
 			} else {
 				index += 1;
 			}
 		}
-	}
-}
-
-impl Default for WorkerPool {
-	fn default() -> Self {
-		Self::new()
 	}
 }
 
@@ -116,17 +103,14 @@ impl CrawlerWorker {
 		!self.should_retire.load(Ordering::Relaxed) && !self.handle.is_finished()
 	}
 
-	fn is_finished(&self) -> bool {
-		self.handle.is_finished()
-	}
-
-	fn join_and_close(self) {
+	fn join_and_close(self, queue: CrawlQueue) {
 		let id = self.id;
-		if self.handle.join().is_err() {
-			error!("Crawler worker {id} panicked");
+		if let Err(payload) = self.handle.join() {
+			let panic_message = payload.downcast_ref::<&str>().copied().or_else(|| payload.downcast_ref::<String>().map(String::as_str)).unwrap_or("<unknown panic payload>");
+			error!("{queue:?} crawler worker {id} panicked: {panic_message}");
 		}
 
 		self.crawler_tab.close_tab();
-		info!("Closed crawler worker {id} tab");
+		info!("Closed {queue:?} crawler worker {id} tab");
 	}
 }

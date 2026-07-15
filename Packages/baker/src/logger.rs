@@ -17,7 +17,7 @@ pub fn init_logging(default_level: Level) -> anyhow::Result<()> {
 		.unwrap_or(default_level);
 
 	let my_crate = env!("CARGO_PKG_NAME");
-	let targets = Targets::new().with_default(LevelFilter::OFF).with_target(my_crate, level);
+	let targets = Targets::new().with_default(LevelFilter::OFF).with_target(my_crate, level).with_target("panic", LevelFilter::ERROR);
 
 	let base = fmt::layer().with_thread_names(true).with_file(true).with_line_number(true).with_target(true);
 	let stdout_layer = if env::var_os("NO_COLOR").is_some() { base.with_ansi(false) } else { base };

@@ -665,9 +665,11 @@ dependencies = [
  "anyhow",
  "base64 0.22.1",
  "headless_chrome",
+ "regex",
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -5306,16 +5308,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracing-serde"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc6b213177105856957181934e4920de57730fc69bf42c37ee5bb664d406d9e1"
-dependencies = [
- "serde",
- "tracing-core",
-]
-
-[[package]]
 name = "tracing-subscriber"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5326,16 +5318,12 @@ dependencies = [
  "matchers",
  "parking_lot 0.11.2",
  "regex",
- "serde",
- "serde_json",
  "sharded-slab",
  "smallvec",
  "thread_local",
- "time",
  "tracing",
  "tracing-core",
  "tracing-log",
- "tracing-serde",
 ]
 
 [[package]]

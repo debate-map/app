@@ -1,9 +1,9 @@
 use crate::browser::BrowserSession;
 use crate::config::BakerConfig;
-use crate::crawl_state::{CrawlConfigSignature, CrawlStateStore, PathRuleSignature, SamePageRouteGroupSignature};
+use crate::crawl_state::{CrawlConfigSignature, CrawlStateStore, IsolatedCrawlGroupSignature};
 use crate::output_path::static_route_path;
 use crate::serve::{PreviewServer, PreviewServerConfig};
-use crate::visit::{Frontier, GlobalVisitState, SamePageRouteGroup, VisitPolicy};
+use crate::visit::{CrawlQueue, Frontier, GlobalVisitState, IsolatedCrawlGroups, VisitPolicy};
 use crate::worker_pool::WorkerPool;
 use anyhow::{Context, bail};
 use std::fs;
@@ -15,31 +15,32 @@ use tracing::{info, warn};
 use url::Url;
 
 pub struct CrawlerEngine {
-	worker_pool: WorkerPool,
+	regular_worker_pool: WorkerPool,
+	isolated_worker_pool: WorkerPool,
 	browser: BrowserSession,
 	visit_state: Arc<GlobalVisitState>,
 	config: CrawlerEngineConfig,
 	config_path: PathBuf,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum CrawlerStartMode {
 	Resume,
 	ForceRestart,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct CrawlerEngineConfig {
-	/// The number of crawlers to run
-	pub crawler_count: usize,
+	/// Maximum tabs dedicated to URLs outside isolated groups.
+	pub regular_crawler_count: usize,
 	/// Failed page attempts before the URL is skipped.
 	pub max_retries: usize,
 	/// URLs that seed the crawl.
 	pub start_urls: Vec<Url>,
 	/// The visit policy to follow during crawling
 	pub visit_policy: VisitPolicy,
-	/// SPA route groups that can be rendered in one already-loaded page.
-	pub same_page_route_groups: Vec<SamePageRouteGroup>,
+	/// Child-route families crawled in isolated, bounded worker groups.
+	pub isolated_crawl_groups: IsolatedCrawlGroups,
 	/// Base folder where all baked sites are stored
 	pub base_output_dir: PathBuf,
 	/// Optional local static preview server.
@@ -48,32 +49,24 @@ pub struct CrawlerEngineConfig {
 
 impl CrawlerEngineConfig {
 	fn state_signature(&self) -> CrawlConfigSignature {
-		let path_rule_signature = |rule: &crate::visit::PathRule| {
-			let (kind, value) = rule.kind_and_value();
-			PathRuleSignature { kind: kind.to_string(), value: value.to_string() }
-		};
-
 		CrawlConfigSignature {
-			root_url: self.config_root_url(),
+			root_url: self.visit_policy.root.as_str().to_string(),
 			start_urls: self.start_urls.iter().map(|url| url.as_str().to_string()).collect(),
-			allow_paths: self.visit_policy.allow_paths.iter().map(path_rule_signature).collect(),
-			exclude_paths: self.visit_policy.exclude_paths.iter().map(path_rule_signature).collect(),
+			allow_paths: self.visit_policy.allow_paths.clone(),
+			exclude_paths: self.visit_policy.exclude_paths.clone(),
 			query_params: self.visit_policy.query_params.clone(),
-			same_page_route_groups: self
-				.same_page_route_groups
+			isolated_crawl_groups: self
+				.isolated_crawl_groups
+				.routes
 				.iter()
-				.map(|group| SamePageRouteGroupSignature {
+				.map(|group| IsolatedCrawlGroupSignature {
 					parent_url: group.parent.as_str().to_string(),
-					child_paths: group.child_paths.iter().map(path_rule_signature).collect(),
-					lane_path_segment_count: group.lane_path_segment_count,
+					child_path_prefix: group.child_path_prefix.clone(),
+					group_path_segment_count: group.group_path_segment_count,
 				})
 				.collect(),
 			max_retries: self.max_retries,
 		}
-	}
-
-	fn config_root_url(&self) -> String {
-		self.visit_policy.root.as_str().to_string()
 	}
 }
 
@@ -86,10 +79,17 @@ impl CrawlerEngine {
 		let visit_state = Arc::new(GlobalVisitState::with_state_store(config.visit_policy.clone(), frontier, state_store, config.max_retries));
 		let browser = BrowserSession::launch()?;
 
-		Ok(CrawlerEngine { worker_pool: WorkerPool::new(), browser, visit_state, config, config_path })
+		Ok(CrawlerEngine {
+			regular_worker_pool: WorkerPool::new(CrawlQueue::Regular),
+			isolated_worker_pool: WorkerPool::new(CrawlQueue::Isolated),
+			browser,
+			visit_state,
+			config,
+			config_path,
+		})
 	}
 
-	fn prepare_crawl_state(config: &CrawlerEngineConfig, start_mode: CrawlerStartMode) -> anyhow::Result<(Arc<CrawlStateStore>, Frontier)> {
+	fn prepare_crawl_state(config: &CrawlerEngineConfig, start_mode: CrawlerStartMode) -> anyhow::Result<(CrawlStateStore, Frontier)> {
 		let signature = config.state_signature();
 
 		match start_mode {
@@ -119,24 +119,27 @@ impl CrawlerEngine {
 		}
 	}
 
-	fn sync_worker_count(&mut self, max_worker_count: usize) -> anyhow::Result<()> {
-		let queued_work_units = self.visit_state.queued_work_units(&self.config.same_page_route_groups);
-		self.worker_pool.sync(&self.browser, self.visit_state.clone(), &self.config.base_output_dir, &self.config.same_page_route_groups, max_worker_count, queued_work_units)
+	fn sync_worker_counts(&mut self, regular_crawler_count: usize) -> anyhow::Result<()> {
+		let regular_work_units = self.visit_state.work_units(CrawlQueue::Regular, &self.config.isolated_crawl_groups);
+		self.regular_worker_pool.sync(&self.browser, self.visit_state.clone(), &self.config.base_output_dir, &self.config.isolated_crawl_groups, regular_crawler_count, regular_work_units)?;
+
+		let isolated_work_units = self.visit_state.work_units(CrawlQueue::Isolated, &self.config.isolated_crawl_groups);
+		self.isolated_worker_pool.sync(&self.browser, self.visit_state.clone(), &self.config.base_output_dir, &self.config.isolated_crawl_groups, self.config.isolated_crawl_groups.max_worker_count(), isolated_work_units)
 	}
 
-	fn reload_desired_worker_count(&self, current_desired_count: usize, last_reload_error: &mut Option<String>) -> usize {
+	fn reload_regular_crawler_count(&self, current_desired_count: usize, last_reload_error: &mut Option<String>) -> usize {
 		match BakerConfig::load_runtime(&self.config_path) {
-			Ok(runtime_config) => {
+			Ok(regular_crawler_count) => {
 				*last_reload_error = None;
-				if runtime_config.crawler_count != current_desired_count {
-					info!("Reloaded crawler_count from {} to {}", current_desired_count, runtime_config.crawler_count);
+				if regular_crawler_count != current_desired_count {
+					info!("Reloaded regular_crawler_count from {} to {}", current_desired_count, regular_crawler_count);
 				}
-				runtime_config.crawler_count
+				regular_crawler_count
 			},
 			Err(err) => {
 				let msg = err.to_string();
 				if last_reload_error.as_deref() != Some(msg.as_str()) {
-					warn!("Could not reload runtime config from {}; keeping crawler_count={}: {err}", self.config_path.display(), current_desired_count);
+					warn!("Could not reload runtime config from {}; keeping regular_crawler_count={}: {err}", self.config_path.display(), current_desired_count);
 					*last_reload_error = Some(msg);
 				}
 				current_desired_count
@@ -193,31 +196,27 @@ impl CrawlerEngine {
 			info!("Using queued/visited state loaded from previous crawl");
 		}
 
-		let mut desired_worker_count = self.config.crawler_count;
+		let mut regular_crawler_count = self.config.regular_crawler_count;
 		let mut last_config_check = Instant::now();
 		let mut last_reload_error = None;
-
-		if self.visit_state.is_done() {
-			self.log_final_summary();
-			return Ok(());
-		}
 
 		loop {
 			if self.visit_state.is_done() {
 				break;
 			}
 
-			self.sync_worker_count(desired_worker_count)?;
+			self.sync_worker_counts(regular_crawler_count)?;
 
 			if last_config_check.elapsed() >= Self::CONFIG_RELOAD_INTERVAL {
-				desired_worker_count = self.reload_desired_worker_count(desired_worker_count, &mut last_reload_error);
+				regular_crawler_count = self.reload_regular_crawler_count(regular_crawler_count, &mut last_reload_error);
 				last_config_check = Instant::now();
 			}
 
 			sleep(Self::SUPERVISOR_SLEEP);
 		}
 
-		self.worker_pool.stop_all();
+		self.regular_worker_pool.stop_all();
+		self.isolated_worker_pool.stop_all();
 		self.log_final_summary();
 
 		Ok(())

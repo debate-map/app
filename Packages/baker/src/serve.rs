@@ -95,13 +95,13 @@ fn handle_connection(mut stream: TcpStream, root_dir: &Path) -> anyhow::Result<(
 		return HttpResponse::method_not_allowed().write(&mut stream, request.is_head());
 	}
 
-	match StaticFileResolver::new(root_dir).resolve(&request)? {
-		ResolvedRequest::File(path) => {
+	match resolve_request_path(root_dir, request.path())? {
+		Some(path) => {
 			let body = fs::read(&path).with_context(|| format!("read {}", path.display()))?;
 			let content_type = content_type_for_path(&path);
 			HttpResponse::ok(content_type, body).write(&mut stream, request.is_head())
 		},
-		ResolvedRequest::NotFound => HttpResponse::not_found().write(&mut stream, request.is_head()),
+		None => HttpResponse::not_found().write(&mut stream, request.is_head()),
 	}
 }
 
@@ -133,73 +133,38 @@ impl HttpRequest {
 		self.method == "HEAD"
 	}
 
-	fn path_and_query(&self) -> (&str, &str) {
-		self.target.split_once('?').unwrap_or((&self.target, ""))
+	fn path(&self) -> &str {
+		self.target.split_once('?').map_or(&self.target, |(path, _)| path)
 	}
 }
 
-#[derive(Debug)]
-enum ResolvedRequest {
-	File(PathBuf),
-	NotFound,
-}
-
-struct StaticFileResolver<'a> {
-	root_dir: &'a Path,
-}
-
-impl<'a> StaticFileResolver<'a> {
-	fn new(root_dir: &'a Path) -> Self {
-		Self { root_dir }
+fn resolve_request_path(root_dir: &Path, raw_path: &str) -> anyhow::Result<Option<PathBuf>> {
+	if !raw_path.starts_with('/') {
+		return Ok(None);
 	}
 
-	fn resolve(&self, request: &HttpRequest) -> anyhow::Result<ResolvedRequest> {
-		let (raw_path, query) = request.path_and_query();
-		self.resolve_path(raw_path, query)
-	}
-
-	fn resolve_path(&self, raw_path: &str, _query: &str) -> anyhow::Result<ResolvedRequest> {
-		if !raw_path.starts_with('/') {
-			return Ok(ResolvedRequest::NotFound);
-		}
-
-		let decoded_path = percent_decode_path(raw_path)?;
-		let relative_segments = safe_segments(&decoded_path)?;
-		let mut fs_path = self.root_dir.to_path_buf();
-		for segment in &relative_segments {
-			fs_path.push(segment);
-		}
-
-		if fs_path.is_file() {
-			return Ok(ResolvedRequest::File(fs_path));
-		}
-
-		let index_path = fs_path.join("index.html");
-		if index_path.is_file() {
-			return Ok(ResolvedRequest::File(index_path));
-		}
-
-		Ok(ResolvedRequest::NotFound)
-	}
-}
-
-#[cfg(test)]
-fn resolve_request_path(root_dir: &Path, raw_path: &str, query: &str) -> anyhow::Result<ResolvedRequest> {
-	StaticFileResolver::new(root_dir).resolve_path(raw_path, query)
-}
-
-fn safe_segments(path: &str) -> anyhow::Result<Vec<String>> {
-	let mut segments = Vec::new();
-	for segment in path.trim_matches('/').split('/') {
+	let decoded_path = percent_decode_path(raw_path)?;
+	let mut fs_path = root_dir.to_path_buf();
+	for segment in decoded_path.trim_matches('/').split('/') {
 		if segment.is_empty() {
 			continue;
 		}
 		if segment == "." || segment == ".." || segment.contains('\\') {
 			bail!("unsafe preview path segment {segment:?}");
 		}
-		segments.push(segment.to_string());
+		fs_path.push(segment);
 	}
-	Ok(segments)
+
+	if fs_path.is_file() {
+		return Ok(Some(fs_path));
+	}
+
+	let index_path = fs_path.join("index.html");
+	if index_path.is_file() {
+		return Ok(Some(index_path));
+	}
+
+	Ok(None)
 }
 
 fn percent_decode_path(path: &str) -> anyhow::Result<String> {
@@ -316,38 +281,19 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn root_serves_index_html() {
+	fn resolves_static_routes_without_allowing_traversal() {
 		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-test-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
-		fs::create_dir_all(&root).unwrap();
+		fs::create_dir_all(root.join("database/users")).unwrap();
 		fs::write(root.join("index.html"), "ok").unwrap();
+		fs::write(root.join("database/users/index.html"), "ok").unwrap();
 
-		let resolved = resolve_request_path(&root, "/", "").unwrap();
-		assert!(matches!(resolved, ResolvedRequest::File(_)));
-
-		fs::remove_dir_all(root).unwrap();
-	}
-
-	#[test]
-	fn directory_index_route_serves_index_html() {
-		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-test-index-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
-		fs::create_dir_all(root.join("database").join("users")).unwrap();
-		fs::write(root.join("database").join("users").join("index.html"), "ok").unwrap();
-
-		let resolved = resolve_request_path(&root, "/database/users", "").unwrap();
-		assert!(matches!(resolved, ResolvedRequest::File(_)));
-
-		let resolved = resolve_request_path(&root, "/database/users/", "").unwrap();
-		assert!(matches!(resolved, ResolvedRequest::File(_)));
-
-		let resolved = resolve_request_path(&root, "/database/users/index.html", "").unwrap();
-		assert!(matches!(resolved, ResolvedRequest::File(_)));
+		let request = HttpRequest { method: "GET".into(), target: "/database/users?db=prod".into() };
+		for path in ["/", request.path(), "/database/users/", "/database/users/index.html"] {
+			assert!(resolve_request_path(&root, path).unwrap().is_some());
+		}
+		assert!(resolve_request_path(&root, "/missing").unwrap().is_none());
+		assert!(resolve_request_path(&root, "/../secret").unwrap_err().to_string().contains("unsafe preview path"));
 
 		fs::remove_dir_all(root).unwrap();
-	}
-
-	#[test]
-	fn unsafe_paths_are_rejected() {
-		let err = resolve_request_path(Path::new("static"), "/../secret", "").unwrap_err();
-		assert!(err.to_string().contains("unsafe preview path"));
 	}
 }
