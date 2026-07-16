@@ -25,8 +25,8 @@ query_params:
 # their current page. Isolated tabs are configured separately below.
 #
 # Maximum crawler tabs = regular_crawler_count + (isolated_crawl_groups.max_active_groups * isolated_crawl_groups.max_tabs_per_group)
-# This config: 3 + (3 * 4) = 15 maximum crawler tabs.
-regular_crawler_count: 3
+# This config: 6 + (3 * 6) = 24 maximum crawler tabs.
+regular_crawler_count: 6
 
 # Retry a page this many times before skipping it.
 max_retries: 3
@@ -63,8 +63,8 @@ visit_policy:
     # Example: terms, debate X, and debate Y may run; debate Z waits for a slot.
     max_active_groups: 3
     # Maximum tabs working inside each active group.
-    # Example: up to 4 tabs divide the queued URLs belonging to debate X.
-    max_tabs_per_group: 4
+    # Six tabs divide the queued URLs belonging to the same debate or term group.
+    max_tabs_per_group: 6
     # URL families that should use the isolated worker pool.
     # Example: only descendants of /database/terms and /debates match here.
     routes:

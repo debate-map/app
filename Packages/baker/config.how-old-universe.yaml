@@ -8,8 +8,8 @@ query_params:
   db: prod
   internalCrawler: "1"
 
-# Maximum crawler tabs: 1 regular + (1 active isolated group * 8 tabs) = 9.
-regular_crawler_count: 1
+# Maximum crawler tabs: 6 regular + (1 active isolated group * 6 tabs) = 12.
+regular_crawler_count: 6
 max_retries: 3
 base_output_dir: ./static-how-old-universe
 
@@ -35,7 +35,7 @@ visit_policy:
 
   isolated_crawl_groups:
     max_active_groups: 1
-    max_tabs_per_group: 8
+    max_tabs_per_group: 6
     routes:
       # Every tab loads /debates once, enters its derived /debates/X group through
       # the SPA, then processes distinct descendants claimed from one frontier.

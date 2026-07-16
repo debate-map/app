@@ -143,7 +143,7 @@ impl IsolatedCrawlGroupsConfig {
 }
 
 fn default_regular_crawler_count() -> usize {
-	10
+	6
 }
 
 fn default_max_retries() -> usize {
@@ -171,21 +171,21 @@ mod tests {
 		let standard = standard.into_engine_config().unwrap();
 		assert_eq!(standard.start_urls.len(), 4);
 		assert_eq!(standard.visit_policy.query_params.len(), 2);
-		assert_eq!(standard.regular_crawler_count, 3);
+		assert_eq!(standard.regular_crawler_count, 6);
 		assert_eq!(standard.isolated_crawl_groups.routes.len(), 2);
 		assert_eq!(standard.isolated_crawl_groups.max_active_groups, 3);
-		assert_eq!(standard.isolated_crawl_groups.max_tabs_per_group, 4);
-		assert_eq!(standard.isolated_crawl_groups.max_worker_count(), 12);
+		assert_eq!(standard.isolated_crawl_groups.max_tabs_per_group, 6);
+		assert_eq!(standard.isolated_crawl_groups.max_worker_count(), 18);
 		assert_eq!(standard.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
 		assert_eq!(standard.max_retries, DEFAULT_MAX_RETRIES);
 		assert!(standard.serve.enabled);
 
 		let focused: BakerConfig = serde_yaml::from_str(include_str!("../config.how-old-universe.yaml")).unwrap();
 		let focused = focused.into_engine_config().unwrap();
-		assert_eq!(focused.regular_crawler_count, 1);
+		assert_eq!(focused.regular_crawler_count, 6);
 		assert_eq!(focused.start_urls, vec![Url::parse("http://localhost:5101/debates").unwrap()]);
 		assert_eq!(focused.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
-		assert_eq!(focused.isolated_crawl_groups.max_worker_count(), 8);
+		assert_eq!(focused.isolated_crawl_groups.max_worker_count(), 6);
 		assert_eq!(focused.base_output_dir, PathBuf::from("./static-how-old-universe"));
 	}
 }
