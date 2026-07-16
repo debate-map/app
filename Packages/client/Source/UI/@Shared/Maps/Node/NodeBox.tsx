@@ -319,7 +319,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const subscription = GetNodeSubscription(MeID()!, node.id);
 	const subscriptionLevel = GetSubscriptionLevel(subscription);
 
-	const showNotificationButton = ShowNotification(node.type);
+	const showNotificationButton = !internalCrawlerMode && ShowNotification(node.type);
 	const showNotificationPaint = showNotificationButton && (mapState?.subscriptionPaintMode ?? false);
 	let showNotificationPaintCss = "none";
 	if (showNotificationPaint) {
@@ -417,7 +417,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		const textElements = <>
 			{toolbarAndTitleElements}
 			{subPanelShow && <SubPanel node={node} toolbarShowing={toolbarShow}/>}
-			<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes}/>
+			{!internalCrawlerMode && <NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes}/>}
 		</>;
 
 		const beforeChildrenElements = <>
@@ -439,7 +439,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 					{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 				</NodeUI_LeftBox>
 			}
-			{showNotificationPanel && <NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
+			{showNotificationButton && showNotificationPanel && <NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
 		</>
 
 		const afterChildrenElements = <>

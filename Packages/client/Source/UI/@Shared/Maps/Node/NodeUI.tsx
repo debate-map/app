@@ -278,7 +278,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 				{/* these are for components shown just to the right of the NodeBox box */}
 				{nodeChildrenToShow == emptyArray_forLoading &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) && !store.main.timelines.hideEditingControls &&
+				{!store.main.internalCrawlerMode && !path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) && !store.main.timelines.hideEditingControls &&
 					<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{!boxExpanded &&
 					<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length} childrenLoading={IsSpecialEmptyArray(nodeChildrenToShow)}/>}

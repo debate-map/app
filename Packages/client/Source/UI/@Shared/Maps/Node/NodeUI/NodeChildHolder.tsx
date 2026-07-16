@@ -138,7 +138,7 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 
 	const playback = GetPlaybackInfo();
 	const childLayout = GetChildLayout_Final(parentNode.current, map);
-	const showArgumentsControlBar_final = showArgumentsControlBar && !(playback?.timeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
+	const showArgumentsControlBar_final = !store.main.internalCrawlerMode && showArgumentsControlBar && !(playback?.timeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
 
 	const nodeView = GetNodeView(map.id, parentPath);
 	const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
