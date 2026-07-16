@@ -1,5 +1,5 @@
 import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "js-vextensions";
-import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
+import {GetDoc, GetDocs, CreateAccessor, Bail} from "mobx-graphlink";
 import {DMap} from "./maps/@Map.js";
 
 export const GetMaps = CreateAccessor((orderByEdits = false): DMap[]=>{
@@ -9,6 +9,7 @@ export const GetMaps = CreateAccessor((orderByEdits = false): DMap[]=>{
 	if (!mapsMap) return emptyArray_forLoading;
 	let result = ObjectCE(mapsMap).VValues();*/
 	let result = GetDocs({}, a=>a.maps);
+	if (result == emptyArray_forLoading) Bail("Maps are still loading.");
 	if (orderByEdits) result = CE(result).OrderByDescending(a=>ToNumber(a && a.edits, 0));
 	return result;
 });

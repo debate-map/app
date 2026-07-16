@@ -1,5 +1,5 @@
 import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "js-vextensions";
-import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull} from "mobx-graphlink";
+import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull, Bail} from "mobx-graphlink";
 import {Term} from "./terms/@Term.js";
 import {GetNodeRevision} from "./nodeRevisions.js";
 
@@ -11,7 +11,9 @@ export const GetTerm = CreateAccessor((id: string|n)=>{
 } */
 
 export const GetTerms = CreateAccessor((): Term[]=>{
-	return GetDocs({}, a=>a.terms);
+	const result = GetDocs({}, a=>a.terms);
+	if (result == emptyArray_forLoading) Bail("Terms are still loading.");
+	return result;
 });
 export const GetTermsByName = CreateAccessor((name: string): Term[]=>{
 	return GetDocs({

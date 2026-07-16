@@ -1,4 +1,5 @@
-import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
+import {emptyArray_forLoading} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor, Bail} from "mobx-graphlink";
 import {User} from "./users/@User.js";
 
 export const MeID = CreateAccessor({ctx: 1}, function(): string|n {
@@ -14,7 +15,9 @@ export const GetUser = CreateAccessor((userID: string|n): User|n=>{
 	return GetDoc({}, a=>a.users.get(userID!));
 });
 export const GetUsers = CreateAccessor((): User[]=>{
-	return GetDocs({}, a=>a.users);
+	const result = GetDocs({}, a=>a.users);
+	if (result == emptyArray_forLoading) Bail("Users are still loading.");
+	return result;
 });
 
 export const GetUserReputation_Approvals = CreateAccessor((userID: string|n)=>{
