@@ -14,7 +14,6 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, css2} from "web-vcore";
 import {BailError, BailInfo} from "mobx-graphlink";
 import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "js-vextensions";
-import {Column, Div} from "react-vcomponents";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
@@ -65,7 +64,6 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	const lastObservedValues = useRef(new ObservedValues());
 	const nodeUIRef = useRef<HTMLDivElement|n>(null);
 	const nodeBoxRef = useRef<HTMLDivElement|n>(null);
-	const rightColumn = useRef<Column|n>(null);
 	//const nodeChildHolder_genericRef = useRef<NodeChildHolder|n>(null);
 
 	// TODO: this was in class component before, we might need it back
@@ -238,8 +236,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	const css = css2;
 
-	const handleColumnRef = useCallback((c: Column|n)=>{
-		const dom = c?.root;
+	const handleColumnRef = useCallback((dom: HTMLDivElement|null)=>{
 		nodeUIRef.current = dom;
 		ref_leftColumn(dom);
 		if (dom) {
@@ -255,14 +252,12 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	return (
 		<>
-			<Column ref={handleColumnRef}
+			<div ref={handleColumnRef}
 				className={["NodeUI", "innerBoxColumn", "clickThrough"].filter(a=>a).join(" ")}
 				data-internal-crawler-loading={store.main.internalCrawlerMode && !forLayoutHelper && IsSpecialEmptyArray(nodeChildrenToShow) ? "true" : undefined}
 				style={css(
 					{
-						position: "absolute",
 						opacity: standardWidthInGroup != 0 ? 1 : 0,
-						boxSizing: "content-box",
 						paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 					},
 					style,
@@ -282,7 +277,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 					<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{!boxExpanded &&
 					<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length} childrenLoading={IsSpecialEmptyArray(nodeChildrenToShow)}/>}
-			</Column>
+			</div>
 			{boxExpanded && nodeChildHolder_truth}
 			{boxExpanded && nodeChildHolder_relevance}
 			{boxExpanded && nodeChildHolder_freeform}

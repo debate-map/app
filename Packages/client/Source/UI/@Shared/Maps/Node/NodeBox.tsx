@@ -6,7 +6,6 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {SLMode, URL_HideNodeHover} from "UI/@SL/SL.js";
-import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
@@ -17,7 +16,6 @@ import {Draggable} from "@hello-pangea/dnd";
 import ReactDOM from "react-dom";
 import {UseCallback} from "react-vextensions";
 import {Graph, GraphContext} from "tree-grapher";
-import {Row} from "react-vcomponents";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
@@ -396,7 +394,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		const toolbarAndTitleElements = <>
 			{!toolbarShow && titlePanel}
 			{/* for arguments, we render the toolbar after the title, because it is an "inline toolbar" that is rendered right-of-title on the same row */}
-			{toolbarShow && node.type == NodeType.argument && <Row>{titlePanel}{toolbarElement}</Row>}
+			{toolbarShow && node.type == NodeType.argument && <div className="NodeBox_argumentRow">{titlePanel}{toolbarElement}</div>}
 			{toolbarShow && node.type != NodeType.argument && <>{toolbarElement}{titlePanel}</>}
 		</>;
 
@@ -411,7 +409,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 					s.main.debates.focusedNodePath = crawlerNodeLink_path;
 				}}
 				onClick={e=>e.stopPropagation()}
-				style={{display: "block", position: "absolute", top: 0, right: 0, bottom: 0, width: 17, zIndex: 3, cursor: "pointer"}}
+				className="CrawlerNodeLink"
 			/>;
 
 		const textElements = <>
@@ -508,7 +506,6 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 					onMouseLeave={onMouseLeave}
 					{...dragInfo?.provided.draggableProps} // drag-handle is attached to just the TitlePanel, above
 					style={E(
-						{color: liveSkin.NodeTextColor().css()},
 						style,
 						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},

@@ -56,3 +56,167 @@ h6 { font-weight: bold; font-size: 12px; margin: 5px 0px; }
 .PaintingCursor {
 	cursor: url('/Images/Cursors/Brush.cur'), auto;
 }
+
+// map-node styles are shared because baked pages repeat these elements hundreds of times
+.NodeUI {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	box-sizing: content-box;
+}
+
+.ExpandableBox,
+.ExpandableBox_mainContent {
+	border-radius: 5px;
+}
+.ExpandableBox,
+.NodeBox_argumentRow,
+.ExpandableBox_mainContent,
+.NodeTitle,
+.NodeToolbar,
+.ToolBarButton {
+	display: flex;
+}
+.ExpandableBox {
+	position: relative;
+	cursor: default;
+}
+.ExpandableBox_squareTopLeft {
+	border-top-left-radius: 0;
+}
+.ExpandableBox_mainContent {
+	align-items: stretch;
+	width: 100%;
+	cursor: pointer;
+}
+.ExpandableBox_text {
+	position: relative;
+}
+.ExpandableBox_fill,
+.ExpandableBox_unfilled,
+.ExpandableBox_marker {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.ExpandableBox_fill {
+	left: 0;
+}
+.ExpandableBox_unfilled {
+	right: 0;
+}
+.CrawlerNodeLink {
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 17px;
+	z-index: 3;
+	cursor: pointer;
+}
+.NodeExpandButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 17px;
+	padding: 0;
+	border: none;
+	border-radius: 0 5px 5px 0;
+	background-color: var(--node-expand-background);
+	background-repeat: no-repeat;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 1px;
+	text-align: center;
+	cursor: pointer;
+}
+.NodeExpandButton:hover {
+	background-color: var(--node-expand-hover-background);
+}
+
+.NodeTitle {
+	position: relative;
+	min-width: 0;
+	min-height: 0;
+	cursor: pointer;
+}
+.NodeTitle_text {
+	position: relative;
+	flex: 1 1 0%;
+	min-width: 0;
+	min-height: 0;
+	white-space: initial;
+}
+
+.NodeToolbar {
+	height: 25px;
+	border-radius: 5px 5px 0 0;
+}
+.NodeToolbar_prefix {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+}
+.NodeToolbar_argument {
+	position: relative;
+}
+.NodeToolbar_above {
+	position: absolute;
+	right: -17px;
+	bottom: 100%;
+}
+.NodeToolbar_bordered {
+	box-sizing: content-box;
+	border-bottom: 1px solid black;
+}
+.ToolBarButton {
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	box-sizing: content-box;
+	width: 110px;
+	height: 25px;
+	min-height: 0;
+	border: solid rgba(0, 0, 0, 1);
+	border-width: 0;
+	font-size: 12px;
+	cursor: pointer;
+}
+.ToolBarButton_leftBorder {
+	border-left-width: 1px;
+}
+.ToolBarButton_text {
+	min-width: 110px;
+}
+.ToolBarButton_prefix {
+	width: auto;
+	padding: 0 10px;
+}
+.ToolBarButton_textContent {
+	display: flex;
+	align-items: center;
+	position: relative;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.RatingsPanel {
+	position: relative;
+}
+.RatingsPanel_overlay {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+.uplotHolder {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.u-legend {
+	font-size: 12px;
+}
+.u-legend .hideLegend {
+	display: none;
+}

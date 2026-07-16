@@ -86,6 +86,9 @@ export class DMSkin extends Skin {
 			.MapUI table td {
 				color: ${this.NodeTextColor().css()};
 			}
+			.NodeBox {
+				color: ${this.NodeTextColor().css()};
+			}
 			/*.NodeUI_LeftBox, .NodeToolbar, .NodeUI_BottomPanel {
 				color: ${this.NodeTextColor().css()} !important;
 			}*/
