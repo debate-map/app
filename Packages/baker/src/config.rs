@@ -166,26 +166,19 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn checked_in_configs_match_the_runtime_contract() {
-		let standard: BakerConfig = serde_yaml::from_str(include_str!("../config.yaml")).unwrap();
-		let standard = standard.into_engine_config().unwrap();
-		assert_eq!(standard.start_urls.len(), 4);
-		assert_eq!(standard.visit_policy.query_params.len(), 2);
-		assert_eq!(standard.regular_crawler_count, 6);
-		assert_eq!(standard.isolated_crawl_groups.routes.len(), 2);
-		assert_eq!(standard.isolated_crawl_groups.max_active_groups, 3);
-		assert_eq!(standard.isolated_crawl_groups.max_tabs_per_group, 6);
-		assert_eq!(standard.isolated_crawl_groups.max_worker_count(), 18);
-		assert_eq!(standard.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
-		assert_eq!(standard.max_retries, DEFAULT_MAX_RETRIES);
-		assert!(standard.serve.enabled);
-
-		let focused: BakerConfig = serde_yaml::from_str(include_str!("../config.how-old-universe.yaml")).unwrap();
-		let focused = focused.into_engine_config().unwrap();
-		assert_eq!(focused.regular_crawler_count, 6);
-		assert_eq!(focused.start_urls, vec![Url::parse("http://localhost:5101/debates").unwrap()]);
-		assert_eq!(focused.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
-		assert_eq!(focused.isolated_crawl_groups.max_worker_count(), 6);
-		assert_eq!(focused.base_output_dir, PathBuf::from("./static-how-old-universe"));
+	fn checked_in_config_matches_the_runtime_contract() {
+		let config: BakerConfig = serde_yaml::from_str(include_str!("../config.yaml")).unwrap();
+		let config = config.into_engine_config().unwrap();
+		assert_eq!(config.start_urls, vec![Url::parse("http://localhost:5101/debates").unwrap()]);
+		assert_eq!(config.visit_policy.query_params.len(), 2);
+		assert_eq!(config.regular_crawler_count, 6);
+		assert_eq!(config.isolated_crawl_groups.routes.len(), 1);
+		assert_eq!(config.isolated_crawl_groups.max_active_groups, 1);
+		assert_eq!(config.isolated_crawl_groups.max_tabs_per_group, 6);
+		assert_eq!(config.isolated_crawl_groups.max_worker_count(), 6);
+		assert_eq!(config.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
+		assert_eq!(config.max_retries, DEFAULT_MAX_RETRIES);
+		assert_eq!(config.base_output_dir, PathBuf::from("./static"));
+		assert!(config.serve.enabled);
 	}
 }

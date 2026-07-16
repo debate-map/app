@@ -40,10 +40,7 @@ Object.assign(scripts, {
 	baker: {
 		run: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml",
 		runFresh: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml --force-restart",
-		runHowOldUniverse: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.how-old-universe.yaml",
-		runFreshHowOldUniverse: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.how-old-universe.yaml --force-restart",
-		check: "cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo check -p baker",
-		test: "cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo test -p baker",
+		serve: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml --serve-only",
 	},
 });
 

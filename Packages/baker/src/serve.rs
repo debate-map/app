@@ -1,3 +1,4 @@
+use crate::compression::decompress_html;
 use anyhow::{Context, bail};
 use serde::Deserialize;
 use std::fs;
@@ -96,18 +97,35 @@ fn handle_connection(mut stream: TcpStream, root_dir: &Path) -> anyhow::Result<(
 	}
 
 	match resolve_request_path(root_dir, request.path())? {
-		Some(path) => {
-			let body = fs::read(&path).with_context(|| format!("read {}", path.display()))?;
-			let content_type = content_type_for_path(&path);
-			HttpResponse::ok(content_type, body).write(&mut stream, request.is_head())
-		},
+		Some(path) => static_file_response(root_dir, &path, request.accepts_brotli)?.write(&mut stream, request.is_head()),
 		None => HttpResponse::not_found().write(&mut stream, request.is_head()),
 	}
+}
+
+fn static_file_response(root_dir: &Path, path: &Path, accepts_brotli: bool) -> anyhow::Result<HttpResponse> {
+	let body = fs::read(path).with_context(|| format!("read {}", path.display()))?;
+	let mut response = HttpResponse::ok(content_type_for_path(path), body);
+
+	if is_brotli_page(root_dir, path) {
+		response.extra_headers.push(("Vary", "Accept-Encoding".into()));
+		if accepts_brotli {
+			response.extra_headers.push(("Content-Encoding", "br".into()));
+		} else {
+			response.body = decompress_html(&response.body).with_context(|| format!("serve {} without Brotli", path.display()))?;
+		}
+	}
+
+	Ok(response)
+}
+
+fn is_brotli_page(root_dir: &Path, path: &Path) -> bool {
+	matches!(path.extension().and_then(|extension| extension.to_str()), Some("html" | "htm")) && path.strip_prefix(root_dir).is_ok_and(|relative| !relative.starts_with("_assets"))
 }
 
 struct HttpRequest {
 	method: String,
 	target: String,
+	accepts_brotli: bool,
 }
 
 impl HttpRequest {
@@ -119,10 +137,12 @@ impl HttpRequest {
 		}
 
 		let request = String::from_utf8_lossy(&buffer[..read]);
-		let first_line = request.lines().next().ok_or_else(|| anyhow::anyhow!("empty HTTP request"))?;
+		let mut lines = request.lines();
+		let first_line = lines.next().ok_or_else(|| anyhow::anyhow!("empty HTTP request"))?;
 		let mut parts = first_line.split_whitespace();
+		let accepts_brotli = lines.filter_map(|line| line.split_once(':')).any(|(name, value)| name.eq_ignore_ascii_case("accept-encoding") && header_accepts_brotli(value));
 
-		Ok(Some(Self { method: parts.next().unwrap_or("").to_string(), target: parts.next().unwrap_or("").to_string() }))
+		Ok(Some(Self { method: parts.next().unwrap_or("").to_string(), target: parts.next().unwrap_or("").to_string(), accepts_brotli }))
 	}
 
 	fn is_supported_method(&self) -> bool {
@@ -136,6 +156,15 @@ impl HttpRequest {
 	fn path(&self) -> &str {
 		self.target.split_once('?').map_or(&self.target, |(path, _)| path)
 	}
+}
+
+fn header_accepts_brotli(value: &str) -> bool {
+	value.split(',').any(|item| {
+		let mut parts = item.split(';');
+		let encoding = parts.next().unwrap_or_default().trim();
+		let quality = parts.filter_map(|parameter| parameter.split_once('=')).find_map(|(name, value)| name.trim().eq_ignore_ascii_case("q").then(|| value.trim().parse::<f32>().ok()).flatten()).unwrap_or(1.0);
+		encoding.eq_ignore_ascii_case("br") && quality > 0.0
+	})
 }
 
 fn resolve_request_path(root_dir: &Path, raw_path: &str) -> anyhow::Result<Option<PathBuf>> {
@@ -287,12 +316,33 @@ mod tests {
 		fs::write(root.join("index.html"), "ok").unwrap();
 		fs::write(root.join("database/users/index.html"), "ok").unwrap();
 
-		let request = HttpRequest { method: "GET".into(), target: "/database/users?db=prod".into() };
+		let request = HttpRequest { method: "GET".into(), target: "/database/users?db=prod".into(), accepts_brotli: false };
 		for path in ["/", request.path(), "/database/users/", "/database/users/index.html"] {
 			assert!(resolve_request_path(&root, path).unwrap().is_some());
 		}
 		assert!(resolve_request_path(&root, "/missing").unwrap().is_none());
 		assert!(resolve_request_path(&root, "/../secret").unwrap_err().to_string().contains("unsafe preview path"));
+
+		fs::remove_dir_all(root).unwrap();
+	}
+
+	#[test]
+	fn serves_brotli_pages_with_an_identity_fallback() {
+		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-brotli-test-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+		let path = root.join("index.html");
+		let html = b"<html><body>compressed page</body></html>";
+		fs::create_dir_all(&root).unwrap();
+		fs::write(&path, crate::compression::compress_html(html).unwrap()).unwrap();
+
+		let encoded = static_file_response(&root, &path, true).unwrap();
+		assert_eq!(encoded.extra_headers, vec![("Vary", "Accept-Encoding".into()), ("Content-Encoding", "br".into())]);
+		assert_ne!(encoded.body, html);
+
+		let identity = static_file_response(&root, &path, false).unwrap();
+		assert_eq!(identity.extra_headers, vec![("Vary", "Accept-Encoding".into())]);
+		assert_eq!(identity.body, html);
+		assert!(header_accepts_brotli("gzip, deflate, br"));
+		assert!(!header_accepts_brotli("gzip, br;q=0"));
 
 		fs::remove_dir_all(root).unwrap();
 	}

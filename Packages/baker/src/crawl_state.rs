@@ -15,6 +15,8 @@ const STATE_FILE: &str = "crawl-state.json";
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CrawlConfigSignature {
+	#[serde(default)]
+	pub output_format_version: u8,
 	pub root_url: String,
 	pub start_urls: Vec<String>,
 	pub allow_paths: Vec<PathRule>,
@@ -248,6 +250,7 @@ mod tests {
 
 	fn signature() -> CrawlConfigSignature {
 		CrawlConfigSignature {
+			output_format_version: crate::compression::OUTPUT_FORMAT_VERSION,
 			root_url: "https://debatemap.app/".into(),
 			start_urls: vec!["https://debatemap.app/database".into()],
 			allow_paths: vec![PathRule::StartsWith("/database".into())],

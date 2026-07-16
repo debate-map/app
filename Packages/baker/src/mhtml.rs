@@ -1,3 +1,6 @@
+use crate::compression::compress_html;
+#[cfg(test)]
+use crate::compression::decompress_html;
 use crate::output_path::static_route_path;
 use anyhow::{Context, anyhow, bail};
 use base64::Engine;
@@ -130,7 +133,8 @@ impl<'a> MhtmlConverter<'a> {
 		reference_rewriter.rewrite(&mut html);
 		html = rewrite_tag_attribute_urls(&html, "a", "href", self.page_url);
 		html = rewrite_tag_attribute_urls(&html, "form", "action", self.page_url);
-		Self::write_atomic(self.html_out_path, html.as_bytes()).with_context(|| format!("write {}", self.html_out_path.display()))?;
+		let compressed_html = compress_html(html.as_bytes())?;
+		Self::write_atomic(self.html_out_path, &compressed_html).with_context(|| format!("write {}", self.html_out_path.display()))?;
 
 		Ok(())
 	}
@@ -484,7 +488,9 @@ Zm9udA==
 		let page_url = Url::parse("https://debatemap.app/database?db=prod").unwrap();
 		MhtmlConverter::new(&html_path, &output_dir, &page_url).write(mhtml).unwrap();
 
-		let html = fs::read_to_string(&html_path).unwrap();
+		let compressed_html = fs::read(&html_path).unwrap();
+		let html = String::from_utf8(decompress_html(&compressed_html).unwrap()).unwrap();
+		assert!(!compressed_html.starts_with(b"<!DOCTYPE html>"));
 		assert!(html.contains("Loaded x <− y"));
 		assert!(html.contains("/_assets/"));
 		assert!(!html.contains("cid:style"));

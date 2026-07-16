@@ -1,4 +1,5 @@
 use crate::browser::BrowserSession;
+use crate::compression::{OUTPUT_FORMAT_VERSION, compress_html};
 use crate::config::BakerConfig;
 use crate::crawl_state::{CrawlConfigSignature, CrawlStateStore, IsolatedCrawlGroupSignature};
 use crate::output_path::static_route_path;
@@ -50,6 +51,7 @@ pub struct CrawlerEngineConfig {
 impl CrawlerEngineConfig {
 	fn state_signature(&self) -> CrawlConfigSignature {
 		CrawlConfigSignature {
+			output_format_version: OUTPUT_FORMAT_VERSION,
 			root_url: self.visit_policy.root.as_str().to_string(),
 			start_urls: self.start_urls.iter().map(|url| url.as_str().to_string()).collect(),
 			allow_paths: self.visit_policy.allow_paths.clone(),
@@ -166,7 +168,7 @@ impl CrawlerEngine {
 		let target = static_route_path(start_url);
 		let escaped_target = escape_html_attr(&target);
 		let contents = format!("<!doctype html>\n<html><head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; url={escaped_target}\"><title>Redirecting</title></head><body><a href=\"{escaped_target}\">{escaped_target}</a></body></html>\n");
-		fs::write(&index_path, contents).with_context(|| format!("write root entrypoint {}", index_path.display()))?;
+		fs::write(&index_path, compress_html(contents.as_bytes())?).with_context(|| format!("write root entrypoint {}", index_path.display()))?;
 		info!("Wrote root entrypoint redirect to {target}");
 
 		Ok(())

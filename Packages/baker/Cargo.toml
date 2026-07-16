@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "=1.0.80"
 base64 = "=0.22.1"
+brotli = "=3.5.0"
 headless_chrome = {git = "https://github.com/rust-headless-chrome/rust-headless-chrome", rev = "c9ad54618c0f8a4feb79ca49e99b360a5b3988e2", features = ["fetch"]}
 regex = "=1.11.1"
 url = "=2.5.4"
