@@ -46,6 +46,8 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 		const toolbarItemsToShow_inline = GetToolbarItemsToShow(node, path, map).filter(a=>a.panel != "prefix"); // todo: confirm whether the filter op is correct here
 		expectedOtherStuffWidth += (toolbarItemsToShow_inline.length * TOOLBAR_BUTTON_WIDTH_WITH_BORDER); // add space for the inline toolbar-items (eg. "Relevance")
 	}
+	// keep an above toolbar within the node's horizontal bounds.
+	const aboveToolbarWidth = node.type == NodeType.argument ? 0 : GetToolbarItemsToShow(node, path, map).filter(a=>a.panel != "prefix").length * TOOLBAR_BUTTON_WIDTH_WITH_BORDER;
 
 	if (ShowNotification(node.type)) {
 		expectedOtherStuffWidth += NOTIFICATION_BELL_WIDTH; // add space for the notification-button
@@ -65,7 +67,7 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 		expectedBoxWidth = maxWidth_final;
 	}
 
-	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, maxWidth_final);
+	const width = (node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, maxWidth_final)).KeepAtLeast(aboveToolbarWidth);
 
 	let expectedHeight = -1;
 	// todo: update this block to use canvas-based measurement as well
