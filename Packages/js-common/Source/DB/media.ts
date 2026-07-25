@@ -1,5 +1,5 @@
-import {CachedTransform, IsNaN} from "js-vextensions";
-import {GetDoc, GetDocs, CreateAccessor} from "mobx-graphlink";
+import {CachedTransform, IsNaN, emptyArray_forLoading} from "js-vextensions";
+import {GetDoc, GetDocs, CreateAccessor, Bail} from "mobx-graphlink";
 import {Media} from "./media/@Media.js";
 
 export const GetMedia = CreateAccessor((id: string|n)=>{
@@ -10,7 +10,9 @@ export const GetMedia = CreateAccessor((id: string|n)=>{
 }*/
 
 export const GetMedias = CreateAccessor((): Media[]=>{
-	return GetDocs({}, a=>a.medias);
+	const result = GetDocs({}, a=>a.medias);
+	if (result == emptyArray_forLoading) Bail("Media are still loading.");
+	return result;
 });
 export const GetMediasByURL = CreateAccessor((url: string|n): Media[]=>{
 	return GetDocs({
