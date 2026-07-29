@@ -41,7 +41,9 @@ impl WorkerPool {
 		}
 
 		while let Some(worker) = self.workers.pop() {
-			worker.join_and_close(self.queue);
+			// Browser drop closes every remaining target. Avoid a synchronous
+			// close here because a missing CDP response waits the full idle timeout.
+			worker.join(self.queue, false);
 		}
 	}
 
@@ -72,7 +74,7 @@ impl WorkerPool {
 		while index < self.workers.len() {
 			if self.workers[index].handle.is_finished() {
 				let worker = self.workers.swap_remove(index);
-				worker.join_and_close(self.queue);
+				worker.join(self.queue, true);
 			} else {
 				index += 1;
 			}
@@ -103,14 +105,16 @@ impl CrawlerWorker {
 		!self.should_retire.load(Ordering::Relaxed) && !self.handle.is_finished()
 	}
 
-	fn join_and_close(self, queue: CrawlQueue) {
+	fn join(self, queue: CrawlQueue, close_tab: bool) {
 		let id = self.id;
 		if let Err(payload) = self.handle.join() {
 			let panic_message = payload.downcast_ref::<&str>().copied().or_else(|| payload.downcast_ref::<String>().map(String::as_str)).unwrap_or("<unknown panic payload>");
 			error!("{queue:?} crawler worker {id} panicked: {panic_message}");
 		}
 
-		self.crawler_tab.close_tab();
-		info!("Closed {queue:?} crawler worker {id} tab");
+		if close_tab {
+			self.crawler_tab.close_tab();
+			info!("Closed {queue:?} crawler worker {id} tab");
+		}
 	}
 }

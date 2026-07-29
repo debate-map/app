@@ -10,8 +10,10 @@ pub struct BrowserSession {
 }
 
 impl BrowserSession {
-	pub fn launch() -> anyhow::Result<Self> {
-		let launch_options = LaunchOptionsBuilder::default().headless(false).idle_browser_timeout(Duration::from_secs(600)).args(chrome_args()).build()?;
+	pub fn launch(headless: bool) -> anyhow::Result<Self> {
+		// SPA route switches can stay active without emitting browser-level target events.
+		// Keep this process-lifetime guard well above any expected crawl duration.
+		let launch_options = LaunchOptionsBuilder::default().headless(headless).idle_browser_timeout(Duration::from_secs(24 * 60 * 60)).args(chrome_args()).build()?;
 		Ok(Self { browser: Browser::new(launch_options).context("launch Chrome")? })
 	}
 

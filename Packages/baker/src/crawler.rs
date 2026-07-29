@@ -62,7 +62,7 @@ impl CrawlerTab {
 	}
 
 	fn render_url(&self, url: &Url) -> anyhow::Result<()> {
-		if let Some(group) = self.isolated_group_for_child(url).cloned() {
+		if let Some(group) = self.isolated_crawl_groups.group_for_child(url).cloned() {
 			self.ensure_isolated_group_loaded(&group, url)?;
 			if group.group_url_for_visit(url) == *url {
 				return Ok(());
@@ -72,7 +72,7 @@ impl CrawlerTab {
 			return Ok(());
 		}
 
-		self.set_loaded_isolated_group(None);
+		*self.loaded_isolated_group.lock().unwrap() = None;
 		self.navigate_wait_and_prepare(url)?;
 		Ok(())
 	}
@@ -83,7 +83,7 @@ impl CrawlerTab {
 			return Ok(());
 		}
 
-		self.set_loaded_isolated_group(None);
+		*self.loaded_isolated_group.lock().unwrap() = None;
 		let parent_url = group.parent_url_for_visit(child_url);
 		let group_url = group.group_url_for_visit(child_url);
 		info!("Loading isolated parent {} before group {}", parent_url.as_str(), group_url.as_str());
@@ -91,22 +91,14 @@ impl CrawlerTab {
 		if group_url != parent_url {
 			page::switch_isolated_route(&self.tab, &group_url).with_context(|| format!("initialize isolated group {}", group_url.as_str()))?;
 		}
-		self.set_loaded_isolated_group(Some(group_key));
+		*self.loaded_isolated_group.lock().unwrap() = Some(group_key);
 
 		Ok(())
 	}
 
-	fn set_loaded_isolated_group(&self, group_key: Option<String>) {
-		*self.loaded_isolated_group.lock().unwrap() = group_key;
-	}
-
-	fn isolated_group_for_child(&self, url: &Url) -> Option<&IsolatedCrawlGroup> {
-		self.isolated_crawl_groups.group_for_child(url)
-	}
-
 	fn record_discovered_links(&self, url: &Url, mut links: Vec<Url>, branch: Option<&IsolatedCrawlGroup>) -> anyhow::Result<Option<Url>> {
 		let extracted_count = links.len();
-		links.retain(|link| self.isolated_group_for_child(link).is_none_or(|group| !group.has_repeated_descendant_segment(link)));
+		links.retain(|link| self.isolated_crawl_groups.group_for_child(link).is_none_or(|group| !group.has_repeated_descendant_segment(link)));
 		let cyclic_count = extracted_count - links.len();
 		if cyclic_count > 0 {
 			warn!("Skipped {} cyclic isolated link(s) from {}", cyclic_count, url.as_str());
@@ -114,7 +106,7 @@ impl CrawlerTab {
 
 		let preferred_urls = branch.into_iter().flat_map(|group| links.iter().filter(|link| group.is_descendant(url, link)).cloned()).collect::<Vec<_>>();
 		let (queued_urls, reserved_url) = self.visit_state.add_many_to_visit_reserving_first(links, preferred_urls).with_context(|| format!("record discovered links from {}", url.as_str()))?;
-		let isolated_count = queued_urls.iter().filter(|url| self.isolated_group_for_child(url).is_some()).count();
+		let isolated_count = queued_urls.iter().filter(|url| self.isolated_crawl_groups.group_for_child(url).is_some()).count();
 		let regular_count = queued_urls.len() - isolated_count;
 		if regular_count > 0 {
 			info!("Discovered {} regular link(s) from {}", regular_count, url.as_str());
@@ -131,44 +123,27 @@ impl CrawlerTab {
 	}
 
 	fn process_url(&self, url: Url) {
-		if let Some(group) = self.isolated_group_for_child(&url).cloned() {
+		if let Some(group) = self.isolated_crawl_groups.group_for_child(&url).cloned() {
 			let group_key = group.group_key(&url);
-			if let Err(err) = self.process_isolated_group(url.clone(), &group) {
-				let error = format!("{err:#}");
-				error!("{error}");
-				self.re_add_failed_visit(url, &error);
-			}
+			self.process_isolated_group(url, &group);
 			self.visit_state.release_isolated_tab(&group, &group_key);
-			return;
-		}
-
-		if let Err(err) = self.process_regular_url(url.clone()) {
-			let error = format!("{err:#}");
-			error!("{error}");
-			self.re_add_failed_visit(url, &error);
+		} else if let Err(err) = self.process_and_bake(&url, None) {
+			self.record_failure(url, err);
 		}
 	}
 
-	fn process_isolated_group(&self, first_url: Url, group: &IsolatedCrawlGroup) -> anyhow::Result<()> {
+	fn process_isolated_group(&self, first_url: Url, group: &IsolatedCrawlGroup) {
 		let mut next_url = Some(first_url);
 		while let Some(url) = next_url {
 			info!("Processing isolated child route {} under {}", url.as_str(), group.parent.as_str());
-			match self.process_isolated_url(url.clone(), group) {
+			match self.process_and_bake(&url, Some(group)) {
 				Ok(reserved_child) => next_url = reserved_child,
 				Err(err) => {
-					let error = format!("{err:#}");
-					error!("{error}");
-					self.re_add_failed_visit(url, &error);
+					self.record_failure(url, err);
 					next_url = None;
 				},
 			}
 		}
-
-		Ok(())
-	}
-
-	fn process_isolated_url(&self, url: Url, group: &IsolatedCrawlGroup) -> anyhow::Result<Option<Url>> {
-		self.process_and_bake(&url, Some(group))
 	}
 
 	fn process_and_bake(&self, url: &Url, branch: Option<&IsolatedCrawlGroup>) -> anyhow::Result<Option<Url>> {
@@ -188,13 +163,10 @@ impl CrawlerTab {
 		Ok(reserved_child)
 	}
 
-	fn process_regular_url(&self, url: Url) -> anyhow::Result<()> {
-		self.process_and_bake(&url, None)?;
-		Ok(())
-	}
-
-	fn re_add_failed_visit(&self, url: Url, error: &str) {
-		match self.visit_state.re_add_failed_visit(url.clone(), error) {
+	fn record_failure(&self, url: Url, err: anyhow::Error) {
+		let error = format!("{err:#}");
+		error!("{error}");
+		match self.visit_state.re_add_failed_visit(url.clone(), &error) {
 			Ok(FailedVisitAction::Requeued { attempts, max_retries }) => warn!("Requeued failed page {} after attempt {}/{}", url.as_str(), attempts, max_retries),
 			Ok(FailedVisitAction::Exhausted { attempts, max_retries }) => error!("Skipping failed page {} after attempt {}/{}", url.as_str(), attempts, max_retries),
 			Ok(FailedVisitAction::Ignored) => {},

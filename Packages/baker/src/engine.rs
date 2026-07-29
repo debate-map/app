@@ -32,12 +32,16 @@ pub enum CrawlerStartMode {
 
 #[derive(Debug)]
 pub struct CrawlerEngineConfig {
+	/// Whether Chrome launches without a visible window.
+	pub headless: bool,
 	/// Maximum tabs dedicated to URLs outside isolated groups.
 	pub regular_crawler_count: usize,
 	/// Failed page attempts before the URL is skipped.
 	pub max_retries: usize,
 	/// URLs that seed the crawl.
 	pub start_urls: Vec<Url>,
+	/// Discovery URLs that are deliberately crawled again whenever saved state is resumed.
+	pub revisit_urls_on_resume: Vec<Url>,
 	/// The visit policy to follow during crawling
 	pub visit_policy: VisitPolicy,
 	/// Child-route families crawled in isolated, bounded worker groups.
@@ -50,6 +54,9 @@ pub struct CrawlerEngineConfig {
 
 impl CrawlerEngineConfig {
 	fn state_signature(&self) -> CrawlConfigSignature {
+		// Browser presentation and resume refresh hubs are operational rather than
+		// part of persisted crawl identity, so either can change without discarding
+		// otherwise compatible completed work.
 		CrawlConfigSignature {
 			output_format_version: OUTPUT_FORMAT_VERSION,
 			root_url: self.visit_policy.root.as_str().to_string(),
@@ -79,7 +86,7 @@ impl CrawlerEngine {
 	pub fn new(config: CrawlerEngineConfig, config_path: PathBuf, start_mode: CrawlerStartMode) -> anyhow::Result<Self> {
 		let (state_store, frontier) = Self::prepare_crawl_state(&config, start_mode)?;
 		let visit_state = Arc::new(GlobalVisitState::with_state_store(config.visit_policy.clone(), frontier, state_store, config.max_retries));
-		let browser = BrowserSession::launch()?;
+		let browser = BrowserSession::launch(config.headless)?;
 
 		Ok(CrawlerEngine {
 			regular_worker_pool: WorkerPool::new(CrawlQueue::Regular),
@@ -184,18 +191,18 @@ impl CrawlerEngine {
 		};
 
 		if self.visit_state.is_empty() {
-			let mut seeded_count = 0;
-			for start_url in &self.config.start_urls {
-				if self.visit_state.add_to_visit(start_url.clone())? {
-					seeded_count += 1;
-				}
-			}
-
-			if seeded_count == 0 {
+			if self.visit_state.add_many_to_visit(self.config.start_urls.iter().cloned())?.is_empty() {
 				bail!("no start URLs were accepted by the visit policy");
 			}
 		} else {
 			info!("Using queued/visited state loaded from previous crawl");
+			let revisited_urls = self.visit_state.force_revisit_many(self.config.revisit_urls_on_resume.iter().cloned())?;
+			if !revisited_urls.is_empty() {
+				info!("Requeued {} configured discovery page(s) for resume refresh", revisited_urls.len());
+				for url in revisited_urls {
+					info!("Resume refresh queued {url}");
+				}
+			}
 		}
 
 		let mut regular_crawler_count = self.config.regular_crawler_count;

@@ -2,9 +2,22 @@
 # host, and port. the frontend must already be running here.
 root_url: http://localhost:5101
 
-# crawl seeds. remove this section to start at root_url instead, /debates is used so its real links lead the crawler into the selected map.
+# launch chrome without a visible window when true. this is read only when the
+# baker starts, so changing it requires a normal stop and resume.
+headless: true
+
+# crawl seeds. / starts the general site crawl, while /debates exposes the
+# listing links that lead the crawler into the selected map.
 start_paths:
+  - /
   - /debates
+
+# on a resume, re-bake these discovery pages even when they were already ready.
+# any newly exposed links join the saved frontier only when visit_policy permits.
+revisit_paths_on_resume:
+  - /
+  - /debates
+  - /debates/all
 
 # these parameters are added only when an accepted url is dispatched to chrome, they select production data and make the app expose crawler-only links and slices
 query_params:
@@ -32,10 +45,14 @@ serve:
   port: 8787
 
 visit_policy:
-  # optional allowlist. rule kinds: exact, starts_with, contains, and ends_with.
-  # an empty list allows every same-origin path. this list intentionally allows
-  # only the debate listings and the selected map.
+  # optional allowlist. rule kinds: exact, starts_with, not_starts_with,
+  # contains, and ends_with. this permits every same-origin path outside the
+  # debates subtree, then adds back only the debate listings and selected map.
   allow_paths:
+    # /database, /forum, and every other non-debate path remain crawlable.
+    - kind: not_starts_with
+      value: /debates/
+
     # these listing routes expose the selected map's crawlable link.
     - kind: exact
       value: /debates
@@ -68,8 +85,8 @@ visit_policy:
 
     # url families that should use the isolated worker pool.
     routes:
-      # the parent itself remains on a regular tab. depth one uses /debates/x as
-      # the group key, so every descendant of x stays in the same isolated group.
+      # /debates and each depth-one /debates/x group root remain on regular tabs.
+      # every deeper descendant of x stays in the same isolated group.
       - parent: /debates
         child_depth: 1
 

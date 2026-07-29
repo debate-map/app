@@ -12,7 +12,11 @@ use url::Url;
 pub struct BakerConfig {
 	pub root_url: String,
 	#[serde(default)]
+	pub headless: bool,
+	#[serde(default)]
 	pub start_paths: Vec<String>,
+	#[serde(default)]
+	pub revisit_paths_on_resume: Vec<String>,
 	#[serde(default)]
 	pub query_params: BTreeMap<String, String>,
 	#[serde(default = "default_regular_crawler_count", alias = "crawler_count")]
@@ -79,6 +83,7 @@ impl BakerConfig {
 		validate_positive("max_retries", self.max_retries)?;
 
 		let start_urls = Self::resolve_start_urls(&root, &self.start_paths)?;
+		let revisit_urls_on_resume = Self::resolve_paths(&root, &self.revisit_paths_on_resume, "revisit path")?;
 		let VisitPolicyConfig { allow_paths, exclude_paths, isolated_crawl_groups } = self.visit_policy;
 		let isolated_crawl_groups = isolated_crawl_groups.into_isolated_crawl_groups(&root)?;
 
@@ -90,6 +95,12 @@ impl BakerConfig {
 			}
 		}
 
+		for revisit_url in &revisit_urls_on_resume {
+			if !visit_policy.allow(revisit_url) {
+				bail!("resume revisit path {} is not allowed by visit_policy", revisit_url);
+			}
+		}
+
 		for group in &isolated_crawl_groups.routes {
 			if !visit_policy.allow(&group.parent) {
 				bail!("isolated crawl parent {} is not allowed by visit_policy", group.parent);
@@ -97,9 +108,11 @@ impl BakerConfig {
 		}
 
 		Ok(CrawlerEngineConfig {
+			headless: self.headless,
 			regular_crawler_count: self.regular_crawler_count,
 			max_retries: self.max_retries,
 			start_urls,
+			revisit_urls_on_resume,
 			visit_policy,
 			isolated_crawl_groups,
 			base_output_dir: self.base_output_dir,
@@ -112,7 +125,11 @@ impl BakerConfig {
 			return Ok(vec![root.clone()]);
 		}
 
-		start_paths.iter().map(|path| root.join(path).with_context(|| format!("resolve start path {path} against root_url {root}"))).collect()
+		Self::resolve_paths(root, start_paths, "start path")
+	}
+
+	fn resolve_paths(root: &Url, paths: &[String], kind: &str) -> anyhow::Result<Vec<Url>> {
+		paths.iter().map(|path| root.join(path).with_context(|| format!("resolve {kind} {path} against root_url {root}"))).collect()
 	}
 }
 
@@ -169,16 +186,15 @@ mod tests {
 	fn checked_in_config_matches_the_runtime_contract() {
 		let config: BakerConfig = serde_yaml::from_str(include_str!("../config.yaml")).unwrap();
 		let config = config.into_engine_config().unwrap();
-		assert_eq!(config.start_urls, vec![Url::parse("http://localhost:5101/debates").unwrap()]);
+		assert!(config.headless && config.serve.enabled);
+		assert_eq!(config.start_urls.iter().map(Url::path).collect::<Vec<_>>(), ["/", "/debates"]);
+		assert_eq!(config.revisit_urls_on_resume.iter().map(Url::path).collect::<Vec<_>>(), ["/", "/debates", "/debates/all"]);
 		assert_eq!(config.visit_policy.query_params.len(), 2);
-		assert_eq!(config.regular_crawler_count, 6);
-		assert_eq!(config.isolated_crawl_groups.routes.len(), 1);
-		assert_eq!(config.isolated_crawl_groups.max_active_groups, 1);
-		assert_eq!(config.isolated_crawl_groups.max_tabs_per_group, 6);
-		assert_eq!(config.isolated_crawl_groups.max_worker_count(), 6);
-		assert_eq!(config.isolated_crawl_groups.routes[0].group_path_segment_count, 2);
-		assert_eq!(config.max_retries, DEFAULT_MAX_RETRIES);
+		for (path, allowed) in [("/database", true), ("/debates/SC8x0d_SQqOdFdadhFcqhQ", true), ("/debates/another-map", false)] {
+			assert_eq!(config.visit_policy.allow(&config.visit_policy.root.join(path).unwrap()), allowed, "{path}");
+		}
+		let groups = &config.isolated_crawl_groups;
+		assert_eq!((config.regular_crawler_count, groups.routes.len(), groups.max_active_groups, groups.max_tabs_per_group, groups.routes[0].group_path_segment_count, config.max_retries), (6, 1, 1, 6, 2, DEFAULT_MAX_RETRIES));
 		assert_eq!(config.base_output_dir, PathBuf::from("./static"));
-		assert!(config.serve.enabled);
 	}
 }

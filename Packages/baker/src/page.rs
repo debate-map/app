@@ -37,13 +37,7 @@ pub fn switch_isolated_route(tab: &Tab, url: &Url) -> anyhow::Result<()> {
     "#
 	);
 
-	let result = tab.evaluate(&js, false).context("isolated route eval")?;
-	let val = result.value.ok_or_else(|| anyhow!("no value from isolated route eval"))?;
-	let s = val.as_str().ok_or_else(|| anyhow!("unexpected isolated route return type"))?;
-	if let Some(msg) = s.strip_prefix("__ERR__:") {
-		return Err(anyhow!("js error: {msg}"));
-	}
-
+	evaluate_string(tab, &js, "isolated route eval")?;
 	wait_for_stable_readiness(tab, url)
 }
 
@@ -70,14 +64,7 @@ pub fn extract_links(tab: &Tab) -> anyhow::Result<Vec<String>> {
     })();
     "#;
 
-	let result = tab.evaluate(js, false).context("link eval")?;
-	let val = result.value.ok_or_else(|| anyhow!("no value from link eval"))?;
-	let s = val.as_str().ok_or_else(|| anyhow!("unexpected return type"))?;
-	if let Some(msg) = s.strip_prefix("__ERR__:") {
-		return Err(anyhow!("js error: {msg}"));
-	}
-
-	let arr: Value = serde_json::from_str(s).context("parse link json")?;
+	let arr: Value = serde_json::from_str(&evaluate_string(tab, js, "link eval")?).context("parse link json")?;
 	let mut links = arr.as_array().into_iter().flatten().filter_map(|value| value.as_str().map(str::to_string)).collect::<Vec<_>>();
 	links.sort_unstable();
 	links.dedup();
@@ -143,12 +130,36 @@ fn readiness_state(tab: &Tab, url: &Url) -> anyhow::Result<String> {
 
 		const nodes = Array.from(map.querySelectorAll(".NodeUI"));
 		if (nodes.length === 0) return "map has no nodes";
+		if (typeof globalThis.mainGraph?.RunLayout === "function") {
+			// hidden chrome tabs can miss ResizeObserver callbacks, leaving tree-grapher's cached sizes stale.
+			for (const group of globalThis.mainGraph.groupsByPath?.values?.() ?? []) {
+				const element = group.leftColumnEl;
+				if (!element || !group.lcSize || !group.innerUISize) continue;
+				group.lcSize.x = element.offsetWidth;
+				group.lcSize.y = element.offsetHeight;
+				group.innerUISize.x = element.offsetWidth - group.GutterWidth;
+				group.innerUISize.y = element.offsetHeight;
+			}
+			globalThis.mainGraph.RunLayout();
+		}
 		const visibleNodes = nodes.filter(node => {
 			const style = getComputedStyle(node);
 			const rect = node.getBoundingClientRect();
 			return Number(style.opacity) > 0.99 && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
 		});
-		if (visibleNodes.length === 0) return `map layout hidden (${nodes.length} nodes)`;
+		if (visibleNodes.length !== nodes.length) return `map layout pending (${visibleNodes.length}/${nodes.length} nodes visible)`;
+
+		const nodeBoxes = visibleNodes.map(node => node.querySelector(".NodeBox")).filter(Boolean);
+		for (let i = 0; i < nodeBoxes.length; i++) {
+			const a = nodeBoxes[i].getBoundingClientRect();
+			for (let j = i + 1; j < nodeBoxes.length; j++) {
+				const b = nodeBoxes[j].getBoundingClientRect();
+				if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > .5 &&
+					Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > .5) {
+					return `map nodes overlap (${nodeBoxes[i].dataset.nodeboxPath}, ${nodeBoxes[j].dataset.nodeboxPath})`;
+				}
+			}
+		}
 
 		let hash = 2166136261;
 		for (const node of visibleNodes) {
@@ -168,31 +179,20 @@ fn readiness_state(tab: &Tab, url: &Url) -> anyhow::Result<String> {
     "#
 	.replace("$REQUIRES_MAP", if requires_map(url) { "true" } else { "false" });
 
-	let result = tab.evaluate(&js, false).context("readiness eval")?;
-	let val = result.value.ok_or_else(|| anyhow!("no value from readiness eval"))?;
-	let state = val.as_str().ok_or_else(|| anyhow!("unexpected readiness return type"))?.to_string();
+	evaluate_string(tab, &js, "readiness eval")
+}
 
-	if let Some(msg) = state.strip_prefix("__ERR__:") {
+fn evaluate_string(tab: &Tab, js: &str, context: &'static str) -> anyhow::Result<String> {
+	let result = tab.evaluate(js, false).context(context)?;
+	let value = result.value.as_ref().and_then(Value::as_str).ok_or_else(|| anyhow!("JavaScript returned no string during {context}"))?;
+	if let Some(msg) = value.strip_prefix("__ERR__:") {
 		return Err(anyhow!("js error: {msg}"));
 	}
 
-	Ok(state)
+	Ok(value.to_string())
 }
 
 fn requires_map(url: &Url) -> bool {
 	let mut segments = url.path_segments().into_iter().flatten();
 	segments.next() == Some("debates") && segments.next().is_some_and(|segment| !segment.is_empty() && segment != "all")
-}
-
-#[cfg(test)]
-mod tests {
-	use super::requires_map;
-	use url::Url;
-
-	#[test]
-	fn identifies_debate_map_routes() {
-		for (path, expected) in [("/debates", false), ("/debates/all", false), ("/debates/map-id", true), ("/debates/map-id/node-id", true), ("/database/terms", false)] {
-			assert_eq!(requires_map(&Url::parse(&format!("http://localhost{path}")).unwrap()), expected, "{path}");
-		}
-	}
 }

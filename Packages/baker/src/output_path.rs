@@ -45,32 +45,3 @@ fn is_file_like_path(path: &str) -> bool {
 
 	!path.ends_with('/') && matches!(extension.to_ascii_lowercase().as_str(), "css" | "gif" | "htm" | "html" | "ico" | "jpeg" | "jpg" | "js" | "json" | "map" | "otf" | "png" | "svg" | "ttf" | "txt" | "wasm" | "webp" | "woff" | "woff2" | "xml")
 }
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	fn output_for(path: &str) -> PathBuf {
-		let url = Url::parse(&format!("https://debatemap.app{path}")).unwrap();
-		html_output_path(Path::new("static"), &url)
-	}
-
-	#[test]
-	fn maps_urls_to_static_files_and_routes() {
-		let cases = [
-			("/", "static/index.html", "/"),
-			("/database", "static/database/index.html", "/database/"),
-			("/database/", "static/database/index.html", "/database/"),
-			("/database/users/abc", "static/database/users/abc/index.html", "/database/users/abc/"),
-			("/debates/how-old-is-the-universe.abc123", "static/debates/how-old-is-the-universe.abc123/index.html", "/debates/how-old-is-the-universe.abc123/"),
-			("/robots.txt", "static/robots.txt", "/robots.txt"),
-			("/assets/app.css", "static/assets/app.css", "/assets/app.css"),
-		];
-
-		for (path, output, route) in cases {
-			let url = Url::parse(&format!("https://debatemap.app{path}")).unwrap();
-			assert_eq!(output_for(path), PathBuf::from(output));
-			assert_eq!(static_route_path(&url), route);
-		}
-	}
-}

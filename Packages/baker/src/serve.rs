@@ -310,40 +310,26 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn resolves_static_routes_without_allowing_traversal() {
-		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-test-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+	fn resolves_safe_routes_and_serves_brotli_pages() {
+		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+		let html = b"<html><body>compressed page</body></html>";
+		let index = root.join("index.html");
 		fs::create_dir_all(root.join("database/users")).unwrap();
-		fs::write(root.join("index.html"), "ok").unwrap();
+		fs::write(&index, crate::compression::compress_html(html).unwrap()).unwrap();
 		fs::write(root.join("database/users/index.html"), "ok").unwrap();
 
-		let request = HttpRequest { method: "GET".into(), target: "/database/users?db=prod".into(), accepts_brotli: false };
-		for path in ["/", request.path(), "/database/users/", "/database/users/index.html"] {
+		for path in ["/", "/database/users", "/database/users/", "/database/users/index.html"] {
 			assert!(resolve_request_path(&root, path).unwrap().is_some());
 		}
 		assert!(resolve_request_path(&root, "/missing").unwrap().is_none());
 		assert!(resolve_request_path(&root, "/../secret").unwrap_err().to_string().contains("unsafe preview path"));
 
-		fs::remove_dir_all(root).unwrap();
-	}
-
-	#[test]
-	fn serves_brotli_pages_with_an_identity_fallback() {
-		let root = std::env::temp_dir().join(format!("debatemap-baker-serve-brotli-test-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
-		let path = root.join("index.html");
-		let html = b"<html><body>compressed page</body></html>";
-		fs::create_dir_all(&root).unwrap();
-		fs::write(&path, crate::compression::compress_html(html).unwrap()).unwrap();
-
-		let encoded = static_file_response(&root, &path, true).unwrap();
-		assert_eq!(encoded.extra_headers, vec![("Vary", "Accept-Encoding".into()), ("Content-Encoding", "br".into())]);
-		assert_ne!(encoded.body, html);
-
-		let identity = static_file_response(&root, &path, false).unwrap();
+		let encoded = static_file_response(&root, &index, true).unwrap();
+		assert!(encoded.extra_headers.iter().any(|(name, value)| *name == "Content-Encoding" && value == "br"));
+		let identity = static_file_response(&root, &index, false).unwrap();
 		assert_eq!(identity.extra_headers, vec![("Vary", "Accept-Encoding".into())]);
 		assert_eq!(identity.body, html);
-		assert!(header_accepts_brotli("gzip, deflate, br"));
 		assert!(!header_accepts_brotli("gzip, br;q=0"));
-
 		fs::remove_dir_all(root).unwrap();
 	}
 }

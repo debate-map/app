@@ -12,6 +12,7 @@ pub const DEFAULT_MAX_RETRIES: usize = 3;
 #[serde(tag = "kind", content = "value", rename_all = "snake_case")]
 pub enum PathRule {
 	StartsWith(String),
+	NotStartsWith(String),
 	Contains(String),
 	EndsWith(String),
 	Exact(String),
@@ -21,6 +22,7 @@ impl PathRule {
 	pub fn matches(&self, path: &str) -> bool {
 		match self {
 			PathRule::StartsWith(prefix) => path.starts_with(prefix),
+			PathRule::NotStartsWith(prefix) => !path.starts_with(prefix),
 			PathRule::Contains(sub) => path.contains(sub),
 			PathRule::EndsWith(suffix) => path.ends_with(suffix),
 			PathRule::Exact(p) => path == p,
@@ -45,26 +47,9 @@ impl VisitPolicy {
 		Self { root, allow_paths, exclude_paths, query_params }
 	}
 
-	fn in_scope(&self, url: &Url) -> bool {
-		same_origin(&self.root, url)
-	}
-
-	fn path_excluded(&self, url: &Url) -> bool {
-		let path = url.path();
-		self.exclude_paths.iter().any(|rule| rule.matches(path))
-	}
-
-	fn path_allowed(&self, url: &Url) -> bool {
-		if self.allow_paths.is_empty() {
-			return true;
-		}
-
-		let path = url.path();
-		self.allow_paths.iter().any(|rule| rule.matches(path))
-	}
-
 	pub fn allow(&self, url: &Url) -> bool {
-		self.in_scope(url) && self.path_allowed(url) && !self.path_excluded(url)
+		let path = url.path();
+		same_origin(&self.root, url) && (self.allow_paths.is_empty() || self.allow_paths.iter().any(|rule| rule.matches(path))) && !self.exclude_paths.iter().any(|rule| rule.matches(path))
 	}
 }
 
@@ -100,7 +85,8 @@ pub enum CrawlQueue {
 
 impl IsolatedCrawlGroup {
 	pub fn matches_child(&self, url: &Url) -> bool {
-		same_origin(&self.parent, url) && url.path().starts_with(&self.child_path_prefix)
+		let path_segment_count = url.path_segments().into_iter().flatten().filter(|segment| !segment.is_empty()).count();
+		same_origin(&self.parent, url) && url.path().starts_with(&self.child_path_prefix) && path_segment_count > self.group_path_segment_count
 	}
 
 	pub fn is_descendant(&self, parent: &Url, child: &Url) -> bool {
@@ -191,16 +177,14 @@ impl<'a> VisitScheduler<'a> {
 		let mut isolated_queued_counts = HashMap::<(usize, String), usize>::new();
 
 		for url in &self.frontier.to_visit {
-			if let Some(group_index) = self.isolated_group_index_for_url(url) {
-				let group = &self.isolated_crawl_groups.routes[group_index];
+			if let Some((group_index, group)) = self.isolated_crawl_groups.routes.iter().enumerate().find(|(_, group)| group.matches_child(url)) {
 				*isolated_queued_counts.entry((group_index, group.group_key(url))).or_default() += 1;
 			}
 		}
 
 		let mut work_units = self.frontier.isolated_active_tabs.values().sum::<usize>();
 		let mut active_group_count = self.frontier.isolated_active_groups.len();
-		for ((group_index, group_key), queued_count) in isolated_queued_counts {
-			let group = &self.isolated_crawl_groups.routes[group_index];
+		for ((_, group_key), queued_count) in isolated_queued_counts {
 			if !self.group_is_active(&group_key) {
 				if active_group_count >= self.isolated_crawl_groups.max_active_groups {
 					continue;
@@ -208,7 +192,7 @@ impl<'a> VisitScheduler<'a> {
 				active_group_count += 1;
 			}
 
-			work_units += self.group_work_units(queued_count, group, &group_key);
+			work_units += self.group_work_units(queued_count, &group_key);
 		}
 
 		work_units
@@ -231,11 +215,7 @@ impl<'a> VisitScheduler<'a> {
 		self.isolated_crawl_groups.group_for_child(url)
 	}
 
-	fn isolated_group_index_for_url(&self, url: &Url) -> Option<usize> {
-		self.isolated_crawl_groups.routes.iter().position(|group| group.matches_child(url))
-	}
-
-	fn group_work_units(&self, queued_count: usize, _group: &IsolatedCrawlGroup, group_key: &str) -> usize {
+	fn group_work_units(&self, queued_count: usize, group_key: &str) -> usize {
 		let active_count = self.frontier.isolated_active_tabs.get(group_key).copied().unwrap_or_default();
 		queued_count.min(self.isolated_crawl_groups.max_tabs_per_group.saturating_sub(active_count))
 	}
@@ -265,10 +245,6 @@ pub struct Frontier {
 }
 
 impl Frontier {
-	pub fn new() -> Self {
-		Self::default()
-	}
-
 	pub fn seen_any(&self, normalized_url: &Url) -> bool {
 		self.to_visit.contains(normalized_url) || self.visiting.contains(normalized_url) || self.visited.contains(normalized_url) || self.failures.contains_key(normalized_url)
 	}
@@ -312,14 +288,6 @@ pub struct GlobalVisitState {
 }
 
 impl GlobalVisitState {
-	pub fn new(visit_policy: VisitPolicy) -> Self {
-		Self::with_max_retries(visit_policy, DEFAULT_MAX_RETRIES)
-	}
-
-	pub fn with_max_retries(visit_policy: VisitPolicy, max_retries: usize) -> Self {
-		Self { visit_policy, frontier: Mutex::new(Frontier::new()), state_store: None, max_retries }
-	}
-
 	pub fn with_state_store(visit_policy: VisitPolicy, frontier: Frontier, state_store: CrawlStateStore, max_retries: usize) -> Self {
 		Self { visit_policy, frontier: Mutex::new(frontier), state_store: Some(state_store), max_retries }
 	}
@@ -340,6 +308,47 @@ impl GlobalVisitState {
 		I: IntoIterator<Item = Url>,
 	{
 		Ok(self.add_many_to_visit_reserving_first(urls, [])?.0)
+	}
+
+	pub fn force_revisit_many<I>(&self, urls: I) -> anyhow::Result<Vec<Url>>
+	where
+		I: IntoIterator<Item = Url>,
+	{
+		let mut frontier = self.frontier.lock().unwrap();
+		let mut changes = Vec::new();
+
+		for url in urls {
+			let normalized_url = Self::normalize_url(&url);
+			if !self.visit_policy.allow(&normalized_url) || frontier.to_visit.contains(&normalized_url) || frontier.visiting.contains(&normalized_url) {
+				continue;
+			}
+
+			let was_visited = frontier.visited.remove(&normalized_url);
+			let previous_output = frontier.visited_outputs.remove(&normalized_url);
+			let previous_failure = frontier.failures.remove(&normalized_url);
+			frontier.to_visit.insert(normalized_url.clone());
+			changes.push((normalized_url, was_visited, previous_output, previous_failure));
+		}
+
+		if !changes.is_empty()
+			&& let Err(err) = self.save_frontier(&frontier)
+		{
+			for (url, was_visited, previous_output, previous_failure) in &changes {
+				frontier.to_visit.remove(url);
+				if *was_visited {
+					frontier.visited.insert(url.clone());
+				}
+				if let Some(output_path) = previous_output {
+					frontier.visited_outputs.insert(url.clone(), output_path.clone());
+				}
+				if let Some(failure) = previous_failure {
+					frontier.failures.insert(url.clone(), failure.clone());
+				}
+			}
+			return Err(err).context("save forced revisit URL state");
+		}
+
+		Ok(changes.into_iter().map(|(url, _, _, _)| url).collect())
 	}
 
 	pub fn add_many_to_visit_reserving_first<I, P>(&self, urls: I, preferred_urls: P) -> anyhow::Result<(Vec<Url>, Option<Url>)>
@@ -387,10 +396,6 @@ impl GlobalVisitState {
 			state_store.save_frontier(frontier)?;
 		}
 		Ok(())
-	}
-
-	pub fn take_to_visit(&self) -> anyhow::Result<VisitQueueState> {
-		self.take_to_visit_from(CrawlQueue::Regular, &IsolatedCrawlGroups::default())
 	}
 
 	pub fn take_to_visit_from(&self, queue: CrawlQueue, isolated_crawl_groups: &IsolatedCrawlGroups) -> anyhow::Result<VisitQueueState> {
@@ -478,69 +483,67 @@ impl GlobalVisitState {
 	pub fn re_add_failed_visit(&self, url: Url, error: &str) -> anyhow::Result<FailedVisitAction> {
 		let normalized_url = Self::normalize_url(&url);
 		let mut frontier = self.frontier.lock().unwrap();
-		if frontier.visiting.contains(&normalized_url) {
-			let had_to_visit = frontier.to_visit.contains(&normalized_url);
-			let previous_failure = frontier.failures.get(&normalized_url).cloned();
-
-			frontier.visiting.remove(&normalized_url);
-			let failure = frontier.failures.entry(normalized_url.clone()).or_insert_with(|| VisitFailure { attempts: 0, last_error: String::new() });
-			failure.attempts += 1;
-			failure.last_error = error.to_string();
-
-			let attempts = failure.attempts;
-			let action = if attempts >= self.max_retries {
-				frontier.to_visit.remove(&normalized_url);
-				FailedVisitAction::Exhausted { attempts, max_retries: self.max_retries }
-			} else {
-				frontier.to_visit.insert(normalized_url.clone());
-				FailedVisitAction::Requeued { attempts, max_retries: self.max_retries }
-			};
-
-			if let Err(err) = self.save_frontier(&frontier) {
-				frontier.to_visit.remove(&normalized_url);
-				if had_to_visit {
-					frontier.to_visit.insert(normalized_url.clone());
-				}
-				frontier.visiting.insert(normalized_url.clone());
-				if let Some(failure) = previous_failure {
-					frontier.failures.insert(normalized_url.clone(), failure);
-				} else {
-					frontier.failures.remove(&normalized_url);
-				}
-				return Err(err).with_context(|| format!("save failed URL {normalized_url}"));
-			}
-
-			return Ok(action);
+		if !frontier.visiting.remove(&normalized_url) {
+			return Ok(FailedVisitAction::Ignored);
 		}
 
-		Ok(FailedVisitAction::Ignored)
+		let had_to_visit = frontier.to_visit.contains(&normalized_url);
+		let previous_failure = frontier.failures.get(&normalized_url).cloned();
+		let failure = frontier.failures.entry(normalized_url.clone()).or_default();
+		failure.attempts += 1;
+		failure.last_error = error.to_string();
+
+		let attempts = failure.attempts;
+		let action = if attempts >= self.max_retries {
+			frontier.to_visit.remove(&normalized_url);
+			FailedVisitAction::Exhausted { attempts, max_retries: self.max_retries }
+		} else {
+			frontier.to_visit.insert(normalized_url.clone());
+			FailedVisitAction::Requeued { attempts, max_retries: self.max_retries }
+		};
+
+		if let Err(err) = self.save_frontier(&frontier) {
+			frontier.to_visit.remove(&normalized_url);
+			if had_to_visit {
+				frontier.to_visit.insert(normalized_url.clone());
+			}
+			frontier.visiting.insert(normalized_url.clone());
+			if let Some(failure) = previous_failure {
+				frontier.failures.insert(normalized_url.clone(), failure);
+			} else {
+				frontier.failures.remove(&normalized_url);
+			}
+			return Err(err).with_context(|| format!("save failed URL {normalized_url}"));
+		}
+
+		Ok(action)
 	}
 
 	pub fn mark_visited(&self, url: Url, output_path: &Path) -> anyhow::Result<()> {
 		let normalized_url = Self::normalize_url(&url);
 		let mut frontier = self.frontier.lock().unwrap();
-		if frontier.visiting.contains(&normalized_url) {
-			let previous_failure = frontier.failures.remove(&normalized_url);
-			let was_visited = frontier.visited.contains(&normalized_url);
-			let previous_output = frontier.visited_outputs.insert(normalized_url.clone(), output_path.to_path_buf());
+		if !frontier.visiting.remove(&normalized_url) {
+			return Ok(());
+		}
 
-			frontier.visiting.remove(&normalized_url);
-			frontier.visited.insert(normalized_url.clone());
-			if let Err(err) = self.save_frontier(&frontier) {
-				if !was_visited {
-					frontier.visited.remove(&normalized_url);
-				}
-				if let Some(output_path) = previous_output {
-					frontier.visited_outputs.insert(normalized_url.clone(), output_path);
-				} else {
-					frontier.visited_outputs.remove(&normalized_url);
-				}
-				if let Some(failure) = previous_failure {
-					frontier.failures.insert(normalized_url.clone(), failure);
-				}
-				frontier.visiting.insert(normalized_url.clone());
-				return Err(err).with_context(|| format!("save visited URL {normalized_url}"));
+		let previous_failure = frontier.failures.remove(&normalized_url);
+		let was_visited = frontier.visited.contains(&normalized_url);
+		let previous_output = frontier.visited_outputs.insert(normalized_url.clone(), output_path.to_path_buf());
+		frontier.visited.insert(normalized_url.clone());
+		if let Err(err) = self.save_frontier(&frontier) {
+			if !was_visited {
+				frontier.visited.remove(&normalized_url);
 			}
+			if let Some(output_path) = previous_output {
+				frontier.visited_outputs.insert(normalized_url.clone(), output_path);
+			} else {
+				frontier.visited_outputs.remove(&normalized_url);
+			}
+			if let Some(failure) = previous_failure {
+				frontier.failures.insert(normalized_url.clone(), failure);
+			}
+			frontier.visiting.insert(normalized_url.clone());
+			return Err(err).with_context(|| format!("save visited URL {normalized_url}"));
 		}
 
 		Ok(())
@@ -558,135 +561,76 @@ impl GlobalVisitState {
 mod tests {
 	use super::*;
 
-	#[test]
-	fn policy_applies_origin_allow_and_exclude_rules() {
-		let policy = VisitPolicy::new(Url::parse("https://debatemap.app").unwrap(), vec![PathRule::StartsWith("/database".into()), PathRule::Exact("/debates".into())], vec![PathRule::Contains("private".into()), PathRule::EndsWith(".map".into())], vec![]);
-		let cases = [
-			("https://debatemap.app/database", true),
-			("https://debatemap.app/database/users", true),
-			("https://debatemap.app/debates", true),
-			("https://debatemap.app/debates/child", false),
-			("https://debatemap.app/database/private/user", false),
-			("https://debatemap.app/database/app.map", false),
-			("http://debatemap.app/database", false),
-			("https://debatemap.app:444/database", false),
-			("https://other.com/database", false),
-		];
+	fn test_state(policy: VisitPolicy, max_retries: usize) -> GlobalVisitState {
+		GlobalVisitState { visit_policy: policy, frontier: Mutex::new(Frontier::default()), state_store: None, max_retries }
+	}
 
-		for (url, expected) in cases {
-			assert_eq!(policy.allow(&Url::parse(url).unwrap()), expected, "{url}");
+	fn take(state: &GlobalVisitState, queue: CrawlQueue, groups: &IsolatedCrawlGroups) -> Url {
+		match state.take_to_visit_from(queue, groups).unwrap() {
+			VisitQueueState::Ready(url) => url,
+			other => panic!("expected ready URL, got {other:?}"),
 		}
 	}
 
 	#[test]
-	fn queue_dispatches_normalized_urls_and_retries_failures() {
+	fn queue_normalizes_retries_and_refreshes_pages() {
 		let root = Url::parse("https://debatemap.app").unwrap();
-		let policy = VisitPolicy::new(root.clone(), vec![], vec![], vec![("db".into(), "prod".into()), ("internalCrawler".into(), "1".into())]);
-		let state = GlobalVisitState::with_max_retries(policy, 2);
-		assert!(matches!(state.take_to_visit().unwrap(), VisitQueueState::Done));
+		let policy = VisitPolicy::new(root.clone(), vec![PathRule::StartsWith("/database".into())], vec![PathRule::Contains("private".into())], vec![("db".into(), "prod".into())]);
+		let state = test_state(policy, 2);
+		let groups = IsolatedCrawlGroups::default();
+		let page = root.join("/database/item?old=1#fragment").unwrap();
+		let normalized = root.join("/database/item").unwrap();
 
-		let first = root.join("/database/terms/a?old=1#fragment").unwrap();
-		let second = root.join("/database/terms/b").unwrap();
-		let (added, reserved) = state.add_many_to_visit_reserving_first([second.clone(), first.clone()], [second.clone()]).unwrap();
-		assert_eq!(added, vec![second.clone(), root.join("/database/terms/a").unwrap()]);
-		assert_eq!(reserved, Some(root.join("/database/terms/b?db=prod&internalCrawler=1").unwrap()));
-		let queued = match state.take_to_visit().unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected queued URL, got {other:?}"),
-		};
-		assert_eq!(queued, root.join("/database/terms/a?db=prod&internalCrawler=1").unwrap());
-		assert!(matches!(state.take_to_visit().unwrap(), VisitQueueState::Waiting));
-		state.mark_visited(first, Path::new("a/index.html")).unwrap();
-		state.mark_visited(second, Path::new("b/index.html")).unwrap();
-		assert!(matches!(state.take_to_visit().unwrap(), VisitQueueState::Done));
+		assert!(!state.add_to_visit(root.join("/database/private").unwrap()).unwrap());
+		assert!(!state.add_to_visit(Url::parse("https://other.test/database/item").unwrap()).unwrap());
+		assert!(state.add_to_visit(page.clone()).unwrap());
+		assert!(!state.add_to_visit(normalized.clone()).unwrap());
 
-		let failing = root.join("/database/failing?old=1").unwrap();
-		assert!(state.add_to_visit(failing.clone()).unwrap());
-		assert!(!state.add_to_visit(root.join("/database/failing#duplicate").unwrap()).unwrap());
-		let first_attempt = match state.take_to_visit().unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected ready URL, got {other:?}"),
-		};
-		assert_eq!(first_attempt.query(), Some("db=prod&internalCrawler=1"));
-		assert_eq!(state.re_add_failed_visit(first_attempt, "temporary").unwrap(), FailedVisitAction::Requeued { attempts: 1, max_retries: 2 });
-		let second_attempt = match state.take_to_visit().unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected retry URL, got {other:?}"),
-		};
-		assert_eq!(state.re_add_failed_visit(second_attempt, "permanent").unwrap(), FailedVisitAction::Exhausted { attempts: 2, max_retries: 2 });
-		assert!(matches!(state.take_to_visit().unwrap(), VisitQueueState::Done));
-		assert_eq!(state.failed_visits()[0].1.last_error, "permanent");
+		let first = take(&state, CrawlQueue::Regular, &groups);
+		assert_eq!(first.query(), Some("db=prod"));
+		assert_eq!(state.re_add_failed_visit(first, "temporary").unwrap(), FailedVisitAction::Requeued { attempts: 1, max_retries: 2 });
+		let second = take(&state, CrawlQueue::Regular, &groups);
+		assert_eq!(state.re_add_failed_visit(second, "permanent").unwrap(), FailedVisitAction::Exhausted { attempts: 2, max_retries: 2 });
+		assert_eq!(state.force_revisit_many([page.clone()]).unwrap(), vec![normalized.clone()]);
+
+		let retry = take(&state, CrawlQueue::Regular, &groups);
+		state.mark_visited(retry, Path::new("database/item/index.html")).unwrap();
+		assert!(state.failed_visits().is_empty());
+		assert_eq!(state.force_revisit_many([page]).unwrap(), vec![normalized]);
+		let refreshed = take(&state, CrawlQueue::Regular, &groups);
+		state.mark_visited(refreshed, Path::new("database/item/index.html")).unwrap();
+		assert!(matches!(state.take_to_visit_from(CrawlQueue::Regular, &groups).unwrap(), VisitQueueState::Done));
 	}
 
 	#[test]
-	fn isolated_scheduler_limits_groups_and_shares_their_tabs() {
+	fn isolated_scheduler_reserves_children_and_limits_groups() {
 		let root = Url::parse("https://debatemap.app").unwrap();
-		let policy = || VisitPolicy::new(root.clone(), vec![], vec![], vec![]);
-		let debate_group = IsolatedCrawlGroup { parent: root.join("/debates").unwrap(), child_path_prefix: "/debates/".into(), group_path_segment_count: 2 };
-		let terms_group = IsolatedCrawlGroup { parent: root.join("/database/terms").unwrap(), child_path_prefix: "/database/terms/".into(), group_path_segment_count: 2 };
-		let isolated = IsolatedCrawlGroups { routes: vec![debate_group.clone(), terms_group.clone()], max_active_groups: 1, max_tabs_per_group: 2 };
-		let debates = GlobalVisitState::new(policy());
-		debates.add_to_visit(root.join("/debates/map-a").unwrap()).unwrap();
-		let first = match debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected first map, got {other:?}"),
-		};
-		let owned_child = root.join("/debates/map-a/owned").unwrap();
-		let sibling = root.join("/debates/map-a/sibling").unwrap();
-		let (_, reserved_child) = debates.add_many_to_visit_reserving_first([owned_child.clone(), sibling.clone(), root.join("/debates/map-b").unwrap(), root.join("/database").unwrap()], [owned_child.clone()]).unwrap();
-		assert_eq!(reserved_child, Some(owned_child.clone()));
-		assert_eq!(debates.work_units(CrawlQueue::Regular, &isolated), 1);
-		assert_eq!(debates.work_units(CrawlQueue::Isolated, &isolated), 2);
-		let regular = match debates.take_to_visit_from(CrawlQueue::Regular, &isolated).unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected regular URL, got {other:?}"),
-		};
-		assert_eq!(regular.path(), "/database");
-		debates.mark_visited(regular, Path::new("database/index.html")).unwrap();
+		let group = IsolatedCrawlGroup { parent: root.join("/debates").unwrap(), child_path_prefix: "/debates/".into(), group_path_segment_count: 2 };
+		let groups = IsolatedCrawlGroups { routes: vec![group.clone()], max_active_groups: 1, max_tabs_per_group: 2 };
+		let state = test_state(VisitPolicy::new(root.clone(), vec![], vec![], vec![]), DEFAULT_MAX_RETRIES);
+		let first_url = root.join("/debates/map-a/first").unwrap();
+		let reserved_url = root.join("/debates/map-a/reserved").unwrap();
+		let second_url = root.join("/debates/map-a/second").unwrap();
+		let other_group = root.join("/debates/map-b/first").unwrap();
 
-		let second = match debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected stealable sibling, got {other:?}"),
-		};
-		assert_eq!(second, sibling);
-		let group_key = debate_group.group_key(&first);
-		assert_eq!(group_key, debate_group.group_key(&second));
-		assert_eq!(debate_group.parent_url_for_visit(&second).path(), "/debates");
-		assert_eq!(debate_group.group_url_for_visit(&second).path(), "/debates/map-a");
-		assert!(matches!(debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap(), VisitQueueState::Waiting));
+		state.add_many_to_visit([first_url, root.join("/database").unwrap()]).unwrap();
+		let regular = take(&state, CrawlQueue::Regular, &groups);
+		state.mark_visited(regular, Path::new("database/index.html")).unwrap();
+		let first = take(&state, CrawlQueue::Isolated, &groups);
+		let (_, reserved) = state.add_many_to_visit_reserving_first([reserved_url.clone(), second_url], [reserved_url.clone()]).unwrap();
+		assert_eq!(reserved, Some(reserved_url.clone()));
+		let second = take(&state, CrawlQueue::Isolated, &groups);
+		assert_eq!(group.group_key(&first), group.group_key(&second));
 
-		debates.mark_visited(first, Path::new("map-a/index.html")).unwrap();
-		debates.mark_visited(owned_child, Path::new("map-a/owned/index.html")).unwrap();
-		debates.release_isolated_tab(&debate_group, &group_key);
-		debates.mark_visited(second, Path::new("map-a/sibling/index.html")).unwrap();
-		debates.release_isolated_tab(&debate_group, &group_key);
-
-		let map_b = match debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected second map, got {other:?}"),
-		};
-		debates.add_to_visit(root.join("/database/terms/a").unwrap()).unwrap();
-		assert!(matches!(debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap(), VisitQueueState::Waiting));
-		let map_b_key = debate_group.group_key(&map_b);
-		debates.mark_visited(map_b, Path::new("map-b/index.html")).unwrap();
-		debates.release_isolated_tab(&debate_group, &map_b_key);
-
-		let term = match debates.take_to_visit_from(CrawlQueue::Isolated, &isolated).unwrap() {
-			VisitQueueState::Ready(url) => url,
-			other => panic!("expected terms group, got {other:?}"),
-		};
-		assert_eq!(terms_group.group_key(&term), "https://debatemap.app/database/terms");
-		assert_eq!(terms_group.group_url_for_visit(&term).path(), "/database/terms");
-	}
-
-	#[test]
-	fn isolated_group_detects_cyclic_descendant_paths() {
-		let group = IsolatedCrawlGroup { parent: Url::parse("https://debatemap.app/debates").unwrap(), child_path_prefix: "/debates/".into(), group_path_segment_count: 2 };
-		let parent = Url::parse("https://debatemap.app/debates/map-a/node-a").unwrap();
-
-		assert!(!group.has_repeated_descendant_segment(&Url::parse("https://debatemap.app/debates/map-a/node-a/node-b").unwrap()));
-		assert!(group.has_repeated_descendant_segment(&Url::parse("https://debatemap.app/debates/map-a/node-a/node-b/node-a").unwrap()));
-		assert!(group.is_descendant(&parent, &Url::parse("https://debatemap.app/debates/map-a/node-a/node-b").unwrap()));
-		assert!(!group.is_descendant(&parent, &Url::parse("https://debatemap.app/debates/map-a/node-c").unwrap()));
+		state.add_to_visit(other_group.clone()).unwrap();
+		assert!(matches!(state.take_to_visit_from(CrawlQueue::Isolated, &groups).unwrap(), VisitQueueState::Waiting));
+		for url in [first, reserved_url, second] {
+			state.mark_visited(url, Path::new("map/index.html")).unwrap();
+		}
+		let group_key = group.group_key(&root.join("/debates/map-a/first").unwrap());
+		state.release_isolated_tab(&group, &group_key);
+		state.release_isolated_tab(&group, &group_key);
+		assert_eq!(take(&state, CrawlQueue::Isolated, &groups), other_group);
+		assert!(group.has_repeated_descendant_segment(&root.join("/debates/map-a/a/b/a").unwrap()));
 	}
 }

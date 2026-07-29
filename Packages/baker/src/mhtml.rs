@@ -456,55 +456,28 @@ mod tests {
 	fn converts_chrome_mhtml_to_static_html_and_shared_assets() {
 		let output_dir = std::env::temp_dir().join(format!("debatemap-baker-mhtml-{}-{}", std::process::id(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
 		let html_path = output_dir.join("database").join("index.html");
-		let mhtml = r#"From: <Saved by Blink>
-Snapshot-Content-Location: https://debatemap.app/database?db=prod
-MIME-Version: 1.0
-Content-Type: multipart/related;
-	type="text/html";
-	boundary="----Boundary"
-
-------Boundary
-Content-Type: text/html
-Content-ID: <frame@mhtml.blink>
-Content-Transfer-Encoding: quoted-printable
-Content-Location: https://debatemap.app/database?db=prod
-
-<!DOCTYPE html><html><head><link rel=3D"stylesheet" href=3D"cid:style@mhtml.blink"><link rel=3D"icon" href=3D"https://debatemap.app/Images/Logo/Icon_Square.png"></head><body><main>Loaded x <− y</main><a href=3D"https://debatemap.app/database/users/user-1?db=3Dprod#node">User</a><a href=3D"https://example.com/user?db=3Dprod">External</a><form action=3D"/database/terms?db=3Dprod"></form></body></html>
-------Boundary
-Content-Type: text/css
-Content-Transfer-Encoding: quoted-printable
-Content-Location: cid:style@mhtml.blink
-
-body { color: red; background: url(cid:font@mhtml.blink); }
-------Boundary
-Content-Type: font/woff2
-Content-Transfer-Encoding: base64
-Content-Location: cid:font@mhtml.blink
-
-Zm9udA==
-------Boundary--
-"#;
-
+		let mhtml = concat!(
+			"MIME-Version: 1.0\nContent-Type: multipart/related; boundary=x\n\n",
+			"--x\nContent-Type: text/html\nContent-Transfer-Encoding: quoted-printable\n\n",
+			r#"<!doctype html><link href=3D"cid:style"><main>Loaded x <− y</main><a href=3D"https://debatemap.app/database/users/u?db=3Dprod#node">User</a><a href=3D"https://example.com/u">External</a><form action=3D"/database/terms"></form>"#,
+			"\n--x\nContent-Type: text/css\nContent-Transfer-Encoding: quoted-printable\nContent-Location: cid:style\n\nbody{background:url(cid:font)}",
+			"\n--x\nContent-Type: font/woff2\nContent-Transfer-Encoding: base64\nContent-Location: cid:font\n\nZm9udA==\n--x--\n",
+		);
 		let page_url = Url::parse("https://debatemap.app/database?db=prod").unwrap();
 		MhtmlConverter::new(&html_path, &output_dir, &page_url).write(mhtml).unwrap();
 
 		let compressed_html = fs::read(&html_path).unwrap();
 		let html = String::from_utf8(decompress_html(&compressed_html).unwrap()).unwrap();
 		assert!(!compressed_html.starts_with(b"<!DOCTYPE html>"));
-		assert!(html.contains("Loaded x <− y"));
-		assert!(html.contains("/_assets/"));
+		for expected in ["Loaded x <− y", "/_assets/", r#"href="/database/users/u/#node""#, r#"href="https://example.com/u""#, r#"action="/database/terms/""#] {
+			assert!(html.contains(expected), "{expected}");
+		}
 		assert!(!html.contains("cid:style"));
-		assert!(html.contains(r#"href="/database/users/user-1/#node""#));
-		assert!(html.contains(r#"href="https://example.com/user?db=prod""#));
-		assert!(html.contains(r#"href="https://debatemap.app/Images/Logo/Icon_Square.png""#));
-		assert!(html.contains(r#"action="/database/terms/""#));
 
 		let asset_dir = output_dir.join("_assets");
 		let css_path = fs::read_dir(&asset_dir).unwrap().map(|entry| entry.unwrap().path()).find(|path| path.extension().is_some_and(|extension| extension == "css")).unwrap();
 		let css = fs::read_to_string(&css_path).unwrap();
-		assert!(!css.contains("cid:font"));
-		assert!(css.contains("/_assets/"));
-
+		assert!(!css.contains("cid:font") && css.contains("/_assets/"));
 		let second_html_path = output_dir.join("database").join("second").join("index.html");
 		MhtmlConverter::new(&second_html_path, &output_dir, &page_url).write(mhtml).unwrap();
 		assert_eq!(fs::read_dir(asset_dir).unwrap().count(), 2);

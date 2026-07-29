@@ -248,58 +248,47 @@ fn now_nanos() -> u128 {
 mod tests {
 	use super::*;
 
-	fn signature() -> CrawlConfigSignature {
+	fn signature(start_path: &str) -> CrawlConfigSignature {
 		CrawlConfigSignature {
 			output_format_version: crate::compression::OUTPUT_FORMAT_VERSION,
 			root_url: "https://debatemap.app/".into(),
-			start_urls: vec!["https://debatemap.app/database".into()],
-			allow_paths: vec![PathRule::StartsWith("/database".into())],
+			start_urls: vec![format!("https://debatemap.app{start_path}")],
+			allow_paths: vec![],
 			exclude_paths: vec![],
-			query_params: vec![("db".into(), "prod".into())],
+			query_params: vec![],
 			isolated_crawl_groups: vec![],
 			max_retries: 3,
 		}
 	}
 
-	fn temp_output_dir(name: &str) -> PathBuf {
-		std::env::temp_dir().join(format!("debatemap-baker-{name}-{}-{}", std::process::id(), now_nanos()))
-	}
-
 	#[test]
 	fn resume_reconciles_the_frontier() {
-		let output_dir = temp_output_dir("resume");
-		let interrupted = Url::parse("https://debatemap.app/database/interrupted").unwrap();
-		let failed = Url::parse("https://debatemap.app/database/failed").unwrap();
-		let ready = Url::parse("https://debatemap.app/database/ready").unwrap();
-		let missing = Url::parse("https://debatemap.app/database/missing").unwrap();
+		let output_dir = std::env::temp_dir().join(format!("debatemap-baker-resume-{}-{}", std::process::id(), now_nanos()));
+		let url = |path| Url::parse(&format!("https://debatemap.app{path}")).unwrap();
+		let (interrupted, failed, ready, missing) = (url("/interrupted"), url("/failed"), url("/ready"), url("/missing"));
 		let ready_output = html_output_path(&output_dir, &ready);
 		fs::create_dir_all(ready_output.parent().unwrap()).unwrap();
 		fs::write(&ready_output, "page").unwrap();
 
-		let mut frontier = Frontier::new();
+		let mut frontier = Frontier::default();
 		frontier.visiting.insert(interrupted.clone());
 		frontier.failures.insert(failed.clone(), VisitFailure { attempts: 3, last_error: "permanent failure".into() });
 		frontier.visited.extend([ready.clone(), missing.clone()]);
 		frontier.visited_outputs.insert(ready.clone(), PathBuf::from("old/ready.html"));
 		frontier.visited_outputs.insert(missing.clone(), PathBuf::from("old/missing.html"));
 
-		let config = signature();
+		let config = signature("/database");
 		let store = CrawlStateStore::start_fresh(&output_dir, config.clone()).unwrap();
 		store.save_frontier(&frontier).unwrap();
-
-		let (_store, resumed) = CrawlStateStore::resume(&output_dir, config.clone()).unwrap();
+		let (_, resumed) = CrawlStateStore::resume(&output_dir, config).unwrap();
 		assert!(resumed.visiting.is_empty());
 		assert!(resumed.to_visit.is_superset(&HashSet::from([interrupted, failed.clone(), missing.clone()])));
 		assert_eq!(resumed.failures.get(&failed), Some(&VisitFailure { attempts: 0, last_error: "permanent failure".into() }));
 		assert!(resumed.visited.contains(&ready));
 		assert!(!resumed.visited.contains(&missing));
 		assert_eq!(resumed.visited_outputs.get(&ready), Some(&ready_output.strip_prefix(&output_dir).unwrap().to_path_buf()));
-
-		let mut changed_config = config;
-		changed_config.start_urls.push("https://debatemap.app/database/other".into());
-		let err = CrawlStateStore::resume(&output_dir, changed_config).err().unwrap();
-		assert!(err.to_string().contains("different crawl config"));
-
+		let mismatch = CrawlStateStore::resume(&output_dir, signature("/other")).err().unwrap();
+		assert!(mismatch.to_string().contains("different crawl config"));
 		fs::remove_dir_all(output_dir).unwrap();
 	}
 }
