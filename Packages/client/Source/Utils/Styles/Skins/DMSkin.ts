@@ -64,10 +64,12 @@ export class DMSkin extends Skin {
 		return `
 			${styleFixesFromWVC}
 			
-			a:not(.noMatch) {
+			/* Keep the skin colors stronger than Main.scss's fallback link colors even
+			when Chrome's MHTML snapshot serializes this runtime style before app.css. */
+			html a:not(.noMatch) {
 				color: hsla(120,100%,25%,1)
 			}
-			a:not(.noMatch):hover {
+			html a:not(.noMatch):hover {
 				color: hsla(120,100%,30%,1)
 			}
 			.useLightText a:not(.noMatch) {
