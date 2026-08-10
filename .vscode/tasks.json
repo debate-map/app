@@ -3,9 +3,9 @@
 	"tasks": [
 		// common
 		{
-			"label": "## common.tsc (typecheck)",
+			"label": "## jsCommon.tsc (typecheck)",
 			"type": "shell",
-			"command": "npm start common.tsc",
+			"command": "npm start jsCommon.tsc",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
