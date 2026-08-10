@@ -3,9 +3,10 @@ import {CE, E, RemoveCircularLinks, ToJSON, emptyArray} from "js-vextensions";
 import {ObservableMap, ObservableSet, _getAdministration, configure, observable, onReactionError, reaction} from "mobx";
 import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink";
 import {observer} from "mobx-react";
-import type {ObservableObjectAdministration} from "mobx/dist/internal"; // for some reason, webpack breaks on actual/runtime imports of this (for production builds), so only import types
+import {type ObservableObjectAdministration} from "mobx/dist/internal"; // for some reason, webpack breaks on actual/runtime imports of this (for production builds), so only import types
 import {EnsureClassProtoRenderFunctionIsWrapped} from "react-vextensions";
 import {HandleError} from "../General/Errors.js";
+import {isObservableMap, isObservableSet, $mobx} from "mobx";
 //import {getAdministration, ObservableObjectAdministration, storedAnnotationsSymbol} from "mobx/dist/internal";
 /*export function RunInAction(name: string, action: ()=>any) {
 	 Object.defineProperty(action, "name", {value: name});
@@ -233,12 +234,22 @@ export function GetMirrorOfMobXTree<T>(mobxTree: T, opt = new GetMirrorOfMobXTre
 
 /** Wrapper around _getAdministration that returns null when encountering a non-mobx object, rather than erroring. */
 export function GetAdministration_Safe(possibleMobXTree: any) {
-	try {
-		//return mobxTree[$mobx];
+	/*try {
 		return _getAdministration(possibleMobXTree) as ObservableObjectAdministration;
 	} catch (ex) {
 		return null;
-	}
+	}*/
+
+	const thing = possibleMobXTree; // alias to match mobx getAdministration function
+	// for this case, return null instead of mobx's default (throwing an error)
+	if (!thing) return null;
+	// property-branch commented here; not necessary because we already handle key-getting for `ObservableMap`s
+	//if (property !== undefined) return getAdministration(getAtom(thing, property))
+	// commented for now, because newer mobx versions don't expose these
+	//if (isAtom(thing) || isComputedValue(thing) || isReaction(thing)) return thing
+	if (isObservableMap(thing) || isObservableSet(thing)) return thing
+	if (thing[$mobx]) return thing[$mobx];
+	return null;
 }
 
 export function StartUpdatingMirrorOfMobXTree(mobxTree: any, tree_plainMirror: any, opt = new GetMirrorOfMobXTree_Options()) {
