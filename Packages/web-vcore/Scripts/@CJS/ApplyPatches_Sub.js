@@ -65,7 +65,7 @@ for (const patchFile of fs.readdirSync(PathFromWVC("patches"))) {
 	}
 	//console.log("Patch-apply result:", result);
 }
-if (skippedPatches) {
+if (skippedPatches.length) {
 	console.log("Skipped the following patch-files (since found at wrong level):", skippedPatches);
 }
 

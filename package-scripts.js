@@ -84,7 +84,7 @@ Object.assign(scripts, {
 		// helps for spotting typescript errors in the "Packages/js-common" (client.dev script can work too, but it's nice to have one just for errors in "common")
 		// (not really useful anymore; just use [edit: now non-existent] app-server.dev instead)
 		//tsc: "cd Packages/js-common && tsc --noEmit",
-		tsc: "tsc --noEmit --project Packages/js-common/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
+		tsc: "tsc --noEmit --project Packages/js-common/tsconfig.json --watch", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
 });
 Object.assign(scripts, {

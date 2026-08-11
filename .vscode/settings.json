@@ -71,5 +71,8 @@
 	// maybe use these in the future, in place of the "-Awarnings" flag in config.toml and Dockerfile
 	/*"rust-analyzer.diagnostics.warningsAsHint": [],
 	"rust-analyzer.diagnostics.warningsAsInfo": [],*/
-	"rust-analyzer.diagnostics.disabled": ["unused_braces"],
+	"rust-analyzer.diagnostics.disabled": [
+		"unused_braces"
+	],
+	"js/ts.tsdk.path": "./node_modules/typescript/lib",
 }

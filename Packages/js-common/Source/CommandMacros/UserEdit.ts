@@ -5,9 +5,10 @@ export function UserEdit(targetClass: typeof Command) {
 	const Validate_old = targetClass.prototype["Validate"];
 	targetClass.prototype["Validate"] = function() {
 		const result = Validate_old.apply(this);
-		const user = GetUser(this.userInfo.id);
+		const this_ = this as Command<any, any> & {user_oldEditCount?: number};
+		const user = GetUser(this_.userInfo.id);
 		if (user) {
-			this.user_oldEditCount = user.edits ?? 0;
+			this_.user_oldEditCount = user.edits ?? 0;
 		}
 		return result;
 	};
@@ -15,9 +16,10 @@ export function UserEdit(targetClass: typeof Command) {
 	const DeclareDBUpdates_old = targetClass.prototype.DeclareDBUpdates;
 	targetClass.prototype.DeclareDBUpdates = function(db) {
 		DeclareDBUpdates_old.call(this, db);
-		if (this.user_oldEditCount != null) {
-			db.set(dbp`users/${this.userInfo.id}/.edits`, this.user_oldEditCount + 1);
-			db.set(dbp`users/${this.userInfo.id}/.lastEditAt`, Date.now());
+		const this_ = this as Command<any, any> & {user_oldEditCount?: number};
+		if (this_.user_oldEditCount != null) {
+			db.set(dbp`users/${this_.userInfo.id}/.edits`, this_.user_oldEditCount + 1);
+			db.set(dbp`users/${this_.userInfo.id}/.lastEditAt`, Date.now());
 		}
 	};
 }

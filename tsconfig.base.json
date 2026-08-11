@@ -12,7 +12,8 @@
 		"lib": [
 			"es6",
 			"es5",
-			"dom"
+			"dom",
+			"ESNext"
 		],
 		"jsx": "react",
 		"noImplicitAny": false,
@@ -29,11 +30,13 @@
 		//"strictBindCallApply": true,
 		"strictNullChecks": true,
 		//"strictFunctionTypes": true,
-		//"strictPropertyInitialization": true,
+		// TS 7 enables strictPropertyInitialization by default; explicitly disable it, since the project relies on the
+		// "declare field, assign in Validate()/decorator" pattern (which is also what the commented-out line below documents).
+		"strictPropertyInitialization": false,
 
 		// modules/paths
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"composite": true,
 		"rootDir": ".",
 		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules

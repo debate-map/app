@@ -199,7 +199,7 @@
 			"isBackground": true,
 			"group": "build"
 		},*/
-		{
+		/*{
 			"label": "bridge-to-kubernetes.resource [not yet working]",
 			"type": "bridge-to-kubernetes.resource",
 			"resource": "dm-app-server",
@@ -210,6 +210,6 @@
 			"targetCluster": "Main_1",
 			"targetNamespace": "default",
 			"useKubernetesServiceEnvironmentVariables": false
-		},
+		},*/
 	]
 }
