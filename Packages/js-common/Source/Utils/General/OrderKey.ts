@@ -24,7 +24,7 @@ export class OrderKey {
 			OrderKey.validate(key);
 			return null;
 		} catch (ex) {
-			return ex.toString(); //.replace("Error: ", "");
+			return String(ex); //.replace("Error: ", "");
 		}
 	}
 

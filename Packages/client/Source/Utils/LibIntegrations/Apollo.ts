@@ -4,7 +4,8 @@ import {Client, createClient} from "graphql-ws";
 import {store} from "Store";
 import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, NormalizedCacheObject, split} from "@apollo/client";
+import {ApolloClient, ApolloLink, from, gql, HttpLink, split} from "@apollo/client";
+import type {FetchResult} from "@apollo/client/link";
 import {getMainDefinition} from "@apollo/client/utilities/index.js";
 import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
 import {onError} from "@apollo/client/link/error/index.js";
@@ -47,7 +48,7 @@ export let wsClient_connectCount = 0; // export, so can check with console comma
 let wsLink: GraphQLWsLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
-export let apolloClient: ApolloClient<NormalizedCacheObject>;
+export let apolloClient: ApolloClient;
 
 export function InitApollo() {
 	httpLink = new HttpLink({
@@ -162,7 +163,7 @@ export function InitApollo() {
 				fetchPolicy: "no-cache",
 				errorPolicy: "all",
 			},
-		} as DefaultOptions,
+		},
 	});
 
 	// Websocket doesn't have auth-data attached quite yet (happens in onConnected/onReconnected), but send user-data to MGL immediately anyway.
@@ -195,13 +196,8 @@ export async function AttachUserJWTToWebSocketConnection() {
 			},
 			// By providing an error-handler function, we prevent apollo from turning the gql-error into a "full-fledged error" -- which would trigger an on-screen error-message.
 			// In this case, we don't want it to trigger an on-screen error-message, because the verification failure is likely benign. For example, it can happen when changing the "?db=[dev/prod]" url-flag.
-			(err: ApolloError)=>{
-				// tell global gql-error-handler (seen above) to not handle this error; that way we can provide a more helpful error-message here, without two errors being logged
-				const innerError = err.graphQLErrors?.[0]; // ts-def lies; graphQLErrors is null in some cases!
-				if (innerError) innerError["ignoreInGlobalGQLErrorHandler"] = true;
-
-				console.error(`Error attaching auth-data jwt to websocket connection; you'll likely need to sign-in again. This is likely benign, eg. when changing the "?db=[dev/prod]" url-flag. @error:`, err);
-				//if (innerError) SendErrorToSentry(innerError);
+		(err: Error)=>{
+			console.error(`Error attaching auth-data jwt to websocket connection; you'll likely need to sign-in again. This is likely benign, eg. when changing the "?db=[dev/prod]" url-flag. @error:`, err);
 			},
 		);
 	});

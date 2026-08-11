@@ -1,4 +1,5 @@
-import {gql, useQuery} from "@apollo/client";
+import {gql} from "@apollo/client";
+import {useQuery} from "@apollo/client/react";
 import {store} from "Store";
 import {E} from "js-vextensions";
 import React, {useState} from "react";

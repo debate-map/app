@@ -4,7 +4,7 @@ import {store} from "Store";
 import {Observer} from "web-vcore";
 import React, {useState} from "react";
 import gql from "graphql-tag";
-import {useMutation, useSubscription} from "@apollo/client";
+import {useMutation, useSubscription} from "@apollo/client/react";
 import {ShowMessageBox} from "react-vmessagebox";
 
 export class MigrationLogEntry {

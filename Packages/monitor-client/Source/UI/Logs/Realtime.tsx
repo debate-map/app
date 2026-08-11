@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {store} from "Store";
 import {LogGroup} from "Store/main/logs/LogGroup";
 import {Observer} from "web-vcore";
-import {useSubscription} from "@apollo/client";
+import {useSubscription} from "@apollo/client/react";
 import {observer} from "mobx-react";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";

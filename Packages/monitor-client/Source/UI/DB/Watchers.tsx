@@ -4,7 +4,7 @@ import {store} from "Store";
 import {ES, Observer} from "web-vcore";
 import React, {useState} from "react";
 import gql from "graphql-tag";
-import {useMutation, useQuery, useSubscription} from "@apollo/client";
+import {useMutation, useQuery, useSubscription} from "@apollo/client/react";
 import {ShowMessageBox} from "react-vmessagebox";
 import {observer} from "mobx-react";
 import {ScrollView} from "react-vscrollview";

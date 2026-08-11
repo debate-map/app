@@ -1,6 +1,7 @@
 import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, DMap, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep, Subscription, Notification, AddSubscriptionInput, GetNodeSubscription, MeID, SubscriptionLevel, GetSubscriptionLevel} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
-import {FetchResult, gql} from "@apollo/client";
+import {gql} from "@apollo/client";
+import type {FetchResult} from "@apollo/client/link";
 
 // standardized add/update/delete commands
 // ==========

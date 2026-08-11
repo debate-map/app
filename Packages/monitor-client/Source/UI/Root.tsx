@@ -5,7 +5,7 @@ import {store} from "Store";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {MainSkin} from "Utils/Styles/MainSkin";
 import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, NotificationsUI, Observer, RunInAction} from "web-vcore";
-import {ApolloProvider} from "@apollo/client";
+import {ApolloProvider} from "@apollo/client/react";
 import chroma from "chroma-js";
 import {Clone} from "js-vextensions";
 import {AsyncTrunk} from "mobx-sync";

@@ -133,6 +133,11 @@ export const buildConfig = options=>{
 										syntax: "typescript",
 										decorators: true,
 									},
+									transform: {
+										// use Stage 3 (TC39) decorators, matching the project's tsconfig (which uses mobx 7's accessor-decorators)
+										legacyDecorator: false,
+										decoratorVersion: "2023-11",
+									},
 								},
 							},
 						},

@@ -14,7 +14,7 @@ import {ColorPickerBox, Column, Text} from "react-vcomponents";
 import {VMenuLayer} from "react-vmenu";
 import {MessageBoxLayer} from "react-vmessagebox";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
-import {ApolloProvider} from "@apollo/client";
+import {ApolloProvider} from "@apollo/client/react";
 import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";

@@ -1,5 +1,5 @@
 export function DMCommon_InServer() {
-	return typeof global != "undefined";
+	return typeof globalThis != "undefined";
 }
 export function DMCommon_InFrontend() {
 	//return typeof window != "undefined";

@@ -446,8 +446,9 @@ export const GetNodeDisplayTextFromAttachment = CreateAccessor((node: NodeL2, ra
 				const dom = window["$"](html).children(".katex-html");
 				result = dom.text();
 			} catch (ex) {
-				if (ex.message.startsWith("KaTeX parse error: ")) {
-					return ex.message.replace(/^KaTeX/, "LaTeX");
+				const ex_ = ex as Error;
+				if (ex_.message.startsWith("KaTeX parse error: ")) {
+					return ex_.message.replace(/^KaTeX/, "LaTeX");
 				}
 			}
 		}

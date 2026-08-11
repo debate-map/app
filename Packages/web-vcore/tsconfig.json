@@ -3,7 +3,7 @@
 		// general
 		"sourceMap": true,
 		//"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		//"maxNodeModulesJsDepth": 1,
 
 		// temp (while waiting for mobx, react-datetime, etc. to update to fully correct react-19 typing support)
@@ -13,15 +13,15 @@
 		//"target": "es2015",
 		//"target": "esnext", // babel targets es2015 (ie. transpiles our code to it), so it's fine for TS to target es-next
 		"target": "ES2018", // need es2018 for ts-loader (it doesn't understand esnext)
-		/*"lib": [
+		"lib": [
 			"es5",
 			"es6",
-			"ESNext",
-			"dom"
-		],*/
+			"dom",
+			"ESNext"
+		],
 		//"allowJs": true,
 		"jsx": "react",
-		"experimentalDecorators": true,
+		// (moved to Stage 3 decorators; see repo-root tsconfig.base.json)
 		"allowSyntheticDefaultImports": true,
 		//"declaration": true,
 		//"declarationDir": "Dist",
@@ -39,25 +39,26 @@
 		//"strictBindCallApply": true,
 		"strictNullChecks": true,
 		//"strictFunctionTypes": true,
-		//"strictPropertyInitialization": true,
+		// TS 7 enables strictPropertyInitialization by default; disable it (matches repo-root tsconfig.base.json)
+		"strictPropertyInitialization": false,
 
 		// modules/paths
 		"composite": true,
 		"rootDir": "Source",
-		"baseUrl": "Source", // keep commented; this way, we remember to always use relative paths (needed for in-node-modules typescript type-resolving)
+		//"baseUrl": "Source", // (removed in TS 7) keep commented; this way, we remember to always use relative paths (needed for in-node-modules typescript type-resolving)
 		"outDir": "Dist",
 		"declarationMap": true,
-		"paths": { // ("paths" is relative to "baseUrl")
+		"paths": { // ("paths" is relative to the file's folder)
 			/*"*": [
 				"../node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
 				"*"
 			],*/
 			// remove @types/node and such (conflicts with typescript web definitions)
-			"@types/node": ["Typings/empty.d.ts"],
+			"@types/node": ["./Typings/empty.d.ts"],
 			// remove @types/react/global.d.ts, as it breaks the auto-import-finder for react-vcomponents/Text
-			"react/global.d.ts": ["Typings/empty.d.ts"],
-			"react-vextensions/node_modules/react/global.d.ts": ["Typings/empty.d.ts"],
-			"react-vcomponents/node_modules/react/global.d.ts": ["Typings/empty.d.ts"]
+			"react/global.d.ts": ["./Typings/empty.d.ts"],
+			"react-vextensions/node_modules/react/global.d.ts": ["./Typings/empty.d.ts"],
+			"react-vcomponents/node_modules/react/global.d.ts": ["./Typings/empty.d.ts"]
 		},
 	},
 	//"files": ["Source/index.ts"],

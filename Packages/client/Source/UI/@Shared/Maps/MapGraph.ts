@@ -5,7 +5,7 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
 import {AssertWarn, GetPercentFromXToY} from "js-vextensions";
 import {CatchBail, CreateAccessor} from "mobx-graphlink";
-import {comparer} from "mobx";
+import {compareShallow} from "mobx";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetPlaybackEffects, GetVisiblePathsAfterEffects} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants.js";
@@ -35,7 +35,7 @@ export const RevealPathsIncludesNode = (revealPaths: string[], nodePath: string)
 	return revealPaths.Any(a=>a.startsWith(nodePath));
 };
 
-export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: comparer.shallow}, ()=>{
+export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compareShallow}, ()=>{
 	const playback = GetPlaybackInfo();
 	if (playback == null) return null;
 	const steps = GetTimelineSteps(playback.timeline.id);

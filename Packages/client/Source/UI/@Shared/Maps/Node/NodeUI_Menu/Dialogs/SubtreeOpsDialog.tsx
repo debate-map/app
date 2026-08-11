@@ -5,7 +5,7 @@ import {InfoButton, RunInAction_Set} from "web-vcore";
 import {GetEntries} from "js-vextensions";
 import {Button, Column, Row, RowLR, Select, Spinner, Text} from "react-vcomponents";
 import {BoxController} from "react-vmessagebox";
-import {useQuery} from "@apollo/client";
+import {useQuery} from "@apollo/client/react";
 import {ExportRetrievalMethod} from "../../../../../../Store/main/maps.js";
 import {MI_SharedProps} from "../../NodeUI_Menu.js";
 import {SubtreeOpsUI_Export_Left, SubtreeOpsUI_Export_Right} from "./SubtreeOps/SubtreeOpsUI_Export.js";

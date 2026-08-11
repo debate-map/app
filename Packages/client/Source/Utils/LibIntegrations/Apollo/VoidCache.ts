@@ -1,7 +1,7 @@
-import {ApolloCache, NormalizedCacheObject, Cache} from "@apollo/client";
+import {ApolloCache} from "@apollo/client/cache";
 
 const emptyCacheObj = {};
-export class VoidCache extends ApolloCache<NormalizedCacheObject> {
+export class VoidCache extends ApolloCache {
 	read(options) { return null; }
 	write(options) { return undefined; }
 	diff(options) { return {}; }

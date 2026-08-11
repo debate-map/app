@@ -1,4 +1,5 @@
-import {gql, useSubscription} from "@apollo/client";
+import {gql} from "@apollo/client";
+import {useSubscription} from "@apollo/client/react";
 import {observer_mgl} from "mobx-graphlink";
 
 export const LINK_PRESERVER_SUBSCRIPTION = gql`

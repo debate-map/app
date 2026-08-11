@@ -3,7 +3,8 @@ import React, {useState} from "react";
 import {store} from "Store";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {CopyText, Observer} from "web-vcore";
-import {gql, useQuery} from "@apollo/client";
+import {gql} from "@apollo/client";
+import {useQuery} from "@apollo/client/react";
 import {Button, CheckBox, Column, Row, Text, TextInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 

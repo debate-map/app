@@ -1,0 +1,18 @@
+diff --git a/node_modules/svg-sprite-loader/lib/utils/is-module-should-be-extracted.js b/node_modules/svg-sprite-loader/lib/utils/is-module-should-be-extracted.js
+index 4e27e08..c7e9e2f 100644
+--- a/node_modules/svg-sprite-loader/lib/utils/is-module-should-be-extracted.js
++++ b/node_modules/svg-sprite-loader/lib/utils/is-module-should-be-extracted.js
+@@ -16,6 +16,12 @@ function isModuleShouldBeExtracted(module, moduleGraph) {
+   let issuer;
+   if (moduleGraph && moduleGraph.getIssuer) {
+-    issuer = moduleGraph.getIssuer(module);
++    try {
++      issuer = moduleGraph.getIssuer(module);
++    } catch (ex) {
++      // rspack 2.x: ModuleGraph.getIssuer throws when called during the module-graph-building phase.
++      // Fall back to module.issuer (webpack 1 compat), as rspack also provides it.
++      issuer = module.issuer;
++    }
+   } else {
+     issuer = module.issuer;
+   }

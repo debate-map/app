@@ -3,7 +3,7 @@ import React from "react";
 import {store} from "Store";
 import {MtxGroup} from "Store/main/database/MtxGroup.js";
 import {hourInMS, InfoButton, minuteInMS, RunInAction, RunInAction_Set, secondInMS} from "web-vcore";
-import {useMutation, useQuery} from "@apollo/client";
+import {useMutation, useQuery} from "@apollo/client/react";
 import {Clone, GetPercentFromXToY, Range} from "js-vextensions";
 import {observer} from "mobx-react";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Spinner, Text, TextInput} from "react-vcomponents";

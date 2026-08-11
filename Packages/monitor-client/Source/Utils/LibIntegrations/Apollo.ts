@@ -1,7 +1,8 @@
 import {store} from "Store";
 import {Client, createClient} from "graphql-ws";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "@apollo/client";
+import {ApolloClient, ApolloLink, from, gql, HttpLink, InMemoryCache, split} from "@apollo/client";
+import type {FetchResult} from "@apollo/client/link";
 import {getMainDefinition} from "@apollo/client/utilities/index.js";
 import {WebSocketLink} from "@apollo/client/link/ws/index.js";
 import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
@@ -29,7 +30,7 @@ let wsClient_connectCount = 0;
 let wsLink: GraphQLWsLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
-export let apolloClient: ApolloClient<NormalizedCacheObject>;
+export let apolloClient: ApolloClient;
 
 export function InitApollo() {
 	httpLink = new HttpLink({
@@ -150,7 +151,7 @@ export function InitApollo() {
 				fetchPolicy: "no-cache",
 				errorPolicy: "all",
 			},
-		} as DefaultOptions,
+		},
 	});
 }
 

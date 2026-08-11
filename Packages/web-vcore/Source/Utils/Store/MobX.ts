@@ -121,16 +121,11 @@ export function StoreAction(...args) {
 }
 
 const observableWarningGivenFor = new WeakSet<Function>();
-export const O = ((target: object, propertyKey: string | symbol)=>{
-	//if (target.constructor instanceof Function && !target.constructor.toString().includes("makeObservable(")) {
-	if (target.constructor instanceof Function && !target.constructor.toString().includes("makeObservable")) { // transpilation makes only the raw name safe to look for
-		if (!observableWarningGivenFor.has(target.constructor)) {
-			console.warn(`The @O decorator was used on "${target.constructor.name}.${String(propertyKey)
-				}", but the class is missing the "makeObservable(this);" call. See here for more info: https://mobx.js.org/enabling-decorators.html`);
-			observableWarningGivenFor.add(target.constructor);
-		}
-	}
-	return observable(target, propertyKey);
+// Stage 3 (TC39) accessor/field decorator wrapper around mobx's `observable` (which in mobx 7 is Stage-3-only).
+export const O = ((value: any, context: ClassAccessorDecoratorContext | ClassFieldDecoratorContext)=>{
+	// Note: in Stage 3, `context` has `.name`, `.kind`, `.addInitializer(...)`; `value` is the initializer (field) or {get,set} (accessor).
+	// (the old "missing makeObservable" warning is no longer needed, since Stage 3 decorators via `accessor` don't require makeObservable)
+	return (observable as any)(value, context);
 }) as typeof observable;
 // copy ".ref", etc. fields from "observable" (not wrapped)
 for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(observable))) {
