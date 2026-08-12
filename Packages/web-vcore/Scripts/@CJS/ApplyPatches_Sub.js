@@ -34,39 +34,47 @@ const getPatchFiles_orig = require_patch("patchFs.js").getPatchFiles;
 const getPackageDetailsFromPatchFilename_orig = require_patch("PackageDetails.js").getPackageDetailsFromPatchFilename;
 const process_exit_orig = process.exit;
 //console.log("Test1;", process.cwd(), __dirname, __dirname_fixed);
-/** @type {string[]} */ const skippedPatches = [];
-for (const patchFile of fs.readdirSync(PathFromWVC("patches"))) {
-	let orgName, packageName;
-	if (patchFile.startsWith("@")) {
-		[, orgName, packageName] = patchFile.match(/@(.+?)\+(.+?)\+/);
-	} else {
-		packageName = patchFile.match(/(.+?)\+/)?.[1];
-	}
-	//console.log("Path:", patchFile, "@Org:", orgName, "@Pkg:", packageName);
+const patchesDir = PathFromWVC("patches");
+if (fs.existsSync(patchesDir)) {
+	/** @type {string[]} */ const skippedPatches = [];
+	for (const patchFile of fs.readdirSync(patchesDir)) {
+		let orgName, packageName;
+		if (patchFile.startsWith("@")) {
+			const match = patchFile.match(/@(.+?)\+(.+?)\+/);
+			if (match) {
+				[, orgName, packageName] = match;
+			}
+		} else {
+			packageName = patchFile.match(/(.+?)\+/)?.[1];
+		}
+		//console.log("Path:", patchFile, "@Org:", orgName, "@Pkg:", packageName);
 
-	const orgPlusPackageSubpath = orgName ? `@${orgName}/${packageName}` : packageName;
-	const isSubdepUnderWVC = fs.existsSync(PathFromWVC(`node_modules/${orgPlusPackageSubpath}`));
-	//const isSubdepAsPeer = fs.existsSync(PathFromWVC(`../${orgPlusPackageSubpath}`));
-	const isSubdepAsPeer = fs.existsSync(PathFromWVC(`../../node_modules/${orgPlusPackageSubpath}`));
+		const orgPlusPackageSubpath = orgName ? `@${orgName}/${packageName}` : packageName;
+		const isSubdepUnderWVC = fs.existsSync(PathFromWVC(`node_modules/${orgPlusPackageSubpath}`));
+		//const isSubdepAsPeer = fs.existsSync(PathFromWVC(`../${orgPlusPackageSubpath}`));
+		const isSubdepAsPeer = fs.existsSync(PathFromWVC(`../../node_modules/${orgPlusPackageSubpath}`));
 
-	//let result;
-	if (isSubdepUnderWVC) {
-		if (process.argv.includes("level=0")) { skippedPatches.push(patchFile); continue; }
-		console.log(`Applying patch for ${patchFile}, at subdep path: ${PathFromWVC(`node_modules/${orgPlusPackageSubpath}`)}`);
-		ApplyPatch(patchFile, true);
-		//result = execSync(`git apply --ignore-space-change --ignore-whitespace patches/${patchFile}`);
-	} else if (isSubdepAsPeer) {
-		if (process.argv.includes("level=1")) { skippedPatches.push(patchFile); continue; }
-		console.log(`Applying patch for ${patchFile}, at peer path: ${PathFromWVC(`../../node_modules/${orgPlusPackageSubpath}`)}`);
-		ApplyPatch(patchFile, false);
-		//result = execSync(`cd ../.. && git apply --ignore-space-change --ignore-whitespace node_modules/web-vcore/patches/${patchFile}`);
-	} else {
-		throw new Error(`Cannot find package as either subdep or peer:${orgPlusPackageSubpath}`);
+		//let result;
+		if (isSubdepUnderWVC) {
+			if (process.argv.includes("level=0")) { skippedPatches.push(patchFile); continue; }
+			console.log(`Applying patch for ${patchFile}, at subdep path: ${PathFromWVC(`node_modules/${orgPlusPackageSubpath}`)}`);
+			ApplyPatch(patchFile, true);
+			//result = execSync(`git apply --ignore-space-change --ignore-whitespace patches/${patchFile}`);
+		} else if (isSubdepAsPeer) {
+			if (process.argv.includes("level=1")) { skippedPatches.push(patchFile); continue; }
+			console.log(`Applying patch for ${patchFile}, at peer path: ${PathFromWVC(`../../node_modules/${orgPlusPackageSubpath}`)}`);
+			ApplyPatch(patchFile, false);
+			//result = execSync(`cd ../.. && git apply --ignore-space-change --ignore-whitespace node_modules/web-vcore/patches/${patchFile}`);
+		} else {
+			throw new Error(`Cannot find package as either subdep or peer:${orgPlusPackageSubpath}`);
+		}
+		//console.log("Patch-apply result:", result);
 	}
-	//console.log("Patch-apply result:", result);
-}
-if (skippedPatches.length) {
-	console.log("Skipped the following patch-files (since found at wrong level):", skippedPatches);
+	if (skippedPatches.length) {
+		console.log("Skipped the following patch-files (since found at wrong level):", skippedPatches);
+	}
+} else {
+	console.log(`No patches folder found at: ${patchesDir}; skipping patch-application.`);
 }
 
 var errorsHit;
@@ -97,7 +105,7 @@ function ApplyPatch(/** @type {string} */ patchFile, /** @type {boolean} */ asSu
 	const shouldExitWithError = false;
 	//console.log("Patch dir:", PathFromWVC("patches"));
 	try {
-		process.exit = (()=>{}); // keep patch-package from quitting as soon as an error occurs
+		process.exit = /** @type {typeof process.exit} */ (()=>{}); // keep patch-package from quitting as soon as an error occurs
 
 		process["cwd_orig"] = process["cwd_orig"] ?? process.cwd;
 		process.cwd = ()=>appPath; // cwd must match with appPath, because of something in patch-package

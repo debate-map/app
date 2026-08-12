@@ -18,6 +18,7 @@
 		// (moved to Stage 3 decorators; see repo-root tsconfig.base.json)
 		"allowSyntheticDefaultImports": true,
 		"noImplicitAny": false,
+		"checkJs": true, // type-check the .js files under Scripts/@CJS (eg. so undeclared global-variable usage like `nonExistent.test()` errors)
 		"alwaysStrict": true, // alternative: "@babel/plugin-transform-strict-mode"; went with this since doesn't require another npm package
 		"strictNullChecks": true,
 		"strictPropertyInitialization": false,
