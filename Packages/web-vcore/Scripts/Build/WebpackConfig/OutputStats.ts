@@ -29,11 +29,11 @@ export function MakeSoWebpackConfigOutputsStats(config: webpack.Configuration) {
 				});
 				fs.writeFile(`./Tools/Webpack Profiling/Stats${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(stats), ()=>{});
 
-				let modules_justTimings = stats.modules.map(mod=>{
-					const timings = mod.profile;
+				let modules_justTimings = (stats.modules ?? []).map(mod=>{
+					const timings = mod.profile ?? ({} as any);
 					return {
 						name: mod.name,
-						totalTime: (timings.factory | 0) + (timings.building | 0) + (timings.dependencies | 0),
+						totalTime: ((timings.factory ?? 0) | 0) + ((timings.building ?? 0) | 0) + ((timings.dependencies ?? 0) | 0),
 						timings,
 					};
 				});
@@ -41,7 +41,7 @@ export function MakeSoWebpackConfigOutputsStats(config: webpack.Configuration) {
 
 				const modules_justTimings_asMap = {};
 				for (const mod of modules_justTimings) {
-					modules_justTimings_asMap[mod.name] = mod;
+					modules_justTimings_asMap[mod.name as string] = mod;
 					delete mod.name;
 				}
 				fs.writeFile(`./Tools/Webpack Profiling/ModuleTimings${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(modules_justTimings_asMap, null, 2), ()=>{});

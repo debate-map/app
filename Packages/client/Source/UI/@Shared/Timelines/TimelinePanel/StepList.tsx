@@ -33,13 +33,12 @@ function LockMapEdgeScrolling() {
 
 class NoVideoPlayer {
 	constructor(comp: StepListElem) {
-		makeObservable(this);
 		this.comp = comp;
 	}
 
 	comp: StepListElem;
 
-	@O speed = 1;
+	@O accessor speed = 1;
 	SetSpeed(speed: number) {
 		this.speed = speed;
 		this.timer.intervalInMS = (1000 / 30) / speed;
@@ -48,7 +47,7 @@ class NoVideoPlayer {
 		}
 	}
 
-	@O playing = false;
+	@O accessor playing = false;
 	SetPlaying(playing: boolean) {
 		RunInAction("NoVideoPlayer.SetPlaying", ()=>this.playing = playing);
 		this.timer.Enabled = playing;
@@ -291,7 +290,7 @@ export const StepList = observer_mgl((props: StepList_Props)=>{
 		/>;
 	};
 
-	const onScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: Vector2)=>{
+	const onScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: any)=>{
 		// we only change auto-scroll status if the user initiated the scroll
 		if (source == ScrollSource.Code) return;
 

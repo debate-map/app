@@ -110,10 +110,11 @@ export const RecordDropdown = observer_mgl(()=>{
 					await captureFrame(currentFrameNumber);
 					frameCaptured = true;
 				} catch (ex) {
+					const exAny = ex as {message?: string};
 					// if we hit a "fatal error", stop the whole rendering loop (else, just show it in console, but continue)
-					if (ex?.message?.includes("Image size mismatch")) {
+					if (exAny?.message?.includes("Image size mismatch")) {
 						throw ex;
-					} else if (ex?.message?.includes("Did not obtain a valid frame-capture within time-limit.")) {
+					} else if (exAny?.message?.includes("Did not obtain a valid frame-capture within time-limit.")) {
 						// we may just have missed the initial frame-render, so force rerender of ui, such that the backend's frame-render listener can see a new entry
 						forceBrowserRender();
 						console.error(ex);

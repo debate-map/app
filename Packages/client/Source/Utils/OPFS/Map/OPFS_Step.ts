@@ -1,7 +1,7 @@
 import {GetTimelineSteps} from "dm_common";
 import {Clone} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
-import {computed, makeObservable} from "mobx";
+import {computed} from "mobx";
 import {OPFSFolder} from "../OPFSFolder.js";
 import {OPFS_Map} from "../OPFS_Map.js";
 import {ReadFileText_AsJSON} from "../AccessorsForFiles.js";
@@ -9,7 +9,6 @@ import {ReadFileText_AsJSON} from "../AccessorsForFiles.js";
 export class OPFS_Step extends OPFSFolder {
 	constructor(mapID: string, stepID: string) {
 		super(["Maps", mapID, `Step_${stepID}`]);
-		makeObservable(this);
 		this.mapID = mapID;
 		this.stepID = stepID;
 	}

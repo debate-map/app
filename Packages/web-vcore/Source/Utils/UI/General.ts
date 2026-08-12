@@ -26,11 +26,11 @@ OnPopulated(()=>{
 	// ==========
 
 	const createElement_old = React.createElement;
-	React["createElement" as any] = function(componentClass, props) {
+	React["createElement" as any] = function(this: any, componentClass, props, ...rest) {
 		if (componentClass.ValidateProps) {
 			componentClass.ValidateProps(props);
 		}
-		return createElement_old.apply(this, arguments);
+		return createElement_old(componentClass, props, ...rest);
 	};
 });
 

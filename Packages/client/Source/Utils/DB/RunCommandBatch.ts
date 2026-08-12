@@ -18,9 +18,9 @@ export function RunCommandBatch(commands: CommandEntry[], onProgress?: (subcomma
 	});
 	return new Promise<RunCommandBatchResult>((resolve, reject)=>{
 		const subscription = fetchResult_subscription.subscribe(data=>{
-			if ((data.errors?.length ?? 0) > 0) {
+			if (data.error != null) {
 				subscription.unsubscribe(); // unsubscribe if error occurs
-				return void reject(new Error(`Error during RunCommandBatch: ${JSON.stringify(data.errors)}`));
+				return void reject(new Error(`Error during RunCommandBatch: ${JSON.stringify(data.error)}`));
 			}
 			if (data.data == null) {
 				subscription.unsubscribe(); // unsubscribe if error occurs

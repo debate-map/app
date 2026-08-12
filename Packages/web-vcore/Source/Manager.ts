@@ -64,7 +64,7 @@ export class Manager {
 	mobxCompatMode: boolean;
 	GetConsoleFuncIntercept = (funcName: "log" | "info" | "warn" | "error", origFunc: Function)=>{
 		if (funcName == "warn") {
-			return function(...args) {
+			return function(this: any, ...args) {
 				//var str = message + "";
 				if (typeof args[2] == "string" && args[2].includes("do not mix longhand and shorthand properties in the same style object")) return;
 				if (typeof args[0] == "string" && args[0].includes("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
@@ -73,7 +73,7 @@ export class Manager {
 			} as typeof console.warn;
 		}
 		if (funcName == "error") {
-			return function(...args) {
+			return function(this: any, ...args) {
 				const {message} = args[0];
 				var messageAsStr = `${message}`;
 				if (messageAsStr.Contains("Warning: A component is `contentEditable`")) return;

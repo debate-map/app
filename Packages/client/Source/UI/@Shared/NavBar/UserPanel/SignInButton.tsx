@@ -29,7 +29,7 @@ export const SignInButton = observer_mgl<SignInButtonProps>(({
 	// TODO: may want to handle possible edge-case of auth-link "expiring", requiring retrieval of a new one (ie. starting a new subscription)
 	const monthInSecs = 2629800; // 60 * 60 * 24 * 30;
 
-	useSubscription(gql`
+	useSubscription<{signInStart: {instructions: any, authLink: string, resultJWT: string}}>(gql`
 		subscription($input: SignInStartInput!) {
 			signInStart(input: $input) { instructions authLink resultJWT }
 		}
@@ -37,11 +37,11 @@ export const SignInButton = observer_mgl<SignInButtonProps>(({
 		skip: !subActive,
 		variables: {input: {provider, jwtDuration: monthInSecs, preferredUsername}},
 		onData: info=>{
-			const gqlResult = info.data.data.signInStart;
-			if (gqlResult.authLink) {
+			const gqlResult = info.data.data?.signInStart;
+			if (gqlResult?.authLink) {
 				setAuthLink(gqlResult.authLink);
 			}
-			if (gqlResult.resultJWT) {
+			if (gqlResult?.resultJWT) {
 				//subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
 				setJwtResolved(true); // by setting jwtResolved to true, we disable the subscription and clear this comp's ui contents (comp will be unmounted soon when replaced with user information)
 				onJWTReceived(gqlResult.resultJWT);

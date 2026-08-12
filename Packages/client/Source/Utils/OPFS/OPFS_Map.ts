@@ -1,5 +1,4 @@
 import {O, RunInAction} from "web-vcore";
-import {computed, makeObservable} from "mobx";
 import {OPFSFolder} from "./OPFSFolder";
 import {OPFS_Step} from "./Map/OPFS_Step";
 
@@ -13,7 +12,6 @@ export class OPFS_Map extends OPFSFolder {
 	}
 	constructor(mapID: string) {
 		super(["Maps", mapID]);
-		makeObservable(this);
 		this.mapID = mapID;
 	}
 	mapID: string;

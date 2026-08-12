@@ -79,13 +79,13 @@ export function UseSize(options?: Partial<UseSize_Options>): [(node: Component |
 	return [ref, size];
 }
 
-export function UseWindowEventListener<K extends keyof WindowEventMap>(eventName: K, func: (this: Document, ev: WindowEventMap[K])=>any, deps?: any[], listenerOptions?: boolean | AddEventListenerOptions) {
+export function UseWindowEventListener<K extends keyof WindowEventMap>(eventName: K, func: (this: Window, ev: Event)=>any, deps?: any[], listenerOptions?: boolean | AddEventListenerOptions) {
 	useEffect(()=>{
 		window.addEventListener(eventName, func, listenerOptions);
 		return ()=>window.removeEventListener(eventName, func, listenerOptions);
 	}, deps);
 }
-export function UseDocumentEventListener<K extends keyof DocumentEventMap>(eventName: K, func: (this: Document, ev: DocumentEventMap[K])=>any, deps?: any[], listenerOptions?: boolean | AddEventListenerOptions) {
+export function UseDocumentEventListener<K extends keyof DocumentEventMap>(eventName: K, func: (this: Document, ev: Event)=>any, deps?: any[], listenerOptions?: boolean | AddEventListenerOptions) {
 	useEffect(()=>{
 		document.addEventListener(eventName, func, listenerOptions);
 		return ()=>document.removeEventListener(eventName, func, listenerOptions);

@@ -9,7 +9,7 @@ import type {FetchResult} from "@apollo/client/link";
 function CreateFunc_RunCommand_AddX<ResultShape = {id: string}, T = any>(classConstructor: new(..._)=>T, entryFieldName: string, className = classConstructor.name) {
 	return async function(entry: T) {
 		const inputFields = {[entryFieldName]: entry};
-		const result = await apolloClient.mutate({
+		const result = await apolloClient.mutate<Record<string, ResultShape>>({
 			mutation: gql`
 				mutation($input: Add${className}Input!) {
 					add${className}(input: $input) { id }
@@ -17,12 +17,12 @@ function CreateFunc_RunCommand_AddX<ResultShape = {id: string}, T = any>(classCo
 			`,
 			variables: {input: inputFields},
 		});
-		return result.data[`add${className}`] as ResultShape;
+		return result.data?.[`add${className}`] as ResultShape;
 	};
 }
 function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, className = classConstructor.name) {
 	return async function(inputFields: {id: string}) {
-		const result = await apolloClient.mutate({
+		const result = await apolloClient.mutate<Record<string, ResultShape>>({
 			mutation: gql`
 				mutation($input: Delete${className}Input!) {
 					delete${className}(input: $input) { __typename }
@@ -30,12 +30,12 @@ function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstruct
 			`,
 			variables: {input: inputFields},
 		});
-		return result.data[`delete${className}`] as ResultShape;
+		return result.data?.[`delete${className}`] as ResultShape;
 	};
 }
 function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, className = classConstructor.name) {
 	return async function(inputFields: {id: string, updates: Partial<T>}) {
-		const result = await apolloClient.mutate({
+		const result = await apolloClient.mutate<Record<string, ResultShape>>({
 			mutation: gql`
 				mutation($input: Update${className}Input!) {
 					update${className}(input: $input) { __typename }
@@ -43,7 +43,7 @@ function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstruct
 			`,
 			variables: {input: inputFields},
 		});
-		return result.data[`update${className}`] as ResultShape;
+		return result.data?.[`update${className}`] as ResultShape;
 	};
 }
 
@@ -85,11 +85,10 @@ export const RunCommand_UpdateTimelineStep = CreateFunc_RunCommand_UpdateX(Timel
 
 /*export type CommandEntry = {addChildNode?: AddChildNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
 export async function RunCommand_RunCommandBatch(inputFields: {commands: CommandEntry[]}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: RunCommandBatchInput!) { runCommandBatch(input: $input) { results } }`,
+	const result = await apolloClient.mutate<{'runCommandBatch': {results: any[]}}>({		mutation: gql`mutation($input: RunCommandBatchInput!) { runCommandBatch(input: $input) { results } }`,
 		variables: {input: inputFields},
 	});
-	//return result.data.runCommandBatch as {results: any[]};
+	//return result.data?.runCommandBatch as {results: any[]};
 	return result as FetchResult<{runCommandBatch: {results: any[]}}>;
 }*/
 
@@ -103,11 +102,10 @@ export async function RunCommand_AddArgumentAndClaim(inputFields: {
 	claimRevision: Partial<NodeRevision>,
 	claimLink: Partial<NodeLink>,
 }) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: AddArgumentAndClaimInput!) { addArgumentAndClaim(input: $input) { argumentNodeID argumentRevisionID claimNodeID claimRevisionID doneAt } }`,
+	const result = await apolloClient.mutate<{'addArgumentAndClaim': {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number}}>({		mutation: gql`mutation($input: AddArgumentAndClaimInput!) { addArgumentAndClaim(input: $input) { argumentNodeID argumentRevisionID claimNodeID claimRevisionID doneAt } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.addArgumentAndClaim as {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number};
+	return result.data?.addArgumentAndClaim as {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number};
 }
 
 export type AddChildNodeInput = {
@@ -118,11 +116,10 @@ export type AddChildNodeInput = {
 	link: Partial<NodeLink>,
 };
 export async function RunCommand_AddChildNode(inputFields: AddChildNodeInput) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,
+	const result = await apolloClient.mutate<{'addChildNode': {nodeID: string, revisionID: string, linkID: string, doneAt: number}}>({		mutation: gql`mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.addChildNode as {nodeID: string, revisionID: string, linkID: string, doneAt: number};
+	return result.data?.addChildNode as {nodeID: string, revisionID: string, linkID: string, doneAt: number};
 }
 
 /*type NodeRevisionInput =
@@ -130,28 +127,25 @@ export async function RunCommand_AddChildNode(inputFields: AddChildNodeInput) {
 	& {id?: never, creator?: never, createdAt?: never};*/
 //type NodeRevisionInput = Partial<NodeRevision> & {id?: never, creator?: never, createdAt?: never};
 export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string|n, revision: NodeRevisionInput}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: AddNodeRevisionInput!) { addNodeRevision(input: $input) { id } }`,
+	const result = await apolloClient.mutate<{'addNodeRevision': {id: string}}>({		mutation: gql`mutation($input: AddNodeRevisionInput!) { addNodeRevision(input: $input) { id } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.addNodeRevision as {id: string};
+	return result.data?.addNodeRevision as {id: string};
 }
 
 // todo: eventually remove (or rework) this command, since unused
 /*export async function RunCommand_DeleteArgument(inputFields: {mapID?: string|n, argumentID: string, claimID: string, deleteClaim: boolean}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: DeleteArgumentInput!) { deleteArgument(input: $input) { __typename } }`,
+	const result = await apolloClient.mutate<{'deleteArgument': {}}>({		mutation: gql`mutation($input: DeleteArgumentInput!) { deleteArgument(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.deleteArgument as {};
+	return result.data?.deleteArgument as {};
 }*/
 
 export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, nodeID: string}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: DeleteNodeInput!) { deleteNode(input: $input) { __typename } }`,
+	const result = await apolloClient.mutate<{'deleteNode': {}}>({		mutation: gql`mutation($input: DeleteNodeInput!) { deleteNode(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.deleteNode as {};
+	return result.data?.deleteNode as {};
 }
 
 export const RunCommand_DeleteNodeRating = CreateFunc_RunCommand_DeleteX(NodeRating);
@@ -166,52 +160,46 @@ type LinkNodeInputFields = {
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
 export async function RunCommand_LinkNode(inputFields: LinkNodeInputFields) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: LinkNodeInput!) { linkNode(input: $input) { argumentWrapperID } }`,
+	const result = await apolloClient.mutate<{'linkNode': {argumentWrapperID: string}}>({		mutation: gql`mutation($input: LinkNodeInput!) { linkNode(input: $input) { argumentWrapperID } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.linkNode as {argumentWrapperID: string};
+	return result.data?.linkNode as {argumentWrapperID: string};
 }
 
 export async function RunCommand_SetNodeRating(inputFields: {rating: NodeRating}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: SetNodeRatingInput!) { setNodeRating(input: $input) { id } }`,
+	const result = await apolloClient.mutate<{'setNodeRating': {id: string}}>({		mutation: gql`mutation($input: SetNodeRatingInput!) { setNodeRating(input: $input) { id } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.setNodeRating as {id: string};
+	return result.data?.setNodeRating as {id: string};
 }
 
 // todo: eventually remove this command, since unused
 /*export async function RunCommand_SetNodeIsMultiPremiseArgument(inputFields: {id: string, multiPremiseArgument: boolean|n}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: SetNodeIsMultiPremiseArgumentInput!) { setNodeIsMultiPremiseArgument(input: $input) { __typename } }`,
+	const result = await apolloClient.mutate<{'setNodeIsMultiPremiseArgument': {}}>({		mutation: gql`mutation($input: SetNodeIsMultiPremiseArgumentInput!) { setNodeIsMultiPremiseArgument(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.setNodeIsMultiPremiseArgument as {};
+	return result.data?.setNodeIsMultiPremiseArgument as {};
 }*/
 
 export async function RunCommand_SetUserFollowData(inputFields: {targetUser: string, userFollow: UserFollow|n}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: SetUserFollowDataInput!) { setUserFollowData(input: $input) { __typename } }`,
+	const result = await apolloClient.mutate<{'setUserFollowData': {}}>({		mutation: gql`mutation($input: SetUserFollowDataInput!) { setUserFollowData(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.setUserFollowData as {};
+	return result.data?.setUserFollowData as {};
 }
 
 export async function RunCommand_TransferNodes(inputFields: {mapID?: string|n, nodes: NodeInfoForTransfer[]}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: TransferNodesInput!) { transferNodes(input: $input) { __typename } }`,
+	const result = await apolloClient.mutate<{'transferNodes': {}}>({		mutation: gql`mutation($input: TransferNodesInput!) { transferNodes(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.transferNodes as {};
+	return result.data?.transferNodes as {};
 }
 
 export async function RunCommand_AddSubscription(inputFields: AddSubscriptionInput) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: AddSubscriptionInput!) { addSubscription(input: $input) { id } }`,
+	const result = await apolloClient.mutate<{'addSubscription': {id: string}}>({		mutation: gql`mutation($input: AddSubscriptionInput!) { addSubscription(input: $input) { id } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.addSubscription as {id: string};
+	return result.data?.addSubscription as {id: string};
 }
 
 export async function RunCommand_AddSubscriptionWithLevel({node, level}: {node: string, level: SubscriptionLevel}) {
@@ -249,9 +237,9 @@ export function RunCommand_DeleteSubtree(inputFields: {mapId?: string|n, rootNod
 	type DeleteSubtreeResult = {subcommandCount: number, subcommandResults: Object[], committed: boolean};
 	return new Promise<DeleteSubtreeResult>((resolve, reject)=>{
 		const subscription = fetchResult_subscription.subscribe(data=>{
-			if ((data.errors?.length ?? 0) > 0) {
+			if (data.error != null) {
 				subscription.unsubscribe(); // unsubscribe if error occurs
-				return void reject(new Error(`Error during DeleteSubtree: ${JSON.stringify(data.errors)}`));
+				return void reject(new Error(`Error during DeleteSubtree: ${JSON.stringify(data.error)}`));
 			}
 			if (data.data == null) {
 				subscription.unsubscribe(); // unsubscribe if error occurs

@@ -28,7 +28,7 @@ export const PoliciesUI = observer_mgl(()=>{
 		setSelectedPolicy_newDataError(null);
 	}, [selectedPolicy]);
 
-	const handleStateChange = (data: AccessPolicy, error: string)=>{
+	const handleStateChange = (data: AccessPolicy, error: string | null)=>{
 		setSelectedPolicy_newData(data);
 		setSelectedPolicy_newDataError(error);
 	};

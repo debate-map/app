@@ -1,6 +1,7 @@
 import React from "react";
-
-Object.assign(window, {React}); declare global { const React: typeof React; }
+export {};
+Object.assign(window, {React});
+// provide a global `React` (as a UMD global) for any module that references it without importing it.
 
 // needed for @fast-csv/parser
 // ==========

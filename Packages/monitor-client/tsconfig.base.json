@@ -33,7 +33,7 @@
 
 		// modules/paths
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"composite": true,
 		"rootDir": ".",
 		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules

@@ -4,7 +4,10 @@ import {Client, createClient} from "graphql-ws";
 import {store} from "Store";
 import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloLink, from, gql, HttpLink, split} from "@apollo/client";
+import {ApolloClient} from "@apollo/client/core";
+import {gql} from "@apollo/client/core";
+import {HttpLink} from "@apollo/client/link/http";
+import {ApolloLink, from, split} from "@apollo/client/link";
 import type {FetchResult} from "@apollo/client/link";
 import {getMainDefinition} from "@apollo/client/utilities/index.js";
 import {GraphQLWsLink} from "@apollo/client/link/subscriptions/index.js";
@@ -90,10 +93,11 @@ export function InitApollo() {
 			opened: ()=>{
 				console.log("WebSocket opened.");
 			},
-			closed: (event: CloseEvent)=>{
+			closed: (event: unknown)=>{
 				// count DC as part of reconnect process if there's been at least one prior DC, and state was known as disconnected just prior (the WS "disconnects" each time a reconnect attempt is made)
 				const asPartOfRC = store.wvc.webSocketLastDCTime != null && !store.wvc.webSocketConnected;
-				console.log(`WebSocket disconnected${asPartOfRC ? " (seemingly as part of reconnect)" : ""}. @code:`, event.code, "@reason:", event.reason);
+				const eventAny = event as {code?: number, reason?: string};
+				console.log(`WebSocket disconnected${asPartOfRC ? " (seemingly as part of reconnect)" : ""}. @code:`, eventAny?.code, "@reason:", eventAny?.reason);
 				RunInAction("wsClient.onDisconnected", ()=>{
 					store.wvc.webSocketConnected = false;
 					store.wvc.webSocketLastDCTime = Date.now();
@@ -121,23 +125,26 @@ export function InitApollo() {
 		onError(info=>{
 			// wait a moment before processing, so that call-specific error-handling can be done first (and so it can set the "ignoreInGlobalGQLErrorHandler" field if desired)
 			setTimeout(()=>{
-				const {graphQLErrors, networkError, response, operation, forward} = info;
+				const {error, operation} = info;
+				const errAny = error as any;
 
-				if (graphQLErrors) {
+				if (errAny["graphQLErrors"]) {
+					const graphQLErrors = errAny["graphQLErrors"];
 					if (graphQLErrors?.[0]?.["ignoreInGlobalGQLErrorHandler"]) return;
 
 					for (const err of graphQLErrors) {
 						const {message, locations, path} = err;
-						console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", JSON.stringify(operation));
+						console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@operation", JSON.stringify(operation));
 					}
 				}
 
-				if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", JSON.stringify(operation));
+				if (errAny["networkError"]) console.error(`[Network error]:`, errAny["networkError"], "@operation", JSON.stringify(operation));
 			});
 		}),
-		setContext((_, {headers})=>{
+		setContext((_, prevContext)=>{
 			// get the authentication token from local storage if it exists
 			const token = GetUserInfoJWTString();
+			const headers = (prevContext as any)?.headers ?? {};
 			const finalHeaders = {...headers};
 			// only attach the "authorization" header if there's a valid token to place there (otherwise server will error)
 			if (token) finalHeaders["authorization"] = `Bearer ${token}`;
@@ -163,7 +170,7 @@ export function InitApollo() {
 				fetchPolicy: "no-cache",
 				errorPolicy: "all",
 			},
-		},
+		} as any,
 	});
 
 	// Websocket doesn't have auth-data attached quite yet (happens in onConnected/onReconnected), but send user-data to MGL immediately anyway.
@@ -175,7 +182,7 @@ export function InitApollo() {
 // todo: ensure that this request gets sent before any others, on the websocket connection (else those ones will fail)
 export async function AttachUserJWTToWebSocketConnection() {
 	// associate user-info jwt to websocket-connection, by calling the `signInAttach` endpoint
-	const fetchResult_subscription = apolloClient.subscribe({
+	const fetchResult_subscription = apolloClient.subscribe<{signInAttach: {success: boolean}}>({
 		query: gql`
 			subscription($input: SignInAttachInput!) {
 				signInAttach(input: $input) {
@@ -188,11 +195,11 @@ export async function AttachUserJWTToWebSocketConnection() {
 		}},
 		//errorPolicy: "ignore",
 	});
-	const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
+	const fetchResult = await new Promise<FetchResult<{signInAttach: {success: boolean}}>>(resolve=>{
 		const subscription = fetchResult_subscription.subscribe(
 			data=>{
 				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-				resolve(data);
+				resolve(data as any);
 			},
 			// By providing an error-handler function, we prevent apollo from turning the gql-error into a "full-fledged error" -- which would trigger an on-screen error-message.
 			// In this case, we don't want it to trigger an on-screen error-message, because the verification failure is likely benign. For example, it can happen when changing the "?db=[dev/prod]" url-flag.
@@ -201,7 +208,7 @@ export async function AttachUserJWTToWebSocketConnection() {
 			},
 		);
 	});
-	console.log("Tried attaching auth-data jwt to websocket connection. @success:", fetchResult.data.signInAttach.success);
+	console.log("Tried attaching auth-data jwt to websocket connection. @success:", fetchResult.data?.signInAttach.success);
 
 	SendUserJWTToMGL();
 }

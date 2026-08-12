@@ -49,7 +49,14 @@ export const SubtreeOpsUI_Delete_Right = observer_mgl((props: MI_SharedProps)=>{
 	const dialogState = store.main.maps.subtreeOperationsDialog;
 
 	// todo: if this fails authentication, use query-fetching approach seen in Admin.tsx for db-backups
-	const {data} = useQuery(gql`
+	const {data} = useQuery<{getPreparedDataForDeletingSubtree: {
+		subcommandCount: number;
+		nodesToUnlinkIds: string[],
+		nodesToDeleteIds: string[],
+		nodesToDeleteAccessPolicies: {[key: string]: number},
+		nodesToDeleteCreatorIds: {[key: string]: number},
+		nodesToDeleteCreationTimes: number[],
+	}}>(gql`
 		query($input: DeleteSubtreeInput!) {
 			getPreparedDataForDeletingSubtree(input: $input) {
 				subcommandCount

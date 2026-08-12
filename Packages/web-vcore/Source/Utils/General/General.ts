@@ -205,7 +205,7 @@ export function Chroma(input: string | number | number[] | chroma.Color, colorSp
 
 	//return chroma(input);
 	//return chroma(...arguments);
-	return chroma.apply(this, arguments); // eslint-disable-line
+	return chroma(input as any); // eslint-disable-line
 }
 
 /** Wrapper around chroma that:

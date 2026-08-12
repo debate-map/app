@@ -1,16 +1,14 @@
 import {O} from "web-vcore";
 import {AccessorCallPlan, CreateAccessor, GetDoc} from "mobx-graphlink";
 import {GetTerms, GetMedias, GraphDBShape, GetUser, GetAccessPolicy, GetTerm, GetMedia} from "dm_common";
-import {makeObservable} from "mobx";
 
 export class DatabaseState {
-	constructor() { makeObservable(this); }
-	@O subpage: "users" | "policies" | "terms" | "media" | "subscriptions";
-	@O selectedUserID: string|n;
-	@O selectedTermID: string|n;
-	//@O selectedTermComponentID: string|n;
-	@O selectedMediaID: string|n;
-	@O selectedPolicyID: string|n;
+	@O accessor subpage: "users" | "policies" | "terms" | "media" | "subscriptions";
+	@O accessor selectedUserID: string|n;
+	@O accessor selectedTermID: string|n;
+	//@O accessor selectedTermComponentID: string|n;
+	@O accessor selectedMediaID: string|n;
+	@O accessor selectedPolicyID: string|n;
 }
 
 export const GetSelectedUserID = CreateAccessor({ctx: 1}, function() {

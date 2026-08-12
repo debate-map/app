@@ -1,12 +1,10 @@
 import {O} from "web-vcore";
 import {CreateAccessor} from "mobx-graphlink";
 import {GetMap} from "dm_common";
-import {makeObservable} from "mobx";
 
 export class DebatesPageState {
-	constructor() { makeObservable(this); }
-	@O listType = "featured" as "featured" | "all";
-	@O selectedMapID: string|n;
+	@O accessor listType = "featured" as "featured" | "all";
+	@O accessor selectedMapID: string|n;
 }
 
 export const GetSelectedDebatesPageMapID = CreateAccessor({ctx: 1}, function() {

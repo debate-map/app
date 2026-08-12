@@ -2,9 +2,10 @@ import {ApolloCache} from "@apollo/client/cache";
 
 const emptyCacheObj = {};
 export class VoidCache extends ApolloCache {
+	fragmentMatches(fragment, typename) { return true; }
 	read(options) { return null; }
 	write(options) { return undefined; }
-	diff(options) { return {}; }
+	diff(options) { return {} as any; }
 	watch(watch) { return ()=>{}; }
 	async reset() {} // eslint-disable-line
 	evict(options) { return false; }

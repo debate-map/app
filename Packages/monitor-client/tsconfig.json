@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		// general
 		"rootDir": "Source",
-		"baseUrl": "Source", // probably todo: comment this, to require relative imports, to be consistent with the output-as-esm packages
+		//"baseUrl": "Source", // (removed in TS 7) replicate with paths below
+		"paths": {"*": ["./Source/*"]},
 		"resolveJsonModule": true,
 		"outDir": "Source_JS",
 		"skipLibCheck": true,

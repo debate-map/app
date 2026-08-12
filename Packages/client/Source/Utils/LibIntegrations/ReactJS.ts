@@ -1,11 +1,13 @@
+import React from "react";
+
 export function InitReactJS() {
 	// patch React.createElement to do early prop validation
 	const createElement_old = React.createElement;
-	React.createElement = function(componentClass, props) {
+	React.createElement = function(this: any, componentClass, props, ...rest) {
 		if (componentClass.ValidateProps) {
 			componentClass.ValidateProps(props);
 		}
-		return createElement_old.apply(this, arguments);
+		return createElement_old(componentClass, props, ...rest) as any;
 	};
 
 	// You know what? It's better to just disable this until you specifically want to use it... (causes too many seemingly-false-positives otherwise)

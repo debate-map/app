@@ -1,7 +1,6 @@
 import {CreateAccessor} from "mobx-graphlink";
 import {O} from "web-vcore";
 import {CreateStringEnum} from "js-vextensions";
-import {makeObservable} from "mobx";
 
 export enum ShareTab {
 	allMaps = "allMaps",
@@ -20,12 +19,10 @@ export enum ScrollToType {
 }
 
 export class ShareUIState {
-	constructor() { makeObservable(this); }
-
-	@O tab = ShareTab.current;
+	@O accessor tab = ShareTab.current;
 
 	// for new share
-	@O expandType = ExpandType.matchView;
-	@O scrollToType = ScrollToType.viewCenter;
-	@O showJSON = false;
+	@O accessor expandType = ExpandType.matchView;
+	@O accessor scrollToType = ScrollToType.viewCenter;
+	@O accessor showJSON = false;
 }

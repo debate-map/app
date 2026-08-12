@@ -1,9 +1,8 @@
 import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
-import {makeObservable, observable} from "mobx";
+import {observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
-import {ignore, version} from "mobx-sync";
 import {store} from "Store";
-import {AssertUnreachable, O, StoreAction} from "web-vcore";
+import {AssertUnreachable, Ignore, O, StoreAction, Version} from "web-vcore";
 import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "js-vextensions";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -21,63 +20,61 @@ export enum RatingPreviewType {
 }
 
 export class MapsState {
-	constructor() { makeObservable(this); }
 	// @Oervable maps = observable.map<string, MapState>();
 	// @ref(MapState_) maps = {} as {[key: string]: MapState};
 	// @map(MapState_) maps = observable.map<string, MapState>();
-	// @O maps = {} as ObservableMap<string, MapState>;
-	@O @version(2) mapStates = observable.map<string, MapState>();
+	// @O accessor maps = {} as ObservableMap<string, MapState>;
+	@O  @Version(2) accessor mapStates = observable.map<string, MapState>();
 	/* ACTEnsureMapStateInit(mapID: string) {
 		if (this.maps.get(mapID)) return;
 		this.maps.set(mapID, new MapState());
 	} */
-	@O @version(2) mapViews = observable.map<string, MapView>();
+	@O  @Version(2) accessor mapViews = observable.map<string, MapView>();
 
-	@O nodeLastAcknowledgementTimes = observable.map<string, number>();
-	@O @ignore currentNodeBeingAdded_path: string|n;
+	@O accessor nodeLastAcknowledgementTimes = observable.map<string, number>();
+	@O  @Ignore accessor currentNodeBeingAdded_path: string|n;
 
 	// openMap: number;
 
-	@O copiedNodePath: string|n;
-	@O copiedNodePath_asCut: boolean;
+	@O accessor copiedNodePath: string|n;
+	@O accessor copiedNodePath_asCut: boolean;
 
-	@O lockMapScrolling = true;
-	@O initialChildLimit = 5;
-	@O childOrdering?: ChildOrdering;
-	@O showReasonScoreValues = false;
-	@O autoExpandNewNodes = true;
-	@O showCloneHistoryButtons = false;
-	@O toolbarRatingPreviews = RatingPreviewType.chart;
-	@O @ignore forcedExpand = false;
-	@O forcedExpand_depth = 1;
-	@O @ignore screenshotMode = false;
-	@O @ignore fastScrollMode = false;
-	//@O nodeLeftBoxEnabled = false;
+	@O accessor lockMapScrolling = true;
+	@O accessor initialChildLimit = 5;
+	@O accessor childOrdering: ChildOrdering | undefined;
+	@O accessor showReasonScoreValues = false;
+	@O accessor autoExpandNewNodes = true;
+	@O accessor showCloneHistoryButtons = false;
+	@O accessor toolbarRatingPreviews = RatingPreviewType.chart;
+	@O  @Ignore accessor forcedExpand = false;
+	@O accessor forcedExpand_depth = 1;
+	@O  @Ignore accessor screenshotMode = false;
+	@O  @Ignore accessor fastScrollMode = false;
+	//@O accessor nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
-	@O @version(2) nodeStyleRules = [] as NodeStyleRule[];
+	@O  @Version(2) accessor nodeStyleRules = [] as NodeStyleRule[];
 
 	// node panels
-	@O detailsPanel = new DetailsPanelState();
-	@O tagsPanel = new TagsPanelState();
-	@O addChildDialog = new AddChildDialogState();
-	@O importSubtreeDialog = new ImportSubtreeDialogState();
-	@O subtreeOperationsDialog = new SubtreeOperationsDialogState();
+	@O accessor detailsPanel = new DetailsPanelState();
+	@O accessor tagsPanel = new TagsPanelState();
+	@O accessor addChildDialog = new AddChildDialogState();
+	@O accessor importSubtreeDialog = new ImportSubtreeDialogState();
+	@O accessor subtreeOperationsDialog = new SubtreeOperationsDialogState();
 }
 
 export class NodeStyleRule {
 	constructor(data?: Partial<NodeStyleRule>) {
-		makeObservable(this);
 		Object.assign(this, data);
 	}
 
-	@O enabled = true;
+	@O accessor enabled = true;
 
-	@O ifType: NodeStyleRule_IfType;
-	@O.ref if_lastEditorIs: NodeStyleRuleComp_LastEditorIs;
-	@O.ref if_accessPolicyDoesNotMatch: NodeStyleRuleComp_AccessPolicyDoesNotMatch;
+	@O accessor ifType: NodeStyleRule_IfType;
+	@O.ref accessor if_lastEditorIs: NodeStyleRuleComp_LastEditorIs;
+	@O.ref accessor if_accessPolicyDoesNotMatch: NodeStyleRuleComp_AccessPolicyDoesNotMatch;
 
-	@O thenType: NodeStyleRule_ThenType;
-	@O then_setBackgroundColor: NodeStyleRuleComp_SetBackgroundColor;
+	@O accessor thenType: NodeStyleRule_ThenType;
+	@O accessor then_setBackgroundColor: NodeStyleRuleComp_SetBackgroundColor;
 
 	// need Partial<NodeL3>, since can be called from GetNodeColor
 	DoesIfCheckPass(node: Partial<NodeL3>) {
@@ -123,8 +120,7 @@ export enum DetailsPanel_Subpanel {
 	others = "others",
 }
 export class DetailsPanelState {
-	constructor() { makeObservable(this); }
-	@O subpanel = DetailsPanel_Subpanel.text;
+	@O accessor subpanel = DetailsPanel_Subpanel.text;
 }
 
 export enum TagsPanel_Subpanel {
@@ -132,30 +128,26 @@ export enum TagsPanel_Subpanel {
 	"advanced" = "advanced",
 }
 export class TagsPanelState {
-	constructor() { makeObservable(this); }
-	@O subpanel = TagsPanel_Subpanel.basic;
+	@O accessor subpanel = TagsPanel_Subpanel.basic;
 }
 
 export class AddChildDialogState {
-	constructor() { makeObservable(this); }
-	@O advanced = false;
+	@O accessor advanced = false;
 }
 
 export class ImportSubtreeDialogState {
-	constructor() { makeObservable(this); }
+	@O accessor sourceType = DataExchangeFormat.json_cg;
+	@O accessor autoSearchByTitle = true;
+	@O accessor showAutoInsertTools = true;
+	@O accessor autoInsert_interval = 1000;
+	//@O accessor hideFoundEntries = false;
+	@O accessor accessPolicyOverride: string|n;
 
-	@O sourceType = DataExchangeFormat.json_cg;
-	@O autoSearchByTitle = true;
-	@O showAutoInsertTools = true;
-	@O autoInsert_interval = 1000;
-	//@O hideFoundEntries = false;
-	@O accessPolicyOverride: string|n;
+	@O  @Ignore accessor selectedImportResources = new Set<ImportResource>();
+	@O  @Ignore accessor selectFromIndex = -1;
 
-	@O @ignore selectedImportResources = new Set<ImportResource>();
-	@O @ignore selectFromIndex = -1;
-
-	/*@O importRatings = false;
-	@O importRatings_userIDsStr = "";*/
+	/*@O accessor importRatings = false;
+	@O accessor importRatings_userIDsStr = "";*/
 }
 
 export enum ExportRetrievalMethod {
@@ -163,19 +155,18 @@ export enum ExportRetrievalMethod {
 	"client" = "client",
 }
 export class SubtreeOperationsDialogState {
-	constructor() { makeObservable(this); }
-	@O retrievalMethod = ExportRetrievalMethod.server;
-	@O maxExportDepth = 5;
-	@O operation = SubtreeOperation.export;
-	@O @version(2) targetFormat = DataExchangeFormat.json_dm;
+	@O accessor retrievalMethod = ExportRetrievalMethod.server;
+	@O accessor maxExportDepth = 5;
+	@O accessor operation = SubtreeOperation.export;
+	@O  @Version(2) accessor targetFormat = DataExchangeFormat.json_dm;
 
 	// export
-	@O @ignore export_includeKeys = new SubtreeIncludeKeys();
+	@O  @Ignore accessor export_includeKeys = new SubtreeIncludeKeys();
 
 	// set access policy
-	//@O @ignore setPolicy_oldParentCounts = [] as number[];
-	@O @ignore setPolicy_oldAccessPolicies = [] as string[];
-	@O @ignore setPolicy_newPolicyID: string|n;
+	//@O  @Ignore accessor setPolicy_oldParentCounts = [] as number[];
+	@O  @Ignore accessor setPolicy_oldAccessPolicies = [] as string[];
+	@O  @Ignore accessor setPolicy_newPolicyID: string|n;
 
 	// delete
 }

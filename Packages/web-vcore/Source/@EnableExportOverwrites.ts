@@ -1,6 +1,6 @@
 // we need to export something so that we can use "export * from ..." approach (thus having this file accessed prior to "export MyOverrideFunction" calls)
 export const defineProperty_orig = Object.defineProperty;
-Object.defineProperty = function(o, p, attributes) {
+Object.defineProperty = function(this: any, o, p, attributes) {
 	let attributes_final = attributes;
 	if (o["__EnableExportOverwrites__"]) {
 		//const isWebpackExport = Object.keys(attributes).length == 2 && attributes.enumerable == true && attributes.get && attributes.get.toString().match(/return _.+\[key\];/);

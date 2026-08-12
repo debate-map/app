@@ -38,7 +38,7 @@ export class ImportResourceUI extends BaseComponent<
 		const res = this.props.resource;
 		if (this.state.search && res instanceof IR_NodeAndRevision && res.CanSearchByTitle()) {
 			// todo: update this to work against new rust backend! (atm this query fails, hence ui option for it disabled)
-			const result = await apolloClient.query({
+			const result = await apolloClient.query<{nodeRevisions: {nodes: {id: string}[]}}>({
 				query: gql`
 					query SearchQueryForImport($title: String!) {
 						nodeRevisions(filter: {phrasing: {contains: {text_base: $title}}}) {
@@ -49,7 +49,7 @@ export class ImportResourceUI extends BaseComponent<
 				variables: {title: res.revision.phrasing.text_base},
 				fetchPolicy: "network-only",
 			});
-			const foundNodeIDs = result.data.nodeRevisions.nodes.map(a=>a.id);
+			const foundNodeIDs = result.data!.nodeRevisions.nodes.map(a=>a.id);
 			this.SetState({existingNodesWithTitle: foundNodeIDs.length});
 		} else {
 			this.SetState({existingNodesWithTitle: null});

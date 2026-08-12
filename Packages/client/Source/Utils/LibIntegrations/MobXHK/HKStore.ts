@@ -1,7 +1,6 @@
 import {O, RunInAction} from "web-vcore";
 import {Clone, SleepAsync} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
-import {makeObservable} from "mobx";
 import {hkHandlers, hkHandlers_active} from "./HKHandlers";
 import {hkAddress} from "./HKInitBackend";
 
@@ -15,11 +14,10 @@ export class HKEvent<T = any> {
 export class HKStore {
 	//static main: HKStore;
 	constructor() {
-		makeObservable(this);
 	}
 
 	accessToken: string;
-	@O events = [] as HKEvent[];
+	@O accessor events = [] as HKEvent[];
 
 	async Start(accessToken: string) {
 		this.accessToken = accessToken;

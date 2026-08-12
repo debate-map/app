@@ -15,7 +15,7 @@ export type DragInfo = {provided: DraggableProvided, snapshot: DraggableStateSna
 
 type DraggableInfo = any; // this is up to the parent project
 
-export function MakeDraggable(getDraggableCompProps: (props: Object)=>DraggableCompProps) {
+export function MakeDraggable(getDraggableCompProps: (props: any)=>DraggableCompProps) {
 	return WrappedComponent=>{
 		class WrapperComponent extends React.Component {
 			static WrappedComponent = WrappedComponent;

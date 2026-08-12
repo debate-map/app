@@ -1,4 +1,4 @@
-import "."; // ensure file stays a module
+export {}; // ensure file stays a module
 //import {VWAF_OverrideExport} from "web-vcore";
 
 /*

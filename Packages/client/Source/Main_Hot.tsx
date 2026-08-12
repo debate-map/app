@@ -1,4 +1,5 @@
 // import React from "react/lib/ReactWithAddons";
+import React from "react";
 import "./Utils/General/ConsoleHelpers";
 import {createRoot} from "react-dom/client";
 import {JustBeforeInitLibs_listeners, JustBeforeUI_listeners} from "./Main.js";

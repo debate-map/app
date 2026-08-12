@@ -19,17 +19,19 @@ export class Slider extends BaseComponent
 		return (
 			<RCSlider ref={c=>this.slider = c as any} {...rest} disabled={!enabled}
 				value={editedValue != null ? editedValue : (value || 0)}
-				onChange={(val: number)=>{
+				onChange={(val: number|number[])=>{
+					const val_num = val as number;
 					if (!instant) {
-						this.SetState({editedValue: val});
+						this.SetState({editedValue: val_num});
 					} else {
-						onChange(val);
+						onChange(val_num);
 						this.SetState({editedValue: null});
 					}
 				}}
-				onChangeComplete={(val: number)=>{
+				onChangeComplete={(val: number|number[])=>{
+					const val_num = val as number;
 					if (!instant && onChange) {
-						onChange(val);
+						onChange(val_num);
 						this.SetState({editedValue: null});
 					}
 				}}/>
@@ -53,17 +55,19 @@ export class Range extends BaseComponent
 		return (
 			<RCSlider range ref={c=>this.slider = c as any} {...rest} disabled={!enabled}
 				value={editedValue != null ? editedValue : (value || 0)}
-				onChange={(val: number[])=>{
+				onChange={(val: number|number[])=>{
+					const val_arr = val as number[];
 					if (!instant) {
-						this.SetState({editedValue: val});
+						this.SetState({editedValue: val_arr});
 					} else {
-						onChange(val);
+						onChange(val_arr);
 						this.SetState({editedValue: null});
 					}
 				}}
-				onAfterChange={(val: number[])=>{
+				onAfterChange={(val: number|number[])=>{
+					const val_arr = val as number[];
 					if (!instant && onChange) {
-						onChange(val);
+						onChange(val_arr);
 						this.SetState({editedValue: null});
 					}
 				}}/>

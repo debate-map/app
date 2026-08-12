@@ -1,9 +1,7 @@
 import {globalMapID} from "dm_common";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {O} from "web-vcore";
-import {makeObservable} from "mobx";
+import {Ignore, O} from "web-vcore";
 import {CreateAccessor} from "mobx-graphlink";
-import {ignore} from "mobx-sync";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
 import {GuideState} from "./main/guide.js";
@@ -19,58 +17,57 @@ import {NotificationsState} from "./main/notifications.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
-	constructor() { makeObservable(this); }
 	// [immerable] = true;
 
-	@O page = "home";
-	@O urlExtraStr: string|n;
-	@O @ignore urlOtherFlags: URLParam[] = [];
+	@O accessor page = "home";
+	@O accessor urlExtraStr: string|n;
+	@O  @Ignore accessor urlOtherFlags: URLParam[] = [];
 
-	@O lastDBVersion: number|n; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
-	@O envOverride: string|n;
-	@O dbOverride: string|n;
-	//@O dbVersionOverride: string|n;
+	@O accessor lastDBVersion: number|n; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
+	@O accessor envOverride: string|n;
+	@O accessor dbOverride: string|n;
+	//@O accessor dbVersionOverride: string|n;
 
-	@O analyticsEnabled = true;
-	@O blockMobXUnsubscribing = false;
-	@O blockCacheClearing = false;
-	@O @ignore shareBeingLoaded: string|n;
-	@O @ignore selectNode_fragmentPath: string|n;
+	@O accessor analyticsEnabled = true;
+	@O accessor blockMobXUnsubscribing = false;
+	@O accessor blockCacheClearing = false;
+	@O  @Ignore accessor shareBeingLoaded: string|n;
+	@O  @Ignore accessor selectNode_fragmentPath: string|n;
 
 	// pages (and nav-bar panels)
 	// ==========
 
-	//@O stream = new StreamState();
-	@O notifications = new NotificationsState();
-	//@O chat: {subpage: string};
-	//@O reputation: {subpage: string};
+	//@O accessor stream = new StreamState();
+	@O accessor notifications = new NotificationsState();
+	//@O accessor chat: {subpage: string};
+	//@O accessor reputation: {subpage: string};
 
-	@O database = new DatabaseState();
-	@O feedback = {} as {subpage: string};
+	@O accessor database = new DatabaseState();
+	@O accessor feedback = {} as {subpage: string};
 	// forum: Forum;
-	@O more = new MorePageState();
-	@O home = {} as {subpage: string};
-	@O social = new SocialPageState();
-	@O debates = new DebatesPageState();
-	@O global = {} as {subpage: string};
+	@O accessor more = new MorePageState();
+	@O accessor home = {} as {subpage: string};
+	@O accessor social = new SocialPageState();
+	@O accessor debates = new DebatesPageState();
+	@O accessor global = {} as {subpage: string};
 
-	@O search = new SearchState();
-	@O guide = new GuideState();
-	@O profile = new ProfileState();
+	@O accessor search = new SearchState();
+	@O accessor guide = new GuideState();
+	@O accessor profile = new ProfileState();
 
-	@O topLeftOpenPanel: string|n;
+	@O accessor topLeftOpenPanel: string|n;
 	// set topLeftOpenPanel_set(val) { this.topLeftOpenPanel = val; }
-	@O topRightOpenPanel: string|n;
+	@O accessor topRightOpenPanel: string|n;
 	// set topRightOpenPanel_set(val) { this.topRightOpenPanel = val; }
 
 	// non-page-specific sections/components (roughly corresponds to @Shared folder)
 	// ==========
 
-	@O maps = new MapsState();
-	@O timelines = new TimelinesState();
-	@O shareUI = new ShareUIState();
-	@O ratingUI = new RatingUIState();
-	//@O lastAccessPolicy: string|n;
+	@O accessor maps = new MapsState();
+	@O accessor timelines = new TimelinesState();
+	@O accessor shareUI = new ShareUIState();
+	@O accessor ratingUI = new RatingUIState();
+	//@O accessor lastAccessPolicy: string|n;
 }
 
 export const GetOpenMapID = CreateAccessor({ctx: 1}, function() {

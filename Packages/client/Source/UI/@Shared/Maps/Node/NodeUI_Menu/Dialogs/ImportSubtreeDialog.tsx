@@ -310,7 +310,7 @@ export const ImportSubtreeUI = observer_mgl((props: {controller: BoxController} 
 										newState.sourceText_parseError = null;
 									} catch (err) {
 										newState.forJSONDM_subtreeData = null;
-										newState.sourceText_parseError = err;
+										newState.sourceText_parseError = String(err);
 									}
 									setState(prev=>({...prev, ...newState}));
 								} else if (uiState.sourceType == DataExchangeFormat.json_dm_fs) {
@@ -321,7 +321,7 @@ export const ImportSubtreeUI = observer_mgl((props: {controller: BoxController} 
 										newState.sourceText_parseError = null;
 									} catch (err) {
 										newState.forJSONDMFS_subtreeData = null;
-										newState.sourceText_parseError = err;
+										newState.sourceText_parseError = String(err);
 									}
 									setState(prev=>({...prev, ...newState}));
 								} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
@@ -332,7 +332,7 @@ export const ImportSubtreeUI = observer_mgl((props: {controller: BoxController} 
 										newState.sourceText_parseError = null;
 									} catch (err) {
 										newState.forJSONCG_subtreeData = null;
-										newState.sourceText_parseError = err;
+										newState.sourceText_parseError = String(err);
 									}
 									setState(prev=>({...prev, ...newState}));
 								} else if (uiState.sourceType == DataExchangeFormat.csv_sl) {

@@ -82,7 +82,7 @@ export const SubtreeOpsDialog = observer_mgl((props: {controller: BoxController}
 
 export function useSubtreeRetrievalQueryOrAccessors(rootNode: NodeL3, rootNodePath: string, includeKeys: SubtreeIncludeKeys, retrievalMethod: ExportRetrievalMethod, maxRetrievalDepth: number, retrievalActive: boolean) {
 	// todo: if this fails authentication, use query-fetching approach seen in Admin.tsx for db-backups
-	const {data: queryData, loading, refetch} = useQuery(GetServerSubtreeData_GQLQuery(rootNode.id, maxRetrievalDepth, includeKeys), {
+	const {data: queryData, loading, refetch} = useQuery<{subtree: DMSubtreeData}>(GetServerSubtreeData_GQLQuery(rootNode.id, maxRetrievalDepth, includeKeys), {
 		skip: retrievalMethod != ExportRetrievalMethod.server || !retrievalActive,
 		// not sure if these are needed
 		fetchPolicy: "no-cache",

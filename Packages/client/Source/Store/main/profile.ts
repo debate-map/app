@@ -1,5 +1,4 @@
 import {O} from "web-vcore";
-import {makeObservable} from "mobx";
 
 export enum ProfilePanel {
 	general = "general",
@@ -7,7 +6,5 @@ export enum ProfilePanel {
 	notifications = "notifications",
 }
 export class ProfileState {
-	constructor() { makeObservable(this); }
-
-	@O panel = ProfilePanel.general;
+	@O accessor panel = ProfilePanel.general;
 }

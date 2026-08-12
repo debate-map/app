@@ -1,10 +1,7 @@
 import {O} from "web-vcore";
-import {makeObservable} from "mobx";
 
 export class TestingState {
-	constructor() { makeObservable(this); }
-
-	@O.ref testSequences: TestSequence[] = [
+	@O.ref accessor testSequences: TestSequence[] = [
 		new TestSequence(),
 	];
 }

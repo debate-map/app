@@ -84,7 +84,7 @@ export async function ShowCloneSubtreeDialog(payload_initial: CloneSubtreePayloa
 					`.AsMultiline(0)}</Row>
 					<Row>
 						<Button text="Preview clone count" onClick={async()=>{
-							const result = await apolloClient.query({
+							const result = await apolloClient.query<{subtree: {nodes: {id: string}[]}}>({
 								query: gql`
 									query($rootNodeID: String, $maxDepth: Int) {
 										subtree(rootNodeId: $rootNodeID, maxDepth: $maxDepth) {
@@ -99,7 +99,7 @@ export async function ShowCloneSubtreeDialog(payload_initial: CloneSubtreePayloa
 									maxDepth: payload.maxDepth,
 								},
 							});
-							const expectedCloneCount = result.data.subtree.nodes.length;
+							const expectedCloneCount = result.data!.subtree.nodes.length;
 							Change(uiState.expectedCloneCount = expectedCloneCount);
 						}}/>
 						{uiState.expectedCloneCount != null &&

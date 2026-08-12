@@ -56,6 +56,7 @@ export class ElectronOPFS_StorageManager implements StorageManager {
 	}
 }
 export class ElectronOPFS_Directory implements FileSystemDirectoryHandle /*, AsyncIterator<ElectronOPFS_Directory | ElectronOPFS_File>*/ {
+	[Symbol.asyncIterator]() { return this.entries() as any; }
 	constructor(name: string, options: FileSystemGetDirectoryOptions|n, pathSegments: string[]) {
 		this.name = name;
 		this.options = options;
@@ -99,7 +100,7 @@ export class ElectronOPFS_Directory implements FileSystemDirectoryHandle /*, Asy
 
 	// from FileSystemDirectoryHandle->AsyncIterator functionality (typescript's definition doesn't show/require these, but they're part of the spec [and needed], so implement them)
 	// implemented (more or less)
-	entries() {
+	entries(): any {
 		const self = this;
 		return {
 			async* [Symbol.asyncIterator]() {
@@ -113,7 +114,7 @@ export class ElectronOPFS_Directory implements FileSystemDirectoryHandle /*, Asy
 			},
 		};
 	}
-	keys() {
+	keys(): any {
 		const self = this;
 		return {
 			async* [Symbol.asyncIterator]() {
@@ -123,7 +124,7 @@ export class ElectronOPFS_Directory implements FileSystemDirectoryHandle /*, Asy
 			},
 		};
 	}
-	values() {
+	values(): any {
 		const self = this;
 		return {
 			async* [Symbol.asyncIterator]() {
@@ -171,7 +172,7 @@ export class ElectronOPFS_File implements FileSystemFileHandle {
 			this.name.endsWith(".txt") ? "text/plain" :
 			"";
 
-		return new File([data], this.name, {type: guessedType});
+		return new File([data as BlobPart], this.name, {type: guessedType});
 	}
 	async createWritable(options?: FileSystemCreateWritableOptions): Promise<FileSystemWritableFileStream> {
 		return new ElectronOPFS_WriteableFileStream(this, options);

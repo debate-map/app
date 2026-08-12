@@ -12,8 +12,9 @@ InlineMath.prototype.generateHtml = function() {
 		return oldGenerateHtml.apply(this, arguments);
 	} catch (ex) {
 		// return ex.message;
-		if (ex.message.startsWith("KaTeX parse error: ")) {
-			return ex.message.replace(/^KaTeX/, "LaTeX");
+		const exAny = ex as {message: string};
+		if (exAny.message.startsWith("KaTeX parse error: ")) {
+			return exAny.message.replace(/^KaTeX/, "LaTeX");
 		}
 	}
 };

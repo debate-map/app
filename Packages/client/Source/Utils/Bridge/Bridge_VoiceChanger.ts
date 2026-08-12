@@ -1,5 +1,5 @@
 import {O, RunInAction} from "web-vcore";
-import {computed, makeObservable} from "mobx";
+import {computed} from "mobx";
 import {IsNumber} from "js-vextensions";
 import {desktopBridge} from "./Bridge_Desktop";
 
@@ -17,15 +17,14 @@ export const voiceChangerHost = `http://localhost:18888`;
 export class VoiceChangerBridge {
 	//static main = new VoiceChangerInfo();
 	constructor() {
-		makeObservable(this);
 	}
 
-	@O loadStarted = false;
-	@O loaded = false;
+	@O accessor loadStarted = false;
+	@O accessor loaded = false;
 
 	// stored info
-	@O voices: Voice[] = [];
-	@O activeSlotIndex: number|n;
+	@O accessor voices: Voice[] = [];
+	@O accessor activeSlotIndex: number|n;
 
 	// getters
 	@computed get Voices() {

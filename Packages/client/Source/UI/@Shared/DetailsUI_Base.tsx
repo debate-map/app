@@ -1,3 +1,4 @@
+import React from "react";
 import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "js-vextensions";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
@@ -17,7 +18,7 @@ export type DetailsUIBaseState<T> = {
 export type UseDetailsUIOptions<T> = {
     baseData: T;
     phase: DetailsUI_Phase;
-    onChange?: (data: T, error: string|n) => void;
+    onChange?: (data: T, error: string | null) => void;
     /** Post-process before it becomes the next value. */
     getNewDataPostProcess?: (v: T) => void;
     /** Extra validation: return a string (error) or null/undefined if valid. */

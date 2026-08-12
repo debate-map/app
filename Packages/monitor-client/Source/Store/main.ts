@@ -1,7 +1,5 @@
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {O} from "web-vcore";
-import {makeObservable} from "mobx";
-import {ignore} from "mobx-sync";
+import {Ignore, O} from "web-vcore";
 import {store} from "./index.js";
 import {DatabaseState} from "./main/database.js";
 import {LogsState} from "./main/logs.js";
@@ -9,26 +7,24 @@ import {TestingState} from "./main/testing.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
-	constructor() { makeObservable(this); }
+	@O accessor sideBarExpanded = true;
+	@O accessor page = "home";
+	@O accessor urlExtraStr: string|n;
+	@O  @Ignore accessor urlOtherFlags: URLParam[] = [];
 
-	@O sideBarExpanded = true;
-	@O page = "home";
-	@O urlExtraStr: string|n;
-	@O @ignore urlOtherFlags: URLParam[] = [];
-
-	@O adminKey = "";
+	@O accessor adminKey = "";
 
 	// pages (and nav-bar panels)
 	// ==========
 
-	@O home = {} as {subpage: string};
-	@O logs = new LogsState();
-	@O db = new DatabaseState();
-	@O testing = new TestingState();
-	/*@O netdata = {} as {subpage: string};
-	@O grafana = {} as {subpage: string};
-	@O prometheus = {} as {subpage: string};
-	@O pixie = {} as {subpage: string};*/
+	@O accessor home = {} as {subpage: string};
+	@O accessor logs = new LogsState();
+	@O accessor db = new DatabaseState();
+	@O accessor testing = new TestingState();
+	/*@O accessor netdata = {} as {subpage: string};
+	@O accessor grafana = {} as {subpage: string};
+	@O accessor prometheus = {} as {subpage: string};
+	@O accessor pixie = {} as {subpage: string};*/
 
 	// non-page-specific sections/components (roughly corresponds to @Shared folder)
 	// ==========

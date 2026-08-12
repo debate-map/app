@@ -65,7 +65,7 @@ export const RootUIWrapper = observer_mgl(()=>{
 			const root = GetMirrorOfMobXTree(store, mirrorOpts);
 
 			// monkey-patch async-trunk's persist function to add throttling (else can majorly slow down the app in certain cases, eg. when loading maps with tons of nodes expanded)
-			trunk.persist = function() {
+			trunk.persist = function(this: any) {
 				return (async()=>{
 					if (this.persistingScheduled) return;
 					this.persistingScheduled = true;

@@ -64,7 +64,7 @@ export const SearchPanel = observer_mgl(()=>{
 			if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
 			const queryStr_withoutPartialTerms = searchTerms.wholeTerms.join(" ");
 
-			const result = await apolloClient.query({
+			const result = await apolloClient.query<{searchGlobally: {nodeId: string}[]}>({
 				query: gql`
 					query($input: SearchGloballyInput!) {
 						searchGlobally(input: $input) {
@@ -84,7 +84,7 @@ export const SearchPanel = observer_mgl(()=>{
 				}},
 			});
 
-			const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
+			const foundNodeIDs = result.data!.searchGlobally.map(a=>a.nodeId);
 			RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 				store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
 				store.main.search.searchResults_nodeIDs = foundNodeIDs;

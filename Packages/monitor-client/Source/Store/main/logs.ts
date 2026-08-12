@@ -1,5 +1,4 @@
 import {O} from "web-vcore";
-import {makeObservable} from "mobx";
 import {LogGroup} from "./logs/LogGroup.js";
 
 export enum LogsPanel {
@@ -8,19 +7,17 @@ export enum LogsPanel {
 }
 
 export class LogsState {
-	constructor() { makeObservable(this); }
-
-	@O panel = LogsPanel.stored;
+	@O accessor panel = LogsPanel.stored;
 
 	// shared
-	@O.ref groups: LogGroup[] = [];
+	@O.ref accessor groups: LogGroup[] = [];
 
 	// stored
-	@O showRange_start = Date.now() - (1 * 60 * 60 * 1000);
-	@O showRange_end = Date.now();
-	@O showRange_end_enabled = false;
-	@O limit = 1000;
-	@O query = `{app="dm-app-server"}`;
+	@O accessor showRange_start = Date.now() - (1 * 60 * 60 * 1000);
+	@O accessor showRange_end = Date.now();
+	@O accessor showRange_end_enabled = false;
+	@O accessor limit = 1000;
+	@O accessor query = `{app="dm-app-server"}`;
 
 	// realtime
 }

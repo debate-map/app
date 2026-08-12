@@ -33,7 +33,7 @@ type Props = PropsWithChildren<{
 	asHover: boolean,
 	inList?: boolean,
 	style?: React.CSSProperties,
-	onPanelButtonHover: (panel: string)=>void,
+	onPanelButtonHover: (panel: string | undefined)=>void,
 	onPanelButtonClick: (panel: string)=>void,
 	usePortal?: boolean,
 	nodeUIRef?: RefObject<HTMLDivElement|null>,
@@ -183,12 +183,12 @@ export const NodeUI_LeftBox = observer_mgl((props: Props)=>{
 type PanelButton_Props = PropsWithChildren<{
 	map: DMap|n,
 	path: string,
-	openPanel: string|n,
+	openPanel: string | undefined,
 	panel: string,
 	text: string,
 	lastButtonInSeries?: boolean,
 	style?: React.CSSProperties,
-	onPanelButtonHover: (panel: string|n)=>void,
+	onPanelButtonHover: (panel: string | undefined)=>void,
 	onPanelButtonClick: (panel: string)=>void,
 }>;
 
@@ -216,7 +216,7 @@ const PanelButton = (props: PanelButton_Props)=>{
 			)}
 			onClick={()=>onPanelButtonClick(panel)}
 			onMouseEnter={()=>onPanelButtonHover(panel)}
-			onMouseLeave={()=>onPanelButtonHover(null)}>
+			onMouseLeave={()=>onPanelButtonHover(undefined)}>
 			{/* capture mouse events in gap above ad below self */}
 			<div style={{position: "absolute", left: 0, right: 0, top: -3, bottom: -2, cursor: "inherit"}}/>
 			{children}

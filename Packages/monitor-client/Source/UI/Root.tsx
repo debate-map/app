@@ -4,12 +4,11 @@ import ReactDOM from "react-dom";
 import {store} from "Store";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {MainSkin} from "Utils/Styles/MainSkin";
-import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, NotificationsUI, Observer, RunInAction} from "web-vcore";
+import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, NotificationsUI, O, Observer, RunInAction} from "web-vcore";
 import {ApolloProvider} from "@apollo/client/react";
 import chroma from "chroma-js";
 import {Clone} from "js-vextensions";
 import {AsyncTrunk} from "mobx-sync";
-import {makeObservable, observable} from "mobx";
 import {ColorPickerBox, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VMenuLayer} from "react-vmenu";
@@ -34,7 +33,6 @@ ColorPickerBox.Init(ReactColor, chroma);
 export class RootUIWrapper extends BaseComponent<{}, {}> {
 	constructor(props) {
 		super(props);
-		makeObservable(this);
 	}
 
 	async ComponentWillMount() {
@@ -55,7 +53,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>this.storeReady = true);
 	}
 	// use observable field for this rather than react state, since setState synchronously triggers rendering -- which breaks loading process above, when rendering fails
-	@observable storeReady = false;
+	@O accessor storeReady = false;
 
 	render() {
 		const {storeReady} = this;

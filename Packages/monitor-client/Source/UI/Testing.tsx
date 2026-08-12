@@ -50,7 +50,7 @@ export const TestingUI = observer(()=>{
 						try {
 							const sequence = JSON.parse(val);
 							//uiState.testSequences[0] = sequence;
-							uiState.testSequences = [sequence]; // must do in one go, since @O.ref is used
+							uiState.testSequences = [sequence]; // must do in one go, since @O.ref accessor is used
 						} catch (ex) {
 							alert(`Invalid json. Error:${ex}`);
 						}
