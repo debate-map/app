@@ -1,5 +1,6 @@
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {ignore, O} from "web-vcore";
+import {O} from "web-vcore";
+import {ignore} from "mobx-sync";
 import {store} from "./index.js";
 import {DatabaseState} from "./main/database.js";
 import {LogsState} from "./main/logs.js";

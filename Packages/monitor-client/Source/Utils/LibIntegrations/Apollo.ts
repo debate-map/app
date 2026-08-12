@@ -72,10 +72,11 @@ export function InitApollo() {
 			opened: ()=>{
 				console.log("WebSocket opened.");
 			},
-			closed: (event: CloseEvent)=>{
+			closed: (event: unknown)=>{
+				const eventAny = event as {code?: number, reason?: string};
 				// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
 				if (store.wvc.webSocketLastDCTime == null || store.wvc.webSocketConnected) {
-					console.log("WebSocket disconnected. @code:", event.code, "@reason:", event.reason);
+					console.log("WebSocket disconnected. @code:", eventAny?.code, "@reason:", eventAny?.reason);
 				}
 				RunInAction("wsClient.onDisconnected", ()=>{
 					store.wvc.webSocketConnected = false;
@@ -108,14 +109,18 @@ export function InitApollo() {
 	);
 	link_withErrorHandling = from([
 		onError(info=>{
-			const {graphQLErrors, networkError, response, operation, forward} = info;
-			if (graphQLErrors) {
-				graphQLErrors.forEach(({message, locations, path})=>{
-					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", JSON.stringify(operation));
-				});
+			const {error, operation} = info;
+			const errAny = error as any;
+
+			if (errAny["graphQLErrors"]) {
+				const graphQLErrors = errAny["graphQLErrors"];
+				for (const err of graphQLErrors) {
+					const {message, locations, path} = err;
+					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@operation", JSON.stringify(operation));
+				}
 			}
 
-			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", JSON.stringify(operation));
+			if (errAny["networkError"]) console.error(`[Network error]:`, errAny["networkError"], "@operation", JSON.stringify(operation));
 		}),
 		link,
 	]);
@@ -151,7 +156,7 @@ export function InitApollo() {
 				fetchPolicy: "no-cache",
 				errorPolicy: "all",
 			},
-		},
+		} as any,
 	});
 }
 

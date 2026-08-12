@@ -34,15 +34,15 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 		const adminKey = store.main.adminKey;
 
 		const [logEntries, setLogEntries] = useState([] as MigrationLogEntry[]);
-		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
+		const {data, loading} = useSubscription<{migrateLogEntries: MigrationLogEntry}>(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
 			onData: info=>{
-				const newEntry = info.data.data.migrateLogEntries as MigrationLogEntry;
-				setLogEntries(logEntries.concat(newEntry));
+				const newEntry = info.data.data?.migrateLogEntries;
+				if (newEntry) setLogEntries(logEntries.concat(newEntry));
 			},
 		});
 
-		const [startMigration, info] = useMutation(START_MIGRATION);
+		const [startMigration, info] = useMutation<{startMigration: {migrationID: string}}>(START_MIGRATION);
 
 		return (
 			<Column style={{flex: 1}}>
@@ -56,7 +56,7 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 							onOK: async()=>{
 								const {migrationID} = (await startMigration({
 									variables: {toVersion: 2, adminKey},
-								})).data;
+								})).data?.startMigration ?? {};
 							},
 						});
 					}}/>

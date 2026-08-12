@@ -12,11 +12,12 @@
 		"lib": [
 			"es6",
 			"es5",
-			"dom"
+			"dom",
+			"ESNext"
 		],
 		"jsx": "react",
 		"noImplicitAny": false,
-		"experimentalDecorators": true,
+		// Using Stage 3 (TC39) decorators now (needed for mobx 7's `observable`/`accessor`; mobx-graphlink 0.1.12+ exports Stage 3 decorators).
 		"allowSyntheticDefaultImports": true,
 		//"esModuleInterop": true, // enable this within packages that aren't using webpack for compilation
 		"useDefineForClassFields": true, // needed for mobx @observable
@@ -26,10 +27,13 @@
 		//"noImplicitThis": true,
 		//"noImplicitReturns": true,
 		"alwaysStrict": true,
+		"skipLibCheck": true, // don't type-check .d.ts files of dependencies (matches client/web-vcore; avoids TS2882 etc. from node_modules typings)
 		//"strictBindCallApply": true,
 		"strictNullChecks": true,
 		//"strictFunctionTypes": true,
-		//"strictPropertyInitialization": true,
+		// TS 7 enables strictPropertyInitialization by default; explicitly disable it, since the project relies on the
+		// "declare field, assign in Validate()/decorator" pattern.
+		"strictPropertyInitialization": false,
 
 		// modules/paths
 		"module": "ESNext",

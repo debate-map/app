@@ -91,7 +91,7 @@ export const RequestsUI = observer(()=>{
 	//const forceUpdate = useForceUpdate();
 	const rangeStart = uiState.showRange_end - uiState.showRange_duration;
 	const rangeEnd = uiState.showRange_end;
-	const {data, loading, refetch} = useQuery(MTX_RESULTS_QUERY, {
+	const {data, loading, refetch} = useQuery<{mtxResults: Mtx_Raw[]}>(MTX_RESULTS_QUERY, {
 		variables: {adminKey, startTime: rangeStart, endTime: rangeEnd},
 	});
 	const mtxResults_raw: Mtx_Raw[] = data?.mtxResults ?? [];
@@ -108,7 +108,7 @@ export const RequestsUI = observer(()=>{
 		return earliestLifetimeStart;
 	});
 	console.log("Got data:", mtxResults);
-	const [clearMtxResults, info] = useMutation(CLEAR_MTX_RESULTS);
+	const [clearMtxResults, info] = useMutation<{clearMtxResults: {message: string}}>(CLEAR_MTX_RESULTS);
 
 	return (
 		<Column style={{flex: 1, height: "100%"}}>
@@ -121,7 +121,7 @@ export const RequestsUI = observer(()=>{
 				<Button ml={5} text="Clear (on monitor-backend)" onClick={async()=>{
 					const {message} = (await clearMtxResults({
 						variables: {adminKey},
-					})).data.clearMtxResults;
+					})).data?.clearMtxResults ?? {};
 					await refetch();
 				}}/>
 				<Text ml={5}>Range to show, duration:</Text>

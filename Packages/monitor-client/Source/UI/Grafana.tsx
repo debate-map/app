@@ -15,7 +15,7 @@ export class GrafanaUI extends BaseComponent<{}, {}> {
 		const adminKey = store.main.adminKey;
 
 		const [showPassword, setShowPassword] = useState(false);
-		const {data, loading, refetch} = useQuery(gql`
+		const {data, loading, refetch} = useQuery<{getGrafanaPassword: string}>(gql`
 			query($adminKey: String!) {
 				getGrafanaPassword(adminKey: $adminKey)
 			}

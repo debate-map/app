@@ -70,7 +70,7 @@ enum HealthStatsPod {
 	pg_repo_host_0 = "pg_repo_host_0",
 }
 const useHealthStats = (adminKey: string, pod: HealthStatsPod)=>{
-	const {data: dataHealth, loading: loadingHealth, refetch: refetchHealth} = useQuery(
+	const {data: dataHealth, loading: loadingHealth, refetch: refetchHealth} = useQuery<{healthStats: HealthStats[]}>(
 		gql`
 			query($adminKey: String!, $pod: HealthStatsPod!) {
 				healthStats(adminKey: $adminKey, pod: $pod) {
@@ -119,9 +119,9 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 	//let {} = this.props;
 	const adminKey = store.main.adminKey;
 
-	const [restartAppServer, info] = useMutation(RESTART_APP_SERVER_MUTATION);
+	const [restartAppServer, info] = useMutation<{restartAppServer: {message: string}}>(RESTART_APP_SERVER_MUTATION);
 
-	const {data, loading, refetch} = useQuery(BASIC_INFO_QUERY, {
+	const {data, loading, refetch} = useQuery<{basicInfo: BasicInfo}>(BASIC_INFO_QUERY, {
 		variables: {adminKey},
 		// not sure if these are needed
 		fetchPolicy: "no-cache",
@@ -155,7 +155,7 @@ const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it wo
 						onOK: async()=>{
 							const res = (await restartAppServer({
 								variables: {adminKey},
-							})).data.restartAppServer;
+							})).data?.restartAppServer ?? {message: ""};
 							const success = res.message == "success";
 							ShowMessageBox({
 								title: `Restart ${success ? "succeeded" : "failed"}`,

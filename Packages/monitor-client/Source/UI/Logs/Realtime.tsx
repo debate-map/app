@@ -88,11 +88,11 @@ export class LogsUI_Realtime extends BaseComponent<{}, {}> {
 		const [logEntries, setLogEntries] = useState([] as LogEntry[]);
 		const [enabled, setEnabled] = useState(true);
 
-		const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
+		const {data, loading} = useSubscription<{logEntries: LogEntry_Raw[]}>(LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
 			onData: info=>{
 				if (!enabled) return;
-				const newEntries_raw = info.data.data.logEntries as LogEntry_Raw[];
+				const newEntries_raw = info.data.data?.logEntries ?? [];
 				const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
 				setLogEntries(logEntries.concat(newEntries_final));
 			},

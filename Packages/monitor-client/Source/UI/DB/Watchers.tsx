@@ -33,7 +33,7 @@ export const WatchersUI = observer(()=>{
 	const adminKey = store.main.adminKey;
 	const uiState = store.main.db.watchers;
 
-	const {data, loading, refetch} = useQuery(LQ_INSTANCES_QUERY, {
+	const {data, loading, refetch} = useQuery<{lqInstances: LQInstance[]}>(LQ_INSTANCES_QUERY, {
 		variables: {adminKey},
 	});
 	const lqis_raw: LQInstance[] = data?.lqInstances ?? [];

@@ -1,5 +1,6 @@
-import {O, version} from "web-vcore";
+import {O} from "web-vcore";
 import {MtxGroup} from "./database/MtxGroup.js";
+import {version} from "mobx-sync";
 
 export class DatabaseState {
 	@O accessor subpage: "requests" | "watchers" | "migrate";
