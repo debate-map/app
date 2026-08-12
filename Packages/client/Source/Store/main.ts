@@ -1,6 +1,6 @@
 import {globalMapID} from "dm_common";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {Ignore, O} from "web-vcore";
+import {O} from "web-vcore";
 import {CreateAccessor} from "mobx-graphlink";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
@@ -14,6 +14,7 @@ import {ShareUIState} from "./main/shareUI.js";
 import {SocialPageState} from "./main/social.js";
 import {TimelinesState} from "./main/timelines.js";
 import {NotificationsState} from "./main/notifications.js";
+import {ignore} from "mobx-sync";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
@@ -21,7 +22,7 @@ export class MainState {
 
 	@O accessor page = "home";
 	@O accessor urlExtraStr: string|n;
-	@O  @Ignore accessor urlOtherFlags: URLParam[] = [];
+	@O @ignore accessor urlOtherFlags: URLParam[] = [];
 
 	@O accessor lastDBVersion: number|n; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
 	@O accessor envOverride: string|n;
@@ -31,8 +32,8 @@ export class MainState {
 	@O accessor analyticsEnabled = true;
 	@O accessor blockMobXUnsubscribing = false;
 	@O accessor blockCacheClearing = false;
-	@O  @Ignore accessor shareBeingLoaded: string|n;
-	@O  @Ignore accessor selectNode_fragmentPath: string|n;
+	@O @ignore accessor shareBeingLoaded: string|n;
+	@O @ignore accessor selectNode_fragmentPath: string|n;
 
 	// pages (and nav-bar panels)
 	// ==========

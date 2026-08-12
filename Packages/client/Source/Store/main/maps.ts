@@ -2,7 +2,7 @@ import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLa
 import {observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
 import {store} from "Store";
-import {AssertUnreachable, Ignore, O, StoreAction, Version} from "web-vcore";
+import {AssertUnreachable, O, StoreAction} from "web-vcore";
 import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "js-vextensions";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -11,6 +11,7 @@ import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
 import {GetPathVisibilityInfoAfterEffects, GetPlaybackEffects} from "./maps/mapStates/PlaybackAccessors/ForEffects.js";
 import {SubtreeIncludeKeys, SubtreeOperation} from "../../UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/SubtreeOps/SubtreeOpsStructs.js";
+import {ignore, version} from "mobx-sync";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -24,15 +25,15 @@ export class MapsState {
 	// @ref(MapState_) maps = {} as {[key: string]: MapState};
 	// @map(MapState_) maps = observable.map<string, MapState>();
 	// @O accessor maps = {} as ObservableMap<string, MapState>;
-	@O  @Version(2) accessor mapStates = observable.map<string, MapState>();
+	@O @version(2) accessor mapStates = observable.map<string, MapState>();
 	/* ACTEnsureMapStateInit(mapID: string) {
 		if (this.maps.get(mapID)) return;
 		this.maps.set(mapID, new MapState());
 	} */
-	@O  @Version(2) accessor mapViews = observable.map<string, MapView>();
+	@O @version(2) accessor mapViews = observable.map<string, MapView>();
 
 	@O accessor nodeLastAcknowledgementTimes = observable.map<string, number>();
-	@O  @Ignore accessor currentNodeBeingAdded_path: string|n;
+	@O @ignore accessor currentNodeBeingAdded_path: string|n;
 
 	// openMap: number;
 
@@ -46,13 +47,13 @@ export class MapsState {
 	@O accessor autoExpandNewNodes = true;
 	@O accessor showCloneHistoryButtons = false;
 	@O accessor toolbarRatingPreviews = RatingPreviewType.chart;
-	@O  @Ignore accessor forcedExpand = false;
+	@O @ignore accessor forcedExpand = false;
 	@O accessor forcedExpand_depth = 1;
-	@O  @Ignore accessor screenshotMode = false;
-	@O  @Ignore accessor fastScrollMode = false;
+	@O @ignore accessor screenshotMode = false;
+	@O @ignore accessor fastScrollMode = false;
 	//@O accessor nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
-	@O  @Version(2) accessor nodeStyleRules = [] as NodeStyleRule[];
+	@O @version(2) accessor nodeStyleRules = [] as NodeStyleRule[];
 
 	// node panels
 	@O accessor detailsPanel = new DetailsPanelState();
@@ -143,8 +144,8 @@ export class ImportSubtreeDialogState {
 	//@O accessor hideFoundEntries = false;
 	@O accessor accessPolicyOverride: string|n;
 
-	@O  @Ignore accessor selectedImportResources = new Set<ImportResource>();
-	@O  @Ignore accessor selectFromIndex = -1;
+	@O @ignore accessor selectedImportResources = new Set<ImportResource>();
+	@O @ignore accessor selectFromIndex = -1;
 
 	/*@O accessor importRatings = false;
 	@O accessor importRatings_userIDsStr = "";*/
@@ -158,15 +159,15 @@ export class SubtreeOperationsDialogState {
 	@O accessor retrievalMethod = ExportRetrievalMethod.server;
 	@O accessor maxExportDepth = 5;
 	@O accessor operation = SubtreeOperation.export;
-	@O  @Version(2) accessor targetFormat = DataExchangeFormat.json_dm;
+	@O @version(2) accessor targetFormat = DataExchangeFormat.json_dm;
 
 	// export
-	@O  @Ignore accessor export_includeKeys = new SubtreeIncludeKeys();
+	@O @ignore accessor export_includeKeys = new SubtreeIncludeKeys();
 
 	// set access policy
-	//@O  @Ignore accessor setPolicy_oldParentCounts = [] as number[];
-	@O  @Ignore accessor setPolicy_oldAccessPolicies = [] as string[];
-	@O  @Ignore accessor setPolicy_newPolicyID: string|n;
+	//@O @ignore accessor setPolicy_oldParentCounts = [] as number[];
+	@O @ignore accessor setPolicy_oldAccessPolicies = [] as string[];
+	@O @ignore accessor setPolicy_newPolicyID: string|n;
 
 	// delete
 }

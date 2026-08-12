@@ -119,7 +119,9 @@ export const buildConfig = options=>{
 		module: {
 			rules: [
 				{
-					test: /\.(ts?|tsx?|.js)$/,
+					//test: /\.(tsx?|js)$/,
+					// `.ts`/`.tsx` files: parse as TypeScript (with Stage-3 decorators).
+					test: /\.(tsx?)$/,
 					use: [
 						{
 							loader: "builtin:swc-loader",
@@ -132,6 +134,35 @@ export const buildConfig = options=>{
 									parser: {
 										syntax: "typescript",
 										decorators: true,
+									},
+									transform: {
+										// use Stage 3 (TC39) decorators, matching the project's tsconfig (which uses mobx 7's accessor-decorators)
+										legacyDecorator: false,
+										decoratorVersion: "2023-11",
+									},
+								},
+							},
+						},
+					],
+				},
+				{
+					// `.js` files: parse as plain JavaScript. `autoAccessors` is required because some compiled
+					// node_modules packages (eg. ones built with mobx 7 + TS 7 that target "ESNext") may emit
+					// Stage-3 decorators on `accessor` fields (eg. `@observable accessor x = ...`); rspack's builtin
+					// swc-loader parses `.js` files with the ES parser, which needs this flag to accept the `accessor` keyword.
+					test: /\.(m?js)$/,
+					use: [
+						{
+							loader: "builtin:swc-loader",
+							/** @type {import('@rspack/core').SwcLoaderOptions} */
+							options: {
+								jsc: {
+									target: "es2016",
+									parser: {
+										syntax: "ecmascript",
+										decorators: true,
+										decoratorsBeforeExport: true, // TS 7 emits `@dec` (with a newline) before `export class`
+										autoAccessors: true,
 									},
 									transform: {
 										// use Stage 3 (TC39) decorators, matching the project's tsconfig (which uses mobx 7's accessor-decorators)

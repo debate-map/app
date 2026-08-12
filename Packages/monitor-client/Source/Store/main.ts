@@ -1,5 +1,5 @@
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {Ignore, O} from "web-vcore";
+import {ignore, O} from "web-vcore";
 import {store} from "./index.js";
 import {DatabaseState} from "./main/database.js";
 import {LogsState} from "./main/logs.js";
@@ -10,7 +10,7 @@ export class MainState {
 	@O accessor sideBarExpanded = true;
 	@O accessor page = "home";
 	@O accessor urlExtraStr: string|n;
-	@O  @Ignore accessor urlOtherFlags: URLParam[] = [];
+	@O @ignore accessor urlOtherFlags: URLParam[] = [];
 
 	@O accessor adminKey = "";
 

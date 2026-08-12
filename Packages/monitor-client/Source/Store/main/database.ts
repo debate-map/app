@@ -1,4 +1,4 @@
-import {O, Version} from "web-vcore";
+import {O, version} from "web-vcore";
 import {MtxGroup} from "./database/MtxGroup.js";
 
 export class DatabaseState {
@@ -13,7 +13,7 @@ export class RequestsState {
 	@O accessor significantDurationThreshold = 1;
 
 	// groups
-	@O.ref @Version(2) accessor groups: MtxGroup[] = [];
+	@O.ref @version(2) accessor groups: MtxGroup[] = [];
 }
 export class WatchersState {
 	//constructor() { makeObservable(this); }

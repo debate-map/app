@@ -1,11 +1,12 @@
+import {ignore} from "mobx-sync";
 import {NotificationMessage} from "../UI/NotificationsUI/NotificationMessage.js";
-import {Ignore, O} from "../Utils/Store/MobX.js";
+import {O} from "../Utils/Store/MobX.js";
 
 export class WVCState {
-	@O  @Ignore accessor notificationMessages = [] as NotificationMessage[];
-	@O  @Ignore accessor webSocketConnected = false;
-	//@O  @Ignore accessor webSocketError = false;
-	@O  @Ignore accessor webSocketLastDCTime: number;
+	@O @ignore accessor notificationMessages = [] as NotificationMessage[];
+	@O @ignore accessor webSocketConnected = false;
+	//@O @ignore accessor webSocketError = false;
+	@O @ignore accessor webSocketLastDCTime: number;
 }
 
 export const wvc_store = new WVCState();

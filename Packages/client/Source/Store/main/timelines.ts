@@ -1,14 +1,15 @@
 import {GetTimelineStep, NodeEffect, TimelineStepEffect} from "dm_common";
 import {CreateAccessor} from "mobx-graphlink";
-import {Ignore, O} from "web-vcore";
+import {O} from "web-vcore";
 import {DeepEquals} from "js-vextensions";
 import {StepTab} from "./maps/mapStates/@MapState";
+import {ignore} from "mobx-sync";
 
 export class TimelinesState {
 	// editor
 	@O accessor audioMode = false;
 	@O accessor audioPanel = new AudioPanelState();
-	@O  @Ignore accessor copiedNodeEffectInfo: {stepID: string, effectIndex: number, effectData: TimelineStepEffect, asCut: boolean}|n;
+	@O @ignore accessor copiedNodeEffectInfo: {stepID: string, effectIndex: number, effectData: TimelineStepEffect, asCut: boolean}|n;
 	@O accessor selectedAudioInputDeviceID: string|n;
 
 	// playing
@@ -18,7 +19,7 @@ export class TimelinesState {
 	@O accessor showFocusNodes = false;
 	@O accessor layoutHelperMap_load = false;
 	@O accessor layoutHelperMap_show = false;
-	@O  @Ignore accessor autoScroll = true;
+	@O @ignore accessor autoScroll = true;
 	@O accessor stepTabDefault = StepTab.none;
 }
 
@@ -26,12 +27,12 @@ class AudioPanelState {
 	@O accessor selectedFile: string|n;
 
 	@O accessor waveformRows = 0;
-	@O  @Ignore accessor selection_start = 0;
-	//@O  @Ignore accessor selection_end = 0;
+	@O @ignore accessor selection_start = 0;
+	//@O @ignore accessor selection_end = 0;
 	@O accessor playOnClick = true;
 
-	@O  @Ignore accessor wavesurferStateChangedAt = 0;
-	@O  @Ignore accessor act_startPlayAtTimeX = -1;
+	@O @ignore accessor wavesurferStateChangedAt = 0;
+	@O @ignore accessor act_startPlayAtTimeX = -1;
 }
 
 class RecordPanelState {
@@ -41,8 +42,8 @@ class RecordPanelState {
 	@O accessor renderFolderName = "RenderTest";
 	@O accessor frameRender_minWait = 100;
 	@O accessor frameRender_stabilityWait = 300;
-	@O  @Ignore accessor recording = false;
-	@O  @Ignore accessor recording_endFrame = -1;
+	@O @ignore accessor recording = false;
+	@O @ignore accessor recording_endFrame = -1;
 }
 
 export const GetCopiedNodeEffectInfo_IfValid = CreateAccessor({ctx: 1}, function() {

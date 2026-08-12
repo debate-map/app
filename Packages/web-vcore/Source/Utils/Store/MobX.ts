@@ -2,7 +2,7 @@ import {enableES5, setAutoFreeze, setUseProxies} from "immer";
 import {CE, E, RemoveCircularLinks, ToJSON, emptyArray} from "js-vextensions";
 import {ObservableMap, ObservableSet, _getAdministration, configure, observable, observableDeep, observableRef, observableShallow, observableStruct, onReactionError, reaction} from "mobx";
 import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink";
-import {inject, KeyIgnores, KeyVersions} from "mobx-sync";
+import {ignore, version} from "mobx-sync";
 import {observer} from "mobx-react";
 import {EnsureClassProtoRenderFunctionIsWrapped} from "react-vextensions";
 import {HandleError} from "../General/Errors.js";
@@ -130,40 +130,6 @@ export const O = ((value: any, context: ClassAccessorDecoratorContext | ClassFie
 // In mobx 7, `observable.ref`/`.shallow`/`.deep`/`.struct` no longer exist (they're standalone `observableRef`/`observableShallow`/`observableDeep`/`observableStruct` exports).
 // Copy them onto `O` so `@O.ref`, `@O.shallow`, etc. keep working as Stage-3 decorators.
 Object.assign(O, {ref: observableRef, deep: observableDeep, shallow: observableShallow, struct: observableStruct});
-
-// Stage 3 (TC39) class-field/accessor decorators that call through to mobx-sync's logic as plain function calls.
-// (mobx-sync's own `@ignore`/`@version` are LEGACY (target, propertyKey) decorators, which can't apply to `accessor` fields.)
-// We use PascalCase (@Ignore/@Version) to distinguish them from mobx-sync's exports.
-// Note: mobx-sync operates on the class PROTOTYPE (legacy property decorators receive target.prototype), so we use
-// `this.constructor.prototype` here to match; `inject` also overrides `toJSON` on the prototype, exactly as mobx-sync does.
-/** Stage-3 replacement for mobx-sync's `@ignore` (see _ignore): marks the field so it's omitted when serializing/parsing. */
-export function Ignore<T extends object>(
-	_value: T | undefined,
-	context: ClassAccessorDecoratorContext | ClassFieldDecoratorContext,
-): void {
-	context.addInitializer(function(this: any) {
-		const target = this.constructor.prototype as any;
-		inject(target, KeyIgnores);
-		target[KeyIgnores][context.name] = true;
-	});
-}
-/** Stage-3 replacement for mobx-sync's `@version(n)`: sets the field's version so stale persisted data is omitted. */
-export function Version<T extends object>(versionNumber: number | string) {
-	return (
-		_value: T | undefined,
-		context: ClassAccessorDecoratorContext | ClassFieldDecoratorContext,
-	): void => {
-		const key = String(context.name);
-		context.addInitializer(function(this: any) {
-			const target = this.constructor.prototype as any;
-			inject(target);
-			if (!target.hasOwnProperty(KeyVersions)) {
-				Object.defineProperty(target, KeyVersions, {value: Object.assign({}, target[KeyVersions] || {}), enumerable: false});
-			}
-			target[KeyVersions][key] = versionNumber;
-		});
-	};
-}
 
 //export {RunInAction} from "mobx-graphlink";
 export {RunInAction};

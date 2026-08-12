@@ -1,8 +1,9 @@
-import {Ignore, O, wvc_store} from "web-vcore";
+import {O, wvc_store} from "web-vcore";
 import {Graphlink} from "mobx-graphlink";
 import {immerable, setUseProxies, setAutoFreeze} from "immer";
 import {GraphDBShape} from "dm_common";
 import {MainState} from "./main.js";
+import {ignore} from "mobx-sync";
 
 //ConfigureMobX();
 
@@ -11,14 +12,14 @@ export class RootState {
 
 	@O accessor main = new MainState();
 
-	/* @O  @Ignore accessor firebase: any;
-	@O  @Ignore accessor firestore: any; */
-	@O  @Ignore accessor graphlink: Graphlink<RootState, GraphDBShape>;
+	/* @O @ignore accessor firebase: any;
+	@O @ignore accessor firestore: any; */
+	@O @ignore accessor graphlink: Graphlink<RootState, GraphDBShape>;
 
 	// modules
 	@O accessor wvc = wvc_store;
 
-	// @O  @Ignore accessor vMenu: VMenuState;
+	// @O @ignore accessor vMenu: VMenuState;
 }
 
 export const store = new RootState();
