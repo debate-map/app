@@ -2,6 +2,7 @@ import Moment from "moment";
 import {Assert, emptyArray, emptyArray_forLoading, WaitXThenRun} from "js-vextensions";
 import {DeepMap} from "mobx-graphlink/Dist/Utils/General/DeepMap";
 import chroma, {ColorSpaces} from "chroma-js";
+import {g} from "../../PrivateExports.js";
 
 G({Moment});
 
@@ -35,7 +36,7 @@ G({QuickIncrement});
 // methods: url writing/parsing
 // ==================
 
-export var inFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+export var inFirefox = g.navigator != null && g.navigator.userAgent.toLowerCase().includes("firefox");
 
 // others
 // ==================

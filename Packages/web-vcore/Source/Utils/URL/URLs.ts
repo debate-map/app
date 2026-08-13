@@ -2,8 +2,8 @@ import {GetCurrentURLString, VURL, DeepGet, ModifyString} from "js-vextensions";
 import {runInAction} from "mobx";
 import {RootStore} from "web-vcore_UserTypes";
 import {manager} from "../../Manager.js";
-import {e} from "../../PrivateExports.js";
 import {ActionFunc, RunInAction} from "../Store/MobX.js";
+import {MaybeLog} from "../General/Logging.js";
 
 export class Page {
 	constructor(initialData?: Partial<Page>, children?: {[key: string]: Page}) {
@@ -40,7 +40,7 @@ export function GetCurrentURL() {
 
 export let loadingURL = false;
 export function LoadURL(url: VURL) {
-	e.MaybeLog(a=>a.urlLoads, ()=>`Loading url: ${url.toString()}`);
+	MaybeLog(a=>a.urlLoads, ()=>`Loading url: ${url.toString()}`);
 	loadingURL = true;
 
 	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;

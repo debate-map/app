@@ -27,39 +27,41 @@ export function ShouldErrorBeIgnored(e: ErrorEvent|PromiseRejectionEvent|Event) 
 	return false;
 }
 
-//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
-window.addEventListener("error", e=>{
-	if (manager.ShouldErrorBeIgnored(e)) {
-		e.stopImmediatePropagation();
-		return false;
-	}
+if (typeof window !== "undefined") {
+	//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
+	window.addEventListener("error", e=>{
+		if (manager.ShouldErrorBeIgnored(e)) {
+			e.stopImmediatePropagation();
+			return false;
+		}
 
-	const {message, filename: filePath, lineno: line, colno: column, error} = e as {message: string, filename: string, lineno: number, colno: number, error: Error};
-	// sentry already picks up errors that make it here; so don't send it to sentry again
-	if (error != null) {
-		HandleError(error, false);
-	} else {
-		HandleError({stack: `${filePath}:${line}:${column}`, toString: ()=>message} as any, false);
-	}
-});
-window.addEventListener("unhandledrejection", e=>{
-	if (manager.ShouldErrorBeIgnored(e)) {
-		e.stopImmediatePropagation();
-		return false;
-	}
+		const {message, filename: filePath, lineno: line, colno: column, error} = e as {message: string, filename: string, lineno: number, colno: number, error: Error};
+		// sentry already picks up errors that make it here; so don't send it to sentry again
+		if (error != null) {
+			HandleError(error, false);
+		} else {
+			HandleError({stack: `${filePath}:${line}:${column}`, toString: ()=>message} as any, false);
+		}
+	});
+	window.addEventListener("unhandledrejection", e=>{
+		if (manager.ShouldErrorBeIgnored(e)) {
+			e.stopImmediatePropagation();
+			return false;
+		}
 
-	//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
-	HandleError(e["reason"]);
-});
-window.addEventListener("onrejectionhandled", e=>{
-	if (manager.ShouldErrorBeIgnored(e)) {
-		e.stopImmediatePropagation();
-		return false;
-	}
+		//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
+		HandleError(e["reason"]);
+	});
+	window.addEventListener("onrejectionhandled", e=>{
+		if (manager.ShouldErrorBeIgnored(e)) {
+			e.stopImmediatePropagation();
+			return false;
+		}
 
-	//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
-	HandleError(e["reason"]);
-});
+		//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
+		HandleError(e["reason"]);
+	});
+}
 
 export const stringifyError_errorOccurredPrefix = "An error has occurred: ";
 export function StringifyError(error: Error, allowAddErrorOccurredPrefix = true) {

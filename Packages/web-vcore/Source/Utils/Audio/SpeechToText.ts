@@ -1,9 +1,10 @@
 import {ToJSON} from "js-vextensions";
+import {g} from "../../PrivateExports.js";
 
-const SpeechRecognitionClass = window["SpeechRecognition"] || window["webkitSpeechRecognition"];
+const SpeechRecognitionClass = g.SpeechRecognition || g.webkitSpeechRecognition;
 
 // Note that if the user checks "Desktop site", the user-agent will no longer contain "Android", breaking this detection.
-export const inChromeAndroid = navigator.userAgent.includes("; Android ") && navigator.userAgent.includes(" Chrome/");
+export const inChromeAndroid = g.navigator != null && navigator.userAgent.includes("; Android ") && navigator.userAgent.includes(" Chrome/");
 
 function RemoveDanglingSpaces(str: string) {
 	return str.replace(/(^ | $)/g, "");

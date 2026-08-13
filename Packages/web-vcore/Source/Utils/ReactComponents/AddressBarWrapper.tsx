@@ -3,17 +3,18 @@ import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import React from "react";
 import {manager} from "../../Manager.js";
 import {MaybeLog} from "../General/Logging.js";
-import {loadingURL, NotifyURLLoaded, LoadURL} from "../URL/URLs.js";
-import {e} from "../../PrivateExports.js";
+import {loadingURL, NotifyURLLoaded, LoadURL, GetCurrentURL} from "../URL/URLs.js";
 import {Observer} from "../Store/MobX.js";
 import {observer_mgl} from "mobx-graphlink";
 
 // this handles: address-bar-change (from user pressing back/forward) -> store-changes
-window.addEventListener("popstate", e=>{
-	//LoadURL(e.state);
-	//LoadURL(VURL.FromLocationObject(window.location));
-	LoadURL(VURL.Parse(window.location.href));
-});
+if (typeof window !== "undefined") {
+	window.addEventListener("popstate", e=>{
+		//LoadURL(e.state);
+		//LoadURL(VURL.FromLocationObject(window.location));
+		LoadURL(VURL.Parse(window.location.href));
+	});
+}
 
 /**
  * This handles address-bar-change (from history.pushState and history.replaceState, eg. from Link components) -> store-changes.
@@ -46,7 +47,7 @@ export const AddressBarWrapper = observer_mgl({bailHandler_opts: {loadingUI: ()=
 		/*const startURL = e.GetCurrentURL(true).toString({domain: false});
 		//action = replace(startURL);
 		history.replaceState(null, null, startURL.toString());*/
-		MaybeLog(a=>a.urlLoads, ()=>`Dispatching start-url: ${e.GetCurrentURL()} @push:${pushURL}`);
+		MaybeLog(a=>a.urlLoads, ()=>`Dispatching start-url: ${GetCurrentURL()} @push:${pushURL}`);
 	}
 
 	// action.byUser = false;

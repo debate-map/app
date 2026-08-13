@@ -17,6 +17,16 @@
 			"group": "build",
 		},
 
+		// wvc
+		{
+			"label": "## wvc.tsc",
+			"type": "shell",
+			"command": "npm start wvc.tsc",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
+
 		// backend
 		{
 			"label": "## backend.dockerPrep",

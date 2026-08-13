@@ -1,19 +1,19 @@
-import {CE, E} from "js-vextensions";
-
+// override system, start section (disabled for now)
 // import own exports; thus we gain access to the exports object, letting us modify it
-import * as frameworkExportsObject from "./index.js";
+/*import * as frameworkExportsObject from "./index.js";
+// this call installs a monkey-patch that keeps exports configurable
+import {RestoreOrigDefinePropertyFunc} from "./@EnableExportOverwrites.js";
+export * from "./@EnableExportOverwrites.js";
+// special key, marking this module's exports object, which allows the patch in ExportOverwriteEnabler.ts to make the remaining exports overwriteable
+//export const __EnableExportOverwrites__ = true;*/
+
 import "js-vextensions/Helpers/@ApplyCECode.js";
 //export * from "./UserTypes.js";
 import "./UserTypes.js";
 import "./Utils/General/DuplicateLibCheck.js";
-import {RestoreOrigDefinePropertyFunc} from "./@EnableExportOverwrites.js";
 
 //type __ = typeof import("../node_modules/js-vextensions/Helpers/@ApplyCETypes");
 type __ = typeof import("js-vextensions/Helpers/@ApplyCETypes"); // eslint-disable-line
-
-export * from "./@EnableExportOverwrites.js";
-// special key, marking this module's exports object, which allows the patch in ExportOverwriteEnabler.ts to make the remaining exports overwriteable
-//export const __EnableExportOverwrites__ = true;
 
 export * from "./Manager.js";
 
@@ -85,26 +85,15 @@ export * from "./Utils/UI/UPlotDefaults.js";
 export * from "./Utils/URL/History.js";
 export * from "./Utils/URL/URLs.js";
 
-//export * from "./__DisableExportOverwrites__";
-export const __DisableExportOverwrites__ = {};
+// override system, end section (disabled for now)
+// ==========
+
+/*export const __DisableExportOverwrites__ = {};
 // now that our exports are done being attached, we can remove our replacement of Object.defineProperty
 // (attempt is also made in handler itself, on seeing the placeholder export/property above, but it seems to not work reliably)
 RestoreOrigDefinePropertyFunc();
 
-// override system
-// ==========
-
-/*export const WVC_exports_orig = E(frameworkExportsInterface);
-export const WVC_exports_final = frameworkExportsInterface;
-export function WVC_OverrideExport(newValue_withNameProp: any);
-export function WVC_OverrideExport(exportName: string, newValue: any);
-export function WVC_OverrideExport(...args) {
-	let exportName: string, newValue: any;
-	if (args.length == 1) [exportName, newValue] = [args[0].name, args[0]];
-	else [exportName, newValue] = args;
-	WVC_exports_final[exportName] = newValue;
-}*/
-
+// todo: probably remove this override system soon (it isn't used atm and is arguably pretty confusing)
 export const WVC_exports_orig = E(CE(frameworkExportsObject).ExcludeKeys("WVC_exports_orig", "WVC_exports_final", "WVC_OverrideExport"));
 export const WVC_exports_final = frameworkExportsObject;
 export function WVC_OverrideExport(newValue_withNameProp: any);
@@ -115,4 +104,4 @@ export function WVC_OverrideExport(...args) {
 	else [exportName, newValue] = args;
 	delete WVC_exports_final[exportName]; // delete getter-setter
 	WVC_exports_final[exportName] = newValue;
-}
+}*/
