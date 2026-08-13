@@ -1,12 +1,12 @@
 import {enableES5, setAutoFreeze, setUseProxies} from "immer";
-import {CE, E, RemoveCircularLinks, ToJSON, emptyArray} from "js-vextensions";
-import {ObservableMap, ObservableSet, _getAdministration, configure, observable, observableDeep, observableRef, observableShallow, observableStruct, onReactionError, reaction} from "mobx";
+import {CE, E, RemoveCircularLinks, ToJSON} from "js-vextensions";
+import {ObservableMap, ObservableSet, configure, observable, observableDeep, observableRef, observableShallow, observableStruct, onReactionError, reaction} from "mobx";
 import {BailHandler, BailHandler_Options, RunInAction} from "mobx-graphlink";
 import {ignore, version} from "mobx-sync";
 import {observer} from "mobx-react";
 import {EnsureClassProtoRenderFunctionIsWrapped} from "react-vextensions";
 import {HandleError} from "../General/Errors.js";
-import {isObservableMap, isObservableSet, $mobx} from "mobx";
+import {isObservable, $mobx} from "mobx";
 //import {getAdministration, ObservableObjectAdministration, storedAnnotationsSymbol} from "mobx/dist/internal";
 /*export function RunInAction(name: string, action: ()=>any) {
 	 Object.defineProperty(action, "name", {value: name});
@@ -180,7 +180,8 @@ export class GetMirrorOfMobXTree_Options {
 	/** Most callers of GetMirrorOfMobXTree only care to have mobx-prop pathways mirrored, and excluding the rest improves perf substantially. */
 	//onlyCopyMobXNodes = true;
 	onlyCopyMobXProps = true;
-	mirrorObservableRefs = false; // why is this false by default?
+	/** Whether to continue mobx-drill-down [ie. discovering things to un-mobx-ify] into an @observable.ref property. (rarely needed) */
+	drillIntoObservableRefs = false;
 
 	/** If enabled, removes circular-links from mirror tree. This doesn't affect original object-tree, and makes the mirror tree usable in immer.produce(). */
 	removeCircularLinks = false; // disabled by default, since onlyCopyMobXNodes is usually sufficient (and enabling this just adds some slowdown)
@@ -226,52 +227,30 @@ export function GetMirrorOfMobXTree<T>(mobxTree: T, opt = new GetMirrorOfMobXTre
 	return mobxTree["$mirror"];
 }
 
-/** Wrapper around _getAdministration that returns null when encountering a non-mobx object, rather than erroring. */
-export function GetAdministration_Safe(possibleMobXTree: any) {
-	/*try {
-		return _getAdministration(possibleMobXTree) as ObservableObjectAdministration;
-	} catch (ex) {
-		return null;
-	}*/
-
-	const thing = possibleMobXTree; // alias to match mobx getAdministration function
-	// for this case, return null instead of mobx's default (throwing an error)
-	if (!thing) return null;
-	// property-branch commented here; not necessary because we already handle key-getting for `ObservableMap`s
-	//if (property !== undefined) return getAdministration(getAtom(thing, property))
-	// commented for now, because newer mobx versions don't expose these
-	//if (isAtom(thing) || isComputedValue(thing) || isReaction(thing)) return thing
-	if (isObservableMap(thing) || isObservableSet(thing)) return thing
-	if (thing[$mobx]) return thing[$mobx];
-	return null;
-}
-
 export function StartUpdatingMirrorOfMobXTree(mobxTree: any, tree_plainMirror: any, opt = new GetMirrorOfMobXTree_Options()) {
 	//const stopUpdating = autorun(()=>{
 	reaction(()=>{
 		const sourceIsMap = mobxTree instanceof Map || mobxTree instanceof ObservableMap;
 		const targetIsMap = tree_plainMirror instanceof Map || tree_plainMirror instanceof ObservableMap;
-		const mobxInfo = GetAdministration_Safe(mobxTree);
 
-		const keys = sourceIsMap ? mobxTree.keys() : Object.keys(mobxTree); // always access the keys, to ensure the autorun subscribes to them (using the mobx-admin-object path doesn't do this)
-		//const keys = sourceIsMap || mobxInfo ? mobx_keys(mobxTree) : Object.keys(mobxTree); // always access the keys, to ensure the autorun subscribes to them (using the mobx-admin-object path doesn't do this)
-		const mobxKeys =
-			// if mobxTree is an Observable[Map/Set], then all of its keys are "mobx props"/reactive
-			opt.onlyCopyMobXProps && !(mobxTree instanceof ObservableMap || mobxTree instanceof ObservableSet)
-				//? mobxInfo?.keys_() ?? emptyArray
-				// Why do we use x.values_.keys() rather than x.keys_()? Because the former works on both Map's and arrays.
-				//? [...(mobxInfo?.values_?.keys() ?? emptyArray)] // converting to array makes debugging a bit nicer (fixes watch-panel glitch of showing no-items on 2nd+ views), but it's not necessary
-				? mobxInfo?.values_?.keys() ?? emptyArray
-				: keys;
+		// always access the keys, to ensure the autorun subscribes to them (using the mobx-admin-object path doesn't do this)
+		const keys = sourceIsMap ? mobxTree.keys() : Object.keys(mobxTree);
+		// if mobxTree is an Observable[Map/Set], then all of its keys are "mobx props"/reactive
+		const isMapOrSet = mobxTree instanceof ObservableMap || mobxTree instanceof ObservableSet;
+		// The observable's administration key-list: for ObservableObjects this is richer than `keys`
+		// because it also includes *computed* props (which mobx's public keys() omits).
+		// ObservableMaps/Sets have no values_, so we just use the plain `keys` for them.
+		const mobxKeys = (isMapOrSet ? keys : mobxTree[$mobx]?.values_?.keys()) ?? [];
+		const keysToMirror = opt.onlyCopyMobXProps ? mobxKeys : keys;
 		const mobxStoredAnnotations = GetMobXStoredAnnotations(mobxTree);
 
-		for (const key of mobxKeys) {
+		for (const key of keysToMirror) {
 			const valueFromSource = sourceIsMap ? mobxTree.get(key) : mobxTree[key]; // this counts as a mobx-get, meaning the autorun subscribes, so this func reruns when the prop-value changes
 			//const valueFromSource = sourceIsMap || mobxInfo ? mobx_get(mobxTree, key) : mobxTree[key]; // this counts as a mobx-get, meaning the autorun subscribes, so this func reruns when the prop-value changes
-			const fieldObservedAsRefOnly = mobxStoredAnnotations?.[key]?.annotationType_ == "observable.ref" || GetAdministration_Safe(valueFromSource) == null;
+			const fieldObservedAsRefOnly = mobxStoredAnnotations?.[key]?.annotationType_ == "observable.ref" || !isObservable(valueFromSource);
 
 			let valueForTarget;
-			if (typeof valueFromSource == "object" && valueFromSource != null && (opt.mirrorObservableRefs || !fieldObservedAsRefOnly)) {
+			if (typeof valueFromSource == "object" && valueFromSource != null && (opt.drillIntoObservableRefs || !fieldObservedAsRefOnly)) {
 				//if (!opt.onlyCopyMobXNodes || valueFromSource[$mobx] != null) {
 				valueForTarget = GetMirrorOfMobXTree(valueFromSource, opt.removeCircularLinks ? E(opt, {removeCircularLinks: false}) : opt);
 			} else {
