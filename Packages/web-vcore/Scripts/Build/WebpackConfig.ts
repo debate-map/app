@@ -6,7 +6,7 @@ import {CE, E} from "js-vextensions";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import {createRequire} from "module";
 import pathModule from "path";
-import SpriteLoaderPlugin from "svg-sprite-loader/plugin.js";
+//import SpriteLoaderPlugin from "svg-sprite-loader/plugin.js";
 import {fileURLToPath} from "url";
 import webpack from "webpack";
 import WebpackStringReplacer from "webpack-string-replacer";
@@ -434,12 +434,13 @@ export function CreateWebpackConfig(opt: CreateWebpackConfig_Options) {
 	}
 	webpackConfig.plugins.push(new IgnoreNotFoundExportPlugin());
 
-	webpackConfig.plugins.push(new SpriteLoaderPlugin());
+	// commented; svg-sprite-loader was removed as dep (we use rspack + type:asset/source + custom svg injector now)
+	/*webpackConfig.plugins.push(new SpriteLoaderPlugin());
 	webpackConfig.module!.rules.push({
 		test: /\.svg$/,
 		loader: SubdepPath("svg-sprite-loader"),
 		options: {}, // "options" must be present
-	});
+	});*/
 
 	if (OUTPUT_STATS) {
 		MakeSoWebpackConfigOutputsStats(webpackConfig);

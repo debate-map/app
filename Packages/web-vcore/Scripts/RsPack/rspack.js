@@ -218,7 +218,10 @@ export const buildConfig = options=>{
 				},
 				{
 					test: /\.svg$/,
-					loader: "svg-sprite-loader",
+					// commented; causes compile error in rspack v2
+					//loader: "svg-sprite-loader",
+					// just load the raw source; we'll inject it ourselves using SVGInjectHelper.ts
+					type: "asset/source",
 				},
 			],
 		},

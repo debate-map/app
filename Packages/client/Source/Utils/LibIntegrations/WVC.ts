@@ -4,7 +4,7 @@ import {RootState, store} from "Store/index.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddErrorMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
+import {ActionFunc, AddErrorMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, InjectSVGsFromRequireContextAndGetIconInfo, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
 import produce from "immer";
 import {runInAction} from "mobx";
 import {AddSchema, WithStore} from "mobx-graphlink";
@@ -12,10 +12,10 @@ import "./WVC/Overrides.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
-const iconInfo = {};
+/*const iconInfo = {};
 context.keys().forEach(filename=>{
 	iconInfo[filename] = context(filename).default;
-});
+});*/
 
 //declare module "web-vcore/Source/UserTypes" {
 //declare module "web-vcore/Source/UserTypes" {
@@ -34,7 +34,7 @@ export function InitWVC() {
 		// styling
 		colors: {},
 		zIndexes,
-		iconInfo,
+		iconInfo: InjectSVGsFromRequireContextAndGetIconInfo(context),
 		useExpandedNavBar: ()=>true,
 
 		// core
