@@ -3,6 +3,7 @@ import {hasHotReloaded} from "Main";
 import React, {useEffect, useMemo, useRef} from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
+import {InternalCrawlerReadinessMonitor} from "Utils/InternalCrawlerReadiness";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_Options, LoadURL, PageContainer, RunInAction} from "web-vcore";
 import chroma from "chroma-js";
@@ -180,7 +181,7 @@ g.mousePos = new Vector2(undefined, undefined);
 G({ctrlDown: false, shiftDown: false, altDown: false});
 
 export const RootUI = observer_mgl(()=>{
-	const {page} = store.main;
+	const {page, internalCrawlerMode} = store.main;
 
 	return (
 		<Column className='background' style={{height: "100%"}}>
@@ -199,6 +200,7 @@ export const RootUI = observer_mgl(()=>{
 				key={page} // use key, so that error-message clears when user changes pages
 			>
 				<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+					{internalCrawlerMode && <InternalCrawlerReadinessMonitor/>}
 					{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
 					{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
 					{page == "database" && <DatabaseUI/>}

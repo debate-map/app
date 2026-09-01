@@ -115,12 +115,13 @@ fn readiness_state(tab: &Tab, url: &Url) -> anyhow::Result<String> {
             return "internalCrawler error: " + (crawler.reason || "unknown");
           }
           if (status !== "ready") return "internalCrawler " + status;
-        } else if (document.readyState !== "complete") {
-          return "document " + document.readyState;
+        } else {
+          if (document.readyState !== "complete") {
+            return "document " + document.readyState;
+          }
+          const visibleText = document.body ? (document.body.innerText || "") : "";
+          if (visibleText.includes("Loading...")) return "visible Loading..."; // just a heuristic, real page content can contain "Loading..." so we skip this when the app signal exists
         }
-
-        const visibleText = document.body ? (document.body.innerText || "") : "";
-        if (visibleText.includes("Loading...")) return "visible Loading...";
 
 		const map = document.querySelector(".MapUI");
 		if (!map) return requiresMap ? "expected map missing" : "ready";
