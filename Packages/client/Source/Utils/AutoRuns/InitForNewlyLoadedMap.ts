@@ -6,11 +6,13 @@ import {ACTNodeExpandedSet, GetAnchorNodePath, GetMapView, GetNodeView} from "St
 import {ACTSetAnchorNodeAndViewOffset, currentMapUI} from "UI/@Shared/Maps/MapUI.js";
 import {RunInAction} from "web-vcore";
 import {Assert, NN, Vector2} from "js-vextensions";
-import {GetAsync} from "mobx-graphlink";
+import {BailUnless, GetAsync} from "mobx-graphlink";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 //let lastMapID: string|n;
 AutoRun_HandleBail(()=>{
+	BailUnless(graph.initialized); // pre-init the db-accessors just return placeholder nulls, which GetAsync below would take as real answers (initialized is observable, so this refires once it flips)
 	Me(); // watch for user-login-data changes
 
 	const mapID = GetOpenMapID();

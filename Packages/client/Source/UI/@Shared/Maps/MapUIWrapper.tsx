@@ -17,7 +17,8 @@ import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
 import {TimelineEffectApplier_Smooth} from "./MapUI/TimelineEffectApplier_Smooth.js";
 import {TimeTrackerUI} from "./MapUI/TimeTrackerUI.js";
-import {observer_mgl} from "mobx-graphlink";
+import {BailUnless, observer_mgl} from "mobx-graphlink";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 
 export type Padding = {
 	left: number,
@@ -70,7 +71,10 @@ export const MapUIWrapper = observer_mgl((props: MapUIWrapper_Props)=>{
 
 	// map fetch + access checks
 	const map = GetMap(mapID);
-	if (map == null) return <MapUIWaitMessage message="Map is private/deleted." />;
+	if (map == null) {
+		BailUnless(graph.initialized, "Map not yet loadable, since graphlink is not yet initialized."); // pre-init, GetMap's null just means "couldn't ask yet", so bail like any other loading comp
+		return <MapUIWaitMessage message="Map is private/deleted."/>;
+	}
 
 	// defensive; in case something goes wrong with the server-side permission-enforcing, do a basic check here as well
 	if (!DoesMapPolicyGiveMeAccess_ExtraCheck(mapID)) return <MapUIWaitMessage message="Map is private/deleted."/>;

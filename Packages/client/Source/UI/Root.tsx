@@ -7,7 +7,7 @@ import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink
 import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_Options, LoadURL, PageContainer, RunInAction} from "web-vcore";
 import chroma from "chroma-js";
 import {Clone, E, SleepAsyncUntil, Vector2} from "js-vextensions";
-import {AsyncTrunk} from "mobx-sync";
+import {AsyncTrunk, collectFieldsReplacer} from "mobx-sync";
 import {makeObservable, observable} from "mobx";
 import {DragDropContext as DragDropContext_Beautiful} from "@hello-pangea/dnd";
 import {ColorPickerBox, Column, Text} from "react-vcomponents";
@@ -80,7 +80,7 @@ export const RootUIWrapper = observer_mgl(()=>{
 					this.persistingScheduled = false;
 					try {
 						//console.log("Saving...");
-						const storeJSON = JSON.stringify(this.store);
+						const storeJSON = JSON.stringify(this.store, collectFieldsReplacer); // same replacer mobx-sync's own persist() uses, without it mobx7 accessor-based classes (MapState, MapView, NodeView) serialize as {} and come back with no defaults
 						await this.storage.setItem(this.storageKey, storeJSON);
 					} catch (reason) {
 						this.onError(reason);

@@ -166,7 +166,7 @@ export function GetNodeViewsAlongPath(mapID: string|n, path: string | string[] |
 	const pathNodes = ToPathNodes(path);
 	const nodeViews = [] as (NodeView|n)[];
 	for (const [i, pathNode] of pathNodes.entries()) {
-		if (nodeViews.length && nodeViews.Last() == null) {
+		if (nodeViews.length && nodeViews.LastOrX() == null) { // LastOrX, since Last() throws on an undefined entry rather than letting us null-check it
 			nodeViews.push(null);
 			continue;
 		}

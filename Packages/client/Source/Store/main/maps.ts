@@ -25,12 +25,12 @@ export class MapsState {
 	// @ref(MapState_) maps = {} as {[key: string]: MapState};
 	// @map(MapState_) maps = observable.map<string, MapState>();
 	// @O accessor maps = {} as ObservableMap<string, MapState>;
-	@O @version(2) accessor mapStates = observable.map<string, MapState>();
+	@O @version(3) accessor mapStates = observable.map<string, MapState>(); // v3: entries persisted before the collectFieldsReplacer fix (see Root.tsx) are just {} and crash on restore, so discard them
 	/* ACTEnsureMapStateInit(mapID: string) {
 		if (this.maps.get(mapID)) return;
 		this.maps.set(mapID, new MapState());
 	} */
-	@O @version(2) accessor mapViews = observable.map<string, MapView>();
+	@O @version(3) accessor mapViews = observable.map<string, MapView>(); // v3: same reason as mapStates
 
 	@O accessor nodeLastAcknowledgementTimes = observable.map<string, number>();
 	@O @ignore accessor currentNodeBeingAdded_path: string|n;
