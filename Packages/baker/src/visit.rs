@@ -480,7 +480,8 @@ impl GlobalVisitState {
 		frontier.is_empty()
 	}
 
-	pub fn re_add_failed_visit(&self, url: Url, error: &str) -> anyhow::Result<FailedVisitAction> {
+	/// `count_attempt: false` requeues without spending the page's retry budget, for failures that aren't the page's fault (backend outage).
+	pub fn re_add_failed_visit(&self, url: Url, error: &str, count_attempt: bool) -> anyhow::Result<FailedVisitAction> {
 		let normalized_url = Self::normalize_url(&url);
 		let mut frontier = self.frontier.lock().unwrap();
 		if !frontier.visiting.remove(&normalized_url) {
@@ -490,7 +491,9 @@ impl GlobalVisitState {
 		let had_to_visit = frontier.to_visit.contains(&normalized_url);
 		let previous_failure = frontier.failures.get(&normalized_url).cloned();
 		let failure = frontier.failures.entry(normalized_url.clone()).or_default();
-		failure.attempts += 1;
+		if count_attempt {
+			failure.attempts += 1;
+		}
 		failure.last_error = error.to_string();
 
 		let attempts = failure.attempts;
@@ -586,11 +589,13 @@ mod tests {
 		assert!(state.add_to_visit(page.clone()).unwrap());
 		assert!(!state.add_to_visit(normalized.clone()).unwrap());
 
+		let outage = take(&state, CrawlQueue::Regular, &groups);
+		assert_eq!(state.re_add_failed_visit(outage, "backend down", false).unwrap(), FailedVisitAction::Requeued { attempts: 0, max_retries: 2 }); // transient failures don't spend the retry budget
 		let first = take(&state, CrawlQueue::Regular, &groups);
 		assert_eq!(first.query(), Some("db=prod"));
-		assert_eq!(state.re_add_failed_visit(first, "temporary").unwrap(), FailedVisitAction::Requeued { attempts: 1, max_retries: 2 });
+		assert_eq!(state.re_add_failed_visit(first, "temporary", true).unwrap(), FailedVisitAction::Requeued { attempts: 1, max_retries: 2 });
 		let second = take(&state, CrawlQueue::Regular, &groups);
-		assert_eq!(state.re_add_failed_visit(second, "permanent").unwrap(), FailedVisitAction::Exhausted { attempts: 2, max_retries: 2 });
+		assert_eq!(state.re_add_failed_visit(second, "permanent", true).unwrap(), FailedVisitAction::Exhausted { attempts: 2, max_retries: 2 });
 		assert_eq!(state.force_revisit_many([page.clone()]).unwrap(), vec![normalized.clone()]);
 
 		let retry = take(&state, CrawlQueue::Regular, &groups);

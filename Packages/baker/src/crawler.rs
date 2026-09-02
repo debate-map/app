@@ -13,6 +13,9 @@ use std::time::Duration;
 use tracing::{error, info, warn};
 use url::Url;
 
+const FAILURE_BACKOFF: Duration = Duration::from_secs(3);
+const OUTAGE_BACKOFF: Duration = Duration::from_secs(15);
+
 pub struct CrawlerTab {
 	/// The browser tab that will be used for crawling
 	tab: Arc<Tab>,
@@ -139,6 +142,7 @@ impl CrawlerTab {
 			match self.process_and_bake(&url, Some(group)) {
 				Ok(reserved_child) => next_url = reserved_child,
 				Err(err) => {
+					*self.loaded_isolated_group.lock().unwrap() = None; // reload the parent page next time, switching routes on a page with a dead websocket just fails again
 					self.record_failure(url, err);
 					next_url = None;
 				},
@@ -166,12 +170,16 @@ impl CrawlerTab {
 	fn record_failure(&self, url: Url, err: anyhow::Error) {
 		let error = format!("{err:#}");
 		error!("{error}");
-		match self.visit_state.re_add_failed_visit(url.clone(), &error) {
+		// the app reports a dead websocket, and a refused navigation means the dev server is gone, neither is the page's fault so don't burn its retries on an outage
+		let backend_outage = error.contains("websocket disconnected") || error.contains("Failed to navigate");
+		match self.visit_state.re_add_failed_visit(url.clone(), &error, !backend_outage) {
+			Ok(FailedVisitAction::Requeued { .. }) if backend_outage => warn!("Requeued page {} without counting the attempt (backend outage)", url.as_str()),
 			Ok(FailedVisitAction::Requeued { attempts, max_retries }) => warn!("Requeued failed page {} after attempt {}/{}", url.as_str(), attempts, max_retries),
 			Ok(FailedVisitAction::Exhausted { attempts, max_retries }) => error!("Skipping failed page {} after attempt {}/{}", url.as_str(), attempts, max_retries),
 			Ok(FailedVisitAction::Ignored) => {},
 			Err(err) => error!("Failed to record failed page {}: {err}", url.as_str()),
 		}
+		sleep(if backend_outage { OUTAGE_BACKOFF } else { FAILURE_BACKOFF }); // give things a moment before this tab takes more work, retrying instantly just churns
 	}
 
 	pub fn run(&self, worker_id: usize, should_retire: Arc<AtomicBool>) {
