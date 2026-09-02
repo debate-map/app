@@ -5,9 +5,9 @@ import {VMenuItem, VMenuStub} from "react-vmenu";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {ES, Icon, RunInAction} from "web-vcore";
+import {ES, Icon, Link, RunInAction} from "web-vcore";
 import {Button, Div, Row} from "react-vcomponents";
-import {ChildLimitInfo} from "Store/main/maps.js";
+import {ChildLimitInfo, GetDebateMapCrawlerCanonicalFocusPath} from "Store/main/maps.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 import {observer_mgl} from "mobx-graphlink";
@@ -25,9 +25,11 @@ type ChildLimitBar_Props = {
 };
 
 export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
-	const {map, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo, ref} = props;
+	const {map, node, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo, ref} = props;
 	const {direction, showTarget_min, showTarget_actual, childCount} = childLimitInfo;
 	const nodeView = GetNodeView(map.id, path)!;
+	const hiddenChildCount = childCount - childLimitInfo.childCountShowing;
+	const crawlerCanonicalFocusPath = childLimitInfo.crawlerPathTrimmed ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, node.id) : null;
 
 	const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 		// if limit-bar is for showing/hiding premises, have the connector actually be visible (to clarify the limit-bar's role of involving the premises)
@@ -60,7 +62,21 @@ export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 				paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 			}}
 		>
-			<Button title="Show more" enabled={childLimitInfo.HaveShowMoreButtonEnabled()} style={ES({flex: 1})}
+			{/* links to the parent's focus page, where all siblings show */}
+			{childLimitInfo.crawlerPathTrimmed && crawlerCanonicalFocusPath != null &&
+				<Link
+					title={`View ${hiddenChildCount} hidden sibling${hiddenChildCount == 1 ? "" : "s"}`}
+					style={{flex: 1, color: "inherit", textDecoration: "none"}}
+					actionFunc={s=>{
+						s.main.page = "debates";
+						s.main.debates.selectedMapID = map.id;
+						s.main.debates.focusedNodePath = crawlerCanonicalFocusPath || null;
+					}}
+				>
+					<Button style={ES({width: "100%", boxSizing: "border-box"})} text={<Row><Icon icon={`arrow-${direction}`} size={15}/><Div ml={3}>{hiddenChildCount}</Div></Row>}/>
+				</Link>
+			}
+			{!childLimitInfo.crawlerPathTrimmed && <Button title="Show more" enabled={childLimitInfo.HaveShowMoreButtonEnabled()} style={ES({flex: 1})}
 				text={
 					<Row>
 						<Icon icon={`arrow-${direction}`} size={15}/>
@@ -73,8 +89,8 @@ export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 					RunInAction("ChildLimitBar.showMore.onClick", ()=>{
 						nodeView[`childLimit_${direction}`] = childLimitInfo.ShowMore_NewLimit();
 					});
-				}}/>
-			<Button ml={5} title="Show less" enabled={childLimitInfo.HaveShowLessButtonEnabled()} style={ES({flex: 1})}
+				}}/>}
+			{!childLimitInfo.crawlerPathTrimmed && <Button ml={5} title="Show less" enabled={childLimitInfo.HaveShowLessButtonEnabled()} style={ES({flex: 1})}
 				text={
 					<>
 						<Row>
@@ -95,7 +111,7 @@ export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 					RunInAction("ChildLimitBar.showLess.onClick", ()=>{
 						nodeView[`childLimit_${direction}`] = childLimitInfo.ShowLess_NewLimit();
 					});
-				}}/>
+				}}/>}
 		</Row>
 	);
 });

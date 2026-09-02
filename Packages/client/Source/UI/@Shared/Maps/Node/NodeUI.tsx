@@ -128,7 +128,8 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	const useForcedExpand = UseForcedExpandForPath(path, forLayoutHelper);
 	const nodeChildrenToShow = useForcedExpand ? GetNodeChildren(node, path) : GetNodeChildrenToShow(node, path);
 	const nodeView = GetNodeView(map.id, path);
-	const boxExpanded = (useForcedExpand ? true : null) ?? nodeView?.expanded ?? false;
+	// crawler slices ignore saved expansion state
+	const boxExpanded = useForcedExpand || (!store.main.internalCrawlerMode && (nodeView?.expanded ?? false));
 
 	const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 	const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);

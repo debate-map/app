@@ -1,4 +1,4 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, DMap, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap, GetNodeChildrenL3, ChildGroup, SearchUpFromNodeForNodeMatchingX} from "dm_common";
 import {observable} from "mobx";
 import {CreateAccessor} from "mobx-graphlink";
 import {store} from "Store";
@@ -208,7 +208,8 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 	if (pathHasCycle) return false; // never force-expand a path that has a cycle
 
 	const crawlerFocusPath = GetDebateMapCrawlerFocusPath();
-	if (crawlerFocusPath && (path == crawlerFocusPath || crawlerFocusPath.startsWith(`${path}/`))) return true;
+	// crawler routes expand only their url path, regardless of saved map state.
+	if (crawlerFocusPath) return path == crawlerFocusPath || crawlerFocusPath.startsWith(`${path}/`);
 
 	//if (forLayoutHelperMap) return true;
 	if (forLayoutHelperMap) {
@@ -249,6 +250,49 @@ export const GetDebateMapCrawlerFocusPath = CreateAccessor(()=>{
 	return [rootNodeID, ...focusedNodeIDs].join("/");
 });
 
+const CrawlerPathNodeMatchesRoot = (nodeID: string, rootNodeID: string)=>nodeID == rootNodeID;
+export const GetDebateMapCrawlerCanonicalFocusPath = CreateAccessor((rootNodeID: string, focusedNodeID: string): string|null=>{
+	if (focusedNodeID == rootNodeID) return "";
+
+	const fullPath = SearchUpFromNodeForNodeMatchingX.CatchBail(null, focusedNodeID, CrawlerPathNodeMatchesRoot, rootNodeID);
+	if (fullPath == null) return null;
+	return fullPath.split("/").slice(1).join("/");
+});
+
+const crawlerLargeDisplayedGroupSize = 10;
+const crawlerDisplayedChildGroups = [ChildGroup.generic, ChildGroup.truth, ChildGroup.relevance, ChildGroup.freeform];
+const GetDebateMapCrawlerDisplayedGroupSize = CreateAccessor((path: string): number|null=>{
+	// group size as the crawler shows it (argument premises count too)
+	const node = GetNodeL3(path);
+	if (node == null) return null;
+
+	const children = GetNodeChildrenL3.CatchBail(null, node.id, path);
+	if (children == null) return null;
+	const displayedChildren = children.filter(child=>{
+		const group = child.link?.group;
+		return group != null && crawlerDisplayedChildGroups.includes(group);
+	});
+
+	let result = displayedChildren.length;
+	for (const child of displayedChildren) {
+		if (child.type != NodeType.argument) continue;
+		const premises = GetNodeChildrenL3.CatchBail(null, child.id, `${path}/${child.id}`);
+		if (premises == null) return null;
+		result += premises.filter(premise=>premise.link?.group == ChildGroup.generic).length;
+	}
+	return result;
+});
+
+export const GetDebateMapCrawlerTrimmedPathChildID = CreateAccessor((parentPath: string)=>{
+	const focusPath = GetDebateMapCrawlerFocusPath();
+	if (focusPath == null || parentPath == focusPath || !focusPath.startsWith(`${parentPath}/`)) return null;
+
+	const parentDepth = GetPathNodeIDs(parentPath).length - 1;
+	const displayedGroupSize = GetDebateMapCrawlerDisplayedGroupSize(parentPath);
+	if (displayedGroupSize == null || displayedGroupSize < crawlerLargeDisplayedGroupSize) return null;
+	return GetPathNodeIDs(focusPath)[parentDepth + 1];
+});
+
 export class ChildLimitInfo {
 	constructor(data: Partial<ChildLimitInfo>) { Object.assign(this, data); }
 
@@ -264,6 +308,7 @@ export class ChildLimitInfo {
 
 	childCount: number;
 	childCountShowing: number;
+	crawlerPathTrimmed: boolean;
 
 	ShowMore_NewLimit() {
 		return (this.showTarget_actual + this.adjustDelta).KeepBetween(this.showTarget_min, this.showTarget_max);
@@ -283,10 +328,15 @@ export class ChildLimitInfo {
 	}
 
 	ShouldLimitBarShow() {
+		if (this.crawlerPathTrimmed) return this.childCountShowing < this.childCount;
 		return this.HaveShowMoreButtonEnabled() || this.HaveShowLessButtonEnabled();
 	}
 }
-export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map: DMap, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
+export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map: DMap, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number, crawlerPathChildShowing: boolean|n): ChildLimitInfo {
+	if (crawlerPathChildShowing != null) { // crawler slice trimming, only the path child shows and the bar just reports the hidden rest
+		const childCountShowing = Number(crawlerPathChildShowing);
+		return new ChildLimitInfo({direction, adjustDelta: 0, showTarget_initial: childCountShowing, showTarget_min: childCountShowing, showTarget_max: childCount, showTarget_actual: childCountShowing, childCount, childCountShowing, crawlerPathTrimmed: true});
+	}
 	// if the map's root node, show all children
 	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);
@@ -308,7 +358,7 @@ export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map
 
 	const showLimit_actual = (showAll ? 1_000_000 : null) ?? (parentNodeView?.[`childLimit_${direction}`] ?? showTarget_initial).KeepBetween(showTarget_min, showTarget_max);
 	const childCountShowing = showLimit_actual.KeepAtMost(childCount);
-	return new ChildLimitInfo({direction, adjustDelta, showTarget_initial, showTarget_min, showTarget_max, showTarget_actual: showLimit_actual, childCount, childCountShowing});
+	return new ChildLimitInfo({direction, adjustDelta, showTarget_initial, showTarget_min, showTarget_max, showTarget_actual: showLimit_actual, childCount, childCountShowing, crawlerPathTrimmed: false});
 });
 
 // actions

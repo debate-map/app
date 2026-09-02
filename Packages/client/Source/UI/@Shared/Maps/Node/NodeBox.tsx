@@ -16,7 +16,7 @@ import {Draggable} from "@hello-pangea/dnd";
 import ReactDOM from "react-dom";
 import {UseCallback} from "react-vextensions";
 import {Graph, GraphContext} from "tree-grapher";
-import {GetDebateMapCrawlerFocusPath, UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetDebateMapCrawlerCanonicalFocusPath, GetDebateMapCrawlerFocusPath, UseForcedExpandForPath} from "Store/main/maps.js";
 import {GUTTER_WIDTH} from "./NodeLayoutConstants.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
@@ -404,12 +404,14 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		// expose crawler anchors in the expand slot only, so node controls don't become links.
 		const mapID = map?.id;
 		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && store.main.page == "debates" && mapID != null && mapID == store.main.debates.selectedMapID && !forLayoutHelper ? mapID : null;
-		const crawlerNodeLink_path = path.split("/").slice(1).join("/") || null;
-		const crawlerNodeLink = crawlerNodeLink_mapID &&
+		// ">" links to this node's slice (expand), "<" to the parent's (collapse), canonical paths so shared nodes get one page
+		const crawlerNodeLink_targetNodeID = expanded ? (parent?.id ?? node.id) : node.id;
+		const crawlerNodeLink_path = crawlerNodeLink_mapID && map ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, crawlerNodeLink_targetNodeID) : null;
+		const crawlerNodeLink = crawlerNodeLink_mapID && crawlerNodeLink_path != null &&
 			<Link text="" actionFunc={s=>{
 					s.main.page = "debates";
 					s.main.debates.selectedMapID = crawlerNodeLink_mapID;
-					s.main.debates.focusedNodePath = crawlerNodeLink_path;
+					s.main.debates.focusedNodePath = crawlerNodeLink_path || null;
 				}}
 				onClick={e=>e.stopPropagation()}
 				className="CrawlerNodeLink"
