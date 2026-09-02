@@ -324,6 +324,7 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			if (s.main.internalCrawlerMode && s.main.debates.focusedNodePath) {
 				newURL.pathNodes.push(...s.main.debates.focusedNodePath.split("/").filter(a=>a));
 			}
+			if (s.main.internalCrawlerMode) newURL.hash = "focused-node"; // baked pages scroll to the focused node via this fragment (NodeBox sets the id)
 		} else if (s.main.internalCrawlerMode && s.main.debates.listType == "all") {
 			// keep normal list switching spa-only; only crawler mode needs the all route.
 			newURL.pathNodes.push("all");

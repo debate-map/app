@@ -15,6 +15,7 @@ import {observer_mgl} from "mobx-graphlink";
 type DivDataAttrs = { [K in `data-${string}`]?: string | number | boolean | undefined };
 export type ExpandableBox_Props = {
 	className?: string,
+	id?: string,
 	width: number|string|n,
 	widthOverride?: number|n, // is this still needed?
 	innerWidth?: number,

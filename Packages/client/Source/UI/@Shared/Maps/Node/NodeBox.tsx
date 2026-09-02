@@ -16,7 +16,8 @@ import {Draggable} from "@hello-pangea/dnd";
 import ReactDOM from "react-dom";
 import {UseCallback} from "react-vextensions";
 import {Graph, GraphContext} from "tree-grapher";
-import {UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetDebateMapCrawlerFocusPath, UseForcedExpandForPath} from "Store/main/maps.js";
+import {GUTTER_WIDTH} from "./NodeLayoutConstants.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {GetPlaybackTimeSinceNodeRevealed} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
@@ -59,6 +60,8 @@ type State = {
 	lastWidthWhenNotPreview: number,
 	showNotificationPanel: boolean,
 };
+
+const crawlerFocus_childrenOffset = GUTTER_WIDTH + NodeType_Info.for[NodeType.claim].maxWidth / 2; // lands the focused node's children column at center in baked pages
 
 export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const {indexInNodeList, map, node, path, treePath, forLayoutHelper, forSubscriptionsPage, width, standardWidthInGroup, ref,
@@ -412,6 +415,10 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 				className="CrawlerNodeLink"
 			/>;
 
+		// baked pages have no js, the #focused-node fragment plus these scroll-margins are what position this node (children column centered, node left of it)
+		const isCrawlerFocusNode = internalCrawlerMode && !forLayoutHelper && path == GetDebateMapCrawlerFocusPath();
+		const crawlerFocusStyle = isCrawlerFocusNode && {scrollMarginTop: "calc(50vh - 58px)", scrollMarginLeft: `max(${GUTTER_WIDTH}px, calc(50vw - ${width_final + crawlerFocus_childrenOffset}px))`, scrollMarginRight: `calc(50vw + ${crawlerFocus_childrenOffset + 1}px)`}; // oversized right margin forces start-alignment so the left one is honored, max() keeps wide nodes on screen
+
 		const textElements = <>
 			{toolbarAndTitleElements}
 			{subPanelShow && <SubPanel node={node} toolbarShowing={toolbarShow}/>}
@@ -486,6 +493,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		return (
 			<>
 				<ExpandableBox
+					id={isCrawlerFocusNode ? "focused-node" : undefined} // anchor for the #focused-node fragment in baked links
 					dataAttrs={{"data-nodebox-path": path}}
 					{...{
 						outlineColor, outlineThickness, expanded, backgroundColor, markerPercent,
@@ -509,6 +517,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 						style,
 						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
+						crawlerFocusStyle,
 					)}
 					padding={0}
 					roundedTopLeftCorner={!isShowingToolbarButtonAtTopLeft}
