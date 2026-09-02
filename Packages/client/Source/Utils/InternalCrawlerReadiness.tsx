@@ -50,7 +50,7 @@ export function InternalCrawlerReadinessMonitor() {
 
 			if (store.wvc.webSocketConnected) {
 				socketDownSince = null;
-			} else {
+			} else if (store.wvc.webSocketLastDCTime != null) { // only real disconnects count, first connect can be slow
 				socketDownSince ??= performance.now();
 				const downForMS = performance.now() - socketDownSince;
 				if (downForMS >= SOCKET_DOWN_ERROR_AFTER_MS) {
@@ -90,7 +90,8 @@ export function InternalCrawlerReadinessMonitor() {
 	return (
 		<style>{`
 			.scrollTrack { display: none; }
-			.hideScrollbar { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,.75) transparent; } /* setting scrollbar-width makes chrome ignore the ::-webkit-scrollbar width:0 rule, so the native bar comes back */
+			.hideScrollbar::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; } /* undo web-vcore's width:0 (baker's chromium 111 drops scrollbar-width, so webkit rules) */
+			.hideScrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,.75); border-radius: 4px; }
 		`}</style>
 	);
 }
