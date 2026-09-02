@@ -149,6 +149,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	//}
 
 	const {width} = GetMeasurementInfoForNode(node, path, map);
+	const layoutWidth = (node.type != NodeType.argument ? standardWidthInGroup : null) ?? width;
 	const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 	const aboveToolbar_visible = toolbarItemsToShow.length > 0 &&
 
@@ -163,7 +164,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 			parentIsAbove: inBelowGroup,
 		},
 		new NodeDataForTreeGrapher({
-			nodePath: path, nodeType: node.type, width, expanded: boxExpanded,
+			nodePath: path, nodeType: node.type, width: layoutWidth, expanded: boxExpanded,
 			aboveToolbar_visible,
 			aboveToolbar_hasLeftButton: aboveToolbar_visible && toolbarItemsToShow.Any(a=>a.panel == "prefix"),
 		}),
