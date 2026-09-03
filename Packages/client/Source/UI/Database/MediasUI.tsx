@@ -3,7 +3,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
 import {store} from "Store";
 import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
-import {GetUpdates, ES, RunInAction, chroma_maxDarken} from "web-vcore";
+import {GetUpdates, ES, Link, RunInAction, chroma_maxDarken} from "web-vcore";
 import {Assert, E} from "js-vextensions";
 import {Media, GetNiceNameForMediaType, HasModPermissions, MeID, GetMedias, PERMISSIONS} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
@@ -20,6 +20,7 @@ export const MediasUI = observer_mgl(()=>{
 	const userID = MeID();
 	const medias = GetMedias();
 	const selectedMedia = GetSelectedMedia();
+	const internalCrawlerMode = store.main.internalCrawlerMode;
 	const permissionsModify = selectedMedia != null && PERMISSIONS.Media.Modify(userID, selectedMedia);
 	const permissionsDelete = selectedMedia != null && PERMISSIONS.Media.Delete(userID, selectedMedia);
 
@@ -53,7 +54,7 @@ export const MediasUI = observer_mgl(()=>{
 						if (e.target != e.currentTarget) return;
 						RunInAction("MediasUI.ScrollView.onClick", ()=>store.main.database.selectedMediaID = null);
 					}}>
-						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={GetSelectedMediaID() == media.id}/>)}
+						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={GetSelectedMediaID() == media.id} internalCrawlerMode={internalCrawlerMode}/>)}
 					</ScrollView>
 			</Column>
 			 <ScrollView ref={scrollViewRef} style={{position: "absolute", left: "60%", right: 0, height: "100%"}} contentStyle={ES({flex: 1, padding: 10})}>
@@ -97,14 +98,14 @@ export const MediasUI = observer_mgl(()=>{
 	)
 });
 
-export const MediaUI = (({image, first, selected}:{image: Media, first: boolean, selected: boolean})=>{
-	return (
+export const MediaUI = (({image, first, selected, internalCrawlerMode}:{image: Media, first: boolean, selected: boolean, internalCrawlerMode: boolean})=>{
+	const mediaRow = (
 		<Row mt={first ? 0 : 5} className="cursorSet"
 			style={E(
 				{padding: 5, background: liveSkin.BasePanelBackgroundColor().darken(.05 * chroma_maxDarken).css(), borderRadius: 5, cursor: "pointer"},
 				selected && {background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).css()},
 			)}
-			onClick={()=>RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id)}>
+			onClick={!internalCrawlerMode ? ()=>RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id) : undefined}>
 			<div>
 				<Pre>{image.name}: </Pre>
 				{image.description.KeepAtMost(100)}
@@ -114,5 +115,19 @@ export const MediaUI = (({image, first, selected}:{image: Media, first: boolean,
 				<Pre>#{image.id.slice(0, 4)}</Pre>
 			</Span>
 		</Row>
+	);
+
+	if (!internalCrawlerMode) return mediaRow;
+	return (
+		// in crawler mode each media is a real anchor, same as terms
+		<Link actionFunc={s=>{
+				s.main.page = "database";
+				s.main.database.subpage = "media";
+				s.main.database.selectedMediaID = image.id;
+			}}
+			style={{display: "block", color: "inherit", textDecoration: "none"}}
+		>
+			{mediaRow}
+		</Link>
 	);
 });
