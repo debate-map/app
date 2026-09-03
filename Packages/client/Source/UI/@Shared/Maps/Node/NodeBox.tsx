@@ -1,4 +1,4 @@
-import {GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
+import {ChildGroup, GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
 import React, {Ref, useCallback, useContext, useEffect, useReducer, useRef, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -62,6 +62,15 @@ type State = {
 };
 
 const crawlerFocus_childrenOffset = GUTTER_WIDTH + NodeType_Info.for[NodeType.claim].maxWidth / 2; // lands the focused node's children column at center in baked pages
+/** Node whose slice the crawler arrow on a box links to: ">" opens the node's own slice, "<" returns to the slice it appears in, normally the parent's.
+ * Premises are the exception. Arguments always render their premises inline, so a premise is reached from the page above the argument, and "<" returns there.
+ * Example, path root/X/Arg/P where P is a premise of argument Arg: on X's page P is already visible and its ">" opens P's slice,
+ * so on P's slice "<" targets X (not Arg), while a regular child C at root/X/C collapses back to X as usual. */
+const GetCrawlerNodeLinkTargetID = (node: NodeL3, parent: NodeL3|n, path: string, expanded: boolean)=>{
+	if (!expanded) return node.id;
+	const isPremise = parent?.type == NodeType.argument && node.link?.group == ChildGroup.generic;
+	return isPremise ? GetPathNodeIDs(path).slice(-3)[0] : (parent?.id ?? node.id);
+};
 
 export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const {indexInNodeList, map, node, path, treePath, forLayoutHelper, forSubscriptionsPage, width, standardWidthInGroup, ref,
@@ -405,8 +414,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		const mapID = map?.id;
 		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && store.main.page == "debates" && mapID != null && mapID == store.main.debates.selectedMapID && !forLayoutHelper ? mapID : null;
 		// ">" links to this node's slice (expand), "<" to the parent's (collapse), canonical paths so shared nodes get one page
-		const crawlerNodeLink_targetNodeID = expanded ? (parent?.id ?? node.id) : node.id;
-		const crawlerNodeLink_path = crawlerNodeLink_mapID && map ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, crawlerNodeLink_targetNodeID) : null;
+		const crawlerNodeLink_path = crawlerNodeLink_mapID && map ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, GetCrawlerNodeLinkTargetID(node, parent, path, expanded)) : null;
 		const crawlerNodeLink = crawlerNodeLink_mapID && crawlerNodeLink_path != null &&
 			<Link text="" actionFunc={s=>{
 					s.main.page = "debates";
