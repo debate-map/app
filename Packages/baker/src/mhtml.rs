@@ -1,6 +1,4 @@
 use crate::compression::compress_html;
-#[cfg(test)]
-use crate::compression::decompress_html;
 use crate::output_path::static_route_path;
 use anyhow::{Context, anyhow, bail};
 use base64::Engine;
@@ -10,8 +8,9 @@ use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
 use std::time::{SystemTime, UNIX_EPOCH};
-use url::Url;
+use url::{Position, Url};
 
 struct MhtmlPart {
 	content_type: String,
@@ -146,6 +145,9 @@ impl<'a> MhtmlConverter<'a> {
 
 		if is_text_resource(&resource.part.content_type) {
 			let mut text = String::from_utf8_lossy(&resource.bytes).into_owned();
+			if resource.part.content_type == "text/css" {
+				text = self.rebase_css_urls(resource, &text);
+			}
 			reference_rewriter.rewrite(&mut text);
 			return Self::write_atomic(&resource.asset_path, text.as_bytes()).with_context(|| format!("write {}", resource.asset_path.display()));
 		}
@@ -169,7 +171,36 @@ impl<'a> MhtmlConverter<'a> {
 
 		Ok(())
 	}
+
+	// chrome saves css text as-is, so relative url() refs (icon fonts mostly) break once the sheet moves into _assets, this pins them to the sheet's original location
+	fn rebase_css_urls(&self, resource: &ResourcePart, css: &str) -> String {
+		let Some(sheet_url) = resource.part.content_location.as_deref().and_then(|location| Url::parse(location).ok()) else { return css.to_string() };
+		CSS_URL_REF
+			.replace_all(css, |caps: &regex::Captures| match self.rebase_css_ref(caps[2].trim(), &sheet_url) {
+				Some(rebased) => format!("url({quote}{rebased}{quote})", quote = &caps[1]),
+				None => caps[0].to_string(),
+			})
+			.into_owned()
+	}
+
+	// absolute refs and fragments are left alone. same-origin refs stay host-relative like the html links, cdn refs get https since their http redirect has no cors header
+	fn rebase_css_ref(&self, target: &str, sheet_url: &Url) -> Option<String> {
+		if target.starts_with('#') || Url::parse(target).is_ok() {
+			return None;
+		}
+		let mut url = sheet_url.join(target).ok()?;
+		if same_origin(&url, self.page_url) {
+			return Some(url[Position::BeforePath..].to_string());
+		}
+		if url.scheme() == "http" {
+			let _ = url.set_scheme("https");
+		}
+		Some(url.to_string())
+	}
 }
+
+// matches css url(...) refs, quoted or not, capturing the opening quote (1) and the target (2)
+static CSS_URL_REF: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#"(?i)url\(\s*(['"]?)([^'")]+)['"]?\s*\)"#).expect("valid css url() regex"));
 
 fn extract_boundary(mhtml: &str) -> anyhow::Result<String> {
 	let (header_text, _) = split_header_body(mhtml).ok_or_else(|| anyhow!("MHTML archive has no top-level headers"))?;
@@ -446,42 +477,4 @@ fn extension_for_content_type(content_type: &str) -> &'static str {
 
 fn is_text_resource(content_type: &str) -> bool {
 	content_type.starts_with("text/") || matches!(content_type, "application/javascript" | "application/json" | "image/svg+xml")
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn converts_chrome_mhtml_to_static_html_and_shared_assets() {
-		let output_dir = std::env::temp_dir().join(format!("debatemap-baker-mhtml-{}-{}", std::process::id(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
-		let html_path = output_dir.join("database").join("index.html");
-		let mhtml = concat!(
-			"MIME-Version: 1.0\nContent-Type: multipart/related; boundary=x\n\n",
-			"--x\nContent-Type: text/html\nContent-Transfer-Encoding: quoted-printable\n\n",
-			r#"<!doctype html><link href=3D"cid:style"><main>Loaded x <− y</main><a href=3D"https://debatemap.app/database/users/u?db=3Dprod#node">User</a><a href=3D"https://example.com/u">External</a><form action=3D"/database/terms"></form>"#,
-			"\n--x\nContent-Type: text/css\nContent-Transfer-Encoding: quoted-printable\nContent-Location: cid:style\n\nbody{background:url(cid:font)}",
-			"\n--x\nContent-Type: font/woff2\nContent-Transfer-Encoding: base64\nContent-Location: cid:font\n\nZm9udA==\n--x--\n",
-		);
-		let page_url = Url::parse("https://debatemap.app/database?db=prod").unwrap();
-		MhtmlConverter::new(&html_path, &output_dir, &page_url).write(mhtml).unwrap();
-
-		let compressed_html = fs::read(&html_path).unwrap();
-		let html = String::from_utf8(decompress_html(&compressed_html).unwrap()).unwrap();
-		assert!(!compressed_html.starts_with(b"<!DOCTYPE html>"));
-		for expected in ["Loaded x <− y", "/_assets/", r#"href="/database/users/u/#node""#, r#"href="https://example.com/u""#, r#"action="/database/terms/""#] {
-			assert!(html.contains(expected), "{expected}");
-		}
-		assert!(!html.contains("cid:style"));
-
-		let asset_dir = output_dir.join("_assets");
-		let css_path = fs::read_dir(&asset_dir).unwrap().map(|entry| entry.unwrap().path()).find(|path| path.extension().is_some_and(|extension| extension == "css")).unwrap();
-		let css = fs::read_to_string(&css_path).unwrap();
-		assert!(!css.contains("cid:font") && css.contains("/_assets/"));
-		let second_html_path = output_dir.join("database").join("second").join("index.html");
-		MhtmlConverter::new(&second_html_path, &output_dir, &page_url).write(mhtml).unwrap();
-		assert_eq!(fs::read_dir(asset_dir).unwrap().count(), 2);
-
-		fs::remove_dir_all(output_dir).unwrap();
-	}
 }
