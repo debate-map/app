@@ -240,12 +240,12 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 });
 
 export const GetDebateMapCrawlerFocusPath = CreateAccessor(()=>{
-	if (!store.main.internalCrawlerMode || store.main.page != "debates") return null;
-	const map = GetMap(GetOpenMapID());
+	if (!store.main.internalCrawlerMode) return null;
+	const map = GetMap(GetOpenMapID()); // null outside the debates and global pages
 	const rootNodeID = map?.rootNode;
 	if (rootNodeID == null) return null;
 
-	const focusedNodePath = store.main.debates.focusedNodePath;
+	const focusedNodePath = store.main.debates.focusedNodePath; // shared by the global map, the crawler only ever has one map open
 	const focusedNodeIDs = focusedNodePath?.split("/").filter(a=>a) ?? [];
 	return [rootNodeID, ...focusedNodeIDs].join("/");
 });

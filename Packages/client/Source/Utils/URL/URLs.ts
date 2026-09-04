@@ -171,6 +171,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			store.main.debates.selectedMapID = mapID!;
 			store.main.debates.focusedNodePath = mapID ? (url.pathNodes.slice(2).join("/") || null) : null;
 		} else if (page == "global") {
+			store.main.debates.focusedNodePath = url.pathNodes.slice(2).join("/") || null; // crawler slice route, /global/map/<node ids>, shares the debates field since the crawler only ever has one map open
 			/* if (subpage == 'map') {
 				mapID = globalMapID;
 				if (isBot) {
@@ -329,6 +330,9 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			// keep normal list switching spa-only; only crawler mode needs the all route.
 			newURL.pathNodes.push("all");
 		}
+	} else if (page == "global" && subpage == "map" && s.main.internalCrawlerMode) { // global map slices, same shape as the debates ones
+		if (s.main.debates.focusedNodePath) newURL.pathNodes.push(...s.main.debates.focusedNodePath.split("/").filter(a=>a));
+		newURL.hash = "focused-node";
 	}
 	/*if (page == "global" && subpage == "map") {
 		if (isBot) {

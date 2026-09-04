@@ -17,6 +17,7 @@ import ReactDOM from "react-dom";
 import {UseCallback} from "react-vextensions";
 import {Graph, GraphContext} from "tree-grapher";
 import {GetDebateMapCrawlerCanonicalFocusPath, GetDebateMapCrawlerFocusPath, UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetOpenMapID} from "Store/main.js";
 import {GUTTER_WIDTH} from "./NodeLayoutConstants.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
@@ -61,7 +62,6 @@ type State = {
 	showNotificationPanel: boolean,
 };
 
-const crawlerFocus_childrenOffset = GUTTER_WIDTH + NodeType_Info.for[NodeType.claim].maxWidth / 2; // lands the focused node's children column at center in baked pages
 /** Node whose slice the crawler arrow on a box links to: ">" opens the node's own slice, "<" returns to the slice it appears in, normally the parent's.
  * Premises are the exception. Arguments always render their premises inline, so a premise is reached from the page above the argument, and "<" returns there.
  * Example, path root/X/Arg/P where P is a premise of argument Arg: on X's page P is already visible and its ">" opens P's slice,
@@ -71,6 +71,8 @@ const GetCrawlerNodeLinkTargetID = (node: NodeL3, parent: NodeL3|n, path: string
 	const isPremise = parent?.type == NodeType.argument && node.link?.group == ChildGroup.generic;
 	return isPremise ? GetPathNodeIDs(path).slice(-3)[0] : (parent?.id ?? node.id);
 };
+
+const crawlerFocus_childrenOffset = GUTTER_WIDTH + NodeType_Info.for[NodeType.claim].maxWidth / 2; // lands the focused node's children column at center in baked pages
 
 export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const {indexInNodeList, map, node, path, treePath, forLayoutHelper, forSubscriptionsPage, width, standardWidthInGroup, ref,
@@ -412,15 +414,11 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 		// expose crawler anchors in the expand slot only, so node controls don't become links.
 		const mapID = map?.id;
-		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && store.main.page == "debates" && mapID != null && mapID == store.main.debates.selectedMapID && !forLayoutHelper ? mapID : null;
+		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && mapID != null && mapID == GetOpenMapID() && !forLayoutHelper ? mapID : null;
 		// ">" links to this node's slice (expand), "<" to the parent's (collapse), canonical paths so shared nodes get one page
 		const crawlerNodeLink_path = crawlerNodeLink_mapID && map ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, GetCrawlerNodeLinkTargetID(node, parent, path, expanded)) : null;
 		const crawlerNodeLink = crawlerNodeLink_mapID && crawlerNodeLink_path != null &&
-			<Link text="" actionFunc={s=>{
-					s.main.page = "debates";
-					s.main.debates.selectedMapID = crawlerNodeLink_mapID;
-					s.main.debates.focusedNodePath = crawlerNodeLink_path || null;
-				}}
+			<Link text="" actionFunc={s=>{ s.main.debates.focusedNodePath = crawlerNodeLink_path || null; }} // stays on the open map's page, only the slice changes
 				onClick={e=>e.stopPropagation()}
 				className="CrawlerNodeLink"
 			/>;

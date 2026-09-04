@@ -1,13 +1,12 @@
-# single-map crawl config for local debate-slice testing. this origin also defines crawl scope: accepted urls must use the same scheme,
-# host, and port. the frontend must already be running here.
+# full-site crawl, except under /debates only the how-old-is-the-universe map is baked. this origin also defines crawl scope:
+# accepted urls must use the same scheme, host, and port. the frontend must already be running here.
 root_url: http://localhost:5101
 
 # launch chrome without a visible window when true. this is read only when the
 # baker starts, so changing it requires a normal stop and resume.
 headless: true
 
-# crawl seeds. / starts the general site crawl, while /debates exposes the
-# listing links that lead the crawler into the selected map.
+# crawl seeds. / starts the general site crawl, /debates exposes the map listings.
 start_paths:
   - /
   - /debates
@@ -28,13 +27,13 @@ query_params:
 # their current page..isolated tabs are configured separately below.
 #
 # maximum tabs = regular_crawler_count + (max_active_groups * max_tabs_per_group)
-# this config: 6 + (1 * 6) = 12 maximum tabs.
+# this config: 6 + (2 * 6) = 18 maximum tabs.
 regular_crawler_count: 6
 
 # retry a failed page this many times before recording a terminal failure.
 max_retries: 3
 
-# output directory. runs resume its crawl state by default, --force-restart deletes the directory and starts a clean bake.
+# output directory. runs resume their crawl state by default, --force-restart deletes the directory and starts a clean bake.
 base_output_dir: ./static
 
 # local preview server for files as they are baked....html is stored brotli-compressed under normal index.html names, so this server
@@ -45,27 +44,24 @@ serve:
   port: 8787
 
 visit_policy:
-  # optional allowlist. rule kinds: exact, starts_with, not_starts_with,
-  # contains, and ends_with. this permits every same-origin path outside the
-  # debates subtree, then adds back only the debate listings and selected map.
+  # allowlist. rule kinds: exact, starts_with, not_starts_with, contains, ends_with.
+  # this permits every same-origin path outside /debates/ (so /database, /global etc. all bake), then adds back only the debate listings and the universe map.
   allow_paths:
-    # /database, /forum, and every other non-debate path remain crawlable.
+    # /database, /global, and every other non-debate path stay crawlable.
     - kind: not_starts_with
       value: /debates/
 
-    # these listing routes expose the selected map's crawlable link.
+    # the listing routes that expose the map's crawlable link.
     - kind: exact
       value: /debates
     - kind: exact
       value: /debates/all
 
-    # accept the canonical id route and every descendant slice below it.
+    # the how-old-is-the-universe map root and its slices, in both url forms.
     - kind: exact
       value: /debates/SC8x0d_SQqOdFdadhFcqhQ
     - kind: starts_with
       value: /debates/SC8x0d_SQqOdFdadhFcqhQ/
-
-    # accept the slugged route too because the live app may emit or normalize to it.
     - kind: exact
       value: /debates/how-old-is-the-universe.SC8x0d_SQqOdFdadhFcqhQ
     - kind: starts_with
@@ -75,20 +71,21 @@ visit_policy:
   # routes are grouped from parent plus child_depth; tabs in the same derived
   # group share one frontier so each discovered slice is baked only once.
   isolated_crawl_groups:
-    # maximum derived groups that may run simultaneously. the allowlist permits
-    # only one map, so no second debate group needs a slot.
-    max_active_groups: 1
+    # maximum derived groups that may run simultaneously, ie. the universe map and the global map bake side by side.
+    max_active_groups: 2
 
-    # maximum tabs working inside the active group. all six claim distinct
-    # descendant slices from its shared frontier.
+    # maximum tabs working inside one group. all claim distinct descendant slices from its shared frontier.
     max_tabs_per_group: 6
 
     # url families that should use the isolated worker pool.
     routes:
-      # /debates and each depth-one /debates/x group root remain on regular tabs.
-      # every deeper descendant of x stays in the same isolated group.
+      # the universe map: /debates and each depth-one /debates/x stays on regular tabs, every deeper slice shares one group.
       - parent: /debates
         child_depth: 1
+
+      # the global map: /global/map itself stays on a regular tab, every slice below it shares one group.
+      - parent: /global/map
+        child_depth: 0
 
   # optional denylist; it overrides allow_paths when both match.
   # exclude_paths:

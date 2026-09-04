@@ -67,11 +67,7 @@ export const ChildLimitBar = observer_mgl((props: ChildLimitBar_Props)=>{
 				<Link
 					title={`View ${hiddenChildCount} hidden sibling${hiddenChildCount == 1 ? "" : "s"}`}
 					style={{flex: 1, color: "inherit", textDecoration: "none"}}
-					actionFunc={s=>{
-						s.main.page = "debates";
-						s.main.debates.selectedMapID = map.id;
-						s.main.debates.focusedNodePath = crawlerCanonicalFocusPath || null;
-					}}
+					actionFunc={s=>{ s.main.debates.focusedNodePath = crawlerCanonicalFocusPath || null; }}
 				>
 					<Button style={ES({width: "100%", boxSizing: "border-box"})} text={<Row><Icon icon={`arrow-${direction}`} size={15}/><Div ml={3}>{hiddenChildCount}</Div></Row>}/>
 				</Link>

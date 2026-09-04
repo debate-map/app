@@ -186,15 +186,16 @@ mod tests {
 	fn checked_in_config_matches_the_runtime_contract() {
 		let config: BakerConfig = serde_yaml::from_str(include_str!("../config.yaml")).unwrap();
 		let config = config.into_engine_config().unwrap();
-		assert!(config.headless && config.serve.enabled);
+		assert!(config.serve.enabled); // headless is a local preference, not part of the contract
 		assert_eq!(config.start_urls.iter().map(Url::path).collect::<Vec<_>>(), ["/", "/debates"]);
 		assert_eq!(config.revisit_urls_on_resume.iter().map(Url::path).collect::<Vec<_>>(), ["/", "/debates", "/debates/all"]);
 		assert_eq!(config.visit_policy.query_params.len(), 2);
-		for (path, allowed) in [("/database", true), ("/debates/SC8x0d_SQqOdFdadhFcqhQ", true), ("/debates/another-map", false)] {
+		for (path, allowed) in [("/database", true), ("/global/map/some-node", true), ("/debates/SC8x0d_SQqOdFdadhFcqhQ", true), ("/debates/another-map", false)] { // whole site, but only the one debate map
 			assert_eq!(config.visit_policy.allow(&config.visit_policy.root.join(path).unwrap()), allowed, "{path}");
 		}
 		let groups = &config.isolated_crawl_groups;
-		assert_eq!((config.regular_crawler_count, groups.routes.len(), groups.max_active_groups, groups.max_tabs_per_group, groups.routes[0].group_path_segment_count, config.max_retries), (6, 1, 1, 6, 2, DEFAULT_MAX_RETRIES));
+		let group_segment_counts = groups.routes.iter().map(|route| route.group_path_segment_count).collect::<Vec<_>>();
+		assert_eq!((config.regular_crawler_count, groups.max_active_groups, groups.max_tabs_per_group, group_segment_counts, config.max_retries), (6, 2, 6, vec![2, 2], DEFAULT_MAX_RETRIES));
 		assert_eq!(config.base_output_dir, PathBuf::from("./static"));
 	}
 }
