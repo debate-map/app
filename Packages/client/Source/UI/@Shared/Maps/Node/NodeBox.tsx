@@ -1,4 +1,4 @@
-import {GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
+import {ChildGroup, GetChangeTypeOutlineColor, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, DMap, NodeL3, NodeType, NodeType_Info, NodeView, MeID, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetSubPanelAttachments, GetToolbarItemsToShow, GetNodeSubscription, GetSubscriptionLevel, ShowNotification, PERMISSIONS} from "dm_common";
 import React, {Ref, useCallback, useContext, useEffect, useReducer, useRef, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -6,19 +6,19 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {SLMode, URL_HideNodeHover} from "UI/@SL/SL.js";
-import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, IsDoubleClick, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
+import {DragInfo, IsDoubleClick, Link, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import {E, GetPercentFromXToY, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {SlicePath} from "mobx-graphlink";
 import {Draggable} from "@hello-pangea/dnd";
 import ReactDOM from "react-dom";
 import {UseCallback} from "react-vextensions";
 import {Graph, GraphContext} from "tree-grapher";
-import {Row} from "react-vcomponents";
-import {UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetDebateMapCrawlerCanonicalFocusPath, GetDebateMapCrawlerFocusPath, UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetOpenMapID} from "Store/main.js";
+import {GUTTER_WIDTH} from "./NodeLayoutConstants.js";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {GetPlaybackTimeSinceNodeRevealed} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
@@ -61,6 +61,18 @@ type State = {
 	lastWidthWhenNotPreview: number,
 	showNotificationPanel: boolean,
 };
+
+/** Node whose slice the crawler arrow on a box links to: ">" opens the node's own slice, "<" returns to the slice it appears in, normally the parent's.
+ * Premises are the exception. Arguments always render their premises inline, so a premise is reached from the page above the argument, and "<" returns there.
+ * Example, path root/X/Arg/P where P is a premise of argument Arg: on X's page P is already visible and its ">" opens P's slice,
+ * so on P's slice "<" targets X (not Arg), while a regular child C at root/X/C collapses back to X as usual. */
+const GetCrawlerNodeLinkTargetID = (node: NodeL3, parent: NodeL3|n, path: string, expanded: boolean)=>{
+	if (!expanded) return node.id;
+	const isPremise = parent?.type == NodeType.argument && node.link?.group == ChildGroup.generic;
+	return isPremise ? GetPathNodeIDs(path).slice(-3)[0] : (parent?.id ?? node.id);
+};
+
+const crawlerFocus_childrenOffset = GUTTER_WIDTH + NodeType_Info.for[NodeType.claim].maxWidth / 2; // lands the focused node's children column at center in baked pages
 
 export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const {indexInNodeList, map, node, path, treePath, forLayoutHelper, forSubscriptionsPage, width, standardWidthInGroup, ref,
@@ -198,12 +210,13 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 	const pathNodeIDs = GetPathNodeIDs(path);
 	const selected = nodeView?.selected || false;
+	const internalCrawlerMode = store.main.internalCrawlerMode;
 	const leftPanelPinned = nodeView?.leftPanelPinned ?? false;
 	const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 	const toolbarShow = toolbarItemsToShow.length > 0;
 	const toolbar_hasRightAnchoredItems = toolbarItemsToShow.filter(a=>a.panel != "prefix").length > 0;
-	const panelToShow = (selected || hovered) ? ((leftPanelHovered && lastHoveredPanel) || nodeView?.openPanel || lastHoveredPanel) : undefined;
-	const leftPanelShow = (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
+	const panelToShow = !internalCrawlerMode && (selected || hovered) ? ((leftPanelHovered && lastHoveredPanel) || nodeView?.openPanel || lastHoveredPanel) : undefined;
+	const leftPanelShow = !internalCrawlerMode && (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
 	const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 	const subPanelShow = attachments_forSubPanel.length > 0;
 	const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -212,13 +225,19 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	if (UseForcedExpandForPath(path, false)) expanded = true;
 
 	const onMouseEnter = useCallback(e=>{
+		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
+		// which we dont need at all(since we'll be representing each node as a clickable link)
+		if (internalCrawlerMode) {
+			return;
+		}
+
 		if (!IsMouseEnterReal(e, rootRef.current!)) return;
 		setState(prevState=>({
 			...prevState,
-			hovered: true,
+			hovered: true
 		}));
 		checkStillHoveredTimer.current?.Start();
-	}, []);
+	}, [internalCrawlerMode]);
 
 	const onMouseLeave = UseCallback(e=>{
 		if (!IsMouseLeaveReal(e, rootRef.current!)) return;
@@ -233,6 +252,13 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 	const onClick = useCallback(e=>{
 		if ((e.nativeEvent as any).ignore) return;
+
+		// we'll ignore hovering when in internal crawler mode, becuase it opens up the NodeUI LeftBox,
+		// which we dont need at all(since we'll be representing each node as a clickable link)
+		if (internalCrawlerMode) {
+			return;
+		}
+
 		if (useLocalPanelState && !local_nodeView.selected) {
 			UpdateLocalNodeView({selected: true});
 			return;
@@ -243,7 +269,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		if (!nodeView?.selected && map) {
 			ACTNodeSelect(map.id, path);
 		}
-	}, [UpdateLocalNodeView, graph, local_nodeView.selected, map, nodeView?.selected, path, treePath, useLocalPanelState]);
+	}, [UpdateLocalNodeView, graph, internalCrawlerMode, local_nodeView.selected, map, nodeView?.selected, path, treePath, useLocalPanelState]);
 
 	if (usePortalForDetailBoxes) {
 		UseDocumentEventListener("click", e=>{
@@ -305,7 +331,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	const subscription = GetNodeSubscription(MeID()!, node.id);
 	const subscriptionLevel = GetSubscriptionLevel(subscription);
 
-	const showNotificationButton = ShowNotification(node.type);
+	const showNotificationButton = !internalCrawlerMode && ShowNotification(node.type);
 	const showNotificationPaint = showNotificationButton && (mapState?.subscriptionPaintMode ?? false);
 	let showNotificationPaintCss = "none";
 	if (showNotificationPaint) {
@@ -382,17 +408,33 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		const toolbarAndTitleElements = <>
 			{!toolbarShow && titlePanel}
 			{/* for arguments, we render the toolbar after the title, because it is an "inline toolbar" that is rendered right-of-title on the same row */}
-			{toolbarShow && node.type == NodeType.argument && <Row>{titlePanel}{toolbarElement}</Row>}
+			{toolbarShow && node.type == NodeType.argument && <div className="NodeBox_argumentRow">{titlePanel}{toolbarElement}</div>}
 			{toolbarShow && node.type != NodeType.argument && <>{toolbarElement}{titlePanel}</>}
 		</>;
+
+		// expose crawler anchors in the expand slot only, so node controls don't become links.
+		const mapID = map?.id;
+		const crawlerNodeLink_mapID = internalCrawlerMode && (childrenShownByNodeExpandButton ?? 0) > 0 && mapID != null && mapID == GetOpenMapID() && !forLayoutHelper ? mapID : null;
+		// ">" links to this node's slice (expand), "<" to the parent's (collapse), canonical paths so shared nodes get one page
+		const crawlerNodeLink_path = crawlerNodeLink_mapID && map ? GetDebateMapCrawlerCanonicalFocusPath(map.rootNode, GetCrawlerNodeLinkTargetID(node, parent, path, expanded)) : null;
+		const crawlerNodeLink = crawlerNodeLink_mapID && crawlerNodeLink_path != null &&
+			<Link text="" actionFunc={s=>{ s.main.debates.focusedNodePath = crawlerNodeLink_path || null; }} // stays on the open map's page, only the slice changes
+				onClick={e=>e.stopPropagation()}
+				className="CrawlerNodeLink"
+			/>;
+
+		// baked pages have no js, the #focused-node fragment plus these scroll-margins are what position this node (children column centered, node left of it)
+		const isCrawlerFocusNode = internalCrawlerMode && !forLayoutHelper && path == GetDebateMapCrawlerFocusPath();
+		const crawlerFocusStyle = isCrawlerFocusNode && {scrollMarginTop: "calc(50vh - 58px)", scrollMarginLeft: `max(${GUTTER_WIDTH}px, calc(50vw - ${width_final + crawlerFocus_childrenOffset}px))`, scrollMarginRight: `calc(50vw + ${crawlerFocus_childrenOffset + 1}px)`}; // oversized right margin forces start-alignment so the left one is honored, max() keeps wide nodes on screen
 
 		const textElements = <>
 			{toolbarAndTitleElements}
 			{subPanelShow && <SubPanel node={node} toolbarShowing={toolbarShow}/>}
-			<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes}/>
+			{!internalCrawlerMode && <NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes}/>}
 		</>;
 
 		const beforeChildrenElements = <>
+			{crawlerNodeLink}
 			{ leftPanelShow &&
 				<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}}
 					local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
@@ -410,7 +452,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 					{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 				</NodeUI_LeftBox>
 			}
-			{showNotificationPanel && <NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
+			{showNotificationButton && showNotificationPanel && <NodeNotificationControl {...{node, backgroundColor, subscriptionLevel}}/>}
 		</>
 
 		const afterChildrenElements = <>
@@ -459,6 +501,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		return (
 			<>
 				<ExpandableBox
+					id={isCrawlerFocusNode ? "focused-node" : undefined} // anchor for the #focused-node fragment in baked links
 					dataAttrs={{"data-nodebox-path": path}}
 					{...{
 						outlineColor, outlineThickness, expanded, backgroundColor, markerPercent,
@@ -479,10 +522,10 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 					onMouseLeave={onMouseLeave}
 					{...dragInfo?.provided.draggableProps} // drag-handle is attached to just the TitlePanel, above
 					style={E(
-						{color: liveSkin.NodeTextColor().css()},
 						style,
 						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
+						crawlerFocusStyle,
 					)}
 					padding={0}
 					roundedTopLeftCorner={!isShowingToolbarButtonAtTopLeft}

@@ -6,7 +6,7 @@ import {FilterOutUnrecognizedProps} from "react-vextensions";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {GetFontSizeForNode, GetNodeDisplayText, missingTitleStrings, GetEquationStepNumber, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, DMap, NodeRevision, TitleKey, AsNodeRevisionInput, GetTitleIntegratedAttachment, NodeL3, GetNodeRawTitleAndSuch, PERMISSIONS} from "dm_common";
-import {ES, IsDoubleClick, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed} from "web-vcore";
+import {IsDoubleClick, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed} from "web-vcore";
 import React, {Ref, useCallback, useEffect, useImperativeHandle, useRef} from "react";
 import {GetAsync} from "mobx-graphlink";
 import {SLMode} from "UI/@SL/SL.js";
@@ -52,15 +52,13 @@ export type TitlePanelElement = {
 };
 
 export const TitlePanel = observer_mgl((props: Props)=>{
-	const {map, setParentState, ref, node, path, style, onClick, dragHandleProps, ...rest} = props;
+	const {map, setParentState, ref, node, path, style, className, onClick, dragHandleProps, ...rest} = props;
 	const [{editing, edit_newTitle, applyingEdit, edit_titleKey}, setState] = React.useState<State>({
 		editing: false,
 		edit_newTitle: null as string|n,
 		edit_titleKey: null as TitleKey|n,
 		applyingEdit: false,
 	});
-	const rowRef = useRef<HTMLElement|n>(null);
-
 	const isMountedRef = useRef(false);
 	useEffect(()=>{
 		isMountedRef.current = true;
@@ -148,13 +146,13 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 	}, [onDoubleClick]);
 
 	return (
-		<Row {...FilterOutUnrecognizedProps(rest, "div")}
+		<div {...FilterOutUnrecognizedProps(rest, "div")}
 			{...dragHandleProps}
+			className={["NodeTitle", className].filter(a=>a).join(" ")}
 			style={E(
 				{
-					position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, path),
+					fontSize: GetFontSizeForNode(node, path),
 					marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
-					color: liveSkin.NodeTextColor(),
 				},
 				node.type == NodeType.argument && {
 					color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .5).toString(), // for arguments, make text more transparent, since text is repetitive and can be distracting
@@ -166,21 +164,15 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 				if (IsDoubleClick(e)) onDoubleClick();
 				if (onClick) return onClick(e);
 			}}
-			ref={el=>{
-				rowRef.current = el?.root;
-			}}
 		>
 			{equationNumber != null &&
 				<Pre>{equationNumber}) </Pre>}
 			{!editing &&
-				<span style={ES(
-					{flex: 1, position: "relative", whiteSpace: "initial"},
-					node.type == NodeType.argument && {
-						//whiteSpace: "pre", // for arguments, never wrap text // commented, since conflicts with sl arg-with-custom-text case; what case was this line needed for earlier?
-						alignSelf: "center",
-					},
-					titleAttachment == null && missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
-				)}>
+				<span className="NodeTitle_text" style={{
+					//whiteSpace: "pre", // for arguments, never wrap text // commented, since conflicts with sl arg-with-custom-text case; what case was this line needed for earlier?
+					alignSelf: node.type == NodeType.argument ? "center" : undefined,
+					color: titleAttachment == null && missingTitleStrings.Contains(displayText) ? "rgba(255,255,255,.3)" : undefined,
+				}}>
 					{titleAttachment?.equation && latex && <NodeMathUI text={titleAttachment.equation.text}
 						onTermHover={(id, hovered)=>onTermHover([id], hovered)}
 						onTermClick={id=>onTermClick([id])}
@@ -232,7 +224,7 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 							onClick={()=>applyEdit()}/>}
 					{applyingEdit && <Row>Applying edit...</Row>}
 				</Row>}
-		</Row>
+		</div>
 	);
 });
 

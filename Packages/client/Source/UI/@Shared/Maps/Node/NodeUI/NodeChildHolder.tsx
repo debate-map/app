@@ -1,7 +1,7 @@
-import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, IsSLModeOrLayout, DMap, NodeL3, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, IsSLModeOrLayout, DMap, NodeL3, NodeType, Polarity} from "dm_common";
 import * as React from "react";
 import {store} from "Store";
-import {GetChildLimitInfoAtLocation} from "Store/main/maps.js";
+import {GetChildLimitInfoAtLocation, GetDebateMapCrawlerTrimmedPathChildID} from "Store/main/maps.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -138,7 +138,7 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 
 	const playback = GetPlaybackInfo();
 	const childLayout = GetChildLayout_Final(parentNode.current, map);
-	const showArgumentsControlBar_final = showArgumentsControlBar && !(playback?.timeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
+	const showArgumentsControlBar_final = !store.main.internalCrawlerMode && showArgumentsControlBar && !(playback?.timeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
 
 	const nodeView = GetNodeView(map.id, parentPath);
 	const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
@@ -157,17 +157,22 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 
 	const upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
 	const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
+	const crawlerPathChildID = parentNode.type == NodeType.argument && group == ChildGroup.generic ? null : GetDebateMapCrawlerTrimmedPathChildID(parentPath); // premises stay together with their argument
 
 	const PrepPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 		const direction = polarityGroup == "up" ? "up" : "down";
 		const childrenHere_untrimmed = polarityGroup == "all" ? nodeChildrenToShowHere : polarityGroup == "up" ? upChildren : downChildren;
-		const childLimitInfo = GetChildLimitInfoAtLocation(map, forLayoutHelper, parentNode, parentPath, direction, childrenHere_untrimmed.length);
+		const crawlerPathChild = crawlerPathChildID == null ? null : childrenHere_untrimmed.find(a=>a.id == crawlerPathChildID);
+		const crawlerPathChildShowing = crawlerPathChildID == null ? null : crawlerPathChild != null;
+		// one bar for all hidden siblings, owned by the path child's group
+		const childCount = crawlerPathChildShowing ? nodeChildrenToShowHere.length : childrenHere_untrimmed.length;
+		const childLimitInfo = GetChildLimitInfoAtLocation(map, forLayoutHelper, parentNode, parentPath, direction, childCount, crawlerPathChildShowing);
 
-		const childrenHere = childrenHere_untrimmed.slice(0, childLimitInfo.showTarget_actual); // trim to the X most significant children (ie. strongest arguments)
+		const childrenHere = crawlerPathChildID == null ? childrenHere_untrimmed.slice(0, childLimitInfo.showTarget_actual) : crawlerPathChild == null ? [] : [crawlerPathChild]; // trim to the X most significant children (ie. strongest arguments), or just the path child in crawler mode
 		// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 		if (direction == "up") childrenHere.reverse();
 
-		return {direction: direction as "up" | "down", childLimitInfo, children_untrimmed: childrenHere_untrimmed, children_trimmed: childrenHere};
+		return {direction: direction as "up" | "down", childLimitInfo, children_untrimmed: childrenHere_untrimmed, children_trimmed: childrenHere, crawlerPathChildShowing};
 	};
 	const ncToShowHere_groupAll = PrepPolarityGroup("all");
 	const ncToShowHere_groupUp = PrepPolarityGroup("up");
@@ -190,6 +195,7 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 			polarityGroup == "all" ? ncToShowHere_groupAll :
 			polarityGroup == "up" ? ncToShowHere_groupUp :
 			ncToShowHere_groupDown;
+		if (ncToShowHere_thisGroup.crawlerPathChildShowing === false) return null;
 
 		const childrenHere = ncToShowHere_thisGroup.children_trimmed;
 		const showLimitBar = ncToShowHere_thisGroup.childLimitInfo.ShouldLimitBarShow() && !store.main.maps.screenshotMode;

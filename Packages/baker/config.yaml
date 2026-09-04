@@ -1,0 +1,93 @@
+# full-site crawl, except under /debates only the how-old-is-the-universe map is baked. this origin also defines crawl scope:
+# accepted urls must use the same scheme, host, and port. the frontend must already be running here.
+root_url: http://localhost:5101
+
+# launch chrome without a visible window when true. this is read only when the
+# baker starts, so changing it requires a normal stop and resume.
+headless: true
+
+# crawl seeds. / starts the general site crawl, /debates exposes the map listings.
+start_paths:
+  - /
+  - /debates
+
+# on a resume, re-bake these discovery pages even when they were already ready.
+# any newly exposed links join the saved frontier only when visit_policy permits.
+revisit_paths_on_resume:
+  - /
+  - /debates
+  - /debates/all
+
+# these parameters are added only when an accepted url is dispatched to chrome, they select production data and make the app expose crawler-only links and slices
+query_params:
+  db: prod
+  internalCrawler: "1"
+
+# dedicated chrome tabs for urls that do not belong to an isolated group, this value is hot-reloaded; lowering it retires surplus regular tabs after
+# their current page..isolated tabs are configured separately below.
+#
+# maximum tabs = regular_crawler_count + (max_active_groups * max_tabs_per_group)
+# this config: 6 + (2 * 6) = 18 maximum tabs.
+regular_crawler_count: 6
+
+# retry a failed page this many times before recording a terminal failure.
+max_retries: 3
+
+# output directory. runs resume their crawl state by default, --force-restart deletes the directory and starts a clean bake.
+base_output_dir: ./static
+
+# local preview server for files as they are baked....html is stored brotli-compressed under normal index.html names, so this server
+# supplies the content-encoding header browsers need to decode it.
+serve:
+  enabled: true
+  host: 127.0.0.1
+  port: 8787
+
+visit_policy:
+  # allowlist. rule kinds: exact, starts_with, not_starts_with, contains, ends_with.
+  # this permits every same-origin path outside /debates/ (so /database, /global etc. all bake), then adds back only the debate listings and the universe map.
+  allow_paths:
+    # /database, /global, and every other non-debate path stay crawlable.
+    - kind: not_starts_with
+      value: /debates/
+
+    # the listing routes that expose the map's crawlable link.
+    - kind: exact
+      value: /debates
+    - kind: exact
+      value: /debates/all
+
+    # the how-old-is-the-universe map root and its slices, in both url forms.
+    - kind: exact
+      value: /debates/SC8x0d_SQqOdFdadhFcqhQ
+    - kind: starts_with
+      value: /debates/SC8x0d_SQqOdFdadhFcqhQ/
+    - kind: exact
+      value: /debates/how-old-is-the-universe.SC8x0d_SQqOdFdadhFcqhQ
+    - kind: starts_with
+      value: /debates/how-old-is-the-universe.SC8x0d_SQqOdFdadhFcqhQ/
+
+  # matching child routes move into a worker pool separate from regular crawlers.
+  # routes are grouped from parent plus child_depth; tabs in the same derived
+  # group share one frontier so each discovered slice is baked only once.
+  isolated_crawl_groups:
+    # maximum derived groups that may run simultaneously, ie. the universe map and the global map bake side by side.
+    max_active_groups: 2
+
+    # maximum tabs working inside one group. all claim distinct descendant slices from its shared frontier.
+    max_tabs_per_group: 6
+
+    # url families that should use the isolated worker pool.
+    routes:
+      # the universe map: /debates and each depth-one /debates/x stays on regular tabs, every deeper slice shares one group.
+      - parent: /debates
+        child_depth: 1
+
+      # the global map: /global/map itself stays on a regular tab, every slice below it shares one group.
+      - parent: /global/map
+        child_depth: 0
+
+  # optional denylist; it overrides allow_paths when both match.
+  # exclude_paths:
+  #   - kind: starts_with
+  #     value: /draft

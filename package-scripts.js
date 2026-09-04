@@ -37,6 +37,14 @@ Object.assign(scripts, {
 });
 
 Object.assign(scripts, {
+	baker: {
+		run: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml",
+		runFresh: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml --force-restart",
+		serve: "cd Packages/baker && cross-env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo run -- config.yaml --serve-only",
+	},
+});
+
+Object.assign(scripts, {
 	client: {
 		tsc:         `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		tsc_noWatch: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build`,

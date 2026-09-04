@@ -14,7 +14,6 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, css2} from "web-vcore";
 import {BailError, BailInfo} from "mobx-graphlink";
 import {Assert, ea, emptyArray_forLoading, IsNaN, IsSpecialEmptyArray, nl, ShallowEquals} from "js-vextensions";
-import {Column, Div} from "react-vcomponents";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
@@ -65,7 +64,6 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	const lastObservedValues = useRef(new ObservedValues());
 	const nodeUIRef = useRef<HTMLDivElement|n>(null);
 	const nodeBoxRef = useRef<HTMLDivElement|n>(null);
-	const rightColumn = useRef<Column|n>(null);
 	//const nodeChildHolder_genericRef = useRef<NodeChildHolder|n>(null);
 
 	// TODO: this was in class component before, we might need it back
@@ -130,7 +128,8 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	const useForcedExpand = UseForcedExpandForPath(path, forLayoutHelper);
 	const nodeChildrenToShow = useForcedExpand ? GetNodeChildren(node, path) : GetNodeChildrenToShow(node, path);
 	const nodeView = GetNodeView(map.id, path);
-	const boxExpanded = (useForcedExpand ? true : null) ?? nodeView?.expanded ?? false;
+	// crawler slices ignore saved expansion state
+	const boxExpanded = useForcedExpand || (!store.main.internalCrawlerMode && (nodeView?.expanded ?? false));
 
 	const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 	const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
@@ -150,6 +149,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	//}
 
 	const {width} = GetMeasurementInfoForNode(node, path, map);
+	const layoutWidth = (node.type != NodeType.argument ? standardWidthInGroup : null) ?? width;
 	const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 	const aboveToolbar_visible = toolbarItemsToShow.length > 0 &&
 
@@ -164,7 +164,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 			parentIsAbove: inBelowGroup,
 		},
 		new NodeDataForTreeGrapher({
-			nodePath: path, nodeType: node.type, width, expanded: boxExpanded,
+			nodePath: path, nodeType: node.type, width: layoutWidth, expanded: boxExpanded,
 			aboveToolbar_visible,
 			aboveToolbar_hasLeftButton: aboveToolbar_visible && toolbarItemsToShow.Any(a=>a.panel == "prefix"),
 		}),
@@ -225,8 +225,6 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	// we exclude premise and comment children from this expand-to-show count, because these are shown in other places (premises as vertically-below the node, and comments in the node's "Comments" panel)
 	const childrenShownByNodeExpandButton = (node.type == NodeType.argument ? nodeChildrenToShow.Exclude(...ncToShow_generic) : nodeChildrenToShow).filter(a=>a.type != NodeType.comment);
-	console.log(childrenShownByNodeExpandButton);
-
 	const playback = GetPlaybackInfo();
 	const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;
 
@@ -240,8 +238,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	const css = css2;
 
-	const handleColumnRef = useCallback((c: Column|n)=>{
-		const dom = c?.root;
+	const handleColumnRef = useCallback((dom: HTMLDivElement|null)=>{
 		nodeUIRef.current = dom;
 		ref_leftColumn(dom);
 		if (dom) {
@@ -257,13 +254,12 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 
 	return (
 		<>
-			<Column ref={handleColumnRef}
+			<div ref={handleColumnRef}
 				className={["NodeUI", "innerBoxColumn", "clickThrough"].filter(a=>a).join(" ")}
+				data-internal-crawler-loading={store.main.internalCrawlerMode && !forLayoutHelper && IsSpecialEmptyArray(nodeChildrenToShow) ? "true" : undefined}
 				style={css(
 					{
-						position: "absolute",
 						opacity: standardWidthInGroup != 0 ? 1 : 0,
-						boxSizing: "content-box",
 						paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 					},
 					style,
@@ -279,11 +275,11 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 				{/* these are for components shown just to the right of the NodeBox box */}
 				{nodeChildrenToShow == emptyArray_forLoading &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) && !store.main.timelines.hideEditingControls &&
+				{!store.main.internalCrawlerMode && !path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) && !store.main.timelines.hideEditingControls &&
 					<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{!boxExpanded &&
 					<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length} childrenLoading={IsSpecialEmptyArray(nodeChildrenToShow)}/>}
-			</Column>
+			</div>
 			{boxExpanded && nodeChildHolder_truth}
 			{boxExpanded && nodeChildHolder_relevance}
 			{boxExpanded && nodeChildHolder_freeform}

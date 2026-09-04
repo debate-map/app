@@ -58,6 +58,7 @@ export const MapEntryUI = observer_mgl((props: Props)=>{
 						RunInAction("MapEntryUI.onClick", ()=>{
 							store.main.page = "debates";
 							store.main.debates.selectedMapID = map.id;
+							store.main.debates.focusedNodePath = null;
 						});
 					}}/>
 					{map.note &&

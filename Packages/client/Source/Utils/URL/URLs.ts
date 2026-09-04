@@ -164,11 +164,14 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			}
 		} else if (page == "debates") {
 			const urlStr = url.pathNodes[1];
-			const match = urlStr && urlStr.match(/([A-Za-z0-9_-]+)$/);
-			mapID = match ? match[1] : null;
-
+			// keep list mode path backed so the crawler treats featured/all as distinct pages.
+			const isAllList = urlStr == "all";
+			mapID = isAllList ? null : (urlStr?.match(/([A-Za-z0-9_-]+)$/)?.[1] ?? null);
+			store.main.debates.listType = isAllList ? "all" : "featured";
 			store.main.debates.selectedMapID = mapID!;
+			store.main.debates.focusedNodePath = mapID ? (url.pathNodes.slice(2).join("/") || null) : null;
 		} else if (page == "global") {
+			store.main.debates.focusedNodePath = url.pathNodes.slice(2).join("/") || null; // crawler slice route, /global/map/<node ids>, shares the debates field since the crawler only ever has one map open
 			/* if (subpage == 'map') {
 				mapID = globalMapID;
 				if (isBot) {
@@ -242,11 +245,13 @@ export function GetLoadActionFuncForURL(url: VURL) {
 
 		// load query-vars
 		store.main.urlOtherFlags = [];
+		store.main.internalCrawlerMode = false;
 		for (const param of url.queryVars) {
 			// special flags (regular ones have handling in the path-specific branches)
 			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;
 			else if (param.name == "env") store.main.envOverride = param.value == "null" ? null : param.value;
 			else if (param.name == "db") store.main.dbOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "internalCrawler") store.main.internalCrawlerMode = param.value == "1";
 			//else if (param.name == "dbVersion") store.main.dbVersionOverride = param.value == "null" ? null : param.value;
 			else if (param.name == "analytics") store.main.analyticsEnabled = param.value == "1";
 			else if (param.name == "s") {
@@ -317,7 +322,17 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			// newURL.pathNodes.push(mapID+"");
 			const urlStr = GetURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
+			if (s.main.internalCrawlerMode && s.main.debates.focusedNodePath) {
+				newURL.pathNodes.push(...s.main.debates.focusedNodePath.split("/").filter(a=>a));
+			}
+			if (s.main.internalCrawlerMode) newURL.hash = "focused-node"; // baked pages scroll to the focused node via this fragment (NodeBox sets the id)
+		} else if (s.main.internalCrawlerMode && s.main.debates.listType == "all") {
+			// keep normal list switching spa-only; only crawler mode needs the all route.
+			newURL.pathNodes.push("all");
 		}
+	} else if (page == "global" && subpage == "map" && s.main.internalCrawlerMode) { // global map slices, same shape as the debates ones
+		if (s.main.debates.focusedNodePath) newURL.pathNodes.push(...s.main.debates.focusedNodePath.split("/").filter(a=>a));
+		newURL.hash = "focused-node";
 	}
 	/*if (page == "global" && subpage == "map") {
 		if (isBot) {
@@ -363,7 +378,7 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 	// a default-child is only used (ie. removed from url) if there are no path-nodes after it
 	/*if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
 	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;*/
-	// nowadays, we only remove the page and subpage for the /home/home path (it's not worth making urls more brittle just for slightly shorter urls) 
+	// nowadays, we only remove the page and subpage for the /home/home path (it's not worth making urls more brittle just for slightly shorter urls)
 	if (page == "home" && subpage == "home") newURL.pathNodes.length = 0;
 
 	Assert(!newURL.pathNodes.Any(a=>a == "/"), `A path-node cannot be just "/". @url(${newURL})`);
@@ -373,6 +388,7 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "0");
 	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
 	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
+	if (s.main.internalCrawlerMode) newURL.SetQueryVar("internalCrawler", "1");
 	//if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
 	/* if (mapID && includeMapViewStr) {
 		newURL.SetQueryVar('view', GetMapViewStr(mapID));

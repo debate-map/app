@@ -38,6 +38,7 @@ Others/Secrets/*
 /Packages/*/Dist
 /Packages/*/tsconfig.tsbuildinfo
 /Packages/*/nrdiag-*
+/Packages/baker/static/
 /Packages/deploy/NewRelic/newrelic-manifest.yaml
 # the adobe-not-def font files are fully optional (used for debugging), so don't include in repo
 /Packages/client/Resources/Fonts/AdobeNotDef-Regular.otf

@@ -1,4 +1,4 @@
-import {Button, Div, Row} from "react-vcomponents";
+import {Div} from "react-vcomponents";
 import {cssHelper} from "react-vextensions";
 import {Assert} from "js-vextensions";
 import React, {HTMLAttributes, Ref, useMemo, useRef} from "react";
@@ -15,6 +15,7 @@ import {observer_mgl} from "mobx-graphlink";
 type DivDataAttrs = { [K in `data-${string}`]?: string | number | boolean | undefined };
 export type ExpandableBox_Props = {
 	className?: string,
+	id?: string,
 	width: number|string|n,
 	widthOverride?: number|n, // is this still needed?
 	innerWidth?: number,
@@ -66,16 +67,15 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 		showNotificationButton = false, onToggleNotifications, notificationLevel = "none", dataAttrs, ...rest} = props;
 
 	const textHolderRef = useRef<HTMLDivElement>(null);
-	const expandButtonRef = useRef<Button>(null);
+	const showExpandButton = isExpandButtonForNodeChildren || !store.main.internalCrawlerMode;
 
 	const self = useMemo(()=>new ExpandableBox_FakeClass({}), []);
 	const {key, css} = cssHelper(self);
 
 	return (
 		<div ref={ref}
-			className={key("ExpandableBox", className)}
-			style={css({display: "flex", position: "relative", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}),
-				cursor: "default", width: widthOverride ?? width, boxShadow: `rgba(0,0,0,.5) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`}, style)}
+			className={key(["ExpandableBox", !roundedTopLeftCorner && "ExpandableBox_squareTopLeft", className].filter(a=>a).join(" "))}
+			style={css({width: widthOverride ?? width, boxShadow: `rgba(0,0,0,.5) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`}, style)}
 			onClick={onClick}
 			onMouseEnter={onMouseEnter as any}
 			onMouseLeave={onMouseLeave as any}
@@ -83,31 +83,29 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 			{...rest}
 		>
 			{beforeChildren}
-			<Row className={key("ExpandableBox_mainContent")}
-				style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}), cursor: "pointer"})}
+			<div className={key(["ExpandableBox_mainContent", !roundedTopLeftCorner && "ExpandableBox_squareTopLeft"].filter(a=>a).join(" "))}
+				style={css(innerWidth && {width: innerWidth})}
 				onClick={onDirectClick}
 			>
-				<div ref={textHolderRef} onClick={onTextHolderClick} style={ES(
+				<div ref={textHolderRef} className="ExpandableBox_text" onClick={onTextHolderClick} style={ES(
 					{
-						position: "relative", width: "calc(100% - 17px)", padding,
+						width: showExpandButton ? "calc(100% - 17px)" : "100%", padding,
 						paddingRight: showNotificationButton ? NOTIFICATION_BELL_WIDTH : undefined,
 						// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 					},
 					textHolderStyle,
 				)}>
 
-					<div style={{
-						position: "absolute", left: 0, top: 0, bottom: 0,
+					<div className="ExpandableBox_fill" style={{
 						width: `${backgroundFillPercent}%`, borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner, tr: false, br: false, bl: true}),
 						background: backgroundColor.css("hsl"), // outputting as hsl makes it easier to test variants in dev-tools
 					}}/>
-					<div style={{
-						position: "absolute", right: 0, top: 0, bottom: 0,
+					<div className="ExpandableBox_unfilled" style={{
 						width: `${100 - backgroundFillPercent}%`, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
 					}}/>
 					{markerPercent != null &&
-						<div style={{
-							position: "absolute", left: `${markerPercent}%`, top: 0, bottom: 0,
+						<div className="ExpandableBox_marker" style={{
+							left: `${markerPercent}%`,
 							width: 2, background: "rgba(0,255,0,.5)",
 						}}/>}
 					{text}
@@ -144,24 +142,12 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 						</button>
 					</Div>}
 				</div>
-				<Button ref={expandButtonRef}
-					text={<>
-						{expanded ? "<" : ">"}
-						{!expanded && isExpandButtonForNodeChildren &&
-						<TourDot stateKey="nodeUI_expandButton" text={`Click ">" below to expand the children nodes.`}/>}
-					</>}
+				{showExpandButton && <div className={key("Button", "NodeExpandButton")}
 					style={css(
 						{
-							display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-							width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
-							padding: 0,
-							fontSize: 14, fontWeight: "bold", // for arrows
-							lineHeight: "1px", // keeps text from making meta-theses too tall
-							backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
-							border: "none",
-							color: liveSkin.NodeTextColor().css(),
-							":hover": {backgroundColor: Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css()},
-						},
+							"--node-expand-background": Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
+							"--node-expand-hover-background": Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css(),
+						} as React.CSSProperties,
 						expandButtonStyle,
 					)}
 					onClick={e=>{
@@ -169,8 +155,13 @@ export const ExpandableBox = observer_mgl((props: ExpandableBox_Props)=>{
 							RunInAction_Set(()=>store.main.guide.tourDotStates.nodeUI_expandButton = Date.now());
 						}
 						return toggleExpanded(e);
-					}}/>
-			</Row>
+					}}>
+					{expanded ? "<" : ">"}
+					{!expanded && isExpandButtonForNodeChildren &&
+					<TourDot stateKey="nodeUI_expandButton" text={`Click ">" below to expand the children nodes.`}/>}
+				</div>
+				}
+			</div>
 			{afterChildren}
 		</div>
 	);

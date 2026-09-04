@@ -127,10 +127,7 @@ export const RatingsPanel_Old = observer_mgl((props: RatingsPanel_Props)=>{
 
 	return (
 		<div ref={root}
-			style={ES(
-				{position: "relative"}, //minWidth: 496
-				asNodeUIOverlay && {position: "absolute", left: 0, right: 0, top: 0, bottom: 0, pointerEvents: "none"},
-			)}
+			className={["RatingsPanel", asNodeUIOverlay && "RatingsPanel_overlay"].filter(a=>a).join(" ")}
 			onClick={e=>{
 				if (asNodeUIOverlay) return;
 				if (ratingType == "impact") return;
@@ -227,17 +224,9 @@ export const RatingsPanel_Old = observer_mgl((props: RatingsPanel_Props)=>{
 				</Row>
 			</div>}
 
-			<div ref={rootRef as any} className="uplotHolder" style={ES({
-				position: "relative", width: "100%",
-				//height: "calc(100% - 53px)", // we need to cut off some height, for the legend
-				height: "100%",
-			})}>
+			<div ref={rootRef as any} className="uplotHolder">
 				{width != -1 &&
 				<>
-					<style>{`
-					.u-legend { font-size: 12px; }
-					.u-legend .hideLegend { display: none; }
-					`}</style>
 					<UPlot chartRef={chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
 					{(asNodeUIOverlay || rectsResolved) &&
 					//rootRect != null && chartBodyRect != null &&

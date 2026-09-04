@@ -29,6 +29,9 @@ export class MainState {
 	@O accessor dbOverride: string|n;
 	//@O accessor dbVersionOverride: string|n;
 
+	/* Mode used to turn the site into more internal crawler friendly(internal crawler is simply a crawler that we use to bake the site
+	into static html files), which can be used in JS disabled environment, better indexing */
+	@O @ignore accessor internalCrawlerMode = false;
 	@O accessor analyticsEnabled = true;
 	@O accessor blockMobXUnsubscribing = false;
 	@O accessor blockCacheClearing = false;

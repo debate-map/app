@@ -3,6 +3,7 @@ import {hasHotReloaded} from "Main";
 import React, {useEffect, useMemo, useRef} from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
+import {InternalCrawlerReadinessMonitor} from "Utils/InternalCrawlerReadiness";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_Options, LoadURL, PageContainer, RunInAction} from "web-vcore";
 import chroma from "chroma-js";
@@ -47,8 +48,10 @@ export const RootUIWrapper = observer_mgl(()=>{
 
 	if (!isMounted.current){
 		(async()=>{
+			// crawler pages must be url-driven, so don't load or write browser-saved state.
+			const useStoredState = startURL.GetQueryVar("internalCrawler") != "1";
 			const trunk = new AsyncTrunk(store, {storage: localStorage});
-			if (startURL.GetQueryVar("clearState") == "true") {
+			if (useStoredState && startURL.GetQueryVar("clearState") == "true") {
 				console.log("Clearing state. State before clear:", Clone(store));
 				await trunk.clear();
 			}
@@ -56,6 +59,7 @@ export const RootUIWrapper = observer_mgl(()=>{
 			// we start a mirror-generation here, but merely so that we can hook into its "onChange" event (to trigger another call to trunk.persist)
 			const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {
 				onChange: (sourceObj, mirrorObj)=>{
+					if (!useStoredState) return;
 					if (!self.storeReady) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
 					//changeCount++;
 					//console.log(`Mirror changed (${changeCount})! Possibly persisting... (ie. if cooldown has passed) @SourceObj:`, sourceObj, "@MirrorObj:", mirrorObj, "@MirrorObj_Old:", mirrorObj_old);
@@ -88,7 +92,9 @@ export const RootUIWrapper = observer_mgl(()=>{
 				})();
 			};
 
-			await trunk.init();
+			if (useStoredState) {
+				await trunk.init();
+			}
 			console.log("Loaded state:", Clone(store));
 
 			// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)
@@ -175,7 +181,7 @@ g.mousePos = new Vector2(undefined, undefined);
 G({ctrlDown: false, shiftDown: false, altDown: false});
 
 export const RootUI = observer_mgl(()=>{
-	const {page} = store.main;
+	const {page, internalCrawlerMode} = store.main;
 
 	return (
 		<Column className='background' style={{height: "100%"}}>
@@ -194,6 +200,7 @@ export const RootUI = observer_mgl(()=>{
 				key={page} // use key, so that error-message clears when user changes pages
 			>
 				<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+					{internalCrawlerMode && <InternalCrawlerReadinessMonitor/>}
 					{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
 					{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
 					{page == "database" && <DatabaseUI/>}

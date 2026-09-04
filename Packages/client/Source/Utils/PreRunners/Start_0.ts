@@ -48,7 +48,10 @@ let GetBrowser = require('../General/UserAgent').GetBrowser;
 let supportedBrowsers = require('../General/UserAgent').supportedBrowsers;
 
 let browser = GetBrowser().name || navigator.userAgent;
-if (supportedBrowsers.indexOf(browser) == -1 && !isBot) {
+// this runs before crawler mode is initialized from the url, so read the flag directly to keep headless chrome warnings out of snapshots.
+const internalCrawlerRequest = /(?:^|[?&])internalCrawler=1(?:&|$)/.test(location.search);
+if (internalCrawlerRequest) window.internalCrawler = {path: location.pathname, status: "loading", reason: "app booting"}; // gives the baker a signal before react even mounts
+if (supportedBrowsers.indexOf(browser) == -1 && !isBot && !internalCrawlerRequest) {
 	let message = 'Sorry! Your browser (' + browser + ') is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.';
 	setTimeout(() => {
 		try {

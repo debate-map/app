@@ -4,7 +4,7 @@ import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
-import {ES, HSLA, PageContainer, RunInAction} from "web-vcore";
+import {ES, HSLA, Link, PageContainer, RunInAction} from "web-vcore";
 import {E, ToNumber} from "js-vextensions";
 import {Button, Text, Column, Row, Select, TextInput} from "react-vcomponents";
 import {UseCallback} from "react-vextensions";
@@ -105,6 +105,7 @@ export const MapListUI = observer_mgl(()=>{
 
 	const maps_featured = maps.filter(a=>a.featured);
 	let listType = uiState.listType;
+	const internalCrawlerMode = store.main.internalCrawlerMode;
 
 	// if in sl-mode, some modes may not have any featured maps; in those cases, set/lock list-type to "all" so user doesn't see an empty list
 	// (since default list-type is "featured")
@@ -116,6 +117,13 @@ export const MapListUI = observer_mgl(()=>{
 		return [filterMaps(selectedMapsPreFilter, tableData), filterMaps(maps, tableData)];
 	}, [selectedMapsPreFilter, maps, tableData]);
 	const listTypeOptions = [{name: `Featured (${maps_featured.length})`, value: "featured"}, {name: `All (${maps.length})`, value: "all"}];
+	// keep crawler anchors visually aligned with the normal select button bar.
+	const listTypeLinkStyle = (first: boolean, selected: boolean)=>E(
+		{display: "inline-block", background: "rgba(255,255,255,.3)", padding: "5px 12px", cursor: "pointer", color: "inherit", textDecoration: "none"},
+		!first && {border: "solid #222", borderWidth: "0 0 0 1px"},
+		first ? {borderRadius: "4px 0 0 4px"} : {borderRadius: "0 4px 4px 0"},
+		selected && {background: "rgba(255,255,255,.5)"},
+	);
 
 	return (
 		<>
@@ -128,9 +136,17 @@ export const MapListUI = observer_mgl(()=>{
 				SLMode && GetCinzelStyleForBold(),
 			)}>
 				<Row mt={10} p="0 10px">
-					<Select displayType="button bar" options={listTypeOptions} value={listType} onChange={val=>{
-						RunInAction("MapListUI.listTypeBar.onChange", ()=>uiState.listType = val);
-					}}/>
+					{/* expose anchors only in crawler mode, so regular users keep the normal select behavior. */}
+					{internalCrawlerMode ? (
+						<Row>
+							<Link className="ButtonBar_OptionUI" text={listTypeOptions[0].name} style={listTypeLinkStyle(true, listType == "featured")} actionFunc={s=>s.main.debates.listType = "featured"}/>
+							<Link className="ButtonBar_OptionUI" text={listTypeOptions[1].name} style={listTypeLinkStyle(false, listType == "all")} actionFunc={s=>s.main.debates.listType = "all"}/>
+						</Row>
+					) : (
+						<Select displayType="button bar" options={listTypeOptions} value={listType} onChange={val=>{
+							RunInAction("MapListUI.listTypeBar.onChange", ()=>uiState.listType = val);
+						}}/>
+					)}
 					<Text ml={5}>Filter:</Text>
 					<TextInput ml={5} style={{width: 200}} instant value={filter} onChange={val=>{
 						setFilter(val);

@@ -1,20 +1,18 @@
 import {GetExtractedPrefixTextInfo, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, NodeL3, NodeRatingType, NodeType, ShouldRatingTypeBeReversed} from "dm_common";
-import React, {useMemo, useState} from "react";
+import React, {useState} from "react";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {ES, HSLA, InfoButton} from "web-vcore";
+import {HSLA, InfoButton} from "web-vcore";
 import {Color} from "chroma-js";
 import {E, ea} from "js-vextensions";
 import {Row, Text} from "react-vcomponents";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
-import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../NodeLayoutConstants.js";
 import {NodeBox_Props} from "../NodeBox.js";
 import {observer_mgl} from "mobx-graphlink";
 import {JSX} from "react";
-import {cssHelper} from "react-vextensions";
 
 type NodeToolbar_Props = {
 	backgroundColor: Color,
@@ -28,14 +26,10 @@ type NodeToolbar_Props = {
 
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
-class NodeToolbar_FakeClass extends React.Component {}
-
 export const NodeToolbar = observer_mgl((props: NodeToolbar_Props)=>{
 	const {map, node, path, backgroundColor} = props;
-	const self = useMemo(()=>new NodeToolbar_FakeClass({}), []);
 
 	const sharedProps = E(props, {buttonCount: 1}); // button-count is updated shortly
-	const {key, css} = cssHelper(self);
 
 	const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 	const tags = GetNodeTags.CatchBail(ea, node.id);
@@ -102,37 +96,18 @@ export const NodeToolbar = observer_mgl((props: NodeToolbar_Props)=>{
 	return (
 		<>
 			{toolbarItemsToShow.Any(a=>a.panel == "prefix") &&
-			<Row className={key("NodeToolbar useLightText")} style={css(
-				{
-					height: TOOLBAR_HEIGHT_BASE, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-					color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
-					position: "absolute", bottom: "100%", left: 0,
-				},
-				showBottomBorder && {
-					borderBottom: "1px solid black",
-					boxSizing: "content-box", // needed for border to not cut into content (to be consistent with height of the regular right-anchored toolbar section)
-				},
-			)}>
+			<div className={["NodeToolbar", "useLightText", "NodeToolbar_prefix", showBottomBorder && "NodeToolbar_bordered"].filter(a=>a).join(" ")}
+				style={{background: backgroundColor.css(), color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css()}}>
 				<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo?.bracketedText ?? "n/a"} panel="extractedPrefixText" enabled={false}/>
-			</Row>}
-			<Row className={key("NodeToolbar useLightText")} style={css(
-				{
-					height: TOOLBAR_HEIGHT_BASE, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-					color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
-				},
-				node.type == NodeType.argument && {
-					position: "relative", // needed to show above
-				},
-				node.type != NodeType.argument && {
-					position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
-				},
-				showBottomBorder && {
-					borderBottom: "1px solid black",
-					boxSizing: "content-box", // needed for border to not cut into content (eg. making ratings-preview look inconsistent)
-				},
-			)}>
+			</div>}
+			<div className={[
+				"NodeToolbar", "useLightText",
+				node.type == NodeType.argument ? "NodeToolbar_argument" : "NodeToolbar_above",
+				showBottomBorder && "NodeToolbar_bordered",
+			].filter(a=>a).join(" ")}
+				style={{background: backgroundColor.css(), color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css()}}>
 				{getStandardToolbarItemUIs()}
-			</Row>
+			</div>
 		</>
 	);
 });
@@ -154,11 +129,8 @@ type ToolBarButton_Props = {
 	style?: any,
 } & NodeToolbar_SharedProps;
 
-class ToolBarButton_FakeClass extends React.Component {}
-
 export const ToolBarButton = observer_mgl((props: ToolBarButton_Props)=>{
 	let {node, path, text, textComp, enabled = true, disabledInfo, panel, first, panelToShow, onPanelButtonClick, onClick, onHoverChange, nodeUI_width_final, leftPanelShow, style, buttonCount} = props;
-	const self = useMemo(()=>new ToolBarButton_FakeClass({}), []);
 	const [hovered, setHovered] = useState(false);
 
 	let highlight = panel && panelToShow == panel;
@@ -183,10 +155,7 @@ export const ToolBarButton = observer_mgl((props: ToolBarButton_Props)=>{
 
 	if (textComp == null) {
 		textComp = (
-			<Text style={E(
-				{position: "relative", overflow: "hidden", textOverflow: "ellipsis"},
-				{fontSize: [null, 10, 10, 8][sizeIndex]},
-			)}>{text}</Text>
+			<span className="ToolBarButton_textContent" style={{fontSize: [undefined, 10, 10, 8][sizeIndex]}}>{text}</span>
 		);
 		if (!enabled && disabledInfo != null) {
 			textComp = <InfoButton text={disabledInfo!}/>;
@@ -195,13 +164,16 @@ export const ToolBarButton = observer_mgl((props: ToolBarButton_Props)=>{
 	const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
 	const showLeftBorder = !first || (node.type == NodeType.argument && panel != "extractedPrefixText"); // extracted-prefix-text button is always left-most, so has no left-border
-	const showBottomBorder = false;
-
-	const {key, css} = cssHelper(self);
 
 	return (
 		<div
-			className={key("ToolBarButton", icon && `mdi mdi-icon mdi-${icon}`)}
+			className={[
+				"ToolBarButton",
+				icon && `mdi mdi-icon mdi-${icon}`,
+				showLeftBorder && "ToolBarButton_leftBorder",
+				icon == null && "ToolBarButton_text",
+				panel == "extractedPrefixText" && "ToolBarButton_prefix",
+			].filter(a=>a).join(" ")}
 			onMouseEnter={()=>{
 				if (!enabled) return;
 				setHovered(true);
@@ -212,33 +184,17 @@ export const ToolBarButton = observer_mgl((props: ToolBarButton_Props)=>{
 				setHovered(false);
 				onHoverChange?.(false);
 			}}
-			style={ES(
-				{
-					position: "relative", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-					border: "solid rgba(0,0,0,1)",
-					borderWidth: `0 0 ${showBottomBorder ? "1px" : "0"} ${showLeftBorder ? "1px" : "0"}`,
-					boxSizing: "content-box", // needed for border to not cut into content (eg. making ratings-preview look inconsistent)
-				},
+			style={E(
 				highlightOrHovered && {background: "rgba(255,255,255,.2)"},
 				icon == null && {
 					// normally we try to keep all toolbar-buttons the same width, but with limited space, use flexible width based on text-length
 					flex: [50, 50, text.length, text.length][sizeIndex],
-					minWidth: TOOLBAR_BUTTON_WIDTH, // probably temp
 				},
 				icon && {
-					width: icon == "transfer-left" ? [35, 25, 20, 15][sizeIndex] : [30, 25, 20, 15][sizeIndex],
 					fontSize: 16,
 				},
-				// atm, toolbar-buttons are always displayed with the same size, so just set it so explicitly
-				{width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_HEIGHT_BASE},
 				(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 					color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .15})`,
-				},
-				panel == "extractedPrefixText" && {
-					padding: "0 10px",
-					// if we're showing prefix-text here, only set a min-width; while this can the layout system some imperfection (it expects fixed-widths), it's better than cutting off the prefix-text
-					width: null,
-					minWidth: TOOLBAR_BUTTON_WIDTH, // probably temp
 				},
 				SLMode && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont()},
 				style,
