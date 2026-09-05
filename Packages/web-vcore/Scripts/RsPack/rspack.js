@@ -83,12 +83,13 @@ export const buildConfig = options=>{
 			minimizer: [
 				new rspack.SwcJsMinimizerRspackPlugin({
 					minimizerOptions: {
-						// todo: switch back to this more precisely-tuned mangling, once swc's minifier applies it correctly (it ignores the keep_classnames subfield)
-						/*mangle: {
-							keep_classnames: true,
+						compress: {
+							keep_classnames: true, keep_fnames: true,
+						},
+						mangle:   {
+							keep_classnames: true, keep_fnames: true,
 							reserved: ["makeObservable", "observer"],
-						},*/
-						mangle: false,
+						},
 					},
 				}),
 				new rspack.LightningCssMinimizerRspackPlugin({}),
@@ -131,6 +132,7 @@ export const buildConfig = options=>{
 							options: {
 								jsc: {
 									target: "es2016",
+									keepClassNames: true,
 									parser: {
 										syntax: "typescript",
 										decorators: true,
@@ -158,6 +160,7 @@ export const buildConfig = options=>{
 							options: {
 								jsc: {
 									target: "es2016",
+									keepClassNames: true,
 									parser: {
 										syntax: "ecmascript",
 										decorators: true,

@@ -10130,9 +10130,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@npm:0.1.14":
-  version: 0.1.14
-  resolution: "mobx-graphlink@npm:0.1.14"
+"mobx-graphlink@npm:0.1.16":
+  version: 0.1.16
+  resolution: "mobx-graphlink@npm:0.1.16"
   dependencies:
     "@types/json-schema": "npm:^7.0.8"
     ajv: "npm:^8.8.1"
@@ -10152,7 +10152,7 @@ __metadata:
     mobx: ^7.0.0
     mobx-react: ^10.0.0
     react: ^17.0.2
-  checksum: 5370d6aece15068a5b10fa8789335c42ed4f34276bd1306818b960d77798c9df9f21e326e620da53800243008edeb7266b9b607e60eb5f09acd0f97ad15266c0
+  checksum: 99fd71cc7d79c7de6f17c712feecccbbe9eae97c2e444cd3015d2b395b40b565d9717067c40a277d18440f21a76e27ef110c9e733e9a9e118db96df0811f8114
   languageName: node
   linkType: hard
 
@@ -15260,7 +15260,7 @@ __metadata:
     lodash: "npm:^4.17.15"
     mini-css-extract-plugin: "npm:^1.6.0"
     mobx: "npm:7.0.0"
-    mobx-graphlink: "npm:0.1.14"
+    mobx-graphlink: "npm:0.1.16"
     mobx-react: "npm:10.0.0"
     mobx-sync: "git+https://github.com/Venryx/mobx-sync.git#e47ab1964724b1f8c96109d447cfd6aba8343e64"
     mobx-utils: "npm:^6.0.6"
