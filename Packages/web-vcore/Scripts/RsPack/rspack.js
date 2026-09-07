@@ -45,7 +45,12 @@ export const buildConfig = options=>{
 	require("dotenv").config({path: opt.dotEnvFile});
 
 	// read some vars from the environment variables
-	function RSPACK_IN_DEV_SERVER_MODE() { return process.env.WEBPACK_SERVE == "true"; } // rspack re-uses this env-var name apparently
+	function RSPACK_IN_DEV_SERVER_MODE() {
+		if (process.env.RSPACK_SERVE == "true") return true;
+		// also check for webpack's WEBPACK_SERVE env-var (older rspack versions set this)
+		if (process.env.WEBPACK_SERVE == "true") return true;
+		return false;
+	}
 	const QUICK = process.env.QUICK == "true";
 	const ENV_LONG = process.env.NODE_ENV;
 	const ENV = ENV_LONG === "production" ? "prod" : "dev";
