@@ -176,6 +176,38 @@ export function GetMobXStoredAnnotations(mobxTree: object) {
 // mobx-mirror
 // ==========
 
+/** Returns the non-proxied "backing" object for a mobx object -- ie. the object that mobx's proxy actually wraps.
+* (For ObservableObject, that is `adm.target_`; for ObservableArray, `adm.values_`; for ObservableMap/Set, the object itself, since those aren't proxied.)
+* Relevant here because props added *through* the proxy go via the admin's `defineProperty_`,
+* which trips mobx's strict-mode "modifying observed values without an action" warning when `keysAtom_` has observers
+* (which the mirror-reaction itself creates, by reading the keys), whereas props added to the backing object directly do not. */
+function GetUnproxiedMobXObject(obj: object): object {
+	if (obj == null) return obj;
+	try {
+		const adm = obj[$mobx];
+		if (adm == null) return obj; // not a mobx object; use as-is
+		if (adm.target_ != null) return adm.target_; // ObservableObject proxy-target
+		if (Array.isArray(adm.values_)) return adm.values_; // ObservableArray proxy-target
+		return obj; // ObservableMap/ObservableSet (and any other non-proxied mobx objects)
+	} catch (ex) {
+		// if prop-access itself fails (eg. a different-domain frame context object), just use the object as-is
+		return obj;
+	}
+}
+
+/** Stores the "$mirror" cache/replica on [mobxTree]'s non-proxied backing object (so the write isn't seen as a mobx mutation).
+ * Purpose: To avoid mobx state-modification checks/warnings.
+ * Safety: Safe because no reactive context is (supposed to) read the (dynamically added) "$mirror" key; it's specifically intended as a non-reactive mirror/cache/replica. */
+function AttachMirrorOfMobXTree(mobxTree: any, tree_plainMirror: any) {
+	Object.defineProperty(GetUnproxiedMobXObject(mobxTree), "$mirror", {value: tree_plainMirror});
+}
+
+/** Gets the "$mirror" cache stored on [mobxTree] (well actually, on its non-proxied backing object), if any. */
+function GetMirrorOfMobXTree_Raw(mobxTree: object): any {
+	// note: reading through the proxy (rather than off the backing object directly) is fine -- only *writes* trip mobx's state-modification check
+	return mobxTree["$mirror"];
+}
+
 export class GetMirrorOfMobXTree_Options {
 	/** Most callers of GetMirrorOfMobXTree only care to have mobx-prop pathways mirrored, and excluding the rest improves perf substantially. */
 	//onlyCopyMobXNodes = true;
@@ -191,11 +223,9 @@ export class GetMirrorOfMobXTree_Options {
 	onChange?: (sourceObj: any, mirrorObj: any)=>void;
 }
 
-/**
-Creates a deep copy of the object-tree passed in; for source nodes that are mobx objects, creates dynamically-updating "mirrors".
-Purpose: Enables use of MobX object-trees as the source/base object for immer.produce(). (see: https://github.com/immerjs/immer/issues/515)
-Important note: Due to technical reasons, the mobx-tree's "mirror" will be empty for the first call, *if* call-stack already in mobx mutate-batch (ie. globalState.inBatch > 0). Mirror will be populated just after call-stack completes.
-*/
+/** Creates a deep copy of the object-tree passed in; for source nodes that are mobx objects, creates dynamically-updating "mirrors".
+ * Purpose: Enables use of MobX object-trees as the source/base object for immer.produce(). (see: https://github.com/immerjs/immer/issues/515)
+ * Important note: Due to technical reasons, the mobx-tree's "mirror" will be empty for the first call, *if* call-stack already in mobx mutate-batch (ie. globalState.inBatch > 0). Mirror will be populated just after call-stack completes. */
 export function GetMirrorOfMobXTree<T>(mobxTree: T, opt = new GetMirrorOfMobXTree_Options()): T {
 	if (mobxTree == null) return null as any;
 	try {
@@ -205,7 +235,7 @@ export function GetMirrorOfMobXTree<T>(mobxTree: T, opt = new GetMirrorOfMobXTre
 		return {} as any;
 	}
 
-	if (mobxTree["$mirror"] == null) {
+	if (GetMirrorOfMobXTree_Raw(mobxTree) == null) {
 		const tree_plainMirror =
 			Array.isArray(mobxTree) ? [] :
 			mobxTree instanceof Map || mobxTree instanceof ObservableMap ? new Map() :
@@ -216,15 +246,15 @@ export function GetMirrorOfMobXTree<T>(mobxTree: T, opt = new GetMirrorOfMobXTre
 		}
 
 		if (Object.isExtensible(mobxTree)) {
-			Object.defineProperty(mobxTree, "$mirror", {value: tree_plainMirror});
+			AttachMirrorOfMobXTree(mobxTree, tree_plainMirror);
 		}
 
 		StartUpdatingMirrorOfMobXTree(mobxTree, tree_plainMirror, opt);
 	}
 	if (opt.removeCircularLinks) {
-		RemoveCircularLinks(mobxTree["$mirror"]);
+		RemoveCircularLinks(GetMirrorOfMobXTree_Raw(mobxTree));
 	}
-	return mobxTree["$mirror"];
+	return GetMirrorOfMobXTree_Raw(mobxTree);
 }
 
 export function StartUpdatingMirrorOfMobXTree(mobxTree: any, tree_plainMirror: any, opt = new GetMirrorOfMobXTree_Options()) {
