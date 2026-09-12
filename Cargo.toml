@@ -6,6 +6,7 @@ members = [
 	"Packages/app-server",
 	"Packages/monitor-backend",
 	"Packages/baker",
+	"Packages/graphlink-rust",
 	#"Packages/graphlink-server",
 ]
 
