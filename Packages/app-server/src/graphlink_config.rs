@@ -22,6 +22,16 @@ fn get_server_url_for_graphlink(server_pod: GL_ServerPod, subpath: &str, opts: G
 	get_server_url(server_pod, subpath, opts)
 }
 
+// builders for the rules below, so each reads the way its sql does
+fn or(a: RLS, b: RLS) -> RLS {
+	RLS::Or(Box::new(a), Box::new(b))
+}
+
+// admin, or creator, or the entry's access policy grants access for `group` (the section of the policy's permissions: maps/nodes/terms/medias/others)
+fn admin_or_creator_or_policy(group: &str) -> RLS {
+	or(RLS::UserIsAdmin, or(RLS::UserMatchesX("creator".o()), RLS::UserGrantFromPolicy("accessPolicy".o(), group.o())))
+}
+
 pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 	let mut table_defs = vec![];
 	#[rustfmt::skip]
@@ -43,6 +53,25 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		])); // "likely to be removed at some point" per rls_policies.rs
 		table_defs.push(TableDef::new3("feedback_userInfos", RLS::All, vec![
 			co2("proposalsOrder", "text[]"),
+		]));
+
+		// gated by the entry's access policy
+		// ==========
+		table_defs.push(TableDef::new3("maps", admin_or_creator_or_policy("maps"), vec![
+			co2("accessPolicy", "text"), co2("name", "text"), co3("note", "text", true), co3("noteInline", "boolean", true), co2("rootNode", "text"), co2("defaultExpandDepth", "integer"), co3("nodeAccessPolicy", "text", true), co3("featured", "boolean", true),
+			co2("editors", "text[]"), co2("creator", "text"), co2("createdAt", "bigint"), co2("edits", "integer"), co3("editedAt", "bigint", true),
+		]));
+		table_defs.push(TableDef::new3("medias", admin_or_creator_or_policy("medias"), vec![
+			co2("accessPolicy", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("name", "text"), co2("type", "text"), co2("url", "text"), co2("description", "text"),
+		]));
+		table_defs.push(TableDef::new3("nodes", admin_or_creator_or_policy("nodes"), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("type", "text"), co3("rootNodeForMap", "text", true), co2("c_currentRevision", "text"), co2("accessPolicy", "text"), co3("multiPremiseArgument", "boolean", true), co3("argumentType", "text", true),
+		]));
+		table_defs.push(TableDef::new3("terms", admin_or_creator_or_policy("terms"), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("accessPolicy", "text"), co2("name", "text"), co2("forms", "text[]"), co3("disambiguation", "text", true), co2("type", "text"), co2("definition", "text"), co3("note", "text", true), co2("attachments", "jsonb"),
+		]));
+		table_defs.push(TableDef::new3("timelines", admin_or_creator_or_policy("others"), vec![ // policies have no "timelines" section, they fall under "others"
+			co2("accessPolicy", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("mapID", "text"), co2("name", "text"), co3("videoID", "text", true), co3("videoStartTime", "real", true), co3("videoHeightVSWidthPercent", "real", true),
 		]));
 	}
 
