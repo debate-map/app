@@ -46,6 +46,10 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
         query("ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO rls_obeyer;", &[]).await?;
         // grant privileges for already-created tables
         query("GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO rls_obeyer;", &[]).await?;
+
+        // helpers for generated array columns (jsonb has no direct cast to text[]/jsonb[]); STRICT so a missing field yields NULL rather than '{}'
+        query("CREATE OR REPLACE FUNCTION jsonb_to_text_array(jsonb) RETURNS text[] AS $$ SELECT ARRAY(SELECT jsonb_array_elements_text($1)) $$ LANGUAGE sql IMMUTABLE STRICT;", &[]).await?;
+        query("CREATE OR REPLACE FUNCTION jsonb_to_jsonb_array(jsonb) RETURNS jsonb[] AS $$ SELECT ARRAY(SELECT jsonb_array_elements($1)) $$ LANGUAGE sql IMMUTABLE STRICT;", &[]).await?;
     }
 
 	// create tables
@@ -89,10 +93,11 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
 		// get current columns
 		let mut old_columns = vec![];
-		let rows = tx.query("SELECT column_name, data_type, is_nullable, generation_expression, column_default FROM information_schema.columns WHERE table_schema = 'app' AND table_name = $1", &[&table_name]).await?;
+		let rows = tx.query("SELECT column_name, data_type, is_nullable, generation_expression, column_default, udt_name FROM information_schema.columns WHERE table_schema = 'app' AND table_name = $1", &[&table_name]).await?;
 		for row in rows {
 			let name: String = row.get(0);
 			let data_type: String = row.get(1);
+			let data_type = if data_type == "ARRAY" { format!("{}[]", row.get::<_, String>(5).trim_start_matches('_')) } else { data_type }; // info-schema reports arrays as just ARRAY, the element type hides in udt_name (eg. _text)
 			let is_nullable: bool = row.get::<_, String>(2) == "YES".o();
 			let pull_from_data: bool = row.get::<_, Option<String>>(3).is_some();
 			let default_value: Option<String> = row.get(4);
