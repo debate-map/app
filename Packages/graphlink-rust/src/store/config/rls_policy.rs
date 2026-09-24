@@ -43,7 +43,7 @@ impl RLS {
 				RLS::UserMatchesX(field) => SF::new("$I = current_setting('app.current_user_id')", vec![SQLIdent::new_boxed(field.o())?]),
 				// we add (SELECT X) for each function called; this is needed to create a caching-point for the result of that call (see: https://stackoverflow.com/a/75105382)
 				RLS::UserIsAdmin => SF::lit("SELECT is_user_admin('@me')"),
-				RLS::UserGrantFromPolicy(field_name, group) => SF::new("SELECT does_policy_allow_access('@me', $I, $V)", vec![SQLIdent::new_boxed(field_name.o())?, Box::new(group.o())]),
+				RLS::UserGrantFromPolicy(field_name, group) => SF::new("SELECT does_policy_allow_access('@me', $I, $I)", vec![SQLIdent::new_boxed(field_name.o())?, Box::new(SQLIdent::new(group.o())?.set_use_single_quotes(true))]),
 				RLS::All => SF::lit("SELECT true"),
 			},
 			SF::lit(")"),
