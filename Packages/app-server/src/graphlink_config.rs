@@ -26,10 +26,18 @@ fn get_server_url_for_graphlink(server_pod: GL_ServerPod, subpath: &str, opts: G
 fn or(a: RLS, b: RLS) -> RLS {
 	RLS::Or(Box::new(a), Box::new(b))
 }
+fn and(a: RLS, b: RLS) -> RLS {
+	RLS::And(Box::new(a), Box::new(b))
+}
 
 // admin, or creator, or the entry's access policy grants access for `group` (the section of the policy's permissions: maps/nodes/terms/medias/others)
 fn admin_or_creator_or_policy(group: &str) -> RLS {
 	or(RLS::UserIsAdmin, or(RLS::UserMatchesX("creator".o()), RLS::UserGrantFromPolicy("accessPolicy".o(), group.o())))
+}
+
+// admin, or creator, or every policy in the entry's c_accessPolicyTargets grants access (the list is filled from the entry's parents, eg. both nodes of a link)
+fn admin_or_creator_or_targets() -> RLS {
+	or(RLS::UserIsAdmin, or(RLS::UserMatchesX("creator".o()), RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())))
 }
 
 pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
@@ -72,6 +80,52 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		]));
 		table_defs.push(TableDef::new3("timelines", admin_or_creator_or_policy("others"), vec![ // policies have no "timelines" section, they fall under "others"
 			co2("accessPolicy", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("mapID", "text"), co2("name", "text"), co3("videoID", "text", true), co3("videoStartTime", "real", true), co3("videoHeightVSWidthPercent", "real", true),
+		]));
+
+		// gated by the policies of the entry's parents
+		// ==========
+		table_defs.push(TableDef::new3("nodeLinks", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("parent", "text"), co2("child", "text"), co3("form", "text", true), co3("seriesAnchor", "boolean", true), co3("seriesEnd", "boolean", true), co3("polarity", "text", true),
+			co2("c_parentType", "text"), co2("c_childType", "text"), co2("group", "text"), co2("orderKey", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodePhrasings", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("node", "text"), co2("type", "text"), co2("text_base", "text"), co3("text_negation", "text", true), co3("text_question", "text", true), co3("text_narrative", "text", true), co3("note", "text", true),
+			co2("terms", "jsonb[]"), co2("references", "text[]"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeRatings", admin_or_creator_or_targets(), vec![ // has an accessPolicy column, but its sql policy goes by the targets
+			co2("accessPolicy", "text"), co2("node", "text"), co2("type", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("value", "real"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeRevisions", admin_or_creator_or_targets(), vec![
+			co2("node", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("phrasing", "jsonb"), co3("displayDetails", "jsonb", true), co2("attachments", "jsonb"), co3("replacedBy", "text", true), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeTags", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("nodes", "text[]"), co3("mirrorChildrenFromXToY", "jsonb", true), co3("xIsExtendedByY", "jsonb", true), co3("mutuallyExclusiveGroup", "jsonb", true),
+			co3("restrictMirroringOfX", "jsonb", true), co3("labels", "jsonb", true), co3("cloneHistory", "jsonb", true), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("timelineSteps", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("timelineID", "text"), co2("orderKey", "text"), co2("groupID", "text"), co3("timeFromStart", "real", true), co3("timeFromLastStep", "real", true), co3("timeUntilNextStep", "real", true),
+			co2("message", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+
+		// tables with a rule of their own
+		// ==========
+		table_defs.push(TableDef::new3("commandRuns", or(RLS::UserIsAdmin, or(RLS::UserMatchesX("actor".o()), and(RLS::FieldIsTrue("public_base".o()), RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())))), vec![ // public_base is set when the actor has addToStream on
+			co2("actor", "text"), co2("runTime", "bigint"), co2("public_base", "boolean"), co2("commandName", "text"), co2("commandInput", "jsonb"), co2("commandResult", "jsonb"), co2("c_involvedNodes", "text[]"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("mapNodeEdits", or(RLS::UserIsAdmin, RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())), vec![ // no creator column, so admin or targets only
+			co2("map", "text"), co2("node", "text"), co2("time", "bigint"), co2("type", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("user_hiddens", or(RLS::UserIsAdmin, RLS::UserMatchesX("id".o())), vec![ // each user sees only their own row
+			co2("email", "text"), co2("providerData", "jsonb"), co3("backgroundID", "text", true), co3("backgroundCustom_enabled", "boolean", true), co3("backgroundCustom_color", "text", true), co3("backgroundCustom_url", "text", true), co3("backgroundCustom_position", "text", true),
+			co2("addToStream", "boolean"), co3("lastAccessPolicy", "text", true), co2("notificationPolicy", "text"), // varchar(1) in the sql file; only `text` columns get the json quotes stripped
+		]));
+		// admin or own rows; record_command_run.rs lifts rls to notify others
+		table_defs.push(TableDef::new3("subscriptions", or(RLS::UserIsAdmin, RLS::UserMatchesX("user".o())), vec![
+			co2("user", "text"), co2("node", "text"), co2("addChildNode", "boolean"), co2("deleteNode", "boolean"), co2("addNodeLink", "boolean"), co2("deleteNodeLink", "boolean"), co2("addNodeRevision", "boolean"), co2("setNodeRating", "boolean"),
+			co2("createdAt", "bigint"), co2("updatedAt", "bigint"),
+		]));
+		table_defs.push(TableDef::new3("notifications", or(RLS::UserIsAdmin, RLS::UserMatchesX("user".o())), vec![
+			co2("user", "text"), co2("commandRun", "text"), co3("readTime", "bigint", true),
 		]));
 	}
 
