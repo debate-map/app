@@ -26,6 +26,9 @@ fn get_server_url_for_graphlink(server_pod: GL_ServerPod, subpath: &str, opts: G
 fn or(a: RLS, b: RLS) -> RLS {
 	RLS::Or(Box::new(a), Box::new(b))
 }
+fn and(a: RLS, b: RLS) -> RLS {
+	RLS::And(Box::new(a), Box::new(b))
+}
 
 // admin, or creator, or the entry's access policy grants access for `group` (the section of the policy's permissions: maps/nodes/terms/medias/others)
 fn admin_or_creator_or_policy(group: &str) -> RLS {
@@ -102,6 +105,12 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		table_defs.push(TableDef::new3("timelineSteps", admin_or_creator_or_targets(), vec![
 			co2("creator", "text"), co2("createdAt", "bigint"), co2("timelineID", "text"), co2("orderKey", "text"), co2("groupID", "text"), co3("timeFromStart", "real", true), co3("timeFromLastStep", "real", true), co3("timeUntilNextStep", "real", true),
 			co2("message", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+
+		// tables with a rule of their own
+		// ==========
+		table_defs.push(TableDef::new3("commandRuns", or(RLS::UserIsAdmin, or(RLS::UserMatchesX("actor".o()), and(RLS::FieldIsTrue("public_base".o()), RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())))), vec![ // public_base is set when the actor has addToStream on
+			co2("actor", "text"), co2("runTime", "bigint"), co2("public_base", "boolean"), co2("commandName", "text"), co2("commandInput", "jsonb"), co2("commandResult", "jsonb"), co2("c_involvedNodes", "text[]"), co2("c_accessPolicyTargets", "text[]"),
 		]));
 	}
 
