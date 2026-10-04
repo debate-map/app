@@ -32,6 +32,11 @@ fn admin_or_creator_or_policy(group: &str) -> RLS {
 	or(RLS::UserIsAdmin, or(RLS::UserMatchesX("creator".o()), RLS::UserGrantFromPolicy("accessPolicy".o(), group.o())))
 }
 
+// admin, or creator, or every policy in the entry's c_accessPolicyTargets grants access (the list is filled from the entry's parents, eg. both nodes of a link)
+fn admin_or_creator_or_targets() -> RLS {
+	or(RLS::UserIsAdmin, or(RLS::UserMatchesX("creator".o()), RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())))
+}
+
 pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 	let mut table_defs = vec![];
 	#[rustfmt::skip]
@@ -72,6 +77,31 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		]));
 		table_defs.push(TableDef::new3("timelines", admin_or_creator_or_policy("others"), vec![ // policies have no "timelines" section, they fall under "others"
 			co2("accessPolicy", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("mapID", "text"), co2("name", "text"), co3("videoID", "text", true), co3("videoStartTime", "real", true), co3("videoHeightVSWidthPercent", "real", true),
+		]));
+
+		// gated by the policies of the entry's parents
+		// ==========
+		table_defs.push(TableDef::new3("nodeLinks", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("parent", "text"), co2("child", "text"), co3("form", "text", true), co3("seriesAnchor", "boolean", true), co3("seriesEnd", "boolean", true), co3("polarity", "text", true),
+			co2("c_parentType", "text"), co2("c_childType", "text"), co2("group", "text"), co2("orderKey", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodePhrasings", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("node", "text"), co2("type", "text"), co2("text_base", "text"), co3("text_negation", "text", true), co3("text_question", "text", true), co3("text_narrative", "text", true), co3("note", "text", true),
+			co2("terms", "jsonb[]"), co2("references", "text[]"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeRatings", admin_or_creator_or_targets(), vec![ // has an accessPolicy column, but its sql policy goes by the targets
+			co2("accessPolicy", "text"), co2("node", "text"), co2("type", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("value", "real"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeRevisions", admin_or_creator_or_targets(), vec![
+			co2("node", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co2("phrasing", "jsonb"), co3("displayDetails", "jsonb", true), co2("attachments", "jsonb"), co3("replacedBy", "text", true), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("nodeTags", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("nodes", "text[]"), co3("mirrorChildrenFromXToY", "jsonb", true), co3("xIsExtendedByY", "jsonb", true), co3("mutuallyExclusiveGroup", "jsonb", true),
+			co3("restrictMirroringOfX", "jsonb", true), co3("labels", "jsonb", true), co3("cloneHistory", "jsonb", true), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("timelineSteps", admin_or_creator_or_targets(), vec![
+			co2("creator", "text"), co2("createdAt", "bigint"), co2("timelineID", "text"), co2("orderKey", "text"), co2("groupID", "text"), co3("timeFromStart", "real", true), co3("timeFromLastStep", "real", true), co3("timeUntilNextStep", "real", true),
+			co2("message", "text"), co2("c_accessPolicyTargets", "text[]"),
 		]));
 	}
 
