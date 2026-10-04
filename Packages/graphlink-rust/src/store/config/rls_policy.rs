@@ -24,6 +24,8 @@ pub enum RLS {
 	UserGrantFromPolicy(String, String),
 	/// String is the field holding a list of "access_policy_id:group" targets; every target's policy must grant access. (for rows that inherit access from several parents, eg. a link between two nodes)
 	UserGrantFromPolicyTargets(String),
+	/// String is a boolean field that must be true. (compose with And, eg. `public_base = true AND <targets>`)
+	FieldIsTrue(String),
 	All,
 }
 impl RLS {
@@ -47,6 +49,7 @@ impl RLS {
 				RLS::UserIsAdmin => SF::lit("SELECT is_user_admin('@me')"),
 				RLS::UserGrantFromPolicy(field_name, group) => SF::new("SELECT does_policy_allow_access('@me', $I, $I)", vec![SQLIdent::new_boxed(field_name.o())?, Box::new(SQLIdent::new(group.o())?.set_use_single_quotes(true))]),
 				RLS::UserGrantFromPolicyTargets(field_name) => SF::new("SELECT do_policies_allow_access('@me', $I)", vec![SQLIdent::new_boxed(field_name.o())?]),
+				RLS::FieldIsTrue(field_name) => SF::new("$I = true", vec![SQLIdent::new_boxed(field_name.o())?]),
 				RLS::All => SF::lit("SELECT true"),
 			},
 			SF::lit(")"),
@@ -69,6 +72,7 @@ pub fn can_user_access_entry_json(entry: &EntryJSON, rls: &RLS, table_name: &str
 			let targets: Vec<AccessPolicyTarget> = entry.get(field_name).cloned().and_then(|a| serde_json::from_value(a).ok()).unwrap_or_default(); // a missing or unparsable list counts as empty, which the checker denies
 			do_policies_allow_access_cached(user_id, &targets)
 		},
+		RLS::FieldIsTrue(field_name) => entry.get(field_name).and_then(|a| a.as_bool()) == Some(true),
 		RLS::All => true,
 	}
 }
