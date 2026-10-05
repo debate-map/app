@@ -3,7 +3,7 @@
 // user_hiddens / access_policies: the crate hard-codes these names
 
 use graphlink_rust::is_prod;
-use graphlink_rust::{co2, co3, initialize_config, GetServerURL_Options as GL_GetServerURL_Options, MonitorEvent, ServerPod as GL_ServerPod, TableDef, RLS};
+use graphlink_rust::{co2, co3, initialize_config, AppStateArc, GetServerURL_Options as GL_GetServerURL_Options, MonitorEvent, ServerPod as GL_ServerPod, TableDef, RLS};
 use rust_shared::anyhow::Error;
 use rust_shared::db_constants::{SYSTEM_USER_EMAIL, SYSTEM_USER_ID};
 use rust_shared::domains::{get_server_url, GetServerURL_Options, ServerPod};
@@ -139,4 +139,18 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		system_user_id: SYSTEM_USER_ID.o(),
 		system_user_email: SYSTEM_USER_EMAIL.o(),
 	});
+}
+
+/// debate-map's sql functions on top of what pgsync built (all CREATE OR REPLACE, so safe on every boot)
+pub async fn run_post_pgsync_sql(app_state: &AppStateArc) -> Result<(), Error> {
+	let sql = [
+		include_str!("../../../Scripts/InitDB/Funcs/@PreTables.sql"),
+		include_str!("../../../Scripts/InitDB/Funcs/General.sql"),
+		include_str!("../../../Scripts/InitDB/Funcs/GraphTraversal.sql"),
+	].join("\n");
+	let mut client = app_state.db_pool.get().await?;
+	let tx = client.transaction().await?; // all or nothing; dropping it on error rolls back
+	tx.batch_execute(&format!("SET LOCAL search_path TO app;\n{sql}")).await?; // the files expect search_path = app, as InitDB sets it
+	tx.commit().await?;
+	Ok(())
 }
