@@ -112,6 +112,13 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		table_defs.push(TableDef::new3("commandRuns", or(RLS::UserIsAdmin, or(RLS::UserMatchesX("actor".o()), and(RLS::FieldIsTrue("public_base".o()), RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())))), vec![ // public_base is set when the actor has addToStream on
 			co2("actor", "text"), co2("runTime", "bigint"), co2("public_base", "boolean"), co2("commandName", "text"), co2("commandInput", "jsonb"), co2("commandResult", "jsonb"), co2("c_involvedNodes", "text[]"), co2("c_accessPolicyTargets", "text[]"),
 		]));
+		table_defs.push(TableDef::new3("mapNodeEdits", or(RLS::UserIsAdmin, RLS::UserGrantFromPolicyTargets("c_accessPolicyTargets".o())), vec![ // no creator column, so admin or targets only
+			co2("map", "text"), co2("node", "text"), co2("time", "bigint"), co2("type", "text"), co2("c_accessPolicyTargets", "text[]"),
+		]));
+		table_defs.push(TableDef::new3("user_hiddens", or(RLS::UserIsAdmin, RLS::UserMatchesX("id".o())), vec![ // each user sees only their own row
+			co2("email", "text"), co2("providerData", "jsonb"), co3("backgroundID", "text", true), co3("backgroundCustom_enabled", "boolean", true), co3("backgroundCustom_color", "text", true), co3("backgroundCustom_url", "text", true), co3("backgroundCustom_position", "text", true),
+			co2("addToStream", "boolean"), co3("lastAccessPolicy", "text", true), co2("notificationPolicy", "text"), // varchar(1) in the sql file; only `text` columns get the json quotes stripped
+		]));
 	}
 
 	initialize_config(graphlink_rust::Config {
