@@ -119,6 +119,14 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 			co2("email", "text"), co2("providerData", "jsonb"), co3("backgroundID", "text", true), co3("backgroundCustom_enabled", "boolean", true), co3("backgroundCustom_color", "text", true), co3("backgroundCustom_url", "text", true), co3("backgroundCustom_position", "text", true),
 			co2("addToStream", "boolean"), co3("lastAccessPolicy", "text", true), co2("notificationPolicy", "text"), // varchar(1) in the sql file; only `text` columns get the json quotes stripped
 		]));
+		// admin or own rows; record_command_run.rs lifts rls to notify others
+		table_defs.push(TableDef::new3("subscriptions", or(RLS::UserIsAdmin, RLS::UserMatchesX("user".o())), vec![
+			co2("user", "text"), co2("node", "text"), co2("addChildNode", "boolean"), co2("deleteNode", "boolean"), co2("addNodeLink", "boolean"), co2("deleteNodeLink", "boolean"), co2("addNodeRevision", "boolean"), co2("setNodeRating", "boolean"),
+			co2("createdAt", "bigint"), co2("updatedAt", "bigint"),
+		]));
+		table_defs.push(TableDef::new3("notifications", or(RLS::UserIsAdmin, RLS::UserMatchesX("user".o())), vec![
+			co2("user", "text"), co2("commandRun", "text"), co3("readTime", "bigint", true),
+		]));
 	}
 
 	initialize_config(graphlink_rust::Config {
