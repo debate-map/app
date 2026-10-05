@@ -13,6 +13,7 @@ async fn main() {
 	tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"))).init();
 	graphlink_config::set_up_graphlink_rust(|_event| {}); // no monitor-backend here
 	let app_state = AppState::new_in_arc();
+	ok_or_exit("pre-pgsync sql", graphlink_config::run_pre_pgsync_sql(&app_state).await);
 	ok_or_exit("pgsync", run_pgsync(app_state.clone()).await);
 	ok_or_exit("post-pgsync sql", graphlink_config::run_post_pgsync_sql(&app_state).await);
 }

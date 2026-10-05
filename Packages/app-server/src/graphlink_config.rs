@@ -141,12 +141,21 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 	});
 }
 
-/// debate-map's sql functions on top of what pgsync built (all CREATE OR REPLACE, so safe on every boot)
+/// drops the views first: a view pins its columns, so pgsync couldn't alter them (run_post_pgsync_sql recreates them)
+pub async fn run_pre_pgsync_sql(app_state: &AppStateArc) -> Result<(), Error> {
+	let client = app_state.db_pool.get().await?;
+	client.batch_execute("DROP VIEW IF EXISTS app.my_nodes, app.my_node_revisions, app.my_node_phrasings, app.my_node_links;").await?;
+	Ok(())
+}
+
+/// debate-map's sql on top of pgsync's tables: the unchanged InitDB function files, then Graphlink_PostPgsync.sql; safe to rerun on every boot
 pub async fn run_post_pgsync_sql(app_state: &AppStateArc) -> Result<(), Error> {
 	let sql = [
 		include_str!("../../../Scripts/InitDB/Funcs/@PreTables.sql"),
 		include_str!("../../../Scripts/InitDB/Funcs/General.sql"),
 		include_str!("../../../Scripts/InitDB/Funcs/GraphTraversal.sql"),
+		include_str!("../../../Scripts/InitDB/Graphlink_PostPgsync.sql"),
+		include_str!("../../../Scripts/InitDB/Funcs/Search.sql"), // reads the views, and local_search calls descendants2, so it goes last
 	].join("\n");
 	let mut client = app_state.db_pool.get().await?;
 	let tx = client.transaction().await?; // all or nothing; dropping it on error rolls back
