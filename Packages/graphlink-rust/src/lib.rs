@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![allow(stable_features)] // async_closure is stable on our nightly; kept for older ones
 #![feature(async_closure)]
 // for IteratorV
 #![feature(iterator_try_collect)]
