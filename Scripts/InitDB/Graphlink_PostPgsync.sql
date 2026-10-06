@@ -124,3 +124,206 @@ DO $$ DECLARE fk record; BEGIN
 		END IF;
 	END LOOP;
 END $$;
+
+-- access-policy targets: AccessPolicyTriggers.sql, reading and writing through `data` (BEFORE triggers can't read generated columns)
+-- ==========
+
+CREATE OR REPLACE FUNCTION app.targets_empty(row_data jsonb) RETURNS boolean LANGUAGE SQL IMMUTABLE AS $$
+	SELECT coalesce(jsonb_array_length(CASE WHEN jsonb_typeof(row_data->'c_accessPolicyTargets') = 'array' THEN row_data->'c_accessPolicyTargets' END), 0) = 0;
+$$;
+CREATE OR REPLACE FUNCTION app.with_targets(row_data jsonb, targets text[]) RETURNS jsonb LANGUAGE SQL IMMUTABLE AS $$
+	SELECT jsonb_set(row_data, '{c_accessPolicyTargets}', to_jsonb(coalesce(targets, array[]::text[])));
+$$;
+
+-- "pull" triggers, ie. responsive changes to a row's own targets, based on source creation/changes in that same row
+
+CREATE OR REPLACE FUNCTION app.map_node_edits_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'map' IS DISTINCT FROM NEW.data->>'map'
+		OR OLD.data->>'node' IS DISTINCT FROM NEW.data->>'node'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "maps" WHERE id = NEW.data->>'map'), ':maps')),
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'node'), ':nodes'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS map_node_edits_refresh_targets_for_self on app."mapNodeEdits";
+CREATE TRIGGER map_node_edits_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."mapNodeEdits" FOR EACH ROW EXECUTE FUNCTION app.map_node_edits_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.node_links_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'parent' IS DISTINCT FROM NEW.data->>'parent'
+		OR OLD.data->>'child' IS DISTINCT FROM NEW.data->>'child'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'parent'), ':nodes')),
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'child'), ':nodes'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS node_links_refresh_targets_for_self on app."nodeLinks";
+CREATE TRIGGER node_links_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodeLinks" FOR EACH ROW EXECUTE FUNCTION app.node_links_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.node_phrasings_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'node' IS DISTINCT FROM NEW.data->>'node'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'node'), ':nodes'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS node_phrasings_refresh_targets_for_self on app."nodePhrasings";
+CREATE TRIGGER node_phrasings_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodePhrasings" FOR EACH ROW EXECUTE FUNCTION app.node_phrasings_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.node_ratings_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'accessPolicy' IS DISTINCT FROM NEW.data->>'accessPolicy'
+		OR OLD.data->>'node' IS DISTINCT FROM NEW.data->>'node'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat(NEW.data->>'accessPolicy', ':nodeRatings')),
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'node'), ':nodes'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS node_ratings_refresh_targets_for_self on app."nodeRatings";
+CREATE TRIGGER node_ratings_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodeRatings" FOR EACH ROW EXECUTE FUNCTION app.node_ratings_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.node_revisions_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'node' IS DISTINCT FROM NEW.data->>'node'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW.data->>'node'), ':nodes'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS node_revisions_refresh_targets_for_self on app."nodeRevisions";
+CREATE TRIGGER node_revisions_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app.node_revisions_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.node_tags_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->'nodes' IS DISTINCT FROM NEW.data->'nodes'
+	) THEN
+		-- the delete_node command currently does not update/delete associated node-tags, so we have to filter out "empty targets", due to refs to nodes that no longer exist
+		NEW.data = app.with_targets(NEW.data, array_remove(distinct_array(
+			(SELECT array_agg(
+				(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = node_id), ':nodes'))
+			) FROM jsonb_array_elements_text(NEW.data->'nodes') AS node_id)
+		), ':nodes'));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS node_tags_refresh_targets_for_self on app."nodeTags";
+CREATE TRIGGER node_tags_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodeTags" FOR EACH ROW EXECUTE FUNCTION app.node_tags_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.command_runs_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->'c_involvedNodes' IS DISTINCT FROM NEW.data->'c_involvedNodes'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(
+			(SELECT array_agg(
+				(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = node_id), ':nodes'))
+			) FROM jsonb_array_elements_text(NEW.data->'c_involvedNodes') AS node_id)
+		));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS command_runs_refresh_targets_for_self on app."commandRuns";
+CREATE TRIGGER command_runs_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."commandRuns" FOR EACH ROW EXECUTE FUNCTION app.command_runs_refresh_targets_for_self();
+
+CREATE OR REPLACE FUNCTION app.timeline_steps_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR app.targets_empty(NEW.data)
+		OR OLD.data->>'timelineID' IS DISTINCT FROM NEW.data->>'timelineID'
+	) THEN
+		NEW.data = app.with_targets(NEW.data, distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "timelines" WHERE id = NEW.data->>'timelineID'), ':others'))
+		]));
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS timeline_steps_refresh_targets_for_self on app."timelineSteps";
+CREATE TRIGGER timeline_steps_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."timelineSteps" FOR EACH ROW EXECUTE FUNCTION app.timeline_steps_refresh_targets_for_self();
+
+-- "push" triggers, ie. responsive changes to other tables' targets, based on source changes in our row (ie. to our "accessPolicy" field)
+
+CREATE OR REPLACE FUNCTION app.maps_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors
+		OR OLD.data->>'accessPolicy' IS DISTINCT FROM NEW.data->>'accessPolicy'
+	) THEN
+		-- simply cause the associated rows in the other tables to have their triggers run again (emptying the targets makes their pull triggers recompute them)
+		UPDATE app."mapNodeEdits" SET data = app.with_targets(data, array[]::text[]) WHERE "map" = OLD.id;
+	END IF;
+	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
+END $$;
+DROP TRIGGER IF EXISTS maps_refresh_targets_for_others on app."maps";
+CREATE TRIGGER maps_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."maps" FOR EACH ROW EXECUTE FUNCTION app.maps_refresh_targets_for_others();
+
+CREATE OR REPLACE FUNCTION app.nodes_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors (also needed atm for about-to-be-orphaned node-tags)
+		OR OLD.data->>'accessPolicy' IS DISTINCT FROM NEW.data->>'accessPolicy'
+	) THEN
+		-- simply cause the associated rows in the other tables to have their triggers run again (emptying the targets makes their pull triggers recompute them)
+		UPDATE app."mapNodeEdits" SET data = app.with_targets(data, array[]::text[]) WHERE "node" = OLD.id;
+		UPDATE app."nodeLinks" SET data = app.with_targets(data, array[]::text[]) WHERE "parent" = OLD.id OR "child" = OLD.id;
+		UPDATE app."nodePhrasings" SET data = app.with_targets(data, array[]::text[]) WHERE "node" = OLD.id;
+		UPDATE app."nodeRatings" SET data = app.with_targets(data, array[]::text[]) WHERE "node" = OLD.id;
+		UPDATE app."nodeRevisions" SET data = app.with_targets(data, array[]::text[]) WHERE "node" = OLD.id;
+		UPDATE app."nodeTags" SET data = app.with_targets(data, array[]::text[]) WHERE OLD.id = ANY("nodes");
+		UPDATE app."commandRuns" SET data = app.with_targets(data, array[]::text[]) WHERE OLD.id = ANY("c_involvedNodes");
+	END IF;
+	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
+END $$;
+DROP TRIGGER IF EXISTS nodes_refresh_targets_for_others on app."nodes";
+CREATE TRIGGER nodes_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."nodes" FOR EACH ROW EXECUTE FUNCTION app.nodes_refresh_targets_for_others();
+
+CREATE OR REPLACE FUNCTION app.timelines_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors
+		OR OLD.data->>'accessPolicy' IS DISTINCT FROM NEW.data->>'accessPolicy'
+	) THEN
+		-- simply cause the associated rows in the other tables to have their triggers run again (emptying the targets makes their pull triggers recompute them)
+		UPDATE app."timelineSteps" SET data = app.with_targets(data, array[]::text[]) WHERE "timelineID" = OLD.id;
+	END IF;
+	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
+END $$;
+DROP TRIGGER IF EXISTS timelines_refresh_targets_for_others on app."timelines";
+CREATE TRIGGER timelines_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."timelines" FOR EACH ROW EXECUTE FUNCTION app.timelines_refresh_targets_for_others();
+
+-- this function is not called during regular operation, but it's useful for manual maintenance (eg. it's needed just after the restore of a pgdump backup)
+CREATE OR REPLACE FUNCTION app.recalculate_all_access_policy_targets() RETURNS void LANGUAGE plpgsql AS $$
+DECLARE
+	-- all tables that have a "c_accessPolicyTargets" field
+	tables text[] := array[
+		'mapNodeEdits',
+		'nodeLinks',
+		'nodePhrasings',
+		'nodeRatings',
+		'nodeRevisions',
+		'nodeTags',
+		'commandRuns',
+		'timelineSteps'
+	];
+BEGIN
+	-- loop through all tables, and empty their targets, so the pull triggers recompute them
+	FOR i IN 1..array_length(tables, 1) LOOP
+		EXECUTE format('UPDATE app.%I SET data = app.with_targets(data, array[]::text[])', tables[i]);
+	END LOOP;
+END $$;
