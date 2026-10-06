@@ -34,6 +34,12 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 COPY Packages/baker/Cargo.toml Packages/baker/Cargo.toml
 RUN mkdir Packages/baker/src/
 RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/baker/src/main.rs
+COPY Packages/graphlink-rust/Cargo.toml Packages/graphlink-rust/Cargo.toml
+RUN mkdir Packages/graphlink-rust/src/
+RUN echo "" > Packages/graphlink-rust/src/lib.rs
+COPY Packages/automod-plus/Cargo.toml Packages/automod-plus/Cargo.toml
+RUN mkdir Packages/automod-plus/src/
+RUN echo "" > Packages/automod-plus/src/lib.rs
 
 # copy this package
 COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
