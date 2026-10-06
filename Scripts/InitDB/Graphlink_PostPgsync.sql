@@ -327,3 +327,18 @@ BEGIN
 		EXECUTE format('UPDATE app.%I SET data = app.with_targets(data, array[]::text[])', tables[i]);
 	END LOOP;
 END $$;
+
+-- replacedBy: from nodeRevisions.sql; AFTER INSERT can read generated columns, so only the write goes through `data`
+-- ==========
+
+CREATE OR REPLACE FUNCTION app.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE rev_id text;
+BEGIN
+    SELECT id INTO rev_id FROM app."nodeRevisions" nr WHERE node = NEW.node AND "createdAt" < NEW."createdAt" ORDER BY "createdAt" DESC LIMIT 1;
+    IF rev_id IS NOT NULL THEN
+        UPDATE app."nodeRevisions" SET data = jsonb_set(data, '{replacedBy}', to_jsonb(NEW.id)) WHERE id = rev_id;
+    END IF;
+    RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS after_insert_node_revision on app."nodeRevisions";
+CREATE TRIGGER after_insert_node_revision AFTER INSERT ON app."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app.after_insert_node_revision();
