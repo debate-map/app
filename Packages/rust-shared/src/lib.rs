@@ -71,46 +71,47 @@ pub mod domains;
 pub mod links {
 	pub mod app_server_to_monitor_backend;
 }
+// `pub use` modules below are graphlink_rust's, under their old paths (one copy of each type)
 pub mod utils {
 	pub mod auth {
 		pub mod jwt_utils_base;
 	}
 	pub mod db {
-		pub mod uuid;
+		pub use graphlink_rust::db::uuid;
 		pub mod agql_ext {
-			pub mod gql_general_extension;
+			pub use graphlink_rust::gql::utils::agql_ext::gql_general_extension;
 		}
 	}
-	pub mod errors;
+	pub use graphlink_rust::utils::errors::errors;
 	pub mod errors_ {
-		pub mod backtrace_simplifier;
+		pub use graphlink_rust::utils::errors::backtrace_simplifier;
 	}
-	pub mod futures;
-	pub mod general;
+	pub use graphlink_rust::utils::general::futures;
+	pub use graphlink_rust::utils::general::general;
 	pub mod general_ {
-		pub mod extensions;
-		pub mod func_types;
-		pub mod serde;
+		pub use graphlink_rust::utils::general::extensions;
+		pub use graphlink_rust::utils::general::func_types;
+		pub use graphlink_rust::utils::general::serde;
 	}
-	pub mod _k8s;
+	pub use graphlink_rust::utils::k8s::k8s as _k8s; // the crate's copy, under the old name
 	pub mod k8s {
-		pub mod cert_handling;
-		pub mod k8s_client;
-		pub mod k8s_structs;
-		pub mod upgrade;
+		pub use graphlink_rust::utils::k8s::cert_handling;
+		pub use graphlink_rust::utils::k8s::k8s_client;
+		pub use graphlink_rust::utils::k8s::k8s_structs;
+		pub use graphlink_rust::utils::k8s::upgrade;
 	}
 	pub mod locks {
-		pub mod check_lock_order;
-		pub mod rwlock_tracked;
+		pub use graphlink_rust::utils::locks::{check_lock_order, rwlock_tracked};
 	}
 	pub mod mtx {
-		pub mod mtx;
+		pub use graphlink_rust::utils::mtx::mtx;
 	}
-	pub mod net;
-	pub mod time;
+	pub use graphlink_rust::utils::general::net;
+	pub use graphlink_rust::utils::general::time;
 	pub mod type_aliases;
 }
 
+pub use graphlink_rust::{check_lock_chain, new_mtx}; // macros that used to be defined here
 pub use utils::errors::*;
 pub use utils::locks::check_lock_order::*;
 pub use utils::locks::rwlock_tracked::*;
