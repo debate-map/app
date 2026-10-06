@@ -1,3 +1,4 @@
+// `pub use` modules below are graphlink_rust's, under their old paths
 pub mod axum_logging_layer;
 pub mod db {
 	pub mod accessors;
@@ -25,11 +26,11 @@ pub mod db {
 	pub mod transactions;
 }
 pub mod general {
-	pub mod data_anchor;
-	pub mod general;
+	pub use graphlink_rust::utils::general::data_anchor;
+	pub use graphlink_rust::utils::general::general;
 	pub mod logging;
 	pub mod mem_alloc;
-	pub mod order_key;
+	pub use graphlink_rust::utils::general::order_key;
 }
 pub mod http;
 pub mod type_aliases;
