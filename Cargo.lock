@@ -4234,6 +4234,7 @@ dependencies = [
  "chrono",
  "flume",
  "futures",
+ "graphlink_rust",
  "http 1.5.0",
  "http-body-util",
  "hyper 1.12.0",

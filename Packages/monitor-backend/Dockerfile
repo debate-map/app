@@ -23,6 +23,9 @@ RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release"
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+# rust-shared re-exports parts of the graphlink crate, so it is needed here too
+COPY Packages/graphlink-rust/ /dm_repo/Packages/graphlink-rust/
+COPY Packages/automod-plus/ /dm_repo/Packages/automod-plus/
 
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml
@@ -34,12 +37,6 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 COPY Packages/baker/Cargo.toml Packages/baker/Cargo.toml
 RUN mkdir Packages/baker/src/
 RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/baker/src/main.rs
-COPY Packages/graphlink-rust/Cargo.toml Packages/graphlink-rust/Cargo.toml
-RUN mkdir Packages/graphlink-rust/src/
-RUN echo "" > Packages/graphlink-rust/src/lib.rs
-COPY Packages/automod-plus/Cargo.toml Packages/automod-plus/Cargo.toml
-RUN mkdir Packages/automod-plus/src/
-RUN echo "" > Packages/automod-plus/src/lib.rs
 
 # copy this package
 COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
