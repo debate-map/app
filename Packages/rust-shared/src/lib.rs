@@ -86,12 +86,12 @@ pub mod utils {
 	pub mod errors_ {
 		pub use graphlink_rust::utils::errors::backtrace_simplifier;
 	}
-	pub mod futures;
-	pub mod general;
+	pub use graphlink_rust::utils::general::futures;
+	pub use graphlink_rust::utils::general::general;
 	pub mod general_ {
-		pub mod extensions;
-		pub mod func_types;
-		pub mod serde;
+		pub use graphlink_rust::utils::general::extensions;
+		pub use graphlink_rust::utils::general::func_types;
+		pub use graphlink_rust::utils::general::serde;
 	}
 	pub mod _k8s;
 	pub mod k8s {
@@ -106,8 +106,8 @@ pub mod utils {
 	pub mod mtx {
 		pub use graphlink_rust::utils::mtx::mtx;
 	}
-	pub mod net;
-	pub mod time;
+	pub use graphlink_rust::utils::general::net;
+	pub use graphlink_rust::utils::general::time;
 	pub mod type_aliases;
 }
 
