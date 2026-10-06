@@ -109,10 +109,10 @@ impl Extension for CustomExtension {
 }
 
 pub fn trim_str_if_too_long(str: &str, start_chars_to_keep: usize, end_chars_to_keep: usize) -> String {
-	let str_len = str.len();
-	if str_len > start_chars_to_keep + end_chars_to_keep {
-		let start = &str[..start_chars_to_keep];
-		let end = &str[str_len - end_chars_to_keep..];
+	let char_count = str.chars().count(); // count and cut by chars: slicing a str at a byte inside a character panics
+	if char_count > start_chars_to_keep + end_chars_to_keep {
+		let start: String = str.chars().take(start_chars_to_keep).collect();
+		let end: String = str.chars().skip(char_count - end_chars_to_keep).collect();
 		format!("{}<...>{}", start, end)
 	} else {
 		str.to_owned()
