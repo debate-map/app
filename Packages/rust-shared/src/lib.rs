@@ -71,6 +71,7 @@ pub mod domains;
 pub mod links {
 	pub mod app_server_to_monitor_backend;
 }
+// `pub use` modules below are graphlink_rust's, under their old paths (one copy of each type)
 pub mod utils {
 	pub mod auth {
 		pub mod jwt_utils_base;
@@ -81,9 +82,9 @@ pub mod utils {
 			pub mod gql_general_extension;
 		}
 	}
-	pub mod errors;
+	pub use graphlink_rust::utils::errors::errors;
 	pub mod errors_ {
-		pub mod backtrace_simplifier;
+		pub use graphlink_rust::utils::errors::backtrace_simplifier;
 	}
 	pub mod futures;
 	pub mod general;
@@ -100,17 +101,17 @@ pub mod utils {
 		pub mod upgrade;
 	}
 	pub mod locks {
-		pub mod check_lock_order;
-		pub mod rwlock_tracked;
+		pub use graphlink_rust::utils::locks::{check_lock_order, rwlock_tracked};
 	}
 	pub mod mtx {
-		pub mod mtx;
+		pub use graphlink_rust::utils::mtx::mtx;
 	}
 	pub mod net;
 	pub mod time;
 	pub mod type_aliases;
 }
 
+pub use graphlink_rust::{check_lock_chain, new_mtx}; // macros that used to be defined here
 pub use utils::errors::*;
 pub use utils::locks::check_lock_order::*;
 pub use utils::locks::rwlock_tracked::*;
