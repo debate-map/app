@@ -23,14 +23,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::{error, info, warn};
 
-/// Rather than baking the permissions and such into the jwt, we store only the id and email, which are unchanging fields. (well that and the `readOnly` flag, letting the user restrict the JWT's capabilities)
-/// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
-#[derive(Clone, Serialize, Deserialize)]
-pub struct UserJWTData {
-	pub id: String,
-	pub email: String,
-	pub readOnly: Option<bool>,
-}
+// the crate's token payload, so both sides' jwt checks agree; the key functions stay debate-map's (its secret is dm-jwt-secret-hs256)
+pub use graphlink_rust::utils::auth::jwt_utils_base::UserJWTData;
 
 pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
 	let key_str = get_or_create_jwt_key_hs256_str().await?;
