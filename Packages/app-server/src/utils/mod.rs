@@ -1,7 +1,7 @@
 // `pub use` modules below are graphlink_rust's, under their old paths
 pub mod axum_logging_layer;
 pub mod db {
-	pub mod accessors;
+	pub use graphlink_rust::db::accessors;
 	pub mod agql_ext {
 		pub mod gql_request_storage;
 		pub mod gql_result_stream;
@@ -23,7 +23,7 @@ pub mod db {
 	}
 	pub use graphlink_rust::db::sql_ident;
 	pub use graphlink_rust::db::sql_param;
-	pub mod transactions;
+	pub use graphlink_rust::db::transactions;
 }
 pub mod general {
 	pub use graphlink_rust::utils::general::data_anchor;
