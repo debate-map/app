@@ -77,9 +77,9 @@ pub mod utils {
 		pub mod jwt_utils_base;
 	}
 	pub mod db {
-		pub mod uuid;
+		pub use graphlink_rust::db::uuid;
 		pub mod agql_ext {
-			pub mod gql_general_extension;
+			pub use graphlink_rust::gql::utils::agql_ext::gql_general_extension;
 		}
 	}
 	pub use graphlink_rust::utils::errors::errors;
@@ -93,12 +93,12 @@ pub mod utils {
 		pub use graphlink_rust::utils::general::func_types;
 		pub use graphlink_rust::utils::general::serde;
 	}
-	pub mod _k8s;
+	pub use graphlink_rust::utils::k8s::k8s as _k8s; // the crate's copy, under the old name
 	pub mod k8s {
-		pub mod cert_handling;
-		pub mod k8s_client;
-		pub mod k8s_structs;
-		pub mod upgrade;
+		pub use graphlink_rust::utils::k8s::cert_handling;
+		pub use graphlink_rust::utils::k8s::k8s_client;
+		pub use graphlink_rust::utils::k8s::k8s_structs;
+		pub use graphlink_rust::utils::k8s::upgrade;
 	}
 	pub mod locks {
 		pub use graphlink_rust::utils::locks::{check_lock_order, rwlock_tracked};
