@@ -67,15 +67,15 @@ impl QueryFilter {
 						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"in\" requires an array value!"))?;
 						FilterOp::IsWithinX(vals.to_vec())
 					},
-					"containsAll" => {
-						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"containsAll\" requires an array value!"))?;
+					"containsAll" | "contains" => { // "contains" is the op's older name, still sent by existing clients
+						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"{op_json}\" requires an array value!"))?;
 						FilterOp::ContainsAllOfX(vals.to_vec())
 					},
 					"containsAny" => {
 						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"containsAny\" requires an array value!"))?;
 						FilterOp::ContainsAnyOfX(vals.to_vec())
 					},
-					_ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, notEqualTo, greaterThan, greaterOrEqualTo, lessThan, lessOrEqualTo, in, containsAll, containsAny"#),
+					_ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, notEqualTo, greaterThan, greaterOrEqualTo, lessThan, lessOrEqualTo, in, containsAll (or contains), containsAny"#),
 				};
 				field_filter.filter_ops.push(op);
 			}
