@@ -24,7 +24,7 @@ use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::mtx::mtx::Mtx;
 use rust_shared::utils::type_aliases::RowData;
 use rust_shared::uuid::Uuid;
-use rust_shared::{axum, check_lock_order, futures, lock_as_usize_LQInstance_last_entries, new_mtx, tower, tower_http, Assert, IsTrue, Lock};
+use rust_shared::{axum, check_lock_order, futures, new_mtx, tower, tower_http, Assert, IsTrue, Lock};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -189,7 +189,7 @@ impl LQInstance {
 
 	pub async fn set_last_entries<const PRIOR_LOCK: Lock>(&self, mut new_entries: Vec<RowData>)
 	where
-		Assert<{ (PRIOR_LOCK as usize) < lock_as_usize_LQInstance_last_entries!() }>: IsTrue,
+		Assert<{ (PRIOR_LOCK as usize) < 4 }>: IsTrue, // 4 = lock_as_usize_LQInstance_last_entries!(), which the crate keeps private
 	{
 		//check_lock_order_usize::<{PRIOR_LOCK as usize}, {Lock::LQInstance_last_entries as usize}>();
 		let mut last_entries = self.last_entries.write().await;
