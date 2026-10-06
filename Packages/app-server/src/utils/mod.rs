@@ -15,14 +15,14 @@ pub mod db {
 	pub mod pg_row_to_json;
 	pub mod pg_stream_parsing;
 	pub mod queries;
-	pub mod sql_fragment;
+	pub use graphlink_rust::db::sql_fragment;
 	pub mod rls {
 		pub mod rls_applier;
 		pub mod rls_helpers;
 		pub mod rls_policies;
 	}
-	pub mod sql_ident;
-	pub mod sql_param;
+	pub use graphlink_rust::db::sql_ident;
+	pub use graphlink_rust::db::sql_param;
 	pub mod transactions;
 }
 pub mod general {
