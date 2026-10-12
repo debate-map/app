@@ -65,6 +65,22 @@ pub enum ListChangeType {
 	EntryRemoved,
 }
 
+/// The live query sends the full list once, then one change per message; this keeps `entries` equal to the full list.
+pub fn apply_list_change<T>(entries: &mut HashMap<String, T>, change: ListChangeCore<T>, get_id: fn(&T) -> String) {
+	match change.changeType {
+		ListChangeType::FullList => {
+			entries.clear();
+			entries.extend(change.data.into_iter().map(|a| (get_id(&a), a)));
+		},
+		ListChangeType::EntryAdded | ListChangeType::EntryChanged => entries.extend(change.data.into_iter().map(|a| (get_id(&a), a))),
+		ListChangeType::EntryRemoved => {
+			if let Some(id) = change.idOfRemoved {
+				entries.remove(&id);
+			}
+		},
+	}
+}
+
 pub struct Stream_WithDropListener<'a, T> {
 	inner_stream: Pin<Box<dyn Stream<Item = T> + 'a + Send>>,
 	table_name: String,

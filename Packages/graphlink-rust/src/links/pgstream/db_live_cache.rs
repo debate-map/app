@@ -8,7 +8,7 @@ use crate::{
 	to_anyhow, tokio,
 	tracing::error,
 	utils::general::time::tokio_sleep,
-	AccessPolicy, ListChange, ListChangeCore, ListChangeType, ListChange_AccessPolicy, ListChange_User, ToOwnedV, User, UserJWTData,
+	apply_list_change, AccessPolicy, ListChange, ListChangeCore, ListChangeType, ListChange_AccessPolicy, ListChange_User, ToOwnedV, User, UserJWTData,
 };
 use async_graphql::Object;
 use futures_util::StreamExt;
@@ -36,12 +36,13 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 				|core| <ListChange_User as ListChange<_>>::from(core),
 			)
 			.await;
+			let mut users_by_id: HashMap<String, User> = HashMap::new();
 			if let Result::<(), Error>::Err(err) = try {
 				loop {
 					let next_stream_result = stream.next().await.ok_or(anyhow!("Stream unexpectedly ended."))?;
-					let users: Vec<User> = next_stream_result?.core.data;
+					apply_list_change(&mut users_by_id, next_stream_result?.core, |a| a.id.to_string());
 					// for now, we must filter to admin users here, because live-query system doesn't support matching on jsonb subfields yet
-					let admin_users = users.into_iter().filter(|a| a.permissionGroups.admin).collect_vec();
+					let admin_users = users_by_id.values().filter(|a| a.permissionGroups.admin).collect_vec();
 
 					let admin_user_ids: HashSet<String> = admin_users.into_iter().map(|a| a.id.to_string()).collect();
 					let mut cache = ADMIN_USER_IDS_CACHE.lock().map_err(to_anyhow)?;
@@ -61,18 +62,14 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 		loop {
 			let system_user_jwt = UserJWTData { id: cf().system_user_id.o(), email: cf().system_user_email.o(), readOnly: Some(true) };
 			let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, ListChange_AccessPolicy>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "access_policies".o(), None, None, None, |core| <ListChange_AccessPolicy as ListChange<_>>::from(core)).await;
+			let mut access_policies_map: HashMap<String, AccessPolicy> = HashMap::new();
 			if let Result::<(), Error>::Err(err) = try {
 				loop {
 					let next_stream_result = stream.next().await.ok_or(anyhow!("Stream unexpectedly ended."))?;
-					let access_policies: Vec<AccessPolicy> = next_stream_result?.core.data;
-
-					let mut access_policies_map = HashMap::new();
-					for policy in access_policies {
-						access_policies_map.insert(policy.id.to_string(), policy);
-					}
+					apply_list_change(&mut access_policies_map, next_stream_result?.core, |a| a.id.to_string());
 
 					let mut cache = ACCESS_POLICIES_CACHE.lock().map_err(to_anyhow)?;
-					*cache = access_policies_map;
+					*cache = access_policies_map.clone();
 				}
 			} {
 				error!("Error in db-live-cache updater for ACCESS_POLICIES_CACHE. Restarting live-query in a moment. @err:{:?}", err);
