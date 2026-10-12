@@ -59,7 +59,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
 	let attempt_id = params.get("state").map(|a| a.clone()).unwrap_or("n/a".to_owned());
 
 	info!("Got uri:{:?} @attemptID:{}", uri, attempt_id);
-	if let Err(err) = state.channel_for_sign_in_messages__sender_base.broadcast(SignInMsg::GotCallbackData(uri.clone())).await {
+	if let Err(err) = state.channel_for_sign_in_messages__sender_base.send(SignInMsg::GotCallbackData(uri.clone())) { // a tokio broadcast channel in the crate's AppState; send is sync
 		error!("Got error while broadcasting callback-data:{}", err);
 		return response::Html(format!("Got error while broadcasting callback-data. Please refresh page to try again."));
 	}
@@ -161,7 +161,7 @@ impl SignInStartResult {
 			.url();
 
 		let msg_sender = &get_app_state_from_gql_ctx(gql_ctx).channel_for_sign_in_messages__sender_base;
-		let mut msg_receiver = msg_sender.new_receiver();
+		let mut msg_receiver = msg_sender.subscribe();
 
 		let base_stream = async_stream::stream! {
 			match provider.as_str() {
