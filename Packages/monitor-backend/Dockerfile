@@ -23,6 +23,9 @@ RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release"
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+# rust-shared re-exports parts of the graphlink crate, so it is needed here too
+COPY Packages/graphlink-rust/ /dm_repo/Packages/graphlink-rust/
+COPY Packages/automod-plus/ /dm_repo/Packages/automod-plus/
 
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml

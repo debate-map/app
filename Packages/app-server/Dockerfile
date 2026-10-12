@@ -19,6 +19,11 @@
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+COPY Packages/graphlink-rust/ /dm_repo/Packages/graphlink-rust/
+COPY Packages/automod-plus/ /dm_repo/Packages/automod-plus/
+
+# copy the sql files this package compiles in (include_str! in src/graphlink_config.rs)
+COPY Scripts/InitDB/ /dm_repo/Scripts/InitDB/
 
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml

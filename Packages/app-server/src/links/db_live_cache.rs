@@ -4,6 +4,7 @@ use std::{
 };
 
 use futures_util::StreamExt;
+use graphlink_rust::apply_list_change;
 use rust_shared::{
 	anyhow::{anyhow, bail, Error},
 	db_constants::{SYSTEM_USER_EMAIL, SYSTEM_USER_ID},
@@ -16,13 +17,9 @@ use rust_shared::{
 use tracing::error;
 
 use crate::{
-	db::{
-		access_policies::GQLSet_AccessPolicy,
-		access_policies_::_access_policy::AccessPolicy,
-		users::{GQLSet_User, User},
-	},
+	db::{access_policies_::_access_policy::AccessPolicy, users::User},
 	store::storage::AppStateArc,
-	utils::db::generic_handlers::subscriptions::handle_generic_gql_collection_subscription_base,
+	utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription_base, ListChangeCore},
 };
 
 pub fn start_db_live_cache(app_state: AppStateArc) {
@@ -31,7 +28,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 	tokio::spawn(async move {
 		loop {
 			let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
-			let mut stream = handle_generic_gql_collection_subscription_base::<User, GQLSet_User>(
+			let mut stream = handle_generic_gql_collection_subscription_base::<User, ListChangeCore<User>>(
 				app_state_c1.live_queries.clone(),
 				Some(system_user_jwt),
 				"users".o(),
@@ -39,14 +36,17 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 					// todo: once live-query system supports matching on jsonb subfields, use that here
 				})),
 				None,
+				None,
+				|core| core,
 			)
 			.await;
+			let mut users_by_id: HashMap<String, User> = HashMap::new();
 			if let Result::<(), Error>::Err(err) = try {
 				loop {
 					let next_stream_result = stream.next().await.ok_or(anyhow!("Stream unexpectedly ended."))?;
-					let users: Vec<User> = next_stream_result?.nodes;
+					apply_list_change(&mut users_by_id, next_stream_result?, |a| a.id.to_string());
 					// for now, we must filter to admin users here, because live-query system doesn't support matching on jsonb subfields yet
-					let admin_users = users.into_iter().filter(|a| a.permissionGroups.admin).collect_vec();
+					let admin_users = users_by_id.values().filter(|a| a.permissionGroups.admin).collect_vec();
 
 					let admin_user_ids: HashSet<String> = admin_users.into_iter().map(|a| a.id.to_string()).collect();
 					let mut cache = ADMIN_USER_IDS_CACHE.lock().map_err(to_anyhow)?;
@@ -65,19 +65,15 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 	tokio::spawn(async move {
 		loop {
 			let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
-			let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, GQLSet_AccessPolicy>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None, None).await;
+			let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, ListChangeCore<AccessPolicy>>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None, None, None, |core| core).await;
+			let mut access_policies_map: HashMap<String, AccessPolicy> = HashMap::new();
 			if let Result::<(), Error>::Err(err) = try {
 				loop {
 					let next_stream_result = stream.next().await.ok_or(anyhow!("Stream unexpectedly ended."))?;
-					let access_policies: Vec<AccessPolicy> = next_stream_result?.nodes;
-
-					let mut access_policies_map = HashMap::new();
-					for policy in access_policies {
-						access_policies_map.insert(policy.id.to_string(), policy);
-					}
+					apply_list_change(&mut access_policies_map, next_stream_result?, |a| a.id.to_string());
 
 					let mut cache = ACCESS_POLICIES_CACHE.lock().map_err(to_anyhow)?;
-					*cache = access_policies_map;
+					*cache = access_policies_map.clone();
 				}
 			} {
 				error!("Error in db-live-cache updater for ACCESS_POLICIES_CACHE. Restarting live-query in a moment. @err:{:?}", err);

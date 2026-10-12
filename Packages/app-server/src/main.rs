@@ -60,6 +60,7 @@ mod store;
 mod utils;
 // files
 mod globals;
+mod graphlink_config;
 mod gql;
 mod router;
 
