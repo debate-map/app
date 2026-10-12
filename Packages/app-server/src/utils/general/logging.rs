@@ -60,7 +60,8 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
 	}
 
 	match target {
-		t if target_matches(t, &["app_server", "rust_shared"]) => {
+		// graphlink_rust is listed too: the db and live query code lives in that crate now, so without it those errors never show up anywhere
+		t if target_matches(t, &["app_server", "rust_shared", "graphlink_rust"]) => {
 			does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
 			//should_event_be_kept_according_to_x(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
 		},
@@ -75,7 +76,7 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
 }
 pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
 	match metadata.target() {
-		a if a.starts_with("app_server") || a.starts_with("rust_shared") => {
+		a if a.starts_with("app_server") || a.starts_with("rust_shared") || a.starts_with("graphlink_rust") => {
 			//does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG, Level::TRACE])
 			// don't send TRACE atm, because that's intended for logging that's potentially *very* verbose, and could conceivably cause local network congestion
 			// (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)
