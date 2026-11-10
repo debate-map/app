@@ -16,12 +16,10 @@ export const GetSelectedNodePathNodes = CreateAccessor((mapViewOrMapID: string |
 	const nodeViewAtLastPath = DeepGet(mapView.rootNodeViews, cache_lastSelectedNode_dataPath) as NodeView|n;
 	if (nodeViewAtLastPath?.selected) return cache_lastSelectedNode_nodePath;
 
-	const selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
-	if (selectedTreeNode == null) return [];
+	const found = InMapView_FindNodeViewWhere(mapView, a=>!!a.selected);
+	if (found == null) return [];
 
-	const selectedNodeView_entry = selectedTreeNode.ancestorNodes.Last();
-	// return selectedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
-	const nodePath = ConvertDataPathToNodePath(selectedNodeView_entry.PathNodes);
+	const nodePath = found.pathInMap.split("/");
 	cache_lastSelectedNode_nodePath = nodePath;
 	return nodePath;
 });
@@ -128,8 +126,7 @@ export const GetNodeView = CreateAccessor((<{
 }); */
 export const GetViewOffset = CreateAccessor((mapView: MapView|n): Vector2|n=>{
 	if (mapView == null) return null;
-	const treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "viewOffset" && a.Value);
-	return treeNode ? treeNode.Value : null;
+	return InMapView_FindNodeViewWhere(mapView, a=>a.viewOffset != null)?.nodeView.viewOffset ?? null;
 });
 
 // actions
@@ -137,8 +134,8 @@ export const GetViewOffset = CreateAccessor((mapView: MapView|n): Vector2|n=>{
 
 export const ACTNodeSelect = StoreAction((mapID: string, path: string|n)=>{
 	// CreateMapViewIfMissing(mapID);
-	const nodes = GetTreeNodesInObjTree(GetMapView(mapID)?.rootNodeViews ?? {}, true);
-	const selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected)?.Value as NodeView;
+	const mapView = GetMapView(mapID);
+	const selectedNode = mapView ? InMapView_FindNodeViewWhere(mapView, a=>!!a.selected)?.nodeView : null;
 	if (selectedNode) {
 		/*delete selectedNode.selected;
 		delete selectedNode.openPanel;*/
@@ -268,23 +265,22 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 		return;
 	}
 	const inStoreMapView = GetMapView.NN(mapID);
-	const inStoreEntries = GetTreeNodesInObjTree(inStoreMapView, true);
 	const toMergeEntries = GetTreeNodesInObjTree(toMergeMapView, true);
 
 	// deselect old selected-node, if a new one's being set
-	const oldSelectedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.selected);
+	const oldSelectedNode = InMapView_FindNodeViewWhere(inStoreMapView, a=>!!a.selected)?.nodeView;
 	const newSelectedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.selected);
-	if (oldSelectedNode_treeNode && newSelectedNode_treeNode) {
-		oldSelectedNode_treeNode.Value.selected = undefined;
-		oldSelectedNode_treeNode.Value.openPanel = undefined;
+	if (oldSelectedNode && newSelectedNode_treeNode) {
+		oldSelectedNode.selected = undefined;
+		oldSelectedNode.openPanel = undefined;
 	}
 
 	// defocus old anchor-node, if a new one's being set
-	const oldAnchorNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.viewAnchor);
+	const oldAnchorNode = InMapView_FindNodeViewWhere(inStoreMapView, a=>!!a.viewAnchor)?.nodeView;
 	const newAnchorNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.viewAnchor);
-	if (oldAnchorNode_treeNode && newAnchorNode_treeNode) {
-		oldAnchorNode_treeNode.Value.viewAnchor = undefined;
-		oldAnchorNode_treeNode.Value.viewOffset = undefined;
+	if (oldAnchorNode && newAnchorNode_treeNode) {
+		oldAnchorNode.viewAnchor = undefined;
+		oldAnchorNode.viewOffset = undefined;
 	}
 
 	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>{

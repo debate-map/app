@@ -3,13 +3,13 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
-import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset, InMapView_FindNodeViewWhere} from "Store/main/maps/mapViews/$mapView.js";
 import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTakerUI} from "tree-grapher";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, StoreAction} from "web-vcore";
-import {Assert, E, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
+import {Assert, E, FromJSON, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {ScrollView} from "react-vscrollview";
 import {Padding} from "./MapUIWrapper.js";
@@ -47,11 +47,10 @@ export const ACTUpdateAnchorNodeAndViewOffset = StoreAction((mapID: string)=>{
 	// unmark-as-anchor the old anchor node
 	const mapView = GetMapView(mapID);
 	if (mapView) {
-		const nodes = GetTreeNodesInObjTree(mapView.rootNodeViews, true);
-		const oldAnchorNode = nodes.FirstOrX(a=>a.Value && a.Value.viewAnchor);
+		const oldAnchorNode = InMapView_FindNodeViewWhere(mapView, a=>!!a.viewAnchor)?.nodeView;
 		if (oldAnchorNode) {
-			oldAnchorNode.Value.viewAnchor = false;
-			oldAnchorNode.Value.viewOffset = null;
+			oldAnchorNode.viewAnchor = false;
+			oldAnchorNode.viewOffset = undefined;
 		}
 	}
 
