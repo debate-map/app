@@ -167,7 +167,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			// keep list mode path backed so the crawler treats featured/all as distinct pages.
 			const isAllList = urlStr == "all";
 			mapID = isAllList ? null : (urlStr?.match(/([A-Za-z0-9_-]+)$/)?.[1] ?? null);
-			store.main.debates.listType = isAllList ? "all" : "featured";
+			if (isAllList || url.GetQueryVar("internalCrawler") == "1") store.main.debates.listType = isAllList ? "all" : "featured";
 			store.main.debates.selectedMapID = mapID!;
 			store.main.debates.focusedNodePath = mapID ? (url.pathNodes.slice(2).join("/") || null) : null;
 		} else if (page == "global") {

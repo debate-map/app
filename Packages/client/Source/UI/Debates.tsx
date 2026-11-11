@@ -1,5 +1,5 @@
 import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, DMap, Me} from "dm_common";
-import React, {useMemo, useState} from "react";
+import React, {useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
@@ -113,9 +113,8 @@ export const MapListUI = observer_mgl(()=>{
 		listType = "all";
 	}
 	const selectedMapsPreFilter = listType == "featured" ? maps_featured : maps;
-	const [selectedMapsFiltered, allMapsFiltered] = useMemo(()=>{
-		return [filterMaps(selectedMapsPreFilter, tableData), filterMaps(maps, tableData)];
-	}, [selectedMapsPreFilter, maps, tableData]);
+	const selectedMapsFiltered = filterMaps(selectedMapsPreFilter, tableData);
+	const allMapsFiltered = filterMaps(maps, tableData);
 	const listTypeOptions = [{name: `Featured (${maps_featured.length})`, value: "featured"}, {name: `All (${maps.length})`, value: "all"}];
 	// keep crawler anchors visually aligned with the normal select button bar.
 	const listTypeLinkStyle = (first: boolean, selected: boolean)=>E(
@@ -214,7 +213,7 @@ const filterMaps = (maps: DMap[], tableData: TableData)=>{
 			if (filteringOn("name") && a.name.toLowerCase().includes(filter.value.toLowerCase())) return true;
 			if (filteringOn("edits") && (a.edits || 0).toString().includes(filter.value)) return true;
 			if (filteringOn("lastEdit") && Moment(a.editedAt).format("YYYY-MM-DD").includes(filter.value)) return true;
-			if (filteringOn("creator") && GetUser(a.creator)?.displayName.toLowerCase().includes(filter.value)) return true;
+			if (filteringOn("creator") && GetUser.CatchBail(null, a.creator)?.displayName.toLowerCase().includes(filter.value)) return true;
 			return false;
 		});
 	}
