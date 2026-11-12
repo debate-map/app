@@ -4,7 +4,7 @@ import {SubtreeDataToString_CSV_Quotes, csv_quotes_includeKeys} from "Utils/Data
 import {DataExchangeFormat, DataExchangeFormat_entries_supportedBySubtreeExporter} from "Utils/DataFormats/DataExchangeFormat.js";
 import React, {useReducer, useState} from "react";
 import {RunInAction_Set} from "web-vcore";
-import {Clone, ModifyString, StartDownload} from "js-vextensions";
+import {ModifyString, StartDownload} from "js-vextensions";
 import {GetSchemaJSON, TableNameToDocSchemaName} from "mobx-graphlink";
 import {Button, CheckBox, Column, Row, RowLR, Select, Text, TextArea} from "react-vcomponents";
 import {MI_SharedProps} from "../../../NodeUI_Menu.js";
@@ -33,7 +33,7 @@ export const SubtreeOpsUI_Export_Left = observer_mgl((props: MI_SharedProps)=>{
 			</RowLR>
 			{dialogState.targetFormat == DataExchangeFormat.json_dm && <>
 				<Row mt={5}>Include keys:</Row>
-				{Object.keys(includeKeys).map(tableName=>{
+				{["nodes", "nodeLinks", "nodeRevisions", "nodePhrasings", "terms", "medias"].map(tableName=>{
 					const docSchemaName = TableNameToDocSchemaName(tableName);
 					const schema = GetSchemaJSON(docSchemaName);
 					const fieldNames = Object.keys(schema.properties!);
@@ -72,7 +72,7 @@ export const SubtreeOpsUI_Export_Right = observer_mgl((props: MI_SharedProps)=>{
 
 	const dialogState = store.main.maps.subtreeOperationsDialog;
 	const includeKeys_userSet = dialogState.export_includeKeys;
-	let includeKeys = Clone(includeKeys_userSet);
+	let includeKeys = includeKeys_userSet;
 
 	// for the export formats below, we only need a specific subset of the data (selector ui also not shown for these formats)
 	if (dialogState.targetFormat == DataExchangeFormat.csv_basic) includeKeys = csv_basic_includeKeys;
