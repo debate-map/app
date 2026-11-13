@@ -71,8 +71,14 @@ async fn main() {
 	#[cfg(unix)]
 	let agent_running = agent.start().unwrap();
 	println!("Setup of globals completed"); // have one regular print-line, in case logger has issues
+	graphlink_config::set_up_graphlink_rust(|_event| {}); // debate-map's table definitions for the crate; its monitor events aren't forwarded yet
 
 	let app_state = AppState::new_in_arc();
+
+	// build or update the database schema before anything reads from it
+	graphlink_config::run_pre_pgsync_sql(&app_state).await.expect("pre-pgsync sql failed");
+	graphlink_rust::run_pgsync(app_state.clone()).await.expect("pgsync failed");
+	graphlink_config::run_post_pgsync_sql(&app_state).await.expect("post-pgsync sql failed");
 
 	// start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
 	start_pgstream_client_with_restart(app_state.clone());
