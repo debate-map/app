@@ -12,7 +12,7 @@ pub mod db {
 	}
 	pub mod pg_row_to_json;
 	pub use graphlink_rust::db::pg_stream_parsing;
-	pub mod queries;
+	pub use graphlink_rust::db::queries;
 	pub use graphlink_rust::db::sql_fragment;
 	pub mod rls {
 		pub mod rls_helpers;
