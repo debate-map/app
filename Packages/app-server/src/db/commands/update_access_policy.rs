@@ -59,7 +59,7 @@ pub async fn update_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_r
 		..old_data
 	};
 
-	upsert_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "access_policies".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(UpdateAccessPolicyResult { __: gql_placeholder() })
 }

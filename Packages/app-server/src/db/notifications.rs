@@ -13,7 +13,6 @@ use rust_shared::{serde_json, GQLError, SubError};
 use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::FilterInput,
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -47,10 +46,6 @@ pub struct NotificationUpdateReadInput {
 	pub readTime: Option<i64>,
 }
 
-impl From<Row> for Notification {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 gql_set_impl!(Notification);
 
 #[derive(Default)] pub struct QueryShard_Notification;
@@ -65,8 +60,8 @@ gql_set_impl!(Notification);
 
 #[derive(Default)] pub struct SubscriptionShard_Notification;
 #[Subscription] impl SubscriptionShard_Notification {
-	async fn notifications<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Notification, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Notification, GQLSet_Notification>(ctx, "notifications", filter, None).await
+	async fn notifications<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Notification, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Notification, GQLSet_Notification>(ctx, "notifications", filter, cached_entry_hashes, None).await
 	}
 	async fn notification<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Notification>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Notification>(ctx, "notifications", id).await

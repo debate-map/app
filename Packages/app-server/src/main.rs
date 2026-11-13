@@ -39,15 +39,13 @@ use rust_shared::{
 	domains::{get_env, DomainsConstants},
 	sentry, tokio,
 };
+use graphlink_rust::links::pgstream::pgstream::start_pgstream_client_with_restart;
 use store::storage::AppStateArc;
 use tracing::error;
 
 use crate::{
 	globals::{set_up_globals, set_up_globals_linux},
-	links::{
-		db_live_cache::start_db_live_cache,
-		pgclient::{self, start_pgclient_with_restart},
-	},
+	links::db_live_cache::start_db_live_cache,
 	router::start_router,
 	store::storage::AppState,
 	utils::general::data_anchor::DataAnchorFor1,
@@ -77,7 +75,7 @@ async fn main() {
 	let app_state = AppState::new_in_arc();
 
 	// start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
-	start_pgclient_with_restart(app_state.clone());
+	start_pgstream_client_with_restart(app_state.clone());
 
 	// start db-live-cache; this launches some live-queries for certain data (eg. list of admin user-ids, and access-policies), and keeps those results in memory
 	start_db_live_cache(app_state.clone());

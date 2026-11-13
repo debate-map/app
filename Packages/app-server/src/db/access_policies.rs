@@ -26,7 +26,7 @@ use super::commands::_command::CanOmit;
 
 #[rustfmt::skip]
 pub async fn get_access_policy(ctx: &AccessorContext<'_>, id: &str) -> Result<AccessPolicy, Error> {
-    get_db_entry(ctx, "accessPolicies", &Some(json!({
+    get_db_entry(ctx, "access_policies", &Some(json!({
         "id": {"equalTo": id}
     }))).await
 }
@@ -35,7 +35,7 @@ pub async fn get_access_policies(ctx: &AccessorContext<'_>, creator_id: Option<S
 	if let Some(creator_id) = creator_id {
 		filter_map.insert("creator".to_owned(), json!({"equalTo": creator_id}));
 	}
-	get_db_entries(ctx, "accessPolicies", &Some(JSONValue::Object(filter_map))).await
+	get_db_entries(ctx, "access_policies", &Some(JSONValue::Object(filter_map))).await
 }
 
 pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> Result<AccessPolicy, Error> {
@@ -52,20 +52,20 @@ gql_set_impl!(AccessPolicy);
 #[derive(Default)] pub struct QueryShard_AccessPolicy;
 #[Object] impl QueryShard_AccessPolicy {
 	async fn accessPolicies(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<AccessPolicy>, GQLError> {
-		handle_generic_gql_collection_query(ctx, "accessPolicies", filter).await
+		handle_generic_gql_collection_query(ctx, "access_policies", filter).await
 	}
 	async fn accessPolicy(&self, ctx: &Context<'_>, id: String) -> Result<Option<AccessPolicy>, GQLError> {
-		handle_generic_gql_doc_query(ctx, "accessPolicies", id).await
+		handle_generic_gql_doc_query(ctx, "access_policies", id).await
 	}
 }
 
 #[derive(Default)] pub struct SubscriptionShard_AccessPolicy;
 #[Subscription] impl SubscriptionShard_AccessPolicy {
-	async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter, None).await
+	async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "access_policies", filter, cached_entry_hashes, None).await
 	}
 	async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<AccessPolicy>, SubError>> + 'a {
-		handle_generic_gql_doc_subscription::<AccessPolicy>(ctx, "accessPolicies", id).await
+		handle_generic_gql_doc_subscription::<AccessPolicy>(ctx, "access_policies", id).await
 	}
 }
 

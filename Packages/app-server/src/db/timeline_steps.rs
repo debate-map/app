@@ -13,7 +13,6 @@ use rust_shared::{futures, serde_json, GQLError, SubError};
 use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entries;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	accessors::{get_db_entry, AccessorContext},
 	filter::FilterInput,
@@ -83,10 +82,6 @@ pub struct TimelineStep {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for TimelineStep {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct TimelineStepInput {
 	pub timelineID: String,
@@ -124,8 +119,8 @@ gql_set_impl!(TimelineStep);
 
 #[derive(Default)] pub struct SubscriptionShard_TimelineStep;
 #[Subscription] impl SubscriptionShard_TimelineStep {
-	async fn timelineSteps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_TimelineStep, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter, None).await
+	async fn timelineSteps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_TimelineStep, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter, cached_entry_hashes, None).await
 	}
 	async fn timelineStep<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<TimelineStep>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<TimelineStep>(ctx, "timelineSteps", id).await

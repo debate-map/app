@@ -65,7 +65,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
 	tokio::spawn(async move {
 		loop {
 			let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
-			let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, ListChangeCore<AccessPolicy>>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None, None, None, |core| core).await;
+			let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, ListChangeCore<AccessPolicy>>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "access_policies".o(), None, None, None, |core| core).await;
 			let mut access_policies_map: HashMap<String, AccessPolicy> = HashMap::new();
 			if let Result::<(), Error>::Err(err) = try {
 				loop {

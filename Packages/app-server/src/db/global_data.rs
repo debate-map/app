@@ -28,15 +28,6 @@ pub struct GlobalData {
 	pub id: ID,
 	pub extras: JSONValue,
 }
-impl From<Row> for GlobalData {
-	fn from(row: Row) -> Self {
-		Self {
-			id: ID::from(&row.get::<_, String>("id")),
-			extras: serde_json::from_value(row.get("extras")).unwrap(),
-		}
-	}
-}
-
 gql_set_impl!(GlobalData);
 
 #[derive(Default)] pub struct QueryShard_GlobalData;
@@ -51,8 +42,8 @@ gql_set_impl!(GlobalData);
 
 #[derive(Default)] pub struct SubscriptionShard_GlobalData;
 #[Subscription] impl SubscriptionShard_GlobalData {
-	async fn globalData<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_GlobalData, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter, None).await
+	async fn globalData<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_GlobalData, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter, cached_entry_hashes, None).await
 	}
 	async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<GlobalData>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<GlobalData>(ctx, "globalData", id).await

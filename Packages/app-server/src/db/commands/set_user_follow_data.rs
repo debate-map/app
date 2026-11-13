@@ -53,7 +53,7 @@ pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, _is_r
 	assert_user_can_modify(ctx, actor, &actor_hidden_data).await?;
 
 	let user_follow_as_json_value = if let Some(userFollow) = userFollow { Some(serde_json::to_value(userFollow)?) } else { None };
-	jsonb_set(&ctx.tx, "userHiddens", &actor.id, "extras", vec!["userFollows".to_owned(), targetUser], user_follow_as_json_value).await?;
+	jsonb_set(&ctx.tx, "user_hiddens", &actor.id, "extras", vec!["userFollows".to_owned(), targetUser], user_follow_as_json_value).await?;
 
 	Ok(SetUserFollowDataResult { __: gql_placeholder() })
 }

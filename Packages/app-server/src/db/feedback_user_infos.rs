@@ -27,15 +27,6 @@ pub struct UserInfo {
 	pub id: ID,
 	pub proposalsOrder: Vec<String>,
 }
-impl From<Row> for UserInfo {
-	fn from(row: Row) -> Self {
-		Self {
-			id: ID::from(&row.get::<_, String>("id")),
-			proposalsOrder: row.get("proposalsOrder"),
-		}
-	}
-}
-
 gql_set_impl!(UserInfo);
 
 #[derive(Default)] pub struct QueryShard_UserInfo;
@@ -51,8 +42,8 @@ gql_set_impl!(UserInfo);
 #[derive(Default)] pub struct SubscriptionShard_UserInfo;
 #[Subscription] impl SubscriptionShard_UserInfo {
 	#[graphql(name = "feedback_userInfos")]
-	async fn feedback_userInfos<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserInfo, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter, None).await
+	async fn feedback_userInfos<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_UserInfo, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter, cached_entry_hashes, None).await
 	}
 	#[graphql(name = "feedback_userInfo")]
 	async fn feedback_userInfo<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserInfo>, SubError>> + 'a {

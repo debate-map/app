@@ -125,7 +125,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
 	};
 
 	upsert_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;
-	upsert_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "user_hiddens".to_owned(), user_hidden.id.to_string(), user_hidden.clone()).await?;
 	info!("Creation of new user semi-complete! NewID:{}", new_user_id); // "semi" complete, because transaction hasn't been committed yet
 
 	let user = get_user(ctx, new_user_id.as_str()).await?;

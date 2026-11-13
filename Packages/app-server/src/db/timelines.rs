@@ -11,7 +11,6 @@ use rust_shared::{futures, serde_json, GQLError, SubError};
 
 use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	accessors::{get_db_entry, AccessorContext},
 	filter::FilterInput,
@@ -49,10 +48,6 @@ pub struct Timeline {
 		Ok(serde_json::from_value(self.extras.clone())?)
 	}
 }*/
-impl From<Row> for Timeline {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 /*#[derive(Clone, Serialize, Deserialize)]
 pub struct Timeline_Extras {
 }*/
@@ -92,8 +87,8 @@ gql_set_impl!(Timeline);
 
 #[derive(Default)] pub struct SubscriptionShard_Timeline;
 #[Subscription] impl SubscriptionShard_Timeline {
-	async fn timelines<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Timeline, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter, None).await
+	async fn timelines<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Timeline, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter, cached_entry_hashes, None).await
 	}
 	async fn timeline<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Timeline>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Timeline>(ctx, "timelines", id).await

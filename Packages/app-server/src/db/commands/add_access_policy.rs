@@ -56,7 +56,7 @@ pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		permissions_userExtends: policy_.permissions_userExtends,
 	};
 
-	upsert_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "access_policies".to_owned(), policy.id.to_string(), policy.clone()).await?;
 
 	Ok(AddAccessPolicyResult { id: policy.id.to_string() })
 }

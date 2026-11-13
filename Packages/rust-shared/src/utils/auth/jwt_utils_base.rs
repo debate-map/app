@@ -23,37 +23,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::{error, info, warn};
 
-// the crate's token payload, so both sides' jwt checks agree; the key functions stay debate-map's (its secret is dm-jwt-secret-hs256)
+// the crate's token payload and key lookup, so tokens made here and checked by the crate share one key (JWT_SECRET if set, else the k8s secret below)
 pub use graphlink_rust::utils::auth::jwt_utils_base::UserJWTData;
 
+/// debate-map's k8s secret for the hs256 key (the crate's own default names another project's)
+pub const JWT_K8S_SECRET_NAME: &str = "dm-jwt-secret-hs256";
+
 pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
-	let key_str = get_or_create_jwt_key_hs256_str().await?;
-	let key_str_bytes = base64::decode(key_str)?;
-	let key = HS256Key::from_bytes(&key_str_bytes);
-	Ok(key)
-}
-static JWT_KEY_HS256_STR: OnceCell<String> = OnceCell::new();
-/// Retrieves and/or creates the hs256 secret-key for use in generating JWTs.
-/// Why do retrieval manually rather than having k8s import it as an environment-variable at startup?
-/// Because k8s converts the base64 string into a utf8 string, which makes conversion complicated. (we want to decode it simply as a raw byte-array, for passing to HS256Key::from_bytes)
-pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
-	// first, try to read the key from a global variable (in case this func has already been run)
-	if let Some(key_as_base64_str) = JWT_KEY_HS256_STR.get() {
-		//info!("Retrieved secret key from global-var:{:?}", key_as_base64_str);
-		return Ok(key_as_base64_str.to_owned());
-	}
-
-	// create a new key, and try to store it as a k8s secret
-	let new_secret_data_if_missing = json!({
-		"key": base64::encode(HS256Key::generate().to_bytes()),
-	});
-	let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), "default", Some(new_secret_data_if_missing)).await?;
-	let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
-	//info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
-
-	// now that we have the key, store it in global-var for faster retrieval (use get_or_init for safe handling in case this func was called by two threads concurrently)
-	let result = JWT_KEY_HS256_STR.get_or_init(|| key_as_base64_str.to_owned());
-
-	//Ok(key_as_base64_str.to_owned())
-	Ok(result.to_owned())
+	graphlink_rust::set_jwt_k8s_secret_name(JWT_K8S_SECRET_NAME); // no-op once set (app-server sets it at startup); here so monitor-backend's tokens use it too
+	graphlink_rust::utils::auth::jwt_utils_base::get_or_create_jwt_key_hs256().await
 }

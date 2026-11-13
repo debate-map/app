@@ -43,8 +43,8 @@ gql_set_impl!(Node);
 
 #[derive(Default)] pub struct SubscriptionShard_Node;
 #[Subscription] impl SubscriptionShard_Node {
-	async fn nodes<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Node, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Node, GQLSet_Node>(ctx, "nodes", filter, None).await
+	async fn nodes<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Node, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Node, GQLSet_Node>(ctx, "nodes", filter, cached_entry_hashes, None).await
 	}
 	async fn node<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Node>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Node>(ctx, "nodes", id).await

@@ -31,10 +31,7 @@ use crate::{
 	db::general::{sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info},
 	globals::{set_up_globals, GLOBAL},
 	gql::{self, get_gql_data_from_http_request},
-	links::{
-		monitor_backend_link::{http_response_of_bad_gateway_for_non_pod_caller, is_addr_from_pod, monitor_backend_link_handle_ws_upgrade},
-		pgclient,
-	},
+	links::monitor_backend_link::{http_response_of_bad_gateway_for_non_pod_caller, is_addr_from_pod, monitor_backend_link_handle_ws_upgrade},
 	store::storage::{AppState, AppStateArc},
 	utils::{axum_logging_layer::print_request_response, db::accessors::AccessorContext, general::data_anchor::DataAnchorFor1},
 };
