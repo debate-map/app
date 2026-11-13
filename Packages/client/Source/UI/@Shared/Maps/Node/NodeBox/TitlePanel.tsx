@@ -201,8 +201,7 @@ export const TitlePanel = observer_mgl((props: Props)=>{
 						<TextArea required={true} pattern={NodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={E({flex: 1, minWidth: 0})}
 							instant // must be instant-apply, since rb-dnd blocks button-triggered on-blur
 							ref={a=>{
-								if (a == null) return;
-								a.DOM_HTML.focus()
+								a?.root?.focus();
 							}}
 							onKeyDown={e=>{
 								if (e.keyCode == keycode.codes.esc) {

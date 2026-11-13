@@ -9,7 +9,6 @@ import {ES, GetViewportRect, HSLA, Icon, O, PosChangeSource, RunInAction, RunInA
 import {GetPercentFromXToY, Lerp, Timer, Vector2, WaitXThenRun, ea} from "js-vextensions";
 import {computed, makeObservable, observable} from "mobx";
 import {Button, CheckBox, Column, Row, Spinner, TimeSpanInput} from "react-vcomponents";
-import {GetDOM} from "react-vextensions";
 import {ScrollSource, ScrollView} from "react-vscrollview";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -343,8 +342,7 @@ export const StepList = observer_mgl((props: StepList_Props)=>{
 			ref={useCallback(c=>{
 				listRef.current = c
 				if (c) {
-					// TODO: figure out another way coz GetDOM(c) doesn't work in react 19
-					listRootElRef.current = GetDOM(c) as any;
+					listRootElRef.current = (c as any).getEl();
 				}
 			}, [])}
 			initialIndex={targetStepIndex ?? 0}
@@ -401,7 +399,7 @@ export const StepList = observer_mgl((props: StepList_Props)=>{
 					<RecordDropdown/>
 				</Row>
 			</Row>
-			<Row ref={c=>c && c.DOM && messageAreaRef(c.DOM)} style={{flex: 1, minHeight: 0}}>
+			<Row ref={c=>{ if (c?.root) messageAreaRef(c.root); }} style={{flex: 1, minHeight: 0}}>
 				<Column ref={c=>sideBarElRef.current = c ? c.root as any : null} style={{position: "relative", width: 20, background: HSLA(0, 0, 0, 1)}}>
 					<Button text={<Icon icon={`arrow-${self.targetTimeDirection}`} size={20}/>}
 						style={{
