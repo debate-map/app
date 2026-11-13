@@ -402,29 +402,4 @@ pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: Roo
 	Ok(response_str)
 }
 
-pub fn get_gql_data_from_http_request(req: &Request<AxumBody>) -> Result<GQLDataFromHTTPRequest, Error> {
-	let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
-	if let Some(header) = req.headers().get("authorization") {
-		//info!("Found authorization header:{}", header.to_str()?);
-		if let Some(parts) = header.to_str()?.split_once("Bearer ") {
-			//info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
-			data.jwt = Some(parts.1.to_owned());
-		} else {
-			bail!("An \"authorization\" header was present, but its value was unable to be parsed. @header_value:\"{}\"", header.to_str()?);
-		}
-	}
-
-	if let Some(header) = req.headers().get("referrer") {
-		//info!("Found referrer header.");
-		if let Ok(referrer) = header.to_str() {
-			//info!("Found referrer part2:{}", referrer);
-			data.referrer = Some(referrer.to_owned());
-		}
-	}
-	Ok(data)
-}
-
-pub struct GQLDataFromHTTPRequest {
-	pub jwt: Option<String>,
-	pub referrer: Option<String>,
-}
+pub use graphlink_rust::{get_gql_data_from_http_request, GQLDataFromHTTPRequest}; // the crate's AccessorContext finds the jwt by this exact type in the graphql context

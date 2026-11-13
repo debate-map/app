@@ -8,7 +8,7 @@ pub mod db {
 	pub use graphlink_rust::db::filter;
 	pub mod generic_handlers {
 		pub use graphlink_rust::db::generic_handlers::queries;
-		pub mod subscriptions; // the crate's handlers, plus gql_set_impl! and the old-signature collection handler
+		pub mod subscriptions; // the crate's handlers, plus gql_set_impl!
 	}
 	pub mod pg_row_to_json;
 	pub use graphlink_rust::db::pg_stream_parsing;

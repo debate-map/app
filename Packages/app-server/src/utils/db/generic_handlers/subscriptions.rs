@@ -1,12 +1,6 @@
-// the crate's subscription handlers, plus what the table files still use from here: gql_set_impl!, a wrapper without cached_entry_hashes, and the GQLSet name
+// the crate's subscription handlers, plus what the table files still use from here: gql_set_impl! and the GQLSet name
 pub use graphlink_rust::db::generic_handlers::subscriptions::*;
 pub use graphlink_rust::{ListChange, ListChange as GQLSet, ListChangeCore, ListChangeType};
-use futures_util::Stream;
-use rust_shared::async_graphql;
-use rust_shared::serde::{de::DeserializeOwned, Serialize};
-use rust_shared::SubError;
-
-use crate::utils::db::filter::FilterInput;
 
 #[macro_export]
 macro_rules! gql_set_impl {
@@ -46,11 +40,4 @@ macro_rules! gql_set_impl {
 			}
 		}
 	};
-}
-
-/// The crate's collection handler, without its `cached_entry_hashes` argument, which the table files don't pass yet.
-pub async fn handle_generic_gql_collection_subscription<'a, T: 'static + Serialize + DeserializeOwned + Send + Clone, V: 'static + ListChange<T> + Send + Clone + Sync>(
-	ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>, opts: Option<GQLSubOpts>,
-) -> impl Stream<Item = Result<V, SubError>> + 'a {
-	graphlink_rust::db::generic_handlers::subscriptions::handle_generic_gql_collection_subscription::<T, V>(ctx, table_name, filter_json, None, opts).await
 }

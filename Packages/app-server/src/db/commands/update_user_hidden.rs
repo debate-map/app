@@ -61,7 +61,7 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_roo
 		..old_data
 	};
 
-	upsert_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "user_hiddens".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(UpdateUserHiddenResult { __: gql_placeholder() })
 }

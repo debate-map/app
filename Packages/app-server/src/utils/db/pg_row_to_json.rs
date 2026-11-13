@@ -1,7 +1,7 @@
 // the crate's row conversions, plus debate-map's old helper names on top (same results: every column, by name)
 pub use graphlink_rust::db::conversions::pg_row_to_json::*;
 use rust_shared::anyhow::Error;
-use rust_shared::serde::Deserialize;
+use rust_shared::serde::{de::DeserializeOwned, Deserialize};
 use rust_shared::serde_json;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::utils::type_aliases::{JSONValue, RowData};
@@ -16,4 +16,8 @@ pub fn postgres_row_to_json_value(row: Row, columns_to_process: usize) -> Result
 }
 pub fn postgres_row_to_row_data(row: Row, columns_to_process: usize) -> Result<RowData, Error> {
 	Ok(postgres_row_to_entry_row(row, Some(columns_to_process))?.0) // the crate's version of the same column-by-column loop
+}
+/// Raw-sql rows of a blob table (eg. from `SELECT t.* FROM ...`) to their structs, the way the crate's accessors do it: the table's columns at the root, the rest of the blob in `extras`.
+pub fn blob_rows_to_structs<T: DeserializeOwned>(rows: Vec<Row>, table_name: &str) -> Result<Vec<T>, Error> {
+	rows.into_iter().map(|row| postgres_row_to_entry_blob(row, None)?.up(table_name)?.up::<T>()).collect()
 }

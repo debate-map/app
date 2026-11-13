@@ -7,7 +7,6 @@ use rust_shared::{anyhow::Error, rust_macros::wrap_slow_macros};
 use serde::{Deserialize, Serialize};
 
 use crate::db::commands::_command::{CanNullOrOmit, CanOmit};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::{
 	db::node_links::{get_first_link_under_parent, get_node_links, ClaimForm},
 	utils::db::accessors::AccessorContext,
@@ -84,10 +83,6 @@ impl Node {
 		}
 	}
 }
-impl From<Row> for Node {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeInput {
 	pub accessPolicy: String,

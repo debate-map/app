@@ -51,19 +51,6 @@ impl AccessPolicy {
 		Some(permission_set_for_type)
 	}
 }
-impl From<Row> for AccessPolicy {
-	fn from(row: Row) -> Self {
-		Self {
-			id: ID::from(&row.get::<&str, String>(&"id".o())), // &"...".o() is temp-fix for rust-analyzer bug
-			creator: row.get("creator"),
-			createdAt: row.get("createdAt"),
-			name: row.get("name"),
-			permissions: serde_json::from_value(row.get("permissions")).unwrap(),
-			permissions_userExtends: serde_json::from_value(row.get("permissions_userExtends")).unwrap(),
-		}
-	}
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicyInput {
 	pub name: String,

@@ -7,7 +7,6 @@ use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
 
 use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::{FilterInput, QueryFilter},
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -66,10 +65,6 @@ pub struct CommandRun {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for CommandRun {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 gql_set_impl!(CommandRun);
 
 #[derive(Default)] pub struct QueryShard_CommandRun;
@@ -84,8 +79,8 @@ gql_set_impl!(CommandRun);
 
 #[derive(Default)] pub struct SubscriptionShard_CommandRun;
 #[Subscription] impl SubscriptionShard_CommandRun {
-	async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter, None).await
+	async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter, cached_entry_hashes, None).await
 	}
 	async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<CommandRun>(ctx, "commandRuns", id).await

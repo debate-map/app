@@ -7,6 +7,7 @@ use graphlink_rust::{co2, co3, initialize_config, AppStateArc, GetServerURL_Opti
 use rust_shared::anyhow::Error;
 use rust_shared::db_constants::{SYSTEM_USER_EMAIL, SYSTEM_USER_ID};
 use rust_shared::domains::{get_server_url, GetServerURL_Options, ServerPod};
+use rust_shared::utils::auth::jwt_utils_base::JWT_K8S_SECRET_NAME;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 
 // graphlink declares its own ServerPod/GetServerURL_Options (same shape as rust_shared's), so bridge them to debate-map's real get_server_url
@@ -41,6 +42,7 @@ fn admin_or_creator_or_targets() -> RLS {
 }
 
 pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
+	graphlink_rust::set_jwt_k8s_secret_name(JWT_K8S_SECRET_NAME); // the key debate-map's tokens have always been signed with, for the crate's own token checks
 	let mut table_defs = vec![];
 	#[rustfmt::skip]
 	{

@@ -13,7 +13,6 @@ use rust_shared::{serde_json, GQLError, SubError};
 use crate::gql_set_impl;
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::FilterInput,
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -48,10 +47,6 @@ pub struct Map {
 	pub editedAt: Option<i64>,
 	pub extras: JSONValue,
 }
-impl From<Row> for Map {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct MapInput {
 	pub accessPolicy: String,
@@ -94,8 +89,8 @@ gql_set_impl!(Map);
 
 #[derive(Default)] pub struct SubscriptionShard_Map;
 #[Subscription] impl SubscriptionShard_Map {
-	async fn maps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Map, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Map, GQLSet_Map>(ctx, "maps", filter, None).await
+	async fn maps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Map, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Map, GQLSet_Map>(ctx, "maps", filter, cached_entry_hashes, None).await
 	}
 	async fn map<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Map>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Map>(ctx, "maps", id).await

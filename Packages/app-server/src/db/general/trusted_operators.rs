@@ -68,7 +68,7 @@ impl QueryShard_General_TrustedOperators {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		// For this query, bypass rls-checks. It appears safe, and brings major speed-gains (presumably since can use index): with bypass-rls=false, takes ~3000ms; with bypass-rls=true, takes <100ms
 		let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, true).await?;
-		let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT id FROM "userHiddens" WHERE ("providerData" #>> '{0,sub}') = $1"#, &[&google_id]).await?.try_collect().await?;
+		let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT id FROM "user_hiddens" WHERE ("providerData" #>> '{0,sub}') = $1"#, &[&google_id]).await?.try_collect().await?;
 
 		let result = FindUserIdsForGoogleIdResult {
 			user_ids: rows.into_iter().map(|a| a.get("id")).collect(),
