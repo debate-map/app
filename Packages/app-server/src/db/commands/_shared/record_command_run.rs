@@ -21,9 +21,8 @@ use crate::{
 	},
 	utils::{
 		db::{
-			accessors::{get_db_entry, AccessorContext},
+			accessors::{get_db_entries, get_db_entry, AccessorContext},
 			filter::QueryFilter,
-			queries::get_entries_in_collection,
 		},
 		general::data_anchor::DataAnchorFor1,
 	},
@@ -103,7 +102,7 @@ async fn trim_old_command_runs(ctx: &AccessorContext<'_>) -> Result<(), Error> {
 	let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 	let ctx_admin = AccessorContext::new_write(&mut anchor, gql_ctx, false).await?;*/
 
-	let (_, command_runs) = get_entries_in_collection::<CommandRun>(ctx, "commandRuns".o(), &QueryFilter::empty(), None).await?;
+	let command_runs: Vec<CommandRun> = get_db_entries(ctx, "commandRuns", &None).await?;
 	let command_runs_to_remove = command_runs
 		.into_iter()
 		.enumerate()
