@@ -44,6 +44,8 @@ impl ToString for ColumnDef {
 				// postgres has no jsonb -> array cast, so arrays go through the immutable helper funcs that pgsync creates before the tables
 				"text[]" => format!(" GENERATED ALWAYS AS (jsonb_to_text_array(data->'{}')) STORED", self.name.as_str()),
 				"jsonb[]" => format!(" GENERATED ALWAYS AS (jsonb_to_jsonb_array(data->'{}')) STORED", self.name.as_str()),
+				// postgres can't cast a jsonb null to a number or boolean, but can cast a sql null, so a json null is swapped for a sql null first
+				"smallint" | "integer" | "bigint" | "real" | "double precision" | "numeric" | "boolean" => format!(" GENERATED ALWAYS AS ((NULLIF(data->'{}', 'null'::jsonb))::{}) STORED", self.name.as_str(), self.data_type),
 				// The rest don't have this issue, because they are not string-types. (so there is no way in which postgres' standard conversion could add quotes around the actual data)
 				_ => format!(" GENERATED ALWAYS AS ((data->'{}')::{}) STORED", self.name.as_str(), self.data_type),
 			};
