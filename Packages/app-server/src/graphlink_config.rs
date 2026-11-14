@@ -60,7 +60,7 @@ pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
 		]));
 		table_defs.push(TableDef::new3("feedback_proposals", RLS::All, vec![
 			co2("type", "text"), co2("title", "text"), co2("text", "text"), co2("creator", "text"), co2("createdAt", "bigint"), co3("editedAt", "bigint", true), co3("completedAt", "bigint", true),
-		])); // "likely to be removed at some point" per rls_policies.rs
+		])); // likely to be removed at some point
 		table_defs.push(TableDef::new3("feedback_userInfos", RLS::All, vec![
 			co2("proposalsOrder", "text[]"),
 		]));

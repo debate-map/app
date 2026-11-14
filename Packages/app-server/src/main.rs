@@ -40,12 +40,12 @@ use rust_shared::{
 	sentry, tokio,
 };
 use graphlink_rust::links::pgstream::pgstream::start_pgstream_client_with_restart;
+use graphlink_rust::links::pgstream::db_live_cache::start_db_live_cache;
 use store::storage::AppStateArc;
 use tracing::error;
 
 use crate::{
 	globals::{set_up_globals, set_up_globals_linux},
-	links::db_live_cache::start_db_live_cache,
 	router::start_router,
 	store::storage::AppState,
 	utils::general::data_anchor::DataAnchorFor1,

@@ -14,10 +14,6 @@ pub mod db {
 	pub use graphlink_rust::db::pg_stream_parsing;
 	pub use graphlink_rust::db::queries;
 	pub use graphlink_rust::db::sql_fragment;
-	pub mod rls {
-		pub mod rls_helpers;
-		pub mod rls_policies;
-	}
 	pub use graphlink_rust::db::sql_ident;
 	pub use graphlink_rust::db::sql_param;
 	pub use graphlink_rust::db::transactions;
