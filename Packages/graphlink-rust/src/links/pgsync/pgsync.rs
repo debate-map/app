@@ -4,7 +4,7 @@ use tracing::warn;
 //use tracing::info;
 use crate::tracing::{error, info};
 
-use crate::{cf, get_sql_funcs, start_write_transaction, to_anyhow, AppStateArc, ColumnDef, DataAnchorFor1, StringCollector, ToOwnedV, ToSqlWrapper};
+use crate::{cf, db_name, get_sql_funcs, start_write_transaction, to_anyhow, AppStateArc, ColumnDef, DataAnchorFor1, StringCollector, ToOwnedV, ToSqlWrapper};
 
 /// This function connects to the postgres db and ensures all tables are created and up to date.
 pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
@@ -17,9 +17,10 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 		tx.execute(sql, vars).await.map_err(to_anyhow).with_context(|| format!("SQL execution failed for query:{}", sql))
 	};
 
+	let db_ident = format!("\"{}\"", db_name().replace('"', "\"\"")); // quoted, since names like "lucid-frontier" need it
 	#[rustfmt::skip] {
         // alter search path
-        query("ALTER DATABASE \"lucid-frontier\" SET search_path TO 'app';", &[]).await?; // for future pg-sessions
+        query(&format!("ALTER DATABASE {db_ident} SET search_path TO 'app';"), &[]).await?; // for future pg-sessions
         query("SELECT pg_catalog.set_config('search_path', 'app', false);", &[]).await?; // for current pg-session
 
         // create schema
@@ -39,7 +40,7 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
         // create role "rls_obeyer", and grant it permissions
         query("DO $$ BEGIN CREATE ROLE rls_obeyer WITH NOINHERIT NOLOGIN; EXCEPTION WHEN others THEN RAISE NOTICE 'rls_obeyer role seems to exist already, so not re-creating'; end $$;", &[]).await?;
-        query("GRANT CONNECT ON DATABASE \"lucid-frontier\" TO rls_obeyer;", &[]).await?;
+        query(&format!("GRANT CONNECT ON DATABASE {db_ident} TO rls_obeyer;"), &[]).await?;
         query("GRANT USAGE ON SCHEMA app TO rls_obeyer;", &[]).await?;
         //q("grant all on schema app to rls_obeyer", &[]).await?;
         // grant privileges for future-created tables

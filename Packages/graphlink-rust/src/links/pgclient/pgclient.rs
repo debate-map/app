@@ -36,17 +36,22 @@ pub async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
 		.collect()
 }
 
+/// The database to connect to: env-var `DB_NAME`, else "lucid-frontier".
+pub fn db_name() -> String {
+	env::var("DB_NAME").unwrap_or_else(|_| "lucid-frontier".to_owned())
+}
+
 pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
 	// get connection info from env-vars
 	let ev = |name| env::var(name).unwrap();
-	info!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/lucid-frontier", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
+	info!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/{}", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"), db_name());
 
 	let mut cfg = tokio_postgres::Config::new();
 	cfg.user(&ev("DB_USER"));
 	cfg.password(ev("DB_PASSWORD"));
 	cfg.host(&ev("DB_ADDR"));
 	cfg.port(ev("DB_PORT").parse::<u16>().unwrap());
-	cfg.dbname("lucid-frontier");
+	cfg.dbname(&db_name());
 	cfg
 }
 
