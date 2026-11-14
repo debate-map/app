@@ -46,6 +46,7 @@ use tracing::error;
 
 use crate::{
 	globals::{set_up_globals, set_up_globals_linux},
+	links::monitor_backend_link::relay_graphlink_monitor_event,
 	router::start_router,
 	store::storage::AppState,
 	utils::general::data_anchor::DataAnchorFor1,
@@ -71,7 +72,7 @@ async fn main() {
 	#[cfg(unix)]
 	let agent_running = agent.start().unwrap();
 	println!("Setup of globals completed"); // have one regular print-line, in case logger has issues
-	graphlink_config::set_up_graphlink_rust(|_event| {}); // debate-map's table definitions for the crate; its monitor events aren't forwarded yet
+	graphlink_config::set_up_graphlink_rust(relay_graphlink_monitor_event); // debate-map's table definitions for the crate, and where its monitor events go
 
 	let app_state = AppState::new_in_arc();
 
