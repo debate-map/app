@@ -88,7 +88,7 @@ impl EntryJSON {
 		//let data: Map<String, JSONValue> = match row.get_mut("data").ok_or(anyhow!(r#"No "id" field in db-entry!"#))?.take() {
 		let mut entry_blob: Map<String, JSONValue> = match self.remove("extras") {
 			Some(JSONValue::Object(map)) => map,
-			None => return Err(anyhow!("Entry-json's \"extras\" field is missing.")),
+			None => Map::new(), // structs without an "extras" field have nothing beyond their own fields
 			_ => return Err(anyhow!("Entry-json's \"extras\" field is not a json-map.")),
 		};
 		for (key, val) in self.0 {
