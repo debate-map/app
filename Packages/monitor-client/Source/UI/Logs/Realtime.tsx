@@ -2,11 +2,9 @@ import gql from "graphql-tag";
 import React, {useState} from "react";
 import {store} from "Store";
 import {LogGroup} from "Store/main/logs/LogGroup";
-import {Observer} from "web-vcore";
 import {useSubscription} from "@apollo/client/react";
 import {observer} from "mobx-react";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {LogEntryUI} from "./LogEntryUI.js";
 import {LogGroupsUI} from "./LogGroupsUI.js";
@@ -61,79 +59,75 @@ mutation($adminKey: String!) {
 }
 `;*/
 
-//export const LogsUI = observer(()=>{
-@Observer
-export class LogsUI_Realtime extends BaseComponent<{}, {}> {
-	render() {
-		const adminKey = store.main.adminKey;
-		const uiState = store.main.logs;
+export const LogsUI_Realtime = observer(()=>{
+	const adminKey = store.main.adminKey;
+	const uiState = store.main.logs;
 
-		/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
-				variables: {adminKey},
-			});
-			const logEntries_raw: LogEntry_Raw[] = data?.logEntries ?? [];
-			let logEntries = logEntries_raw.map(a=>LogEntry.FromRaw(a))
-				.filter(entry=>{
-					for (const group of uiState.groups) {
-						if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
-					}
-					return true;
-				});
-			// app-server sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
-			logEntries = logEntries.OrderBy(entry=>{
-				return entry.time;
-			});
-			console.log("Got data:", logEntries);*/
-
-		const [logEntries, setLogEntries] = useState([] as LogEntry[]);
-		const [enabled, setEnabled] = useState(true);
-
-		const {data, loading} = useSubscription<{logEntries: LogEntry_Raw[]}>(LOG_ENTRIES_SUBSCRIPTION, {
+	/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
 			variables: {adminKey},
-			onData: info=>{
-				if (!enabled) return;
-				const newEntries_raw = info.data.data?.logEntries ?? [];
-				const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
-				setLogEntries(logEntries.concat(newEntries_final));
-			},
 		});
-
-		const logEntriesToShow = logEntries
+		const logEntries_raw: LogEntry_Raw[] = data?.logEntries ?? [];
+		let logEntries = logEntries_raw.map(a=>LogEntry.FromRaw(a))
 			.filter(entry=>{
 				for (const group of uiState.groups) {
 					if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
 				}
 				return true;
 			});
-		//logEntriesToShow = logEntriesToShow.OrderBy(a=>a.time);
+		// app-server sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
+		logEntries = logEntries.OrderBy(entry=>{
+			return entry.time;
+		});
+		console.log("Got data:", logEntries);*/
 
-		//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
+	const [logEntries, setLogEntries] = useState([] as LogEntry[]);
+	const [enabled, setEnabled] = useState(true);
 
-		return (
-				<Column style={{flex: 1, height: "100%"}}>
-					<Row center>
-						{/*<Text>Actions:</Text>*/}
-						<CheckBox text="Enabled" value={enabled} onChange={val=>setEnabled(val)}/>
-						{/*<Button ml={5} text="Refresh" onClick={async()=>{
-							await refetch();
-							//forceUpdate(); // fsr, this is currently necessary
-						}}/>*/}
-						<Button ml={5} text="Clear (local list)" onClick={async()=>{
-							/*const {message} = (await clearLogEntries({
-								variables: {adminKey},
-							})).data;
-							await refetch();*/
-							setLogEntries([]);
-						}}/>
-						<Text ml={5}>{`Note: "println" calls are not yet captured here.`}</Text>
-					</Row>
-					<Row>Log entries (showing {logEntriesToShow.length} of {logEntries.length})</Row>
-					<ScrollView className="selectable">
-						{logEntriesToShow.map((entry, index)=>{
-							return <LogEntryUI key={index} entry={entry}/>;
-						})}
-					</ScrollView>
-				</Column>
-		);
-	}
-}
+	const {data, loading} = useSubscription<{logEntries: LogEntry_Raw[]}>(LOG_ENTRIES_SUBSCRIPTION, {
+		variables: {adminKey},
+		onData: info=>{
+			if (!enabled) return;
+			const newEntries_raw = info.data.data?.logEntries ?? [];
+			const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
+			setLogEntries(logEntries.concat(newEntries_final));
+		},
+	});
+
+	const logEntriesToShow = logEntries
+		.filter(entry=>{
+			for (const group of uiState.groups) {
+				if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
+			}
+			return true;
+		});
+	//logEntriesToShow = logEntriesToShow.OrderBy(a=>a.time);
+
+	//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
+
+	return (
+			<Column style={{flex: 1, height: "100%"}}>
+				<Row center>
+					{/*<Text>Actions:</Text>*/}
+					<CheckBox text="Enabled" value={enabled} onChange={val=>setEnabled(val)}/>
+					{/*<Button ml={5} text="Refresh" onClick={async()=>{
+						await refetch();
+						//forceUpdate(); // fsr, this is currently necessary
+					}}/>*/}
+					<Button ml={5} text="Clear (local list)" onClick={async()=>{
+						/*const {message} = (await clearLogEntries({
+							variables: {adminKey},
+						})).data;
+						await refetch();*/
+						setLogEntries([]);
+					}}/>
+					<Text ml={5}>{`Note: "println" calls are not yet captured here.`}</Text>
+				</Row>
+				<Row>Log entries (showing {logEntriesToShow.length} of {logEntries.length})</Row>
+				<ScrollView className="selectable">
+					{logEntriesToShow.map((entry, index)=>{
+						return <LogEntryUI key={index} entry={entry}/>;
+					})}
+				</ScrollView>
+			</Column>
+	);
+});

@@ -7,6 +7,7 @@ import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "js-vextensions";
 import {Column, Row, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
+import {observer} from "mobx-react";
 import {Mtx, MtxSection} from "../Requests.js";
 
 class SectionLayer {
@@ -17,57 +18,54 @@ class SectionLayer {
 	sections: MtxSection[] = [];
 }
 
-@Observer
-export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
-	render() {
-		const {mtx} = this.props;
-		const uiState = store.main.db.requests;
-		const sections = mtx.sectionLifetimes;
-		const highlightGroup = uiState.groups.filter(group=>group.enabled && group.highlight && MtxGroup.Matches(group, mtx)).LastOrX(); // have later matching groups take priority
+export const MtxResultUI = observer((props: {mtx: Mtx})=>{
+	const {mtx} = props;
+	const uiState = store.main.db.requests;
+	const sections = mtx.sectionLifetimes;
+	const highlightGroup = uiState.groups.filter(group=>group.enabled && group.highlight && MtxGroup.Matches(group, mtx)).LastOrX(); // have later matching groups take priority
 
-		const sectionLayers = new Map<string, SectionLayer>();
-		for (const lifetime of sections) {
-			const groupPath = `${lifetime.path.slice(0, lifetime.path.lastIndexOf("/"))}/*`;
-			if (!sectionLayers.has(groupPath)) {
-				sectionLayers.set(groupPath, new SectionLayer({path: groupPath}));
-			}
-			sectionLayers.get(groupPath)!.sections.push(lifetime);
+	const sectionLayers = new Map<string, SectionLayer>();
+	for (const lifetime of sections) {
+		const groupPath = `${lifetime.path.slice(0, lifetime.path.lastIndexOf("/"))}/*`;
+		if (!sectionLayers.has(groupPath)) {
+			sectionLayers.set(groupPath, new SectionLayer({path: groupPath}));
 		}
-
-		const [expanded, setExpanded] = useState(false);
-		return (
-			<Column
-				style={{
-					position: "relative",
-					//height: 1 + (lifetimeGroups.size * 3) + (expanded ? lifetimeGroups.size * 20 : 0),
-					height: 1 + (sectionLayers.size * 3) + (expanded ? sections.length * 18 : 0),
-				}}
-			>
-				<Column style={ES(
-					{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"},
-					highlightGroup != null && {background: highlightGroup.highlightColor},
-				)} onClick={()=>setExpanded(!expanded)}>
-					{[...sectionLayers.values()].map((group, index)=>{
-						return <SectionLayerUI key={index} group={group} index={index}/>;
-					})}
-				</Column>
-				{/*expanded &&
-				[...lifetimeGroups.values()].map((group, index)=>{
-					return <LifetimeGroupUI_Expanded key={index} group={group} index={index}/>;
-				})*/}
-				{expanded &&
-				<Column style={{
-					// since we're changing alpha to 1, this shows up darker than the page background (which is good)
-					background: MainSkin.main.BasePanelBackgroundColor().alpha(1).css(),
-				}}>
-					{sections.map((section, sectionIndex)=>{
-						return <SectionUI_Expanded key={sectionIndex} section={section} index={sectionIndex} sections={sections}/>;
-					})}
-				</Column>}
-			</Column>
-		);
+		sectionLayers.get(groupPath)!.sections.push(lifetime);
 	}
-}
+
+	const [expanded, setExpanded] = useState(false);
+	return (
+		<Column
+			style={{
+				position: "relative",
+				//height: 1 + (lifetimeGroups.size * 3) + (expanded ? lifetimeGroups.size * 20 : 0),
+				height: 1 + (sectionLayers.size * 3) + (expanded ? sections.length * 18 : 0),
+			}}
+		>
+			<Column style={ES(
+				{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"},
+				highlightGroup != null && {background: highlightGroup.highlightColor},
+			)} onClick={()=>setExpanded(!expanded)}>
+				{[...sectionLayers.values()].map((group, index)=>{
+					return <SectionLayerUI key={index} group={group} index={index}/>;
+				})}
+			</Column>
+			{/*expanded &&
+			[...lifetimeGroups.values()].map((group, index)=>{
+				return <LifetimeGroupUI_Expanded key={index} group={group} index={index}/>;
+			})*/}
+			{expanded &&
+			<Column style={{
+				// since we're changing alpha to 1, this shows up darker than the page background (which is good)
+				background: MainSkin.main.BasePanelBackgroundColor().alpha(1).css(),
+			}}>
+				{sections.map((section, sectionIndex)=>{
+					return <SectionUI_Expanded key={sectionIndex} section={section} index={sectionIndex} sections={sections}/>;
+				})}
+			</Column>}
+		</Column>
+	);
+});
 
 export class SectionLayerUI extends BaseComponent<{group: SectionLayer, index: number}, {}> {
 	render() {

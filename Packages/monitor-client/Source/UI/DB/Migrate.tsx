@@ -1,7 +1,7 @@
 import {Button, Column, Row, Switch, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
-import {Observer} from "web-vcore";
+import {observer} from "mobx-react";
 import React, {useState} from "react";
 import gql from "graphql-tag";
 import {useMutation, useSubscription} from "@apollo/client/react";
@@ -27,49 +27,45 @@ mutation($adminKey: String!, $toVersion: Int!) {
 }
 `;
 
-@Observer
-export class MigrateUI extends BaseComponent<{}, {}> {
-	render() {
-		let {} = this.props;
-		const adminKey = store.main.adminKey;
+export const MigrateUI = observer(()=>{
+	const adminKey = store.main.adminKey;
 
-		const [logEntries, setLogEntries] = useState([] as MigrationLogEntry[]);
-		const {data, loading} = useSubscription<{migrateLogEntries: MigrationLogEntry}>(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
-			variables: {adminKey},
-			onData: info=>{
-				const newEntry = info.data.data?.migrateLogEntries;
-				if (newEntry) setLogEntries(logEntries.concat(newEntry));
-			},
-		});
+	const [logEntries, setLogEntries] = useState([] as MigrationLogEntry[]);
+	const {data, loading} = useSubscription<{migrateLogEntries: MigrationLogEntry}>(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
+		variables: {adminKey},
+		onData: info=>{
+			const newEntry = info.data.data?.migrateLogEntries;
+			if (newEntry) setLogEntries(logEntries.concat(newEntry));
+		},
+	});
 
-		const [startMigration, info] = useMutation<{startMigration: {migrationID: string}}>(START_MIGRATION);
+	const [startMigration, info] = useMutation<{startMigration: {migrationID: string}}>(START_MIGRATION);
 
-		return (
-			<Column style={{flex: 1}}>
-				<Row>
-					<Text>Migrate to:</Text>
-					<Button ml={5} text="V2" onClick={async()=>{
-						ShowMessageBox({
-							title: "Start migration to V2?",
-							message: "Start migration to version 2?",
-							cancelButton: true,
-							onOK: async()=>{
-								const {migrationID} = (await startMigration({
-									variables: {toVersion: 2, adminKey},
-								})).data?.startMigration ?? {};
-							},
-						});
-					}}/>
-					<Button ml={5} text="Stop" enabled={false}/>
-				</Row>
-				<Row>Migration log-messages:</Row>
-				{logEntries.map((entry, index)=>{
-					return <LogMessageUI key={index} message={entry}/>;
-				})}
-			</Column>
-		);
-	}
-}
+	return (
+		<Column style={{flex: 1}}>
+			<Row>
+				<Text>Migrate to:</Text>
+				<Button ml={5} text="V2" onClick={async()=>{
+					ShowMessageBox({
+						title: "Start migration to V2?",
+						message: "Start migration to version 2?",
+						cancelButton: true,
+						onOK: async()=>{
+							const {migrationID} = (await startMigration({
+								variables: {toVersion: 2, adminKey},
+							})).data?.startMigration ?? {};
+						},
+					});
+				}}/>
+				<Button ml={5} text="Stop" enabled={false}/>
+			</Row>
+			<Row>Migration log-messages:</Row>
+			{logEntries.map((entry, index)=>{
+				return <LogMessageUI key={index} message={entry}/>;
+			})}
+		</Column>
+	);
+});
 
 class LogMessageUI extends BaseComponent<{message: MigrationLogEntry}, {}> {
 	render() {
