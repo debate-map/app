@@ -1,7 +1,6 @@
 #![feature(stmt_expr_attributes)] // for the #[rustfmt::skip] block in graphlink_config.rs, same as main.rs
 // Dev tool: builds debate-map's schema (pgsync, then debate-map's sql) on a scratch database
-// Usage: DB_USER=postgres DB_PASSWORD=x DB_ADDR=127.0.0.1 DB_PORT=5499 ENVIRONMENT=dev cargo run -p app_server --example graphlink_pgsync_smoke
-// (the database is DB_NAME, or "lucid-frontier" when that isn't set)
+// Usage: DB_NAME=scratch DB_USER=postgres DB_PASSWORD=x DB_ADDR=127.0.0.1 DB_PORT=5499 ENVIRONMENT=dev cargo run -p app_server --example graphlink_pgsync_smoke
 #[path = "../src/graphlink_config.rs"]
 mod graphlink_config;
 
