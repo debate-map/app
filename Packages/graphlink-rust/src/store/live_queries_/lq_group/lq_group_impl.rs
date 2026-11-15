@@ -384,7 +384,10 @@ impl LQGroupImpl {
 			//if batch.get_generation() == batch_generation {
 
 			mtx_proxy.section("2:execute batch query");
-			batch.execute(&client, Some(&mtx_proxy)).await.expect("Executing the lq-batch failed!");
+			// this sql is built from filters that clients send, so anyone can make it fail. log it instead of panicking, because a panic takes the server down for everyone
+			if let Err(err) = batch.execute(&client, Some(&mtx_proxy)).await {
+				error!("Executing the lq-batch failed! @error:{:?}", err);
+			}
 
 			//mtx2.section("3:reset batch, and drop batch write-lock");
 			mtx_proxy.section("3:read batch results, and send-message about batch being completed");
