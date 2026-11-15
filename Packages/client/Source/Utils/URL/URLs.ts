@@ -236,7 +236,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 		// unroll a share-link into the target location
 		if (page == "s") {
 			const shareStr = url.pathNodes[1];
-			const shareID = shareStr.slice(-10);
+			const shareID = shareStr.slice(shareStr.lastIndexOf(".") + 1);
 			store.main.shareBeingLoaded = shareID;
 			// actual loading handled by LoadShare.ts
 		}

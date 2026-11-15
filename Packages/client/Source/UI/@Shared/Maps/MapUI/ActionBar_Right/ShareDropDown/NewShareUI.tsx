@@ -7,6 +7,7 @@ import {RunInAction_Set} from "web-vcore"; import {CopyText, GetEntries, ToJSON,
 import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown.js";
 import {observer_mgl} from "mobx-graphlink";
+import {toJSON} from "mobx-sync";
 import React, {useState} from "react";
 
 export const NewShareUI = observer_mgl(({mapID}: {mapID: string})=>{
@@ -25,7 +26,7 @@ export const NewShareUI = observer_mgl(({mapID}: {mapID: string})=>{
 		name: map.name,
 		type: ShareType.map,
 		mapID,
-		mapView: GetMapView(mapID),
+		mapView: toJSON(GetMapView(mapID)),
 	});
 	Object.defineProperty(newShareData, "createdAt", {enumerable: false, value: Date.now()}); // overridden by server, but added for informational convenience, for mere copy-pastes
 
