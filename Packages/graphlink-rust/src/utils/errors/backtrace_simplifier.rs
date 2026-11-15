@@ -89,10 +89,10 @@ pub fn try_simplify_backtrace_str(source: &str, remove_spammy_trace_lines: bool)
             },
             StackTraceLine::CodePath(_) => {
                 let path_line_str = old_lines.get(i)?.get_str();
-                let func_line_str = match &old_lines.get(i - 1) { Some(StackTraceLine::FuncName(str)) => Some(str), _ => None };
+                let func_line_str = match &i.checked_sub(1).and_then(|j| old_lines.get(j)) { Some(StackTraceLine::FuncName(str)) => Some(str), _ => None }; // checked_sub here and for i - 2 below: a backtrace's first path line sits at index 1
 
 				if remove_spammy_trace_lines {
-					let last_path_line_str = match &old_lines.get(i - 2) {
+					let last_path_line_str = match &i.checked_sub(2).and_then(|j| old_lines.get(j)) {
 						Some(StackTraceLine::CodePath(str)) => Some(str),
 						_ => None,
 					};
@@ -104,7 +104,7 @@ pub fn try_simplify_backtrace_str(source: &str, remove_spammy_trace_lines: bool)
 							false => {
 								//let new_path_line_str = "   ===== [spammy segment of stack-trace; removed by backtrace_simplifier.rs; stack-entry type: tokio] =====";
 								let new_path_line_str = "   [spammy segment of stack-trace; removed by backtrace_simplifier.rs; stack-entry type: tokio]";
-								let spaces_to_reach_c2_indent = indent_for_column_2 - new_path_line_str.len();
+								let spaces_to_reach_c2_indent = indent_for_column_2.saturating_sub(new_path_line_str.len()); // the placeholder can be longer than every path line
 								let new_line = StackTraceLine::CodePathPlusFuncName(new_path_line_str.to_owned() + &" ".repeat(spaces_to_reach_c2_indent) + "===== " + &func_line_str.unwrap_or(&"".o()) + " =====");
 								return Some((i, new_line));
 							},
