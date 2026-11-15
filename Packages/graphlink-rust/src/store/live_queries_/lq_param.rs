@@ -5,7 +5,7 @@ use crate::regex::{Captures, Regex};
 use crate::serde_json::Map;
 use crate::tokio_postgres::types::ToSql;
 use crate::utils::general::extensions::ToOwnedV;
-use crate::{FilterOp, SQLFragment, SQLIdent, SQLParam, SF};
+use crate::{FilterOp, JSONValue, SQLFragment, SQLIdent, SQLParam, SF};
 use std::{
 	fmt::Display,
 	iter::{empty, once, Once},
@@ -53,7 +53,11 @@ impl LQParam {
 				//SQLParam::Value_Int(*lq_index as i64).into_value_fragment()
 				Ok(SQLFragment::value(*lq_index as i64))
 			},
-			LQParam::FilterOpValue(_, _, op) => op.get_sql_for_value(),
+			LQParam::FilterOpValue(_, _, op) => match op {
+				// in a live query the row's field is jsonb, so the `in` list goes in as jsonb too. then postgres can compare the two directly
+				FilterOp::IsWithinX(vals) => Ok(SF::value(JSONValue::Array(vals.clone()))),
+				_ => op.get_sql_for_value(),
+			},
 		}
 	}
 
@@ -92,7 +96,11 @@ impl LQParam {
 					SF::lit(")"),
 				]);
 
-				Ok(op.get_sql_for_application(field_name_fragment, lq_param_name_fragment))
+				Ok(match op {
+					// `= ANY(...)` only takes a real sql array and our list is jsonb, so the list's items are unpacked into one first
+					FilterOp::IsWithinX(_) => SF::merge(vec![SF::lit("(("), field_name_fragment, SF::lit(") = ANY(ARRAY(SELECT jsonb_array_elements("), lq_param_name_fragment, SF::lit("))))")]),
+					_ => op.get_sql_for_application(field_name_fragment, lq_param_name_fragment),
+				})
 			},
 		}
 	}
