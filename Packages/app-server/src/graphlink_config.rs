@@ -42,6 +42,7 @@ fn admin_or_creator_or_targets() -> RLS {
 }
 
 pub fn set_up_graphlink_rust(on_monitor_event: fn(MonitorEvent)) {
+	std::env::var("DB_NAME").expect("The DB_NAME env-var is not set."); // checked here because the crate has a default name of its own ("lucid-frontier"), which would hide a missing DB_NAME until the database isn't found
 	graphlink_rust::set_jwt_k8s_secret_name(JWT_K8S_SECRET_NAME); // the key debate-map's tokens have always been signed with, for the crate's own token checks
 	let mut table_defs = vec![];
 	#[rustfmt::skip]
