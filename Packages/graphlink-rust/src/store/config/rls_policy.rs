@@ -65,8 +65,7 @@ pub fn can_user_access_entry_json(entry: &EntryJSON, rls: &RLS, table_name: &str
 		RLS::UserIsAdmin => is_user_admin_cached(user_id),
 		RLS::UserGrantFromPolicy(field_name, rls_group) => {
 			let policy_id = entry.get(field_name).and_then(|a| a.as_str()).expect(&format!("Expected field {} in entry-json to exist, and be a string", field_name));
-			assert!(table_name == rls_group, "Table-name from call to `can_user_access_entry_json` should be the same as the one in the entry-json");
-			does_policy_allow_access_cached(user_id, policy_id, table_name)
+			does_policy_allow_access_cached(user_id, policy_id, rls_group) // the rule's group, like the sql side (a table's group needn't be its name, eg. timelines -> "others")
 		},
 		RLS::UserGrantFromPolicyTargets(field_name) => {
 			let targets: Vec<AccessPolicyTarget> = entry.get(field_name).cloned().and_then(|a| serde_json::from_value(a).ok()).unwrap_or_default(); // a missing or unparsable list counts as empty, which the checker denies
