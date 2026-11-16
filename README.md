@@ -638,11 +638,16 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 
 Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
+> The tables are not created by a sql script anymore: the app-server builds them itself each time it starts. So in a newly created cluster (where the `debate-map` database already exists, empty) you only need step 4. Steps 1-3 are for replacing a database that already has data.
+
 * 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s dm-local"`
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s dm-local db:postgres"`)
-* 2\) Run: `npm start "db.initDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@CreateDB.sql` and `./Scripts/InitDB/@InitDB.sql` scripts)
-* 3\) Run: `npm start "db.seedDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
-	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript dm-local"`.
+	* 1.2\) While the database is missing, the app-server pod cannot start, so it will show as crashing/restarting. This is expected, and the site will not load until step 3 is done.
+* 2\) Run: `npm start "db.initDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@CreateDB.sql` script). This only creates the empty `debate-map` database; the old `./Scripts/InitDB/@InitDB.sql` script (which created the tables) is not used for this anymore.
+* 3\) Wait for the app-server pod to start again; on startup it creates the tables in the new database. It restarts by itself (within about a minute). To check on it, run: `kubectl --context dm-local -n default get pods`. To restart it right away, run: `kubectl --context dm-local -n default rollout restart deployment dm-app-server`
+* 4\) Run: `npm start "db.seedDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
+	* 4.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript dm-local"`.
+	* 4.2\) If the error is that a table does not exist (eg. `relation "globalData" does not exist`), the app-server has not built the tables yet; go back to step 3.
 
 </details>
 
