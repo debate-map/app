@@ -9,7 +9,7 @@ import {SLMode, URL_HideNodeHover} from "UI/@SL/SL.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, IsDoubleClick, Link, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
+import {DragInfo, ErrorBoundary, IsDoubleClick, Link, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import {E, GetPercentFromXToY, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {SlicePath} from "mobx-graphlink";
 import {Draggable} from "@hello-pangea/dnd";
@@ -114,10 +114,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 
 		const mouseRect = new VRect(mousePos, new Vector2(1, 1));
 		const intersectsOne = !!(mouseRect.Intersects(mainRect) || (leftBoxRect && mouseRect.Intersects(leftBoxRect)) || (bottomPanelRect && mouseRect.Intersects(bottomPanelRect)));
-		setState(prevState=>({
-			...prevState,
-			hovered: intersectsOne,
-		}))
+		setState(prevState=>(prevState.hovered == intersectsOne ? prevState : {...prevState, hovered: intersectsOne}));
 
 		if (!intersectsOne) {
 			checkStillHoveredTimer.current?.Stop();
@@ -347,10 +344,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	UseDocumentEventListener("click", e=>{
 		// if user clicked outside of node-box, close the subscription-level dropdown
 		if (!e.composedPath().includes(rootRef.current as any)) {
-			setState(prevState=>({
-				...prevState,
-				showNotificationPanel: false,
-			}));
+			setState(prevState=>(prevState.showNotificationPanel ? {...prevState, showNotificationPanel: false} : prevState));
 		}
 	});
 
@@ -458,23 +452,25 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 		const afterChildrenElements = <>
 			{
 				bottomPanelShow &&
-				<NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
-					ref={c=>{
-						bottomPanelRef.current = c
-					}}
-					nodeUIRef={rootRef}
-					usePortal={usePortalForDetailBoxes}
-					onClick={()=>onPanelButtonClick(panelToShow, "bottom-panel-click")}
-					panelsPosition={panelsPosition!}
-					panelToShow={panelToShow!}
-					hoverTermIDs={hoverTermIDs}
-					onTermHover={termIDs=>{
-						setState(prevState=>({
-							...prevState,
-							hoverTermIDs: termIDs,
-						}));
-					}}
-				/>
+				<ErrorBoundary>
+					<NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
+						ref={c=>{
+							bottomPanelRef.current = c
+						}}
+						nodeUIRef={rootRef}
+						usePortal={usePortalForDetailBoxes}
+						onClick={()=>onPanelButtonClick(panelToShow, "bottom-panel-click")}
+						panelsPosition={panelsPosition!}
+						panelToShow={panelToShow!}
+						hoverTermIDs={hoverTermIDs}
+						onTermHover={termIDs=>{
+							setState(prevState=>({
+								...prevState,
+								hoverTermIDs: termIDs,
+							}));
+						}}
+					/>
+				</ErrorBoundary>
 			}
 			{reasonScoreValues && showReasonScoreValues && <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
 		</>;

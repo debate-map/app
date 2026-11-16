@@ -38,10 +38,7 @@ export type CommentsPanel_Props = {
 
 export const CommentsPanel = observer_mgl((props: CommentsPanel_Props)=>{
 	const {show, map, node} = props;
-	const rootCommentNodes = useMemo(
-		()=>GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment),
-		[node.id],
-	);
+	const rootCommentNodes = GetNodeChildren(node.id).filter(n=>n.type === NodeType.comment);
 
 	const nodeAccessPolicyID = useMemo(
 	     ()=>(map?.nodeAccessPolicy) ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name),

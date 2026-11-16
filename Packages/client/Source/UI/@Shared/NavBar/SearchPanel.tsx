@@ -3,7 +3,7 @@ import keycode from "keycode";
 import moment from "moment";
 import {Button, Column, Div, Pre, Row, TextInput} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
-import {InfoButton, LogWarning, ES, RunInAction, chroma_maxDarken} from "web-vcore";
+import {ErrorBoundary, InfoButton, LogWarning, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
@@ -156,8 +156,9 @@ export const SearchPanel = observer_mgl(()=>{
 					{results_nodeIDs.length == 0 && "No search results."}
 					{results_nodeIDs.length > 0 && results_nodeIDs.map((nodeID, index)=>{
 						return (
-							// <ErrorBoundary key={nodeID}>
-							<SearchResultRow key={nodeID} nodeID={nodeID} index={index}/>
+							<ErrorBoundary key={nodeID}>
+								<SearchResultRow nodeID={nodeID} index={index}/>
+							</ErrorBoundary>
 						);
 					})}
 				</>}

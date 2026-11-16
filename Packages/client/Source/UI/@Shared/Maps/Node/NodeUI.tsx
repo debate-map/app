@@ -66,9 +66,6 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 	const nodeBoxRef = useRef<HTMLDivElement|n>(null);
 	//const nodeChildHolder_genericRef = useRef<NodeChildHolder|n>(null);
 
-	// TODO: this was in class component before, we might need it back
-	//if (this.state["error"]) return EB_ShowError(this.state["error"]);
-
 	validateProps(props);
 	validateState(); // TODO
 

@@ -5,7 +5,7 @@ import {GetChildLimitInfoAtLocation, GetDebateMapCrawlerTrimmedPathChildID} from
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {WaitXThenRun_Deduped} from "web-vcore";
+import {ErrorBoundary, WaitXThenRun_Deduped} from "web-vcore";
 import {E, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "@hello-pangea/dnd";
 import {Column} from "react-vcomponents";
@@ -215,15 +215,17 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 			const showLimitBarHere = index == indexOfOutermostVisibleChild && showLimitBar;
 
 			const getNodeUI = ()=>{
-				return <NodeUI key={child.id}
-					ref={c=>{childBoxes.current[child.id] = c}}
-					indexInNodeList={index} map={map} node={child}
-					path={`${parentPath}/${child.id}`}
-					treePath={`${parentTreePath}/${nextChildFullIndex++}`}
-					forLayoutHelper={forLayoutHelper}
-					inBelowGroup={belowNodeUI}
-					standardWidthInGroup={childrenWidthOverride}
-					onHeightOrPosChange={onChildHeightOrPosChange}/>;
+				return <ErrorBoundary key={child.id}>
+					<NodeUI
+						ref={c=>{childBoxes.current[child.id] = c}}
+						indexInNodeList={index} map={map} node={child}
+						path={`${parentPath}/${child.id}`}
+						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
+						forLayoutHelper={forLayoutHelper}
+						inBelowGroup={belowNodeUI}
+						standardWidthInGroup={childrenWidthOverride}
+						onHeightOrPosChange={onChildHeightOrPosChange}/>
+				</ErrorBoundary>;
 			};
 
 			if (showLimitBarHere) {

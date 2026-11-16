@@ -8,7 +8,7 @@ import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTake
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
-import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, StoreAction} from "web-vcore";
+import {ErrorBoundary, ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, StoreAction} from "web-vcore";
 import {Assert, E, FromJSON, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {ScrollView} from "react-vscrollview";
@@ -413,15 +413,17 @@ export const MapUI = observer_mgl((props: Props)=>{
 				<GraphContext.Provider value={graphInfo}>
 					{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
 					<ConnectorLinesUI/>
-					<NodeUI
-							indexInNodeList={0}
-							map={map}
-							node={rootNode}
-							path={(Assert(rootNode.id != null), rootNode.id.toString())}
-							treePath="0"
-							standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth}
-							forLayoutHelper={forLayoutHelper ?? false}
-						/>
+					<ErrorBoundary>
+						<NodeUI
+								indexInNodeList={0}
+								map={map}
+								node={rootNode}
+								path={(Assert(rootNode.id != null), rootNode.id.toString())}
+								treePath="0"
+								standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth}
+								forLayoutHelper={forLayoutHelper ?? false}
+							/>
+					</ErrorBoundary>
 					{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
 					<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
 						<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
