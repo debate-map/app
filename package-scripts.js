@@ -629,18 +629,11 @@ Object.assign(scripts, {
 		// db init/seed commands (using psql to run standard .sql files)
 		buildSeedDBScript: GetBuildSeedDBScriptCommand(),
 		initDB: Dynamic(()=>{
-			// first connect to the "postgres" db, to run @CreateDB.sql (this creates the "debate-map" db if it doesn't exist yet)
+			// connect to the "postgres" db, to run @CreateDB.sql (this creates the "debate-map" db if it doesn't exist yet)
+			// only the empty database is made here. app-server builds the tables itself when it starts, so the old @InitDB.sql (typed tables) is not run anymore
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
 			psqlProcess.stdin.write(`\\i ./Scripts/InitDB/@CreateDB.sql\n`);
 			psqlProcess.stdin.write(`\\q\n`);
-
-			// on completion of the CreateDB script (without error), run the InitDB script
-			psqlProcess.on("close", code=>{
-				if (code != 0) return void console.error(`psql process exited with code ${code}`);
-				const psqlProcess2 = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
-				psqlProcess2.stdin.write(`\\i ./Scripts/InitDB/@InitDB.sql\n`);
-				psqlProcess2.stdin.write(`\\q\n`);
-			});
 		}),
 		seedDB: Dynamic(()=>{
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
