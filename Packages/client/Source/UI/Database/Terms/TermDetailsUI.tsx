@@ -27,7 +27,7 @@ export const TermDetailsUI = observer_mgl((props: TermDetailsUIProps)=>{
 	const splitAt = 140, width = 400;
 
 	return (
-		<Column style={style} ref={containerRef as any}>
+		<Column style={style} ref={c=>{containerRef.current = c?.root ?? null}}>
 			{!creating && <GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 			<RowLR mt={5} splitAt={splitAt} style={{width}}>
 				<Text>Name:</Text>

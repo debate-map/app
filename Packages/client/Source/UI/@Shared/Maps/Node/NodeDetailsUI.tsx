@@ -131,7 +131,7 @@ export const NodeDetailsUI = observer_mgl((props: Props)=>{
 	if (policy == null) return null;
 	const newDataAsL2 = AsNodeL2(state.newData, state.newRevisionData, policy);
 
-	const sharedProps: NodeDetailsUI_SharedProps = {...props, Change, newDataAsL2, ...state, SetState: setState};
+	const sharedProps: NodeDetailsUI_SharedProps = {...props, enabled, Change, newDataAsL2, ...state, SetState: setState};
 	const subPanel = store.main.maps.detailsPanel.subpanel;
 	return (
 		<Column style={E({padding: 5}, style)} ref={v=>{internalRef.current = v?.root}}>

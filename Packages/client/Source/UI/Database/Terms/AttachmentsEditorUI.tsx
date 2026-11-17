@@ -37,7 +37,7 @@ export const AttachmentsEditorUI = observer_mgl((props: AttachmentsEditorUIProps
 	}
 
 	return (
-		<Column style={ES({flex: 1})} ref={containerRef as any}>
+		<Column style={ES({flex: 1})} ref={c=>{containerRef.current = c?.root ?? null}}>
 			<Row mb={5} style={{flexWrap: "wrap", gap: 5}}>
 				<Text>Attachments:</Text>
 				{newData.map((attachment, index)=>{

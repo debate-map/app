@@ -16,7 +16,7 @@ export type PolicyDetailsUIProps = DetailsUIBaseProps<AccessPolicy, {}>
 
 export const PolicyDetailsUI = observer_mgl((props: PolicyDetailsUIProps)=>{
 	const {baseData, style, phase, onChange} = props;
-	const {newData, helpers} = useDetailsUI<AccessPolicy>({
+	const {newData, helpers, containerRef} = useDetailsUI<AccessPolicy>({
 		baseData,
 		phase,
 		onChange,
@@ -25,7 +25,7 @@ export const PolicyDetailsUI = observer_mgl((props: PolicyDetailsUIProps)=>{
 
 	const splitAt = 140, width = 400;
 	return (
-		<Column style={style}>
+		<Column style={style} ref={c=>{containerRef.current = c?.root ?? null}}>
 			{!creating &&
 				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 			<RowLR mt={5} splitAt={splitAt} style={{width}}>

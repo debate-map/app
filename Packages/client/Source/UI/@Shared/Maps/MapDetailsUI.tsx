@@ -23,7 +23,7 @@ export type MapDetailsUIElem = {
 
 export const MapDetailsUI = observer_mgl((props: MapDetailsUI_Props)=>{
 	const {baseData, style, onChange, phase, ref} = props;
-	const {newData, helpers, getNewData, getValidationError} = useDetailsUI<DMap>({
+	const {newData, helpers, getNewData, getValidationError, containerRef} = useDetailsUI<DMap>({
 		baseData,
 		phase,
 		onChange,
@@ -40,7 +40,7 @@ export const MapDetailsUI = observer_mgl((props: MapDetailsUI_Props)=>{
 	}), [getValidationError, getNewData]);
 
 	return (
-		<Column style={style}>
+		<Column style={style} ref={c=>{containerRef.current = c?.root ?? null}}>
 			{!creating &&
 				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 			<RowLR mt={5} splitAt={splitAt} style={{width}}>

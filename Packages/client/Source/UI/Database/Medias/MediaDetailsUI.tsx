@@ -10,16 +10,25 @@ import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {RunCommand_AddMedia} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
 
+function ParseURLOrNull(urlStr: string) {
+	try {
+		return new URL(urlStr);
+	} catch {
+		return null;
+	}
+}
+
 export function ParseYoutubeVideoInfo(urlStr: string) {
 	const videoID = ParseYoutubeVideoID_New(urlStr);
-	const url = new URL(urlStr);
-	const startTimeStr = url.searchParams.get("t") || url.searchParams.get("start");
+	const url = ParseURLOrNull(urlStr);
+	const startTimeStr = url?.searchParams.get("t") || url?.searchParams.get("start");
 	const startTime = startTimeStr ? parseInt(startTimeStr) : null; // in seconds
 	return {videoID, startTime};
 }
 
 export function ParseYoutubeVideoID_New(urlStr: string) {
-	const url = new URL(urlStr);
+	const url = ParseURLOrNull(urlStr);
+	if (url == null) return null;
 	const pathParts = url.pathname.split("/");
 	if (url.hostname == "youtu.be") {
 		if (pathParts.length > 1) return pathParts[1];
@@ -48,7 +57,7 @@ export const MediaDetailsUI = observer_mgl((props: MediaDetailsUIProps)=>{
 	const enabled = creating || editing;
 	const splitAt = 100;
 	return (
-		<Column style={style}>
+		<Column style={style} ref={c=>{containerRef.current = c?.root ?? null}}>
 			{!creating &&
 				<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 			<RowLR mt={5} splitAt={splitAt}>

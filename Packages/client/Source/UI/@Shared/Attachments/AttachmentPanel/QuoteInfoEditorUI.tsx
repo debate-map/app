@@ -24,7 +24,7 @@ export const QuoteInfoEditorUI = (props: DetailsUIBaseProps<QuoteAttachment, {}>
 	const {Change, enabled} = helpers;
 
 	return (
-		<Column ref={containerRef as any}>
+		<Column ref={c=>{containerRef.current = c?.root ?? null}}>
 			<Column mt={0}>
 				<Pre>Quote text: </Pre>
 				{enabled && <MarkdownToolbar editor={()=>editorRef.current} excludeCommands={["h1", "h2", "h3", "h4", "quote"]}/>}
