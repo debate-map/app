@@ -181,7 +181,7 @@ export function DateToString(date: Date, options?: {date?: boolean|0|1, fileName
 
 /** Wrapper around chroma that tries to detect the input-type right away, to avoid chroma's default error-throwing-based discovery approach. */
 export function Chroma(input: string | number | number[] | chroma.Color, colorSpace?: keyof ColorSpaces): chroma.Color {
-	if (typeof input == "string") {
+	if (typeof input == "string" && input.includes("(")) {
 		if (colorSpace == null) {
 			colorSpace = input.slice(0, input.indexOf("(")) as any;
 			if (colorSpace!.endsWith("a") && colorSpace != "rgba") {
