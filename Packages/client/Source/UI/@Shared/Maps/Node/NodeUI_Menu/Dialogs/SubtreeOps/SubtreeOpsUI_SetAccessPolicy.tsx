@@ -47,7 +47,7 @@ export const SubtreeOpsUI_SetAccessPolicy_Right = observer_mgl((props: MI_Shared
 		medias: [],
 	});
 
-	const newPolicy = GetAccessPolicy(setPolicy_newPolicyID);
+	const newPolicy = GetAccessPolicy.CatchBail(null, setPolicy_newPolicyID);
 
 	const {subtreeData} = useSubtreeRetrievalQueryOrAccessors(rootNode, rootNodePath, includeKeys_minimal, dialogState.retrievalMethod, dialogState.maxExportDepth, retrievalActive);
 	const nodesRetrieved_orig = subtreeData?.nodes ?? [];

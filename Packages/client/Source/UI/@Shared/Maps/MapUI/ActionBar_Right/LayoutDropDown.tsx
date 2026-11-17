@@ -234,8 +234,8 @@ const StyleRuleUI = observer_mgl((props: StyleRuleUI_Props)=>{
 		RunInAction("StyleRuleUI.ChangeIfBlock", ()=>{
 			setter();
 			// re-set if-fields, so mobx detects change
-			for (const key of Object.keys(rule)) {
-				if (key.startsWith("if_")) rule[key] = {...rule[key]};
+			for (const key of ["if_lastEditorIs", "if_accessPolicyDoesNotMatch"] as const) {
+				if (rule[key] != null) rule[key] = {...rule[key]} as any;
 			}
 		});
 	};
@@ -243,8 +243,8 @@ const StyleRuleUI = observer_mgl((props: StyleRuleUI_Props)=>{
 		RunInAction("StyleRuleUI.ChangeThenBlock", ()=>{
 			setter();
 			// re-set then-fields, so mobx detects change
-			for (const key of Object.keys(rule)) {
-				if (key.startsWith("then_")) rule[key] = {...rule[key]};
+			for (const key of ["then_setBackgroundColor"] as const) {
+				if (rule[key] != null) rule[key] = {...rule[key]} as any;
 			}
 		});
 	};

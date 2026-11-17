@@ -94,8 +94,8 @@ export function useSubtreeRetrievalQueryOrAccessors(rootNode: NodeL3, rootNodePa
 		if (retrievalMethod == ExportRetrievalMethod.server) {
 			subtreeData = queryData?.subtree;
 		} else {
-			const subtreeData_local = PopulateLocalSubtreeData(rootNodePath, {maxDepth: maxRetrievalDepth});
-			subtreeData = ConvertLocalSubtreeDataToServerStructure(subtreeData_local);
+			const subtreeData_local = PopulateLocalSubtreeData.CatchBail(null, rootNodePath, {maxDepth: maxRetrievalDepth});
+			subtreeData = subtreeData_local ? ConvertLocalSubtreeDataToServerStructure(subtreeData_local) : null;
 		}
 	}
 
