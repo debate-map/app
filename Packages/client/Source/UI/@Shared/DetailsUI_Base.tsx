@@ -1,6 +1,6 @@
 import React from "react";
 import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "js-vextensions";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useMemo, useRef, useState} from "react";
 
 export type DetailsUI_Phase = "create" | "edit" | "view";
 export type DetailsUIBaseProps<T, ExtraProps> = {
@@ -49,15 +49,20 @@ export function useDetailsUI<T>(options: UseDetailsUIOptions<T>): UseDetailsUIRe
 	const [dataError, setDataError] = useState<string | null>(null);
 	const containerRef = useRef<HTMLElement>(null);
 
-	useEffect(()=>{
+	const [lastBaseData, setLastBaseData] = useState(baseData);
+	if (baseData !== lastBaseData) {
+		setLastBaseData(baseData);
 		setNewData(CloneWithPrototypes(baseData));
-	}, [baseData]);
+	}
+
+	const latest = useRef({newData, onChange});
+	latest.current = {newData, onChange};
 
 	const getNewData = useCallback((): T=>{
-		const result = CloneWithPrototypes(newData) as T;
+		const result = CloneWithPrototypes(latest.current.newData) as T;
 		getNewDataPostProcess?.(result);
 		return result;
-	}, [newData, getNewDataPostProcess]);
+	}, [getNewDataPostProcess]);
 
 	const getValidationError = useCallback((): string | null=>{
 		const root = containerRef.current as HTMLElement | null;
@@ -74,10 +79,10 @@ export function useDetailsUI<T>(options: UseDetailsUIOptions<T>): UseDetailsUIRe
 		const next = getNewData();
 		const error = getValidationError();
 
-		onChange?.(next, error);
+		latest.current.onChange?.(next, error);
 		setNewData(next);
 		setDataError(error);
-	}, [getNewData, getValidationError, onChange]);
+	}, [getNewData, getValidationError]);
 
 	const helpers = useMemo(()=>({
 		creating: phase === "create",

@@ -217,14 +217,12 @@ export const NodeChildHolder = observer_mgl((props: Props)=>{
 			const getNodeUI = ()=>{
 				return <ErrorBoundary key={child.id}>
 					<NodeUI
-						ref={c=>{childBoxes.current[child.id] = c}}
 						indexInNodeList={index} map={map} node={child}
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						forLayoutHelper={forLayoutHelper}
 						inBelowGroup={belowNodeUI}
-						standardWidthInGroup={childrenWidthOverride}
-						onHeightOrPosChange={onChildHeightOrPosChange}/>
+						standardWidthInGroup={childrenWidthOverride}/>
 				</ErrorBoundary>;
 			};
 

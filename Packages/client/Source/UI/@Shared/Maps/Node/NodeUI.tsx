@@ -57,7 +57,7 @@ const validateState = () => {
 
 export type NodeUIElem = HTMLDivElement;
 
-export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
+export const NodeUI = React.memo(observer_mgl((props: NodeUI_Props)=>{
 	const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, forLayoutHelper, inBelowGroup, children} = props;
 	const [obs, setObs] = useState(new ObservedValues());
 
@@ -283,7 +283,7 @@ export const NodeUI = observer_mgl((props: NodeUI_Props)=>{
 			{(boxExpanded || showGenericBelow) && nodeChildHolder_generic}
 		</>
 	);
-})
+}));
 
 // class holding values that are derived entirely within CheckForChanges()
 class ObservedValues {
