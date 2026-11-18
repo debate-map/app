@@ -118,6 +118,12 @@ export const StepList = observer_mgl((props: StepList_Props)=>{
 	const creatorOrModRef = useRef(false);
 	const listRef = useRef<ReactList>(null);
 	const stepListRef = useRef<ReactList>(null);
+	const listRefCallback = useCallback((c: ReactList|null)=>{
+		listRef.current = c
+		if (c) {
+			listRootElRef.current = (c as any).getEl();
+		}
+	}, []);
 
 	const isMountedRef = useRef(false);
 	useEffect(()=>{
@@ -339,12 +345,7 @@ export const StepList = observer_mgl((props: StepList_Props)=>{
 
 	const reactList = ()=>{
 		return <ReactList type='variable' length={steps?.length ?? 0}
-			ref={useCallback(c=>{
-				listRef.current = c
-				if (c) {
-					listRootElRef.current = (c as any).getEl();
-				}
-			}, [])}
+			ref={listRefCallback}
 			initialIndex={targetStepIndex ?? 0}
 			itemSizeEstimator={estimateStepHeight}
 			itemRenderer={renderStep}/>;

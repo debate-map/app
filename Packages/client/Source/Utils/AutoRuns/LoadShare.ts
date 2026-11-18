@@ -1,16 +1,18 @@
 import {GetMap, GetShare, globalMapID, ShareType} from "dm_common";
 import {Assert} from "js-vextensions";
 import {autorun, runInAction} from "mobx";
-import {GetAsync} from "mobx-graphlink";
+import {BailUnless, GetAsync} from "mobx-graphlink";
 import {store} from "Store";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {currentMapUI, MapUI} from "UI/@Shared/Maps/MapUI.js";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {AddNotificationMessage, RunInAction} from "web-vcore";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastShareBeingLoaded;
 AutoRun_HandleBail(()=>{
+	BailUnless(graph.initialized);
 	const shareID = store.main.shareBeingLoaded;
 	if (shareID != lastShareBeingLoaded) {
 		lastShareBeingLoaded = shareID;
