@@ -88,7 +88,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 	upsert_db_entry_by_id_for_struct(ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
 	// also update node's "c_currentRevision" field
-	ctx.tx.execute(r#"UPDATE "nodes" SET "c_currentRevision" = $1 WHERE id = $2"#, &[&revision.id.as_str(), &revision.node]).await?;
+	ctx.tx.execute(r#"UPDATE "nodes" SET data = jsonb_set(data, '{c_currentRevision}', to_jsonb($1::text)) WHERE id = $2"#, &[&revision.id.as_str(), &revision.node]).await?;
 
 	// if node-revision was added from within a map, then add a map-node-edit entry (while also doing cleanup of old map-node-edit entries)
 	if let Some(map_id) = mapID.clone() {

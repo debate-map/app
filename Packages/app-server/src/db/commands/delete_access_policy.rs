@@ -52,14 +52,14 @@ pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_r
 	let old_data = get_access_policy(&ctx, &id).await?;
 	//let rls_data = old_data.get_rls_data();
 	assert_user_can_delete(&ctx, &actor, &old_data).await?;
-	delete_db_entry_by_id(&ctx, "accessPolicies".to_owned(), id.to_string()).await?;
+	delete_db_entry_by_id(&ctx, "access_policies".to_owned(), id.to_string()).await?;
 
 	/*let user_hiddens_referencing_policy = get_db_entries(&ctx, "userHiddens", &Some(json!({
 		"lastAccessPolicy": {"equalTo": id}
 	}))).await?;
 	for user_hidden in user_hiddens_referencing_policy {}*/
 
-	ctx.tx.query_raw(r#"UPDATE "userHiddens" as t1 SET "lastAccessPolicy" = NULL WHERE t1."lastAccessPolicy" = $1"#, params(&[&id])).await?;
+	ctx.tx.query_raw(r#"UPDATE "user_hiddens" as t1 SET data = t1.data - 'lastAccessPolicy' WHERE t1."lastAccessPolicy" = $1"#, params(&[&id])).await?;
 
 	Ok(DeleteAccessPolicyResult { __: gql_placeholder() })
 }

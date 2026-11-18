@@ -33,6 +33,14 @@ pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
 	Ok(key)
 }
 static JWT_KEY_HS256_STR: OnceCell<String> = OnceCell::new();
+static JWT_K8S_SECRET_NAME: OnceCell<String> = OnceCell::new();
+/// Sets the name of the k8s secret that holds the hs256 key (used when the JWT_SECRET env-var isn't set). Defaults to "lf-jwt-secret-hs256"; call it before the first token is made or checked; later calls are ignored.
+pub fn set_jwt_k8s_secret_name(name: &str) {
+	let _ = JWT_K8S_SECRET_NAME.set(name.to_owned());
+}
+fn jwt_k8s_secret_name() -> String {
+	JWT_K8S_SECRET_NAME.get().cloned().unwrap_or_else(|| "lf-jwt-secret-hs256".to_owned())
+}
 /// Retrieves and/or creates the hs256 secret-key for use in generating JWTs.
 /// Why do retrieval manually rather than having k8s import it as an environment-variable at startup?
 /// Because k8s converts the base64 string into a utf8 string, which makes conversion complicated. (we want to decode it simply as a raw byte-array, for passing to HS256Key::from_bytes)
@@ -53,7 +61,7 @@ pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
 			let new_secret_data_if_missing = json!({
 				"key": base64::encode(HS256Key::generate().to_bytes()),
 			});
-			let secret = get_or_create_k8s_secret("lf-jwt-secret-hs256".to_owned(), "default", Some(new_secret_data_if_missing)).await?;
+			let secret = get_or_create_k8s_secret(jwt_k8s_secret_name(), "default", Some(new_secret_data_if_missing)).await?;
 			let secret_key_base64 = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
 			//info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
 			secret_key_base64.to_owned()

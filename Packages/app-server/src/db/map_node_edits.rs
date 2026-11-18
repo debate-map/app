@@ -13,7 +13,6 @@ use rust_shared::SubError;
 use crate::gql_set_impl;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::FilterInput,
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -44,10 +43,6 @@ pub struct MapNodeEdit {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for MapNodeEdit {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 gql_set_impl!(MapNodeEdit);
 
 #[derive(Default)] pub struct QueryShard_NodeEdit;
@@ -62,8 +57,8 @@ gql_set_impl!(MapNodeEdit);
 
 #[derive(Default)] pub struct SubscriptionShard_NodeEdit;
 #[Subscription] impl SubscriptionShard_NodeEdit {
-	async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter, None).await
+	async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter, cached_entry_hashes, None).await
 	}
 	async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNodeEdit>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<MapNodeEdit>(ctx, "mapNodeEdits", id).await

@@ -15,7 +15,6 @@ use rust_shared::{serde_json, should_be_unreachable, to_anyhow, GQLError, SubErr
 use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	accessors::{get_db_entries, AccessorContext},
 	filter::FilterInput,
@@ -133,10 +132,6 @@ impl NodeLink {
 		}
 	}
 }
-impl From<Row> for NodeLink {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeLinkInput {
 	/// Marked as optional, since in some contexts it's not needed. (eg. for add_child_node)
@@ -172,8 +167,8 @@ gql_set_impl!(NodeLink);
 
 #[derive(Default)] pub struct SubscriptionShard_NodeLink;
 #[Subscription] impl SubscriptionShard_NodeLink {
-	async fn nodeLinks<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeLink, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter, None).await
+	async fn nodeLinks<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_NodeLink, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter, cached_entry_hashes, None).await
 	}
 	async fn nodeLink<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeLink>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeLink>(ctx, "nodeLinks", id).await

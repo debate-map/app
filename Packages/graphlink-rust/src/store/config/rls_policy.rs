@@ -1,4 +1,4 @@
-use crate::{cf, does_policy_allow_access_cached, is_user_admin_cached, EntryJSON, JSONValue, SQLFragment, SQLIdent, SQLParam, ToOwnedV, User, SF};
+use crate::{cf, do_policies_allow_access_cached, does_policy_allow_access_cached, is_user_admin_cached, AccessPolicyTarget, EntryJSON, JSONValue, SQLFragment, SQLIdent, SQLParam, ToOwnedV, User, SF};
 use anyhow::{anyhow, Error};
 use itertools::{chain, Itertools};
 use once_cell::sync::OnceCell;
@@ -22,6 +22,10 @@ pub enum RLS {
 	UserIsAdmin,
 	/// First String is the field name that contains the access-policy name, second is the group/table that this object is, and thus should have its data checked within the access-policy.
 	UserGrantFromPolicy(String, String),
+	/// String is the field holding a list of "access_policy_id:group" targets; every target's policy must grant access. (for rows that inherit access from several parents, eg. a link between two nodes)
+	UserGrantFromPolicyTargets(String),
+	/// String is a boolean field that must be true. (compose with And, eg. `public_base = true AND <targets>`)
+	FieldIsTrue(String),
 	All,
 }
 impl RLS {
@@ -43,7 +47,9 @@ impl RLS {
 				RLS::UserMatchesX(field) => SF::new("$I = current_setting('app.current_user_id')", vec![SQLIdent::new_boxed(field.o())?]),
 				// we add (SELECT X) for each function called; this is needed to create a caching-point for the result of that call (see: https://stackoverflow.com/a/75105382)
 				RLS::UserIsAdmin => SF::lit("SELECT is_user_admin('@me')"),
-				RLS::UserGrantFromPolicy(field_name, group) => SF::new("SELECT does_policy_allow_access('@me', $I, $V)", vec![SQLIdent::new_boxed(field_name.o())?, Box::new(group.o())]),
+				RLS::UserGrantFromPolicy(field_name, group) => SF::new("SELECT does_policy_allow_access('@me', $I, $I)", vec![SQLIdent::new_boxed(field_name.o())?, Box::new(SQLIdent::new(group.o())?.set_use_single_quotes(true))]),
+				RLS::UserGrantFromPolicyTargets(field_name) => SF::new("SELECT do_policies_allow_access('@me', $I)", vec![SQLIdent::new_boxed(field_name.o())?]),
+				RLS::FieldIsTrue(field_name) => SF::new("$I = true", vec![SQLIdent::new_boxed(field_name.o())?]),
 				RLS::All => SF::lit("SELECT true"),
 			},
 			SF::lit(")"),
@@ -59,9 +65,13 @@ pub fn can_user_access_entry_json(entry: &EntryJSON, rls: &RLS, table_name: &str
 		RLS::UserIsAdmin => is_user_admin_cached(user_id),
 		RLS::UserGrantFromPolicy(field_name, rls_group) => {
 			let policy_id = entry.get(field_name).and_then(|a| a.as_str()).expect(&format!("Expected field {} in entry-json to exist, and be a string", field_name));
-			assert!(table_name == rls_group, "Table-name from call to `can_user_access_entry_json` should be the same as the one in the entry-json");
-			does_policy_allow_access_cached(user_id, policy_id, table_name)
+			does_policy_allow_access_cached(user_id, policy_id, rls_group) // the rule's group, like the sql side (a table's group needn't be its name, eg. timelines -> "others")
 		},
+		RLS::UserGrantFromPolicyTargets(field_name) => {
+			let targets: Vec<AccessPolicyTarget> = entry.get(field_name).cloned().and_then(|a| serde_json::from_value(a).ok()).unwrap_or_default(); // a missing or unparsable list counts as empty, which the checker denies
+			do_policies_allow_access_cached(user_id, &targets)
+		},
+		RLS::FieldIsTrue(field_name) => entry.get(field_name).and_then(|a| a.as_bool()) == Some(true),
 		RLS::All => true,
 	}
 }

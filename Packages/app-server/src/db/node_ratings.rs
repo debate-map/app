@@ -20,7 +20,6 @@ use crate::gql_set_impl;
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::accessors::{get_db_entries, AccessorContext};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::FilterInput,
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -142,10 +141,6 @@ pub struct NodeRating {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for NodeRating {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeRatingInput {
 	pub accessPolicy: String,
@@ -168,8 +163,8 @@ gql_set_impl!(NodeRating);
 
 #[derive(Default)] pub struct SubscriptionShard_NodeRating;
 #[Subscription] impl SubscriptionShard_NodeRating {
-	async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter, None).await
+	async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter, cached_entry_hashes, None).await
 	}
 	async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRating>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeRating>(ctx, "nodeRatings", id).await

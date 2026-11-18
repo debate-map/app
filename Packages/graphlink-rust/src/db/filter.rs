@@ -67,15 +67,15 @@ impl QueryFilter {
 						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"in\" requires an array value!"))?;
 						FilterOp::IsWithinX(vals.to_vec())
 					},
-					"containsAll" => {
-						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"containsAll\" requires an array value!"))?;
+					"containsAll" | "contains" => { // "contains" is the op's older name, still sent by existing clients
+						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"{op_json}\" requires an array value!"))?;
 						FilterOp::ContainsAllOfX(vals.to_vec())
 					},
 					"containsAny" => {
 						let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"containsAny\" requires an array value!"))?;
 						FilterOp::ContainsAnyOfX(vals.to_vec())
 					},
-					_ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, notEqualTo, greaterThan, greaterOrEqualTo, lessThan, lessOrEqualTo, in, containsAll, containsAny"#),
+					_ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, notEqualTo, greaterThan, greaterOrEqualTo, lessThan, lessOrEqualTo, in, containsAll (or contains), containsAny"#),
 				};
 				field_filter.filter_ops.push(op);
 			}
@@ -334,15 +334,16 @@ pub fn entry_blob_matches_filter(entry_blob: &EntryBlob, filter: &QueryFilter) -
 				// atm, we are assuming the caller is using "contains" in the array sense (ie. array contains all the items specified): https://www.postgresql.org/docs/current/functions-array.html
 				// but support for other versions (eg. "contains json-subtree") may be added (as new filter-op-types) in the future
 				FilterOp::ContainsAllOfX(vals) => {
+					// if the field isn't a list, it's just not a match. no error on purpose: this runs on every db change and the caller .expect()s it, so one odd filter would crash the server
 					for val in vals {
-						if !field_value.as_array().with_context(|| format!("Field value was not an array! @fieldValue:{} @entryBlob:{:?}", field_value, entry_blob.0))?.contains(&val) {
+						if !field_value.as_array().is_some_and(|a| a.contains(val)) {
 							return Ok(false);
 						}
 					}
 				},
 				FilterOp::ContainsAnyOfX(vals) => {
 					for val in vals {
-						if field_value.as_array().with_context(|| format!("Field value was not an array! @fieldValue:{} @entryBlob:{:?}", field_value, entry_blob.0))?.contains(&val) {
+						if field_value.as_array().is_some_and(|a| a.contains(val)) {
 							return Ok(true);
 						}
 					}

@@ -4,7 +4,7 @@ use tracing::warn;
 //use tracing::info;
 use crate::tracing::{error, info};
 
-use crate::{cf, get_sql_funcs, start_write_transaction, to_anyhow, AppStateArc, ColumnDef, DataAnchorFor1, StringCollector, ToOwnedV, ToSqlWrapper};
+use crate::{cf, db_name, get_sql_funcs, start_write_transaction, to_anyhow, AppStateArc, ColumnDef, DataAnchorFor1, StringCollector, ToOwnedV, ToSqlWrapper};
 
 /// This function connects to the postgres db and ensures all tables are created and up to date.
 pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
@@ -17,9 +17,10 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 		tx.execute(sql, vars).await.map_err(to_anyhow).with_context(|| format!("SQL execution failed for query:{}", sql))
 	};
 
+	let db_ident = format!("\"{}\"", db_name().replace('"', "\"\"")); // quoted, since names like "lucid-frontier" need it
 	#[rustfmt::skip] {
         // alter search path
-        query("ALTER DATABASE \"lucid-frontier\" SET search_path TO 'app';", &[]).await?; // for future pg-sessions
+        query(&format!("ALTER DATABASE {db_ident} SET search_path TO 'app';"), &[]).await?; // for future pg-sessions
         query("SELECT pg_catalog.set_config('search_path', 'app', false);", &[]).await?; // for current pg-session
 
         // create schema
@@ -39,13 +40,17 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
         // create role "rls_obeyer", and grant it permissions
         query("DO $$ BEGIN CREATE ROLE rls_obeyer WITH NOINHERIT NOLOGIN; EXCEPTION WHEN others THEN RAISE NOTICE 'rls_obeyer role seems to exist already, so not re-creating'; end $$;", &[]).await?;
-        query("GRANT CONNECT ON DATABASE \"lucid-frontier\" TO rls_obeyer;", &[]).await?;
+        query(&format!("GRANT CONNECT ON DATABASE {db_ident} TO rls_obeyer;"), &[]).await?;
         query("GRANT USAGE ON SCHEMA app TO rls_obeyer;", &[]).await?;
         //q("grant all on schema app to rls_obeyer", &[]).await?;
         // grant privileges for future-created tables
         query("ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO rls_obeyer;", &[]).await?;
         // grant privileges for already-created tables
         query("GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO rls_obeyer;", &[]).await?;
+
+        // helpers for generated array columns (jsonb has no direct cast to text[]/jsonb[]); STRICT so a missing field yields NULL rather than '{}'
+        query("CREATE OR REPLACE FUNCTION jsonb_to_text_array(jsonb) RETURNS text[] AS $$ SELECT ARRAY(SELECT jsonb_array_elements_text($1)) $$ LANGUAGE sql IMMUTABLE STRICT;", &[]).await?;
+        query("CREATE OR REPLACE FUNCTION jsonb_to_jsonb_array(jsonb) RETURNS jsonb[] AS $$ SELECT ARRAY(SELECT jsonb_array_elements($1)) $$ LANGUAGE sql IMMUTABLE STRICT;", &[]).await?;
     }
 
 	// create tables
@@ -89,10 +94,11 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
 		// get current columns
 		let mut old_columns = vec![];
-		let rows = tx.query("SELECT column_name, data_type, is_nullable, generation_expression, column_default FROM information_schema.columns WHERE table_schema = 'app' AND table_name = $1", &[&table_name]).await?;
+		let rows = tx.query("SELECT column_name, data_type, is_nullable, generation_expression, column_default, udt_name FROM information_schema.columns WHERE table_schema = 'app' AND table_name = $1", &[&table_name]).await?;
 		for row in rows {
 			let name: String = row.get(0);
 			let data_type: String = row.get(1);
+			let data_type = if data_type == "ARRAY" { format!("{}[]", row.get::<_, String>(5).trim_start_matches('_')) } else { data_type }; // info-schema reports arrays as just ARRAY, the element type hides in udt_name (eg. _text)
 			let is_nullable: bool = row.get::<_, String>(2) == "YES".o();
 			let pull_from_data: bool = row.get::<_, Option<String>>(3).is_some();
 			let default_value: Option<String> = row.get(4);

@@ -17,7 +17,6 @@ use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 use crate::utils::db::filter::{FilterOp, QueryFilter};
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query, handle_generic_gql_paginated_query};
 use crate::utils::db::generic_handlers::subscriptions::GQLSubOpts;
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	filter::FilterInput,
 	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
@@ -53,12 +52,6 @@ pub struct Subscription {
 	pub createdAt: i64,
 	pub updatedAt: i64,
 }
-impl From<Row> for Subscription {
-	fn from(row: Row) -> Self {
-		postgres_row_to_struct(row).unwrap()
-	}
-}
-
 gql_set_impl!(Subscription);
 
 #[derive(Default)]
@@ -85,11 +78,12 @@ impl QueryShard_Subscription {
 pub struct SubscriptionShard_Subscription;
 #[Subscription]
 impl SubscriptionShard_Subscription {
-	async fn subscriptions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Subscription, SubError>> + 'a {
+	async fn subscriptions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Subscription, SubError>> + 'a {
 		handle_generic_gql_collection_subscription::<Subscription, GQLSet_Subscription>(
 			ctx,
 			"subscriptions",
 			filter,
+			cached_entry_hashes,
 			Some(GQLSubOpts {
 				filter_checker: |filter| {
 					if let Some(node_filter) = &filter.field_filters.get("node") {

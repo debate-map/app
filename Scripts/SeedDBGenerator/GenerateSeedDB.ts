@@ -1,6 +1,5 @@
-import {NodeL1, NodeRevision, Map, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
+import {NodeL1, NodeRevision, DMap, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
 import {GlobalData} from "dm_common/Dist/DB/globalData/@GlobalData";
-import KnexFunc, {Knex} from "knex";
 import {CE, string} from "js-vextensions";
 import {GenerateUUID, LastUUID} from "mobx-graphlink";
 import {writeFileSync} from "fs";
@@ -140,7 +139,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 	},
 });
 
-const maps = TypeCheck(Map, {
+const maps = TypeCheck(DMap, {
 	global: {
 		id: globalMapID,
 		accessPolicy: accessPolicies.public_governed.id,
@@ -149,10 +148,7 @@ const maps = TypeCheck(Map, {
 		createdAt: Date.now(),
 		rootNode: globalRootNodeID,
 		defaultExpandDepth: 3,
-		//editors: [],
-		// temp-fix for cell with pgsql `text[]` type being misunderstood (while generating apply commands) as a cell of type `jsonb` that *contains* an array
-		// (this alternate `{}` is seen by pgsql as something that can be interpreted as an empty `text[]`)
-		editors: "{}" as any,
+		editors: [],
 		edits: 0,
 		editedAt: Date.now(),
 		extras: {},
@@ -231,29 +227,14 @@ function AddRaw(str: string) {
 
 	sqlText += lineSQL_final;
 }*/
-function Add(query: Knex.QueryBuilder<any, any>) {
-	if (sqlText.length > 0) sqlText += "\n";
-
-	const sqlData = query.toSQL().toNative();
-	const lineSQL_base = `${sqlData.sql};`;
-	let lineSQL_final = lineSQL_base;
-	for (let i = 0; i < sqlData.bindings.length; i++) {
-		if (lineSQL_final.includes(`$${i + 1}`)) {
-			let argAsStr = JSON.stringify(sqlData.bindings[i]);
-			if (argAsStr.startsWith("\"")) {
-				argAsStr = `'${argAsStr.slice(1, -1)}'`;
-			}
-			if (argAsStr.startsWith("{") || argAsStr.startsWith("[")) {
-				argAsStr = `'${argAsStr.replace(/'/g, "\\'")}'`;
-			}
-			lineSQL_final = lineSQL_final.replace(new RegExp(`\\$${i + 1}`), argAsStr);
-		}
-	}
-
-	sqlText += lineSQL_final;
+// every table is now just an id plus one json "data" cell, so each row goes in as a single json blob
+function Add(table: string, row: {[key: string]: any}) {
+	const {extras, ...fields} = row; // the server keeps what's inside "extras" at the top level of the blob, so do the same here (else it reads back as extras.extras)
+	const blob = JSON.stringify({...extras, ...fields}).replace(/'/g, "''");
+	AddRaw(`insert into "${table}" (data) values ('${blob}');`);
 }
 
-export default async function seed(knex: Knex) {
+export default async function seed() {
 	AddRaw("-- NOTE: DO NOT MANUALLY MODIFY THIS FILE, AS IT IS AUTO-GENERATED. (modify GenerateSeedDB.ts instead)");
 	AddRaw("\\set ON_ERROR_STOP 1");
 	AddRaw("begin;"); // start transaction
@@ -266,29 +247,29 @@ export default async function seed(knex: Knex) {
 
 	console.log(`Adding seed-code for globalData entry...`);
 	for (const globalData of Object.values(globalDatas)) {
-		Add(knex("globalData").insert(globalData));
+		Add("globalData", globalData);
 	}
 
-	console.log(`Adding seed-code for users and userHiddens...`);
+	console.log(`Adding seed-code for users and user_hiddens...`);
 	for (const user of Object.values(users)) {
-		Add(knex("users").insert(CE(user).ExcludeKeys("hidden")));
-		Add(knex("userHiddens").insert(user.hidden));
+		Add("users", CE(user).ExcludeKeys("hidden"));
+		Add("user_hiddens", user.hidden);
 	}
 
 	console.log(`Adding seed-code for access-policies...`);
 	for (const policy of Object.values(accessPolicies)) {
-		Add(knex("accessPolicies").insert(policy));
+		Add("access_policies", policy);
 	}
 
 	console.log(`Adding seed-code for maps...`);
 	for (const map of Object.values(maps)) {
-		Add(knex("maps").insert(map));
+		Add("maps", map);
 	}
 
 	console.log(`Adding seed-code for nodes and node-revisions...`);
 	for (const node of Object.values(nodes)) {
-		Add(knex("nodes").insert(CE(node).ExcludeKeys("revision")));
-		Add(knex("nodeRevisions").insert(node.revision));
+		Add("nodes", CE(node).ExcludeKeys("revision"));
+		Add("nodeRevisions", node.revision);
 	}
 
 	AddRaw("");
@@ -297,5 +278,4 @@ export default async function seed(knex: Knex) {
 	writeFileSync("./Scripts/SeedDB/@SeedDB.sql", sqlText);
 	console.log(`Done generating @SeedDB.sql script file.`);
 }
-const knexClient = KnexFunc({client: "postgresql"});
-seed(knexClient);
+seed();

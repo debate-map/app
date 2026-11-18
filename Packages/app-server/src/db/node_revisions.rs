@@ -15,7 +15,6 @@ use rust_shared::{GQLError, SubError};
 
 use crate::gql_set_impl;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{
 	accessors::{get_db_entry, AccessorContext},
 	filter::FilterInput,
@@ -83,10 +82,6 @@ impl NodeRevision {
 		}
 	}
 }
-impl From<Row> for NodeRevision {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize, Default)]
 pub struct NodeRevisionInput {
 	/// Marked as optional, since in some contexts it's not needed. (eg. for add_node, add_child_node, etc.)
@@ -133,8 +128,8 @@ gql_set_impl!(NodeRevision);
 
 #[derive(Default)] pub struct SubscriptionShard_NodeRevision;
 #[Subscription] impl SubscriptionShard_NodeRevision {
-	async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRevision, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter, None).await
+	async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_NodeRevision, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter, cached_entry_hashes, None).await
 	}
 	async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRevision>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodeRevision>(ctx, "nodeRevisions", id).await

@@ -557,7 +557,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			// a user does not already exist with this email, so import it as a new entry
 			None => {
 				insert_db_entry_by_id_for_struct(ctx, "users".o(), importing_user.id.to_string(), importing_user).await?;
-				insert_db_entry_by_id_for_struct(ctx, "userHiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;
+				insert_db_entry_by_id_for_struct(ctx, "user_hiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;
 			},
 			// a user already exists with this email, so merge the importing-data into the existing database entry
 			Some((existing_user, _existing_user_hidden)) => {
