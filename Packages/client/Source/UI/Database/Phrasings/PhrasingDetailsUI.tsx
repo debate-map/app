@@ -67,7 +67,7 @@ export const PhrasingDetailsUI = ((props: Props)=>{
 
 	const Change = (..._)=>onChange();
 	const splitAt = 110;
-	const sharedProps = E(OmitRef(props), {newData, dataError}, {splitAt, Change});
+	const sharedProps = E(OmitRef(props), {enabled}, {newData, dataError}, {splitAt, Change});
 
 	useEffect(()=>{
 		setState({
