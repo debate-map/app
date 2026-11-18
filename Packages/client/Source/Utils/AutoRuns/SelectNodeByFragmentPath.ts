@@ -4,11 +4,13 @@ import {ACTNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {JumpToNode} from "UI/@Shared/NavBar/SearchPanel.js";
 import {AddNotificationMessage} from "web-vcore";
 import {Assert, AssertWarn} from "js-vextensions";
-import {GetAsync} from "mobx-graphlink";
+import {BailUnless, GetAsync} from "mobx-graphlink";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let selectNode_fragmentPath_last;
 AutoRun_HandleBail(()=>{
+	BailUnless(graph.initialized);
 	const nodePath = store.main.selectNode_fragmentPath;
 	if (nodePath != selectNode_fragmentPath_last) {
 		selectNode_fragmentPath_last = nodePath;
