@@ -41,7 +41,7 @@ hyper-util = {version = "0.1.3", features = ["client", "client-legacy"] }
 # use version from git which supports hyper v1
 reqwest = {git = "https://github.com/seanmonstar/reqwest.git", rev = "2c11ef000b151c2eebeed2c18a7b81042220c6b0", default-features = false, features = ["rustls-tls", "json"] }
 
-tower = { version = "0.4", features = ["util"] }
+tower = { version = "0.4", features = ["util", "make"] }
 #tower-web = "0.3.7"
 tower-http = { version = "0.5.2", features = ["cors", "fs", "trace"] }
 
