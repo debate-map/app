@@ -27,7 +27,11 @@ export const MI_UnlinkNode = observer_mgl((props: MI_SharedProps)=>{
 					cancelButton: true,
 					message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 					onOK: async()=>{
-						await RunCommand_DeleteNodeLink({id: node.link!.id});
+						try {
+							await RunCommand_DeleteNodeLink({id: node.link!.id});
+						} catch (ex) {
+							ShowMessageBox({title: "Unlink failed", message: (ex as Error).message});
+						}
 					},
 				});
 			}}/>
