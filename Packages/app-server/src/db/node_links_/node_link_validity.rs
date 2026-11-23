@@ -1,3 +1,4 @@
+use graphlink_rust::{new_uuid_v4_as_b64, time_since_epoch_ms_i64, AccessorContext, DataAnchorFor1, GQLError};
 use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
@@ -5,9 +6,8 @@ use rust_shared::db_constants::{GLOBAL_ROOT_NODE_ID, SYSTEM_USER_ID};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Value};
-use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
+use rust_shared::{anyhow, async_graphql, serde_json};
 use tracing::info;
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
@@ -23,9 +23,6 @@ use crate::db::nodes::get_node;
 use crate::db::nodes_::_node::Node;
 use crate::db::nodes_::_node_type::{get_node_type_info, NodeType};
 use crate::db::users::{get_user, PermissionGroups, User};
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::general::data_anchor::DataAnchorFor1;
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 /// Does basic checking of validity of parent<>child linkage. See `assert_new_link_is_valid` for a more thorough validation.
 // sync: js[CheckLinkIsValid]

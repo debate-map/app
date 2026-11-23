@@ -5,10 +5,8 @@ use async_graphql::SimpleObject;
 use rust_macros::wrap_slow_macros;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{
-	mtx::mtx::{MtxData, MtxDataWithExtraInfo},
-	type_aliases::{JSONValue, RowData},
-};
+use crate::utils::type_aliases::{JSONValue, RowData};
+use graphlink_rust::{MtxData, MtxDataWithExtraInfo};
 
 // this alias is needed, since `wrap_serde_macros.rs` inserts refs to, eg. `rust_shared::rust_macros::Serialize_Stub`
 use crate as rust_shared;

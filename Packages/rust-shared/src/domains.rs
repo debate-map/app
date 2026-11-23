@@ -3,7 +3,7 @@ use std::env;
 use anyhow::{ensure, Error};
 use reqwest::Url;
 
-use crate::utils::general_::extensions::ToOwnedV;
+use graphlink_rust::ToOwnedV;
 
 pub fn get_env() -> String {
 	env::var("ENVIRONMENT").unwrap_or("<unknown>".to_string())

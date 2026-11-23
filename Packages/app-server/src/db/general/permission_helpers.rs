@@ -1,25 +1,20 @@
 use std::collections::HashMap;
 
-use rust_shared::{
-	anyhow::{anyhow, bail},
-	utils::auth::jwt_utils_base::UserJWTData,
-};
+use graphlink_rust::{AccessorContext, UserJWTData};
+use rust_shared::anyhow::{anyhow, bail};
 
-use crate::{
-	db::{
-		_shared::{
-			access_policy_target::AccessPolicyTarget,
-			table_permissions::{CanAddChild, CanAddPhrasing, CanDelete, CanModify, CanVote},
-		},
-		access_policies::get_access_policy,
-		access_policies_::{
-			_access_policy::AccessPolicy,
-			_permission_set::{APAction, APTable},
-		},
-		nodes_::_node::Node,
-		users::{get_user, User},
+use crate::db::{
+	_shared::{
+		access_policy_target::AccessPolicyTarget,
+		table_permissions::{CanAddChild, CanAddPhrasing, CanDelete, CanModify, CanVote},
 	},
-	utils::db::accessors::AccessorContext,
+	access_policies::get_access_policy,
+	access_policies_::{
+		_access_policy::AccessPolicy,
+		_permission_set::{APAction, APTable},
+	},
+	nodes_::_node::Node,
+	users::{get_user, User},
 };
 use rust_shared::anyhow::Error;
 

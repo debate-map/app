@@ -41,6 +41,7 @@ use rust_shared::{
 };
 use graphlink_rust::links::pgstream::pgstream::start_pgstream_client_with_restart;
 use graphlink_rust::links::pgstream::db_live_cache::start_db_live_cache;
+use graphlink_rust::DataAnchorFor1;
 use store::storage::AppStateArc;
 use tracing::error;
 
@@ -49,7 +50,6 @@ use crate::{
 	links::monitor_backend_link::relay_graphlink_monitor_event,
 	router::start_router,
 	store::storage::AppState,
-	utils::general::data_anchor::DataAnchorFor1,
 };
 
 // folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)

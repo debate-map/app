@@ -4,6 +4,7 @@ use axum::{
 	routing::{any_service, get, get_service, post},
 	Router,
 };
+use graphlink_rust::MtxData;
 use rust_shared::flume::{unbounded, Receiver, Sender};
 use rust_shared::hyper::{
 	header::{self, FORWARDED},
@@ -22,10 +23,7 @@ use rust_shared::uuid::Uuid;
 use rust_shared::{
 	async_graphql,
 	async_graphql::{Json, SimpleObject},
-	utils::{
-		mtx::mtx::MtxData,
-		type_aliases::{JSONValue, RowData},
-	},
+	utils::type_aliases::{JSONValue, RowData},
 };
 use rust_shared::{axum, futures, tower, tower_http};
 use std::{

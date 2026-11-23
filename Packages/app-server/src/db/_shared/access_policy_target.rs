@@ -1,7 +1,7 @@
+use graphlink_rust::ToOwnedV;
 use rust_shared::{
 	async_graphql::{self, InputValueError, InputValueResult, Scalar, ScalarType, Value},
 	serde_json,
-	utils::general_::extensions::ToOwnedV,
 };
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 

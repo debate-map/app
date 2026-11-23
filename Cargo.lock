@@ -2876,6 +2876,7 @@ dependencies = [
  "flume",
  "futures-timer",
  "futures-util",
+ "graphlink_rust",
  "indexmap 1.9.3",
  "lazy_static",
  "rust_shared",
@@ -5979,6 +5980,7 @@ name = "web_server"
 version = "0.1.0"
 dependencies = [
  "globset",
+ "graphlink_rust",
  "http 0.2.12",
  "log",
  "rust_shared",

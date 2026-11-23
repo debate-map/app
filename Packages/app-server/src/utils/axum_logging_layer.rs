@@ -6,7 +6,8 @@ use axum::{
 	routing::post,
 	Router,
 };
-use rust_shared::{axum, futures, tower, tower_http, utils::net::body_to_bytes};
+use graphlink_rust::body_to_bytes;
+use rust_shared::{axum, futures, tower, tower_http};
 use std::net::SocketAddr;
 
 /*pub fn get_axum_logging_layer() -> FromFnLayer<fn(hyper::Request<Body>, axum::middleware::Next<Body>) -> impl futures_util::Future<Output = Result<impl IntoResponse, (StatusCode, String)>>> {

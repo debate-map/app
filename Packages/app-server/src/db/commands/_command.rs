@@ -2,13 +2,13 @@ use std::iter::{empty, once};
 
 use deadpool_postgres::{Pool, Transaction};
 use futures_util::{Future, TryStreamExt};
+use graphlink_rust::{json_value_to_guessed_sql_value_param_fragment, match_cond_to_iter, AccessorContext, CustomPGSerializer, IteratorV, SQLFragment, SQLIdent, SQLParam, SQLParamBoxed, SF};
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{self, MaybeUndefined};
 use rust_shared::indoc::indoc;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::serde::Serialize;
 use rust_shared::serde_json::json;
-use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::type_aliases::{JSONValue, RowData};
 use rust_shared::{bytes, serde_json};
 use rust_shared::{
@@ -17,17 +17,6 @@ use rust_shared::{
 };
 
 use crate::db::users::User;
-use crate::utils::db::sql_param::SQLParamBoxed;
-use crate::utils::{
-	db::{
-		accessors::AccessorContext,
-		filter::json_value_to_guessed_sql_value_param_fragment,
-		sql_fragment::{SQLFragment, SF},
-		sql_ident::SQLIdent,
-		sql_param::{CustomPGSerializer, SQLParam},
-	},
-	general::general::match_cond_to_iter,
-};
 
 /*pub struct UserInfo {
 	pub id: String,
@@ -210,8 +199,8 @@ pub fn update_field_of_extras(val_in_updates: CanOmit<JSONValue>, old_val: JSONV
 // Note: I've tried creating two variants of this (a pair of pre and post macros, and a regular function); if wanted for reference, view git history.
 macro_rules! command_boilerplate {
 	($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
-		let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
+		let mut anchor = graphlink_rust::DataAnchorFor1::empty(); // holds pg-client
+		let ctx = graphlink_rust::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
 		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx($gql_ctx, &ctx).await?;
 		let input_json = serde_json::to_string(&$input)?;
 
@@ -219,7 +208,7 @@ macro_rules! command_boilerplate {
 
 		if $only_validate.unwrap_or(false) {
 			// before rolling back, ensure that none of the constraints are violated at this point (we must check manually, since commit is never called)
-			$crate::utils::db::accessors::trigger_deferred_constraints(&ctx.tx).await?;
+			graphlink_rust::trigger_deferred_constraints(&ctx.tx).await?;
 
 			// the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
 			ctx.tx.rollback().await?;

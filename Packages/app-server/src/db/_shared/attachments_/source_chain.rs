@@ -1,8 +1,9 @@
+use graphlink_rust::JSONValueV;
 use rust_shared::{
 	anyhow::Error,
 	async_graphql::{self, Enum, InputObject, SimpleObject},
 	rust_macros::wrap_slow_macros,
-	utils::{general_::serde::JSONValueV, type_aliases::JSONValue},
+	utils::type_aliases::JSONValue,
 };
 use serde::{Deserialize, Serialize};
 
