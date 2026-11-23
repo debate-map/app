@@ -14,7 +14,6 @@ use hyper::Request;
 use indoc::indoc;
 use jwt_simple::prelude::{Claims, HS256Key, MACLike, VerificationOptions};
 use oauth2::basic::BasicClient;
-use oauth2::reqwest::async_http_client;
 use oauth2::TokenResponse;
 use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl, RevocationUrl, Scope, StandardRevocableToken, TokenUrl};
 use once_cell::sync::{Lazy, OnceCell};

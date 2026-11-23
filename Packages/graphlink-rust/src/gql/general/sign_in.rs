@@ -31,7 +31,6 @@ use hyper::Request;
 use indoc::{formatdoc, indoc};
 use jwt_simple::prelude::{Claims, HS256Key, MACLike, VerificationOptions};
 use oauth2::basic::BasicClient;
-use oauth2::reqwest::async_http_client;
 use oauth2::TokenResponse;
 use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl, RevocationUrl, Scope, StandardRevocableToken, TokenUrl};
 use once_cell::sync::{Lazy, OnceCell};
@@ -127,11 +126,14 @@ impl SignInStartResult {
 		}).expect("Could not construct callback URL");
 
 		// Set up the config for the Google OAuth2 process.
-		let client = BasicClient::new(google_client_id, Some(google_client_secret), auth_url, Some(token_url))
+		let client = BasicClient::new(google_client_id)
+			.set_client_secret(google_client_secret)
+			.set_auth_uri(auth_url)
+			.set_token_uri(token_url)
 			// This example will be running its own server at localhost:8080. (see below for the server implementation)
 			.set_redirect_uri(RedirectUrl::new(callback_url).expect("Invalid redirect URL"))
 			// Google supports OAuth 2.0 Token Revocation (RFC-7009)
-			.set_revocation_uri(RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string()).expect("Invalid revocation endpoint URL"));
+			.set_revocation_url(RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string()).expect("Invalid revocation endpoint URL"));
 
 		// Google supports Proof Key for Code Exchange (PKCE - https://oauth.net/2/pkce/).
 		// Create a PKCE code verifier and SHA-256 encode it as a code challenge.
@@ -212,11 +214,13 @@ impl SignInStartResult {
 
 											let pkce_code_verifier_copy = serde_json::from_str(&pkce_code_verifier_as_json).unwrap();
 
+											// redirects stay off: following them during the token exchange opens the door to ssrf (per the oauth2 docs)
+											let http_client = oauth2::reqwest::ClientBuilder::new().redirect(oauth2::reqwest::redirect::Policy::none()).build().with_context(|| "Failed to build the http client for the Google token request.").map_err(to_sub_err)?;
 											// Exchange the code with a token.
 											let token_or_error_response = client
 												.exchange_code(code)
 												.set_pkce_verifier(pkce_code_verifier_copy)
-												.request_async(async_http_client).await;
+												.request_async(&http_client).await;
 
 											info!("Google returned the following token/error response:\n{:?}\n", token_or_error_response);
 

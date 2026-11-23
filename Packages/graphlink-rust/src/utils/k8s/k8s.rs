@@ -202,12 +202,12 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
 					// so far anyway, all of the asked-for content has been returned within `Message::Binary` chunks
 					Message::Binary(data) => match allow_utf8_lossy {
 						true => String::from_utf8_lossy(&data).to_string(),
-						false => String::from_utf8(data).map_err(|_| anyhow!("Got non-utf8 data from k8s exec endpoint, and allow_utf8_lossy was false."))?,
+						false => String::from_utf8(data.to_vec()).map_err(|_| anyhow!("Got non-utf8 data from k8s exec endpoint, and allow_utf8_lossy was false."))?,
 					},
 					// but we'll keep processing text chunks as well, in case they are used in some cases
 					Message::Text(string) => {
 						warn!("Got unexpected text-chunk. @len:{} @string:{}", string.len(), string);
-						string
+						string.as_str().to_owned()
 					},
 					msg => {
 						println!("Ignoring web-socket message:{:?}", msg);
