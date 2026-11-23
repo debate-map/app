@@ -157,7 +157,7 @@ checksum = "2cb931c189b85683d69a5cfad41d4d418671e1ac413dd209f3f2fc31e3cfd902"
 name = "app_server"
 version = "0.1.0"
 dependencies = [
- "async-broadcast 0.7.2",
+ "async-broadcast",
  "async-recursion",
  "deadpool",
  "deadpool-postgres",
@@ -219,22 +219,11 @@ checksum = "71938f30533e4d95a6d17aa530939da3842c2ab6f4f84b9dae68447e4129f74a"
 
 [[package]]
 name = "async-broadcast"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d26004fe83b2d1cd3a97609b21e39f9a31535822210fe83205d2ce48866ea61"
-dependencies = [
- "event-listener 2.5.3",
- "futures-core",
- "parking_lot",
-]
-
-[[package]]
-name = "async-broadcast"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "435a87a52755b8f27fcf321ac4f04b2802e337c8c4872923137471ec39c37532"
 dependencies = [
- "event-listener 5.4.2",
+ "event-listener",
  "event-listener-strategy",
  "futures-core",
  "pin-project-lite",
@@ -557,12 +546,6 @@ name = "base16ct"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c7f02d4ea65f2c1853089ffd8d2787bdbc63de2f0d29dedbcf8ccdfa0ccd4cf"
-
-[[package]]
-name = "base64"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
 name = "base64"
@@ -1195,7 +1178,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef552e6f588e446098f6ba40d89ac146c8c7b64aade83c051ee00bb5d2bc18d"
 dependencies = [
  "serde",
- "uuid 1.29.3",
+ "uuid",
 ]
 
 [[package]]
@@ -1420,12 +1403,6 @@ dependencies = [
 
 [[package]]
 name = "event-listener"
-version = "2.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
-
-[[package]]
-name = "event-listener"
 version = "5.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a23add41df1562121a9393cb065eab5146a1242410f23a644851e90cfd669d2"
@@ -1440,7 +1417,7 @@ version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
 dependencies = [
- "event-listener 5.4.2",
+ "event-listener",
  "pin-project-lite",
 ]
 
@@ -1537,19 +1514,6 @@ dependencies = [
  "borrow-or-share",
  "ref-cast",
  "serde",
-]
-
-[[package]]
-name = "flume"
-version = "0.10.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1657b4441c3403d9f7b3409e47575237dac27b1b5726df654a6ecbf92f0f7577"
-dependencies = [
- "futures-core",
- "futures-sink",
- "nanorand",
- "pin-project",
- "spin",
 ]
 
 [[package]]
@@ -1795,20 +1759,20 @@ name = "graphlink_rust"
 version = "0.0.1"
 dependencies = [
  "anyhow",
- "async-broadcast 0.4.1",
+ "async-broadcast",
  "async-graphql",
  "async-graphql-axum",
  "async-trait",
  "automod_plus",
  "axum",
- "base64 0.13.1",
+ "base64 0.23.1",
  "blake3",
  "bytes",
  "chrono",
  "deadpool",
  "deadpool-postgres",
  "dyn-clone",
- "flume 0.10.14",
+ "flume",
  "futures",
  "futures-util",
  "http 1.5.0",
@@ -1817,8 +1781,8 @@ dependencies = [
  "hyper-rustls",
  "hyper-util",
  "indexmap",
- "indoc 1.0.9",
- "itertools 0.10.5",
+ "indoc",
+ "itertools 0.15.0",
  "jwt-simple",
  "lazy_static",
  "lexicon_fractional_index",
@@ -1834,7 +1798,7 @@ dependencies = [
  "sentry",
  "serde",
  "serde_json",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tokio-postgres",
  "tokio-tungstenite 0.30.0",
@@ -1843,7 +1807,7 @@ dependencies = [
  "tower-service",
  "tracing",
  "url",
- "uuid 0.8.2",
+ "uuid",
 ]
 
 [[package]]
@@ -2372,12 +2336,6 @@ dependencies = [
 
 [[package]]
 name = "indoc"
-version = "1.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfa799dd5ed20a7e349f3b4639aa80d74549c81716d9ec4f994c9b5815598306"
-
-[[package]]
-name = "indoc"
 version = "2.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a37b2691796cffeb8a8cd305ac66e65841559f147f4e63231d0eafa4db5384d1"
@@ -2769,7 +2727,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b87bc54a4629b4294d0b3ef041b64c40c611097a677d9dc07b2c67739fe39dba"
 dependencies = [
  "libc",
- "uuid 1.29.3",
+ "uuid",
  "winapi",
 ]
 
@@ -2928,12 +2886,12 @@ dependencies = [
 name = "monitor_backend"
 version = "0.1.0"
 dependencies = [
- "async-broadcast 0.7.2",
+ "async-broadcast",
  "async-recursion",
  "async-trait",
  "deadpool",
  "deadpool-postgres",
- "flume 0.12.0",
+ "flume",
  "futures-timer",
  "futures-util",
  "indexmap",
@@ -2975,15 +2933,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bddcd3bf5144b6392de80e04c347cd7fab2508f6df16a85fc496ecd5cec39bc"
 dependencies = [
  "rand 0.8.8",
-]
-
-[[package]]
-name = "nanorand"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
-dependencies = [
- "getrandom 0.2.17",
 ]
 
 [[package]]
@@ -4232,7 +4181,7 @@ dependencies = [
  "base64 0.23.1",
  "bytes",
  "chrono",
- "flume 0.12.0",
+ "flume",
  "futures",
  "http 1.5.0",
  "http-body-util",
@@ -4240,7 +4189,7 @@ dependencies = [
  "hyper-rustls",
  "hyper-util",
  "indexmap",
- "indoc 2.0.8",
+ "indoc",
  "itertools 0.15.0",
  "jwt-simple",
  "once_cell",
@@ -4262,7 +4211,7 @@ dependencies = [
  "tower-service",
  "tracing",
  "url",
- "uuid 1.29.3",
+ "uuid",
 ]
 
 [[package]]
@@ -4548,7 +4497,7 @@ dependencies = [
  "thiserror 2.0.21",
  "time",
  "url",
- "uuid 1.29.3",
+ "uuid",
 ]
 
 [[package]]
@@ -5024,7 +4973,7 @@ dependencies = [
  "debugid",
  "memmap2",
  "stable_deref_trait",
- "uuid 1.29.3",
+ "uuid",
 ]
 
 [[package]]
@@ -5741,16 +5690,6 @@ name = "utf_types"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6"
-
-[[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
-dependencies = [
- "getrandom 0.2.17",
- "serde",
-]
 
 [[package]]
 name = "uuid"

@@ -1,6 +1,6 @@
 use anyhow::Error;
 use async_graphql::ID;
-use base64::URL_SAFE_NO_PAD;
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use uuid::{Bytes, Uuid};
 
 pub fn uuid_to_b64(id: Uuid) -> String {
@@ -10,7 +10,7 @@ pub fn uuid_to_b64(id: Uuid) -> String {
 	// remove the "==" at the end
 	str.pop();
 	str.pop();*/
-	let str = base64::encode_config(bytes, URL_SAFE_NO_PAD);
+	let str = URL_SAFE_NO_PAD.encode(bytes);
 
 	return str;
 }
@@ -23,7 +23,7 @@ pub fn uuid_from_b64(str: String) -> Result<Uuid, Error> {
 	// add the "==" at the end, for it to be a proper base64 string
 	str_full += "==";
 	let bytes = base64::decode(str_full)?;*/
-	let bytes = base64::decode_config(str, URL_SAFE_NO_PAD)?;
+	let bytes = URL_SAFE_NO_PAD.decode(str)?;
 
 	let bytes_len16 = bytes_slice_as_16_length(&bytes)?;
 	return Ok(Uuid::from_bytes(bytes_len16));
