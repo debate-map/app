@@ -10,7 +10,7 @@ use hyper_util::{
 	rt::TokioExecutor,
 };
 use itertools::Itertools;
-use rustls::{pki_types::CertificateDer, ClientConfig, RootCertStore};
+use rustls::{pki_types::{pem::PemObject, CertificateDer}, ClientConfig, RootCertStore};
 use tracing::{info, warn};
 
 use crate::to_anyhow;
@@ -18,7 +18,7 @@ use crate::to_anyhow;
 pub fn get_k8s_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
 	let cert_file = File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt").context("Could not find the k8s certificate file.")?;
 	let cert_file_reader = &mut std::io::BufReader::new(cert_file);
-	let certs: Vec<CertificateDer> = rustls_pemfile::certs(cert_file_reader).try_collect().map_err(|err| to_anyhow(err).context("Failed to parse a certificate from the k8s certificate file."))?;
+	let certs: Vec<CertificateDer> = CertificateDer::pem_reader_iter(cert_file_reader).try_collect().map_err(|err| to_anyhow(err).context("Failed to parse a certificate from the k8s certificate file."))?;
 	ensure!(certs.len() > 0, "No certificates were found in the k8s certificate file.");
 	return Ok(certs);
 }
