@@ -1,7 +1,5 @@
 use deadpool_postgres::{Client, Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
-use jsonschema::output::BasicOutput;
-use jsonschema::JSONSchema;
 use lazy_static::lazy_static;
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{self, async_stream, scalar, EmptySubscription, Object, OutputType, Schema, SimpleObject, Subscription, ID};

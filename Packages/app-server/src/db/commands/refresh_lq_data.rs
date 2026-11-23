@@ -1,5 +1,5 @@
 use deadpool_postgres::Pool;
-use jsonschema::{output::BasicOutput, JSONSchema};
+use jsonschema::Validator;
 use lazy_static::lazy_static;
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::serde::{Deserialize, Serialize};
@@ -26,13 +26,12 @@ lazy_static! {
 		},
 		"required": ["collection", "entryID"],
 	});
-	static ref REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON_COMPILED: JSONSchema = JSONSchema::compile(&REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
+	static ref REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON_COMPILED: Validator = jsonschema::validator_for(&REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
 }
 
 pub async fn refresh_lq_data(ctx: &async_graphql::Context<'_>, payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
-	let output: BasicOutput = REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON_COMPILED.apply(&payload_raw).basic();
-	if !output.is_valid() {
-		let output_json = serde_json::to_value(output).expect("Failed to serialize output");
+	if !REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON_COMPILED.is_valid(&payload_raw) {
+		let output_json = serde_json::to_value(REFRESH_LQ_DATA_PAYLOAD_SCHEMA_JSON_COMPILED.evaluate(&payload_raw).list()).expect("Failed to serialize output");
 		return Err(anyhow!(output_json));
 	}
 	let payload: RefreshLQDataPayload = serde_json::from_value(payload_raw)?;

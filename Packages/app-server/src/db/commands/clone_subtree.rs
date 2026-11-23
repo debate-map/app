@@ -1,7 +1,6 @@
 use deadpool_postgres::{Client, Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
-use jsonschema::output::BasicOutput;
-use jsonschema::JSONSchema;
+use jsonschema::Validator;
 use lazy_static::lazy_static;
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{async_stream, scalar, EmptySubscription, Object, OutputType, Schema, SimpleObject, Subscription, ID};
@@ -64,13 +63,12 @@ lazy_static! {
 		},
 		"required": ["parentNodeID", "rootNodeID", "maxDepth"],
 	});
-	static ref CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED: JSONSchema = JSONSchema::compile(&CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
+	static ref CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED: Validator = jsonschema::validator_for(&CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
 }
 
 pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
-	let output: BasicOutput = CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED.apply(&payload_raw).basic();
-	if !output.is_valid() {
-		let output_json = serde_json::to_value(output)?;
+	if !CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED.is_valid(&payload_raw) {
+		let output_json = serde_json::to_value(CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED.evaluate(&payload_raw).list())?;
 		return Err(anyhow!(output_json));
 	}
 	let payload: CloneSubtreePayload = serde_json::from_value(payload_raw)?;
