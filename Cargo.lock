@@ -4416,7 +4416,7 @@ dependencies = [
  "pin-project-lite",
  "postgres-protocol",
  "regex",
- "reqwest 0.11.25",
+ "reqwest 0.13.5",
  "rust_macros",
  "rustls 0.23.46",
  "sentry 0.49.6",
