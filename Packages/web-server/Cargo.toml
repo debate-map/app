@@ -17,6 +17,7 @@ http = "0.2" # match version specified by static-web-server
 
 #rust_macros = { path = "../rust-macros" }
 rust_shared = { path = "../rust-shared" }
+graphlink_rust = { path = "../graphlink-rust" }
 
 # sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
 # ==========

@@ -1,24 +1,15 @@
 use std::iter::empty;
 
 use deadpool_postgres::{tokio_postgres::types::ToSql, Transaction};
+use graphlink_rust::{match_cond_to_iter, CustomPGSerializer, IteratorV, SQLFragment, SQLIdent, SQLParamBoxed, SF};
 use rust_shared::{
 	anyhow::{anyhow, Context, Error},
 	itertools::{chain, Itertools},
 	serde_json,
-	utils::{general_::extensions::IteratorV, type_aliases::JSONValue},
+	utils::type_aliases::JSONValue,
 };
 
-use crate::{
-	db::commands::_command::ToSqlWrapper,
-	utils::{
-		db::{
-			sql_fragment::{SQLFragment, SF},
-			sql_ident::SQLIdent,
-			sql_param::{CustomPGSerializer, SQLParamBoxed},
-		},
-		general::general::match_cond_to_iter,
-	},
-};
+use crate::db::commands::_command::ToSqlWrapper;
 
 pub async fn jsonb_set(tx: &Transaction<'_>, table: &str, id: &str, field: &str, jsonb_path: Vec<String>, value: Option<JSONValue>) -> Result<(), Error> {
 	let mut sql_fragment = jsonb_set_to_sql_fragment(table, id, field, jsonb_path, value)?;

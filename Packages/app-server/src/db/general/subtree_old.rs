@@ -1,5 +1,6 @@
 use deadpool_postgres::{Client, Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
+use graphlink_rust::{start_read_transaction, AccessorContext, DataAnchor, DataAnchorFor1, FilterInput, GQLError, QueryFilter, SQLFragment};
 use jsonschema::output::BasicOutput;
 use jsonschema::JSONSchema;
 use lazy_static::lazy_static;
@@ -10,7 +11,6 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
-use rust_shared::GQLError;
 use std::collections::HashSet;
 use std::path::Path;
 use std::rc::Rc;
@@ -24,12 +24,7 @@ use crate::db::node_links::NodeLink;
 use crate::db::node_phrasings::NodePhrasing;
 use crate::db::node_tags::NodeTag;
 use crate::db::terms::Term;
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::db::filter::{FilterInput, QueryFilter};
 use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
-use crate::utils::db::sql_fragment::SQLFragment;
-use crate::utils::db::transactions::start_read_transaction;
-use crate::utils::general::data_anchor::{DataAnchor, DataAnchorFor1};
 use crate::utils::type_aliases::PGClientObject;
 
 use super::subtree::Subtree;

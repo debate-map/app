@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use futures_util::{pin_mut, Stream, StreamExt};
+use graphlink_rust::{new_uuid_v4_as_b64, time_since_epoch_ms_i64, to_sub_err, AccessorContext, DataAnchorFor1, GQLError, OrderKey, SubError, ToOwnedV};
 use rust_shared::anyhow::{anyhow, ensure, Context, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{async_stream, InputObject, SimpleObject, Subscription, ID};
@@ -9,10 +10,8 @@ use rust_shared::indexmap::map;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Value};
-use rust_shared::utils::general_::extensions::ToOwnedV;
-use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::{FReceiver, FSender, JSONValue};
-use rust_shared::{anyhow, async_graphql, flume, serde_json, to_sub_err, GQLError, SubError};
+use rust_shared::{anyhow, async_graphql, flume, serde_json};
 use tracing::{info, warn};
 
 use crate::db::commands::_command::command_boilerplate;
@@ -27,10 +26,6 @@ use crate::db::nodes::{get_node, get_node_children};
 use crate::db::nodes_::_node::{Node, NodeInput};
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::general::data_anchor::DataAnchorFor1;
-use crate::utils::general::order_key::OrderKey;
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::super::_command::{tbd, upsert_db_entry_by_id_for_struct, NoExtras};
 use super::super::_shared::add_node::add_node;
@@ -96,7 +91,7 @@ impl SubscriptionShard_CloneMapSpecial {
 			// sync from: _command.rs
 			if only_validate.unwrap_or(false) {
 				// before rolling back, ensure that none of the constraints are violated at this point (we must check manually, since commit is never called)
-				crate::utils::db::accessors::trigger_deferred_constraints(&ctx.tx).await.map_err(to_sub_err)?;
+				graphlink_rust::trigger_deferred_constraints(&ctx.tx).await.map_err(to_sub_err)?;
 
 				// the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
 				ctx.tx.rollback().await.map_err(to_sub_err)?;

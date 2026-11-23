@@ -1,11 +1,9 @@
 use futures_util::Future;
+use graphlink_rust::{AccessorContext, AsyncFn_Args3};
 use rust_shared::anyhow::Error;
-use rust_shared::utils::{general_::func_types::AsyncFn_Args3, type_aliases::JSONValue};
+use rust_shared::utils::type_aliases::JSONValue;
 
-use crate::{
-	db::{node_links::get_node_links, nodes::get_node},
-	utils::db::accessors::AccessorContext,
-};
+use crate::db::{node_links::get_node_links, nodes::get_node};
 
 pub async fn id_is_of_node_that_is_root_of_map(ctx: &AccessorContext<'_>, id: &str, _extra_data: Option<&JSONValue>) -> Result<bool, Error> {
 	Ok(get_node(ctx, id).await?.rootNodeForMap.is_some())

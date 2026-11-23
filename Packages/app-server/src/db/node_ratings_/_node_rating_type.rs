@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
+use graphlink_rust::average;
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::Enum;
 use rust_shared::itertools::Itertools;
 use rust_shared::once_cell::sync::Lazy;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::utils::general::average;
 use serde::{Deserialize, Serialize};
 
 wrap_slow_macros! {

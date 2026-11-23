@@ -5,6 +5,7 @@ use {
 };
 
 use dotenv::dotenv;
+use graphlink_rust::{simplify_backtrace_str, DataAnchorFor1, MtxData, MtxDataWithExtraInfo, MtxGlobalMsg, MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER};
 use rust_shared::{
 	domains::{get_env, is_prod},
 	flume,
@@ -12,17 +13,15 @@ use rust_shared::{
 	once_cell::sync::OnceCell,
 	sentry::{self, ClientInitGuard},
 	tokio,
-	utils::{
-		errors_::backtrace_simplifier::simplify_backtrace_str,
-		mtx::mtx::{MtxData, MtxDataWithExtraInfo, MtxGlobalMsg, MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER},
-		type_aliases::{FReceiver, FSender},
-	},
+	utils::type_aliases::{FReceiver, FSender},
 };
 use std::{alloc::System, backtrace::Backtrace, env, panic};
 use tracing::{error, info};
 
 use crate::{
-	links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND, router::in_debugger, utils::general::{data_anchor::DataAnchorFor1, logging::set_up_logging, mem_alloc::Trallocator}
+	links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND,
+	router::in_debugger,
+	utils::general::{logging::set_up_logging, mem_alloc::Trallocator},
 };
 
 #[global_allocator]

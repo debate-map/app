@@ -10,16 +10,11 @@ use crate::{
 		nodes::get_node,
 		terms::{get_terms_attached, Term},
 	},
-	utils::db::{
-		accessors::AccessorContext,
-		filter::{FilterInput, QueryFilter},
-		pg_row_to_json::blob_rows_to_structs,
-		queries::get_entries_in_collection_base,
-		sql_fragment::SQLFragment,
-	},
+	utils::db::pg_row_to_json::blob_rows_to_structs,
 };
 use async_recursion::async_recursion;
 use futures_util::{pin_mut, Future, FutureExt, StreamExt, TryStreamExt};
+use graphlink_rust::{get_entries_in_collection_base, AccessorContext, FilterInput, QueryFilter, SQLFragment};
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::ID;
 use rust_shared::indexmap::IndexMap;

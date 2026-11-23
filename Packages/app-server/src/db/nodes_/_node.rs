@@ -7,10 +7,8 @@ use rust_shared::{anyhow::Error, rust_macros::wrap_slow_macros};
 use serde::{Deserialize, Serialize};
 
 use crate::db::commands::_command::{CanNullOrOmit, CanOmit};
-use crate::{
-	db::node_links::{get_first_link_under_parent, get_node_links, ClaimForm},
-	utils::db::accessors::AccessorContext,
-};
+use crate::db::node_links::{get_first_link_under_parent, get_node_links, ClaimForm};
+use graphlink_rust::AccessorContext;
 
 use super::_node_type::NodeType;
 
