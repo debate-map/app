@@ -21,7 +21,7 @@ chrono = "0.4.23"
 flume = "0.12.0"
 indexmap = {version = "2.2.5", features = ["serde"]}
 async-trait = "0.1.52"
-sentry = {version = "0.32.2", default-features = false, features = [
+sentry = {version = "0.49.6", default-features = false, features = [
 	# default
 	"backtrace", "contexts", "panic",
 	#"transport", # commented, since pulls in native-tls (as part of reqwest+native-tls)

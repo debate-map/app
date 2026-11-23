@@ -76,14 +76,12 @@ pub fn set_up_globals_linux() -> Option<bool> {
 
 fn set_up_sentry() -> Option<ClientInitGuard> {
 	if is_prod() {
-		Some(sentry::init(("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@o72324.ingest.sentry.io/155432", sentry::ClientOptions {
-			release: sentry::release_name!(),
-			environment: Some(get_env().into()),
-			integrations: vec![
-				// added integrations: tracing (see logging.rs)
-			],
-			..Default::default()
-		})))
+		// sentry's ClientOptions is non_exhaustive now, so it can't be built with { .. } anymore
+		let mut options = sentry::ClientOptions::default();
+		options.release = sentry::release_name!();
+		options.environment = Some(get_env().into());
+		// added integrations: tracing (see logging.rs)
+		Some(sentry::init(("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@o72324.ingest.sentry.io/155432", options)))
 	} else {
 		None
 	}
