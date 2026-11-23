@@ -1,0 +1,134 @@
+[package]
+name = "graphlink_rust"
+version = "0.0.1"
+edition = "2021"
+publish = false
+
+[dependencies]
+futures = "0.3.30"
+tokio = { version = "1.28.1", features = ["full", "signal"] }
+tracing = "0.1.37"
+anyhow = { version = "1.0.80", features = ["backtrace"] }
+thiserror = "1.0.37"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+base64 = "0.13.1"
+indoc = "1.0.7"
+itertools = "0.10.3"
+regex = "1.5.5"
+once_cell = "1.13.0"
+jwt-simple = "0.11.2"
+chrono = "0.4.23"
+flume = "0.10.10"
+indexmap = {version = "2.2.5", features = ["serde"]}
+async-trait = "0.1.52"
+sentry = {version = "0.32.2", default-features = false, features = [
+	# default
+	"backtrace", "contexts", "panic",
+	#"transport", # commented, since pulls in native-tls (as part of reqwest+native-tls)
+
+	# added
+	"reqwest", "rustls",
+	#"log",
+	"tracing",
+]}
+deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
+deadpool-postgres = "0.10.1"
+async-broadcast = "0.4.0"
+lazy_static = "1.4.0"
+oauth2 = "4.4.2"
+lexicon_fractional_index = "0.0.3"
+dyn-clone = "1.0.4"
+num_cpus = "1.0"
+blake3 = "1.8.2"
+
+url = "2"
+http = "*"
+http-body-util = "0.1.0"
+hyper = {version = "1.2.0", features = ["client"] }
+hyper-util = {version = "0.1.3", features = ["client", "client-legacy"] }
+#reqwest = { "0.11.25", default-features = false, features = ["rustls-tls", "json"] }
+# use version from git which supports hyper v1
+reqwest = {git = "https://github.com/seanmonstar/reqwest.git", rev = "2c11ef000b151c2eebeed2c18a7b81042220c6b0", default-features = false, features = ["rustls-tls", "json"] }
+
+tower = { version = "0.4", features = ["util"] }
+#tower-web = "0.3.7"
+tower-http = { version = "0.5.2", features = ["cors", "fs", "trace", "compression-gzip", "compression-zstd"] }
+
+# axum (separate section, for more explicit version-synchronization with async-graphql-axum's subdep of "axum")
+#axum = { version = "0.4.5", features = ["ws"] }
+#axum = { git = "https://github.com/tokio-rs/axum.git", rev = "15914c4f15b375d5785b7f95be7685abba326c5e", features = ["ws", "headers", "json"] }
+axum = { version = "0.7.4", features = ["ws", "json"] }
+
+serde_json = "1.0.76"
+#async-graphql = {version = "3.0.38", features = ["log"]}
+# sync with version in rust-macros
+async-graphql = "7.0.2"
+async-graphql-axum = "7.0.2"
+
+# needed for async-graphql-axum customization
+tower-service = "0.3"
+
+# needed for tokio-postgres
+bytes = "1.0"
+
+# needed for using the k8s "exec" endpoint (which uses websockets)
+#kube-client = {version = "0.82.2", default-features = false, features = [ "client", "rustls-tls", "ws" ] }
+#k8s-openapi = { version = "0.16.0", features = ["v1_25"] }
+#either = { version = "1.8.1" }
+
+# stay on v0.22.2 for now, to align with hyper-rustls and tokio-rustls (and because 0.23.1 errors in rust-analyzer on my windows pc, with default features, due to aws_lc_rs)
+rustls = {version = "0.22.2"}
+# rustls = {version = "0.23.1", default-features = false, features = [
+# 	#"aws_lc_rs", # aws_lc_rs errors in rust-analyzer, on my windows pc anyway
+# 	"ring",
+# 	"logging", "std", "tls12"
+# ]}
+
+#rustls = {version = "0.23.1"}
+hyper-rustls = {version = "0.26.0"}
+
+tokio-tungstenite = {version = "0.21.0", features = ["rustls-tls-native-roots"]}
+#rustls = "*"
+#tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep)
+
+rustls-pemfile = "2.1.1"
+pin-project-lite = "*"
+
+# added during firestore->postgres rework
+#automod = "1.0"
+#dirmod = "0.1.5"
+futures-util = "0.3.0"
+
+automod_plus = { path = "../automod-plus" }
+rust_macros = { path = "../rust-macros" }
+
+# sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
+# ==========
+
+serde = "1.0.144"
+
+# detailed dependencies section
+# ==========
+
+# sync version with root Cargo.toml
+[dependencies.tokio-postgres]
+
+# git = "https://github.com/petrosagg/rust-postgres.git"
+# branch = "copy-both"
+
+# temp; use own branch, which is a fork of petrosagg's, from before he force-pushed a broken version of the copy-both feature (materialize fork also has same issue atm)
+#git = "https://github.com/Venryx/rust-postgres.git"
+#branch = "copy-both"
+
+git = "https://github.com/MaterializeInc/rust-postgres.git"
+rev = "7bdd17b5acf4d7dbc53b08a9038793ab7e49da6c"
+
+features = [
+	"with-serde_json-1", # needed for serde_json::Value to auto-convert to a declared struct
+	"array-impls"
+]
+
+[dependencies.postgres-protocol]
+
+git = "https://github.com/MaterializeInc/rust-postgres.git"
+rev = "7bdd17b5acf4d7dbc53b08a9038793ab7e49da6c"
