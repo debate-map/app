@@ -65,13 +65,13 @@ impl BakerConfig {
 	pub fn load(path: impl AsRef<Path>) -> anyhow::Result<Self> {
 		let path = path.as_ref();
 		let contents = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-		serde_yaml::from_str(&contents).with_context(|| format!("parse {}", path.display()))
+		serde_saphyr::from_str(&contents).with_context(|| format!("parse {}", path.display()))
 	}
 
 	pub fn load_runtime(path: impl AsRef<Path>) -> anyhow::Result<usize> {
 		let path = path.as_ref();
 		let contents = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-		let runtime_config: RuntimeConfigFile = serde_yaml::from_str(&contents).with_context(|| format!("parse {}", path.display()))?;
+		let runtime_config: RuntimeConfigFile = serde_saphyr::from_str(&contents).with_context(|| format!("parse {}", path.display()))?;
 		validate_positive("regular_crawler_count", runtime_config.regular_crawler_count)?;
 
 		Ok(runtime_config.regular_crawler_count)
@@ -184,7 +184,7 @@ mod tests {
 
 	#[test]
 	fn checked_in_config_matches_the_runtime_contract() {
-		let config: BakerConfig = serde_yaml::from_str(include_str!("../config.yaml")).unwrap();
+		let config: BakerConfig = serde_saphyr::from_str(include_str!("../config.yaml")).unwrap();
 		let config = config.into_engine_config().unwrap();
 		assert!(config.serve.enabled); // headless is a local preference, not part of the contract
 		assert_eq!(config.start_urls.iter().map(Url::path).collect::<Vec<_>>(), ["/", "/debates"]);
