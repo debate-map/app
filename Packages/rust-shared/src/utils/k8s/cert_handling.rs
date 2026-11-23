@@ -27,7 +27,9 @@ pub fn get_rustls_config_that_accepts_k8s_certs() -> Result<ClientConfig, Error>
 	for cert in get_k8s_certs()? {
 		store.add(cert).unwrap();
 	}
-	Ok(ClientConfig::builder().with_root_certificates(store).with_no_client_auth())
+	// both rustls backends (aws-lc-rs and ring) get compiled in through different reqwest versions, so plain builder() would panic; pick one explicitly
+	let provider = Arc::new(rustls::crypto::aws_lc_rs::default_provider());
+	Ok(ClientConfig::builder_with_provider(provider).with_safe_default_protocol_versions()?.with_root_certificates(store).with_no_client_auth())
 }
 
 // this function was created for use by exec_command_in_another_pod; it may need tweaking to support other use-cases
