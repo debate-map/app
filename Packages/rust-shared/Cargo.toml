@@ -11,7 +11,7 @@ tracing = "0.1"
 anyhow = { version = "1.0.80", features = ["backtrace"] }
 thiserror = "2.0.21"
 uuid = { version = "1.29", features = ["serde", "v4"] }
-base64 = "0.13.1"
+base64 = "0.23.1"
 indoc = "2.0.8"
 itertools = "0.15.0"
 regex = "1.5.5"

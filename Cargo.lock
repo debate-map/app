@@ -166,7 +166,7 @@ dependencies = [
  "async-recursion",
  "deadpool",
  "deadpool-postgres",
- "dotenv",
+ "dotenvy",
  "dyn-clone",
  "futures-timer",
  "futures-util",
@@ -1319,10 +1319,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dotenv"
-version = "0.15.0"
+name = "dotenvy"
+version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "dyn-clone"
@@ -4237,7 +4237,7 @@ dependencies = [
  "async-graphql-axum",
  "async-trait",
  "axum",
- "base64 0.13.1",
+ "base64 0.23.1",
  "bytes",
  "chrono",
  "flume 0.12.0",

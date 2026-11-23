@@ -29,7 +29,7 @@ jsonschema = "0.17.1"
 #tokio-pg-mapper-derive = "0.2.0"
 dyn-clone = "1.0.4"
 oauth2 = "4.4.2"
-dotenv = "0.15.0"
+dotenvy = "0.15.7"
 lexicon_fractional_index = "0.0.3"
 pastey = "0.2.3"
 

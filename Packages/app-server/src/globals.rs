@@ -4,7 +4,7 @@ use {
 	pyroscope_pprofrs::{pprof_backend, PprofConfig},
 };
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use rust_shared::{
 	domains::{get_env, is_prod},
 	flume,

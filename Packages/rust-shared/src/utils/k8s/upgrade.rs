@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use bytes::Bytes;
 use http_body_util::Full;
 use hyper::{
@@ -18,7 +19,7 @@ pub const WS_PROTOCOL: &str = "v4.channel.k8s.io";
 /// This must be nonce consisting of a randomly selected 16-byte value in base64.
 pub fn sec_websocket_key() -> String {
 	let r: [u8; 16] = rand::random();
-	base64::encode(r)
+	BASE64.encode(r)
 }
 
 /// Possible errors from upgrading to a WebSocket connection

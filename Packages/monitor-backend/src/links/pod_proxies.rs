@@ -25,7 +25,8 @@ use rust_shared::url::Url;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::net::{full_body_from_str, hyper_response_to_axum_response, AxumBody, AxumResult, AxumResultE, AxumResultI, HyperClient};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{async_graphql_axum, axum, base64, futures, tower, tower_http};
+use rust_shared::base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use rust_shared::{async_graphql_axum, axum, futures, tower, tower_http};
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
@@ -87,7 +88,7 @@ pub fn get_admin_key_from_proxy_request(req: &Request<AxumBody>) -> Result<Strin
 			let (cookie_name, cookie_value) = cookie_entry.split_once("=").ok_or(anyhow!("Invalid cookie-str"))?;
 			if cookie_name == "adminKey" {
 				let admin_key_base64 = cookie_value;
-				let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;
+				let admin_key = String::from_utf8(BASE64.decode(admin_key_base64)?)?;
 				return Ok(admin_key);
 			}
 		}
