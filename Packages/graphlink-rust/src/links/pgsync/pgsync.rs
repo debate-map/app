@@ -28,12 +28,12 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
         // ensure that search dictionary exists
         query("DO $$ BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_ts_dict WHERE dictname = 'english_stem_nostop') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_ts_dict WHERE dictnamespace = 'app'::regnamespace AND dictname = 'english_stem_nostop') THEN
                 CREATE TEXT SEARCH dictionary app.english_stem_nostop (Template = snowball, Language = english);
             END IF; END $$;", &[]).await?;
         // ensure that search configuration exists (and has the right properties)
         query("DO $$ BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'english_nostop') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgnamespace = 'app'::regnamespace AND cfgname = 'english_nostop') THEN
                 CREATE TEXT SEARCH CONFIGURATION app.english_nostop (COPY = pg_catalog.english);
             END IF; END $$;", &[]).await?;
         query("ALTER TEXT SEARCH CONFIGURATION app.english_nostop ALTER mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH app.english_stem_nostop", &[]).await?;
@@ -79,7 +79,7 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 	// Note: This was not required in prior project, because it had an "id" column that was not generated. (which matters because, at least for delete events, pgoutput omits data for generated columns: https://postgrespro.com/list/thread-id/2658394)
 	for table_def in table_defs {
 		let table_name = &table_def.name;
-		let rows = tx.query("SELECT relreplident FROM pg_catalog.pg_class WHERE relname = $1", &[&table_name]).await?;
+		let rows = tx.query("SELECT relreplident FROM pg_catalog.pg_class WHERE relnamespace = 'app'::regnamespace AND relname = $1", &[&table_name]).await?;
 		let replica_is_set_to_full = rows.len() >= 1 && rows.iter().all(|row| row.get::<_, StringCollector>(0).0 == "f"); // "d" = default, "f" = full, "n" = nothing, "i" = index
 		if !replica_is_set_to_full {
 			info!("pgsync: Setting replica-identity for table {} to full.", table_name);
@@ -98,7 +98,11 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 		for row in rows {
 			let name: String = row.get(0);
 			let data_type: String = row.get(1);
-			let data_type = if data_type == "ARRAY" { format!("{}[]", row.get::<_, String>(5).trim_start_matches('_')) } else { data_type }; // info-schema reports arrays as just ARRAY, the element type hides in udt_name (eg. _text)
+			let data_type = if data_type == "ARRAY" {
+				format!("{}[]", row.get::<_, String>(5).trim_start_matches('_'))
+			} else {
+				data_type
+			}; // info-schema reports arrays as just ARRAY, the element type hides in udt_name (eg. _text)
 			let is_nullable: bool = row.get::<_, String>(2) == "YES".o();
 			let pull_from_data: bool = row.get::<_, Option<String>>(3).is_some();
 			let default_value: Option<String> = row.get(4);
@@ -152,7 +156,7 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 
 		let leakproof_str = " STABLE LEAKPROOF"; // for now just always include this
 
-		let rows = tx.query("SELECT proargtypes, proargnames, prosrc FROM pg_proc WHERE proname = $1", &[&func_name]).await?;
+		let rows = tx.query("SELECT proargtypes, proargnames, prosrc FROM pg_proc WHERE pronamespace = 'app'::regnamespace AND proname = $1", &[&func_name]).await?;
 		// if func doesn't exist, create it
 		if rows.is_empty() {
 			info!("pgsync: Creating function {}. @signature:{}", func_name, new_definition);
@@ -199,7 +203,7 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 		let table_oid: i64 = rows.get(0).unwrap().get(0);
 		let rows = tx.query("SELECT 1 FROM pg_catalog.pg_policy WHERE polrelid = $1 AND polname = $2", &[&table_oid, &format!("{}_rls", &table_name)]).await?;*/
 		// check if rls-policy exists (we use consistent rls-policy naming of `${table}_rls`, so just check for the name)
-		let rows = tx.query("SELECT 1 FROM pg_catalog.pg_policy WHERE polname = $1", &[&format!("{}_rls", &table_name)]).await?;
+		let rows = tx.query("SELECT 1 FROM pg_catalog.pg_policy WHERE polrelid = to_regclass(format('app.%I', $1::text)) AND polname = $2", &[&&table_name, &format!("{}_rls", &table_name)]).await?;
 
 		let create_policy = async || -> Result<(), Error> {
 			let mut rls_policy_sql_fragment = rls_policy.to_sql_fragment()?;
@@ -228,7 +232,7 @@ pub async fn run_pgsync(app_state: AppStateArc) -> Result<(), Error> {
 		}
 
 		// check if rls is enabled on this table; if not, enable it
-		let rows = tx.query("SELECT 1 FROM pg_catalog.pg_class WHERE relname = $1 AND relrowsecurity = true", &[&table_name]).await?;
+		let rows = tx.query("SELECT 1 FROM pg_catalog.pg_class WHERE relnamespace = 'app'::regnamespace AND relname = $1 AND relrowsecurity = true", &[&table_name]).await?;
 		if rows.is_empty() {
 			info!("pgsync: Enabling RLS for table {}.", table_name);
 			query(format!(r#"ALTER TABLE "{}" ENABLE ROW LEVEL SECURITY;"#, table_name).as_str(), &[]).await?;
