@@ -57,6 +57,8 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [deploy](https://github.com/debate-map/app/tree/main/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
 * [rust-shared](https://github.com/debate-map/app/tree/main/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]
 * [rust-macros](https://github.com/debate-map/app/tree/main/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in) \[Rust]
+* [baker](https://github.com/debate-map/app/tree/main/Packages/baker): Crawls the site in headless Chrome and saves the rendered pages as static HTML. (run with `npm start baker.run`; settings in `Packages/baker/config.yaml`) \[Rust]
+	* Needs Chrome or Chromium installed. (or `CHROME=/path/to/chrome` set) We don't let the `headless_chrome` crate download its own Chromium (its `fetch` feature), since that downloads an old pinned version and pulls in a zip crate with known vulnerabilities.
 <!--
 // planned packages
 * [graphlink-server](https://github.com/debate-map/app/tree/main/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]

@@ -2,6 +2,7 @@ use futures::executor::block_on;
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
 use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
 use rust_shared::async_graphql::{self, async_stream, scalar, EmptySubscription, Enum, InputObject, Object, OutputType, Result, Schema, SimpleObject, Subscription, ID};
+use rust_shared::base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::hyper::{Method, Request};
 use rust_shared::itertools::Itertools;
@@ -20,7 +21,7 @@ use rust_shared::utils::net::{body_to_str, new_hyper_client_http};
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::SubError;
-use rust_shared::{axum, base64, futures, reqwest, tower, tower_http, GQLError};
+use rust_shared::{axum, futures, reqwest, tower, tower_http, GQLError};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -159,7 +160,7 @@ impl QueryShard_General {
 		}*/
 		let secret = get_or_create_k8s_secret("loki-stack-grafana".o(), "monitoring", None).await?;
 		let password_encoded = secret.data.get("admin-password").ok_or(anyhow!("Field \"admin-password\" missing!"))?.as_str().ok_or(anyhow!("Field \"admin-password\" not a string!"))?;
-		let password_bytes = base64::decode(password_encoded)?;
+		let password_bytes = BASE64.decode(password_encoded)?;
 		//let password_bytes = base64::decode_config(password_encoded, URL_SAFE_NO_PAD)?;
 		let password = String::from_utf8(password_bytes)?;
 		Ok(password.to_owned())

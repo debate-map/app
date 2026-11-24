@@ -72,8 +72,8 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 WORKDIR /dm_repo/Packages/app-server
 ENV ENVIRONMENT=$ENVIRONMENT
 
-# temp (for ssl connections; will look for cleaner way soon)
-#RUN apt-get update && apt-get install -y ca-certificates
+# system ca certs; sentry and reqwest now check https certs against the os store instead of a built in list, and the slim image ships without one
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # add postgres-client; this is needed for app-server to run `db_dump`, for its `getDBDump` endpoint # edit: hit issues; going the k8s "pods/exec" route instead
 # RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >>  /etc/apt/sources.list.d/pgdg.list

@@ -5,7 +5,6 @@ use std::time::Duration;
 use deadpool_postgres::tokio_postgres::Row;
 use futures_util::{Stream, TryStreamExt};
 use oauth2::basic::BasicClient;
-use oauth2::reqwest::async_http_client;
 use oauth2::TokenResponse;
 use oauth2::{AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl, RevocationUrl, Scope, StandardRevocableToken, TokenUrl};
 use rust_shared::anyhow::{anyhow, Context, Error};

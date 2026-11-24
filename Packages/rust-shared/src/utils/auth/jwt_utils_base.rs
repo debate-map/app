@@ -15,6 +15,7 @@ use axum::extract::{Extension, Path};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{response, Router};
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use indoc::indoc;
 use jwt_simple::prelude::{Claims, HS256Key, MACLike, VerificationOptions};
 use once_cell::sync::OnceCell;
@@ -34,7 +35,7 @@ pub struct UserJWTData {
 
 pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
 	let key_str = get_or_create_jwt_key_hs256_str().await?;
-	let key_str_bytes = base64::decode(key_str)?;
+	let key_str_bytes = BASE64.decode(key_str)?;
 	let key = HS256Key::from_bytes(&key_str_bytes);
 	Ok(key)
 }
@@ -51,7 +52,7 @@ pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
 
 	// create a new key, and try to store it as a k8s secret
 	let new_secret_data_if_missing = json!({
-		"key": base64::encode(HS256Key::generate().to_bytes()),
+		"key": BASE64.encode(HS256Key::generate().to_bytes()),
 	});
 	let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), "default", Some(new_secret_data_if_missing)).await?;
 	let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;

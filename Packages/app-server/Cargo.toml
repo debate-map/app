@@ -14,24 +14,24 @@ pyroscope_pprofrs = "0.2.7"
 tracing = "0.1" # todo: remove this (since part of rust_shared now)
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
 #crossbeam-channel = "0.5.2"
-async-broadcast = "0.4.0"
+async-broadcast = "0.7.2"
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
 #dashmap = "4.0.2" # the API is hard to use correctly/safely (there are rules you have to follow that aren't compiled-ensured)
 #flurry = "0.4.0"
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
-metrics = "0.22.1"
+metrics = "0.24.6"
 lazy_static = "1.4.0"
 num_cpus = "1.0"
-jsonschema = "0.17.1"
+jsonschema = "0.63.1"
 #tokio-pg-mapper = "0.2.0"
 #tokio-pg-mapper-derive = "0.2.0"
 dyn-clone = "1.0.4"
-oauth2 = "4.4.2"
-dotenv = "0.15.0"
+oauth2 = "5.0.0"
+dotenvy = "0.15.7"
 lexicon_fractional_index = "0.0.3"
-pastey = "0.1.0"
+pastey = "0.2.3"
 
 # temp-fix for https://github.com/tikv/pprof-rs/issues/232
 #pprof = {git = "https://github.com/Erigara/pprof-rs", branch = "fix-pointer-align"}
@@ -56,7 +56,7 @@ serde = "1.0.144"
 # ==========
 
 itoa = "1.0.4"
-thiserror = "1.0.61"
+thiserror = "2.0.21"
 
 # To calculate build time:
 # 1) Run tilt-up-local and wait for everything to deploy and settle.

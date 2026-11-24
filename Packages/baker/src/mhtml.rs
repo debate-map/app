@@ -63,7 +63,8 @@ impl<'a> ResourcePlanner<'a> {
 		for part in parts {
 			let bytes = decode_body(&part).with_context(|| format!("decode MHTML part {}", part.content_location.as_deref().unwrap_or("<unknown>")))?;
 			// ponytail: decoded bytes are sufficient for one fixed app build; hash rewritten dependency graphs if resources become context-dependent.
-			let filename = format!("{:x}.{}", Sha256::digest(&bytes), extension_for_content_type(&part.content_type));
+			let hash: String = Sha256::digest(&bytes).iter().map(|byte| format!("{byte:02x}")).collect();
+			let filename = format!("{hash}.{}", extension_for_content_type(&part.content_type));
 			let asset_path = self.asset_dir.join(filename);
 			let asset_ref = absolute_web_path(self.base_output_dir, &asset_path)?;
 			resources.push(ResourcePart { part, asset_path, asset_ref, bytes });
