@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs;
 
+use graphlink_rust::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id, time_since_epoch_ms_i64, AccessorContext, DataAnchorFor1, GQLError, JSONValueV, OrderKey, ToOwnedV};
 use rust_shared::anyhow::{anyhow, bail, ensure, Context, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
@@ -12,11 +13,8 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::value::Index;
 use rust_shared::serde_json::{json, Value};
-use rust_shared::utils::general_::extensions::ToOwnedV;
-use rust_shared::utils::general_::serde::JSONValueV;
-use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
+use rust_shared::{anyhow, async_graphql, serde_json};
 use tracing::{info, warn};
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
@@ -44,10 +42,6 @@ use crate::db::shares::{Share, ShareType};
 use crate::db::terms::{Term, TermType};
 use crate::db::user_hiddens::{get_user_hiddens, UserHidden};
 use crate::db::users::{get_user, get_users, PermissionGroups, User};
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::general::data_anchor::DataAnchorFor1;
-use crate::utils::general::order_key::OrderKey;
-use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
 
 use super::_command::{gql_placeholder, insert_db_entry_by_id_for_struct, NoExtras};
 
@@ -557,7 +551,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			// a user does not already exist with this email, so import it as a new entry
 			None => {
 				insert_db_entry_by_id_for_struct(ctx, "users".o(), importing_user.id.to_string(), importing_user).await?;
-				insert_db_entry_by_id_for_struct(ctx, "userHiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;
+				insert_db_entry_by_id_for_struct(ctx, "user_hiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;
 			},
 			// a user already exists with this email, so merge the importing-data into the existing database entry
 			Some((existing_user, _existing_user_hidden)) => {

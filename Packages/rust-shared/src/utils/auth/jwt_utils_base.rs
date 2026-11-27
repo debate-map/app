@@ -3,18 +3,14 @@ use std::env;
 use std::time::Duration;
 
 use crate::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
-use crate::utils::_k8s::get_or_create_k8s_secret;
-use crate::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
-use crate::utils::futures::make_reliable;
-use crate::utils::general::get_uri_params;
-use crate::utils::time::time_since_epoch_ms_i64;
 use crate::utils::type_aliases::JSONValue;
-use crate::{async_graphql, serde_json, to_anyhow, to_sub_err, to_sub_err_in_stream, SubError};
+use crate::{async_graphql, serde_json};
 use anyhow::{anyhow, Error};
 use axum::extract::{Extension, Path};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{response, Router};
+use graphlink_rust::{get_or_create_k8s_secret, get_uri_params, make_reliable, new_uuid_v4_as_b64, new_uuid_v4_as_b64_id, time_since_epoch_ms_i64, to_anyhow, to_sub_err, to_sub_err_in_stream, SubError};
 use indoc::indoc;
 use jwt_simple::prelude::{Claims, HS256Key, MACLike, VerificationOptions};
 use once_cell::sync::OnceCell;
@@ -23,43 +19,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::{error, info, warn};
 
-/// Rather than baking the permissions and such into the jwt, we store only the id and email, which are unchanging fields. (well that and the `readOnly` flag, letting the user restrict the JWT's capabilities)
-/// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
-#[derive(Clone, Serialize, Deserialize)]
-pub struct UserJWTData {
-	pub id: String,
-	pub email: String,
-	pub readOnly: Option<bool>,
-}
+/// debate-map's k8s secret for the hs256 key (the crate's own default names another project's)
+pub const JWT_K8S_SECRET_NAME: &str = "dm-jwt-secret-hs256";
 
 pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
-	let key_str = get_or_create_jwt_key_hs256_str().await?;
-	let key_str_bytes = base64::decode(key_str)?;
-	let key = HS256Key::from_bytes(&key_str_bytes);
-	Ok(key)
-}
-static JWT_KEY_HS256_STR: OnceCell<String> = OnceCell::new();
-/// Retrieves and/or creates the hs256 secret-key for use in generating JWTs.
-/// Why do retrieval manually rather than having k8s import it as an environment-variable at startup?
-/// Because k8s converts the base64 string into a utf8 string, which makes conversion complicated. (we want to decode it simply as a raw byte-array, for passing to HS256Key::from_bytes)
-pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
-	// first, try to read the key from a global variable (in case this func has already been run)
-	if let Some(key_as_base64_str) = JWT_KEY_HS256_STR.get() {
-		//info!("Retrieved secret key from global-var:{:?}", key_as_base64_str);
-		return Ok(key_as_base64_str.to_owned());
-	}
-
-	// create a new key, and try to store it as a k8s secret
-	let new_secret_data_if_missing = json!({
-		"key": base64::encode(HS256Key::generate().to_bytes()),
-	});
-	let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), "default", Some(new_secret_data_if_missing)).await?;
-	let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
-	//info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
-
-	// now that we have the key, store it in global-var for faster retrieval (use get_or_init for safe handling in case this func was called by two threads concurrently)
-	let result = JWT_KEY_HS256_STR.get_or_init(|| key_as_base64_str.to_owned());
-
-	//Ok(key_as_base64_str.to_owned())
-	Ok(result.to_owned())
+	graphlink_rust::set_jwt_k8s_secret_name(JWT_K8S_SECRET_NAME); // no-op once set (app-server sets it at startup); here so monitor-backend's tokens use it too
+	graphlink_rust::utils::auth::jwt_utils_base::get_or_create_jwt_key_hs256().await
 }

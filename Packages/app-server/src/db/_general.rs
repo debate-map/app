@@ -1,4 +1,5 @@
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
+use graphlink_rust::{to_sub_err, GQLError, GQLRequestStorage, SubError, ToOwnedV};
 use rust_shared::anyhow::{anyhow, ensure, Context, Error};
 use rust_shared::async_graphql::{async_stream, scalar, EmptySubscription, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use rust_shared::db_constants::SYSTEM_USER_ID;
@@ -7,15 +8,12 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::Client;
-use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{async_graphql, serde_json, to_sub_err, GQLError, SubError};
+use rust_shared::{async_graphql, serde_json};
 use std::env;
 use std::path::Path;
 use std::{pin::Pin, task::Poll, time::Duration};
 use tracing::{error, info, warn};
-
-use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 
 use super::commands::add_term::AddTermResult;
 use super::commands::refresh_lq_data::refresh_lq_data;
@@ -49,11 +47,7 @@ pub fn ensure_trusted_operator_passkey_is_correct(passkey: String, log_message_i
 	Ok(())
 }
 
-#[derive(Debug, Serialize, Deserialize, SimpleObject)]
-pub struct QueryPaginationResult<T: OutputType> {
-	pub data: Vec<T>,
-	pub total_count: i64,
-}
+pub use graphlink_rust::db::generic_handlers::queries::{QueryPaginationFilter, QueryPaginationResult}; // the crate's paginated query handler takes and returns these
 
 wrap_slow_macros! {
 
@@ -71,15 +65,6 @@ impl QueryShard_General {
 		error!("Test3");
 		""
 	}
-}
-
-// Do not Add SimpleObject to this struct, as it's not meant to be directly exposed to the API.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct QueryPaginationFilter {
-	pub limit: Option<i64>,
-	pub after: Option<i64>,
-	pub order_by: Option<String>,
-	pub order_desc: Option<bool>,
 }
 
 

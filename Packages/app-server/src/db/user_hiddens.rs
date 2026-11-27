@@ -1,4 +1,5 @@
 use futures_util::{stream, Stream, TryFutureExt};
+use graphlink_rust::{get_db_entries, get_db_entry, handle_generic_gql_collection_query, handle_generic_gql_doc_query, AccessorContext, FilterInput, GQLError, SubError};
 use rust_shared::anyhow::Error;
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
@@ -6,25 +7,19 @@ use rust_shared::indexmap::IndexMap;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde;
 use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json;
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{serde_json, GQLError, SubError};
 
 use crate::gql_set_impl;
-use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	filter::FilterInput,
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::commands::_command::{CanNullOrOmit, CanOmit};
 
 #[rustfmt::skip]
 pub async fn get_user_hidden(ctx: &AccessorContext<'_>, id: &str) -> Result<UserHidden, Error> {
-    get_db_entry(ctx, "userHiddens", &Some(json!({
+    get_db_entry(ctx, "user_hiddens", &Some(json!({
         "id": {"equalTo": id}
     }))).await
 }
@@ -33,7 +28,7 @@ pub async fn get_user_hiddens(ctx: &AccessorContext<'_>, email: Option<String>) 
 	if let Some(email) = email {
 		filter_map.insert("email".to_owned(), json!({"equalTo": email}));
 	}
-	get_db_entries(ctx, "userHiddens", &Some(JSONValue::Object(filter_map))).await
+	get_db_entries(ctx, "user_hiddens", &Some(JSONValue::Object(filter_map))).await
 }
 
 wrap_slow_macros! {
@@ -63,10 +58,6 @@ impl UserHidden {
 		Ok(serde_json::from_value(self.extras.clone())?)
 	}
 }
-impl From<Row> for UserHidden {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct UserHiddenUpdates {
 	pub backgroundID: CanNullOrOmit<String>,
@@ -106,20 +97,20 @@ gql_set_impl!(UserHidden);
 #[derive(Default)] pub struct QueryShard_UserHidden;
 #[Object] impl QueryShard_UserHidden {
 	async fn userHiddens(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<UserHidden>, GQLError> {
-		handle_generic_gql_collection_query(ctx, "userHiddens", filter).await
+		handle_generic_gql_collection_query(ctx, "user_hiddens", filter).await
 	}
 	async fn userHidden(&self, ctx: &Context<'_>, id: String) -> Result<Option<UserHidden>, GQLError> {
-		handle_generic_gql_doc_query(ctx, "userHiddens", id).await
+		handle_generic_gql_doc_query(ctx, "user_hiddens", id).await
 	}
 }
 
 #[derive(Default)] pub struct SubscriptionShard_UserHidden;
 #[Subscription] impl SubscriptionShard_UserHidden {
-	async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter, None).await
+	async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<UserHidden, GQLSet_UserHidden>(ctx, "user_hiddens", filter, cached_entry_hashes, None).await
 	}
 	async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserHidden>, SubError>> + 'a {
-		handle_generic_gql_doc_subscription::<UserHidden>(ctx, "userHiddens", id).await
+		handle_generic_gql_doc_subscription::<UserHidden>(ctx, "user_hiddens", id).await
 	}
 }
 

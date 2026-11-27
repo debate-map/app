@@ -254,10 +254,11 @@ impl LQGroup {
 			let new_data_as_change = LDChange {
 				table: self.lq_key.table_name.clone(),
 				kind: "update".to_owned(),
-				columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
-				columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+				// a row is stored as one "data" cell and on_table_changed reads the row from there, so the change we build here needs that same shape (without "data" it panics)
+				columnnames: Some(vec!["data".to_owned()]),
+				columnvalues: Some(vec![JSONValue::Object(new_data.0)]),
 				// marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
-				columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+				columntypes: Some(vec!["unknown".to_owned()]),
 				oldkeys: None,
 				schema: "".to_owned(),
 				needs_wal2json_jsonval_fixes: Some(false), // don't apply fixes, since fixes already applied (if needed) during initial ingestion ("columntypes" being "unknown" precludes the fixes from running anyway)

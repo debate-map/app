@@ -1,12 +1,10 @@
-use rust_shared::{anyhow::Error, utils::time::time_since_epoch_ms_i64};
+use graphlink_rust::{time_since_epoch_ms_i64, AccessorContext};
+use rust_shared::anyhow::Error;
 
-use crate::{
-	db::{
-		commands::_command::upsert_db_entry_by_id_for_struct,
-		maps::{get_map, Map},
-		users::{get_user, User},
-	},
-	utils::db::accessors::AccessorContext,
+use crate::db::{
+	commands::_command::upsert_db_entry_by_id_for_struct,
+	maps::{get_map, Map},
+	users::{get_user, User},
 };
 
 pub async fn increment_edits_if_valid(ctx: &AccessorContext<'_>, user: Option<&User>, map_id: Option<String>, is_root: bool, caller_wants_increment: Option<bool>) -> Result<(), Error> {

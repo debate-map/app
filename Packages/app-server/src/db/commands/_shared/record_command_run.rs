@@ -1,32 +1,23 @@
+use graphlink_rust::{get_db_entries, get_db_entry, new_uuid_v4_as_b64, time_since_epoch_ms_i64, AccessorContext, DataAnchorFor1, QueryFilter, ToOwnedV};
 use rust_shared::{
 	anyhow::{anyhow, Error},
 	async_graphql::ID,
 	itertools::Itertools,
 	serde_json::json,
-	utils::{db::uuid::new_uuid_v4_as_b64, general_::extensions::ToOwnedV, time::time_since_epoch_ms_i64, type_aliases::JSONValue},
+	utils::type_aliases::JSONValue,
 };
 use tracing::error;
 
-use crate::{
-	db::{
-		command_runs::CommandRun,
-		commands::{
-			_command::upsert_db_entry_by_id_for_struct,
-			add_notification::{self, add_notification, AddNotificationInput},
-		},
-		maps::{get_map, Map},
-		subscriptions::Subscription,
-		user_hiddens::get_user_hidden,
-		users::User,
+use crate::db::{
+	command_runs::CommandRun,
+	commands::{
+		_command::upsert_db_entry_by_id_for_struct,
+		add_notification::{self, add_notification, AddNotificationInput},
 	},
-	utils::{
-		db::{
-			accessors::{get_db_entry, AccessorContext},
-			filter::QueryFilter,
-			queries::get_entries_in_collection,
-		},
-		general::data_anchor::DataAnchorFor1,
-	},
+	maps::{get_map, Map},
+	subscriptions::Subscription,
+	user_hiddens::get_user_hidden,
+	users::User,
 };
 
 pub async fn record_command_run_if_root(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, command_name: String, command_input: JSONValue, command_result: JSONValue, involved_nodes: Vec<String>) -> Result<(), Error> {
@@ -60,29 +51,38 @@ pub async fn record_command_run(ctx: &AccessorContext<'_>, actor: &User, command
 
 	upsert_db_entry_by_id_for_struct(&ctx, "commandRuns".to_owned(), command_run.id.to_string(), command_run).await?;
 
-	for node in involved_nodes {
-		let subscription = get_db_entry::<Subscription>(
-			&ctx,
-			"subscriptions",
-			&Some(json!({
-				"node": {"equalTo": node},
-				"user": {"notEqualTo": actor.id.to_string()}
-			})),
-		)
-		.await;
+	// other users' subscriptions and notifications: their policy (admin or own rows) hides them from the actor
+	ctx.with_rls_disabled(
+		|| async {
+			for node in involved_nodes {
+				let subscription = get_db_entry::<Subscription>(
+					&ctx,
+					"subscriptions",
+					&Some(json!({
+						"node": {"equalTo": node},
+						"user": {"notEqualTo": actor.id.to_string()}
+					})),
+				)
+				.await;
 
-		if let Ok(subscription) = subscription {
-			if (subscription.addChildNode && command_name == "addChildNode")
-				|| (subscription.addNodeLink && command_name == "addNodeLink")
-				|| (subscription.addNodeRevision && command_name == "addNodeRevision")
-				|| (subscription.deleteNode && command_name == "deleteNode")
-				|| (subscription.deleteNodeLink && command_name == "deleteNodeLink")
-				|| (subscription.setNodeRating && command_name == "setNodeRating")
-			{
-				add_notification(ctx, actor, false, AddNotificationInput { user: subscription.user, commandRun: id.to_string(), readTime: None }, false).await?;
+				if let Ok(subscription) = subscription {
+					if (subscription.addChildNode && command_name == "addChildNode")
+						|| (subscription.addNodeLink && command_name == "addNodeLink")
+						|| (subscription.addNodeRevision && command_name == "addNodeRevision")
+						|| (subscription.deleteNode && command_name == "deleteNode")
+						|| (subscription.deleteNodeLink && command_name == "deleteNodeLink")
+						|| (subscription.setNodeRating && command_name == "setNodeRating")
+					{
+						add_notification(ctx, actor, false, AddNotificationInput { user: subscription.user, commandRun: id.to_string(), readTime: None }, false).await?;
+					}
+				};
 			}
-		};
-	}
+
+			Ok(())
+		},
+		Some("Failed to notify the subscribers of a command-run."),
+	)
+	.await?;
 
 	Ok(())
 }
@@ -94,7 +94,7 @@ async fn trim_old_command_runs(ctx: &AccessorContext<'_>) -> Result<(), Error> {
 	let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 	let ctx_admin = AccessorContext::new_write(&mut anchor, gql_ctx, false).await?;*/
 
-	let (_, command_runs) = get_entries_in_collection::<CommandRun>(ctx, "commandRuns".o(), &QueryFilter::empty(), None).await?;
+	let command_runs: Vec<CommandRun> = get_db_entries(ctx, "commandRuns", &None).await?;
 	let command_runs_to_remove = command_runs
 		.into_iter()
 		.enumerate()

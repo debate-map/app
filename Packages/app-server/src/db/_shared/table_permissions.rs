@@ -1,9 +1,43 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
-use rust_shared::{anyhow::{anyhow, bail, Error}, async_graphql::ID, utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}};
+use rust_shared::{
+	anyhow::{anyhow, bail, Error},
+	async_graphql::ID,
+};
 use tracing::info;
 
-use crate::{db::{_shared::access_policy_target::AccessPolicyTarget, access_policies::get_access_policy, access_policies_::{_access_policy::AccessPolicy, _permission_set::{APAction, APTable}}, command_runs::CommandRun, feedback_proposals::Proposal, feedback_user_infos::UserInfo, general::permission_helpers::is_user_admin, global_data::GlobalData, map_node_edits::MapNodeEdit, maps::Map, medias::Media, node_links::NodeLink, node_phrasings::NodePhrasing, node_ratings::NodeRating, node_revisions::NodeRevision, node_tags::NodeTag, nodes::get_node, nodes_::_node::Node, notifications::Notification, shares::Share, terms::Term, timeline_steps::TimelineStep, timelines::{get_timeline, Timeline}, user_hiddens::UserHidden, users::User}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
+use crate::db::{
+	_shared::access_policy_target::AccessPolicyTarget,
+	access_policies::get_access_policy,
+	access_policies_::{
+		_access_policy::AccessPolicy,
+		_permission_set::{APAction, APTable},
+	},
+	command_runs::CommandRun,
+	feedback_proposals::Proposal,
+	feedback_user_infos::UserInfo,
+	general::permission_helpers::is_user_admin,
+	global_data::GlobalData,
+	map_node_edits::MapNodeEdit,
+	maps::Map,
+	medias::Media,
+	node_links::NodeLink,
+	node_phrasings::NodePhrasing,
+	node_ratings::NodeRating,
+	node_revisions::NodeRevision,
+	node_tags::NodeTag,
+	nodes::get_node,
+	nodes_::_node::Node,
+	notifications::Notification,
+	shares::Share,
+	terms::Term,
+	timeline_steps::TimelineStep,
+	timelines::{get_timeline, Timeline},
+	user_hiddens::UserHidden,
+	users::User,
+};
+use graphlink_rust::{can_user_access_entry_json, cf, AccessorContext, EntryJSON, ToOwnedV, UserJWTData};
+use rust_shared::serde::Serialize;
 
 // Why are the permission-checks for modifying/deleting defined here, rather than in the updateX and deleteX command endpoints?
 // Because we want all such logic to use the `can_modify` and `can_delete` macros, so that we can be sure that they always start by checking...
@@ -192,11 +226,23 @@ macro_rules! can_delete {
 }
 use can_delete;
 
-// local helpers functions (to match format of rls_policies.rs as much as possible)
+// local helpers functions
 // ==========
 
-fn can_access(actor: &User, target: &impl UsesRLS) -> bool {
-    target.can_access_cached(Some(actor.id.as_str()))
+// which table each row type lives in, so its access rule can be looked up
+trait InTable { const TABLE: &'static str; }
+macro_rules! in_table { ($($type:ident => $table:literal),* $(,)?) => { $(impl InTable for $type { const TABLE: &'static str = $table; })* }; }
+in_table!(
+    AccessPolicy => "access_policies", Share => "shares", User => "users", Proposal => "feedback_proposals", UserInfo => "feedback_userInfos",
+    Term => "terms", Media => "medias", Map => "maps", Node => "nodes", Timeline => "timelines",
+    NodeLink => "nodeLinks", NodePhrasing => "nodePhrasings", NodeRating => "nodeRatings", NodeRevision => "nodeRevisions", NodeTag => "nodeTags", TimelineStep => "timelineSteps",
+    UserHidden => "user_hiddens", Notification => "notifications",
+);
+
+// "can the actor see this row" uses the same rule as reads do (the table's rule in graphlink_config.rs), so the two can't drift apart
+fn can_access<T: InTable + Serialize>(actor: &User, target: &T) -> bool {
+    let (Ok(table_def), Ok(entry)) = (cf().table_def(T::TABLE), EntryJSON::from_struct(target)) else { return false };
+    can_user_access_entry_json(&entry, &table_def.rls_policy, T::TABLE, Some(actor.id.as_str()))
 }
 fn actor_id(actor: &User) -> Option<&str> {
     Some(actor.id.as_str())

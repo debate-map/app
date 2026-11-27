@@ -1,5 +1,6 @@
 use deadpool_postgres::{Client, Pool, Transaction};
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt, TryStreamExt};
+use graphlink_rust::{new_uuid_v4_as_b64, start_read_transaction, start_write_transaction, time_since_epoch_ms, time_since_epoch_ms_i64, AccessorContext, DataAnchor, DataAnchorFor1, FilterInput, QueryFilter, SQLFragment};
 use jsonschema::output::BasicOutput;
 use jsonschema::JSONSchema;
 use lazy_static::lazy_static;
@@ -14,7 +15,6 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::types::ToSql;
 use rust_shared::tokio_postgres::Row;
-use rust_shared::utils::time::{time_since_epoch_ms, time_since_epoch_ms_i64};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, serde, serde_json};
 use std::collections::HashSet;
@@ -34,14 +34,8 @@ use crate::db::node_revisions::NodeRevision;
 use crate::db::node_tags::{NodeTag, TagComp_CloneHistory};
 use crate::db::nodes_::_node::Node;
 use crate::db::terms::Term;
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::db::filter::{FilterInput, QueryFilter};
 use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
-use crate::utils::db::sql_fragment::SQLFragment;
-use crate::utils::db::transactions::{start_read_transaction, start_write_transaction};
-use crate::utils::general::data_anchor::{DataAnchor, DataAnchorFor1};
 use crate::utils::type_aliases::PGClientObject;
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use rust_shared::utils::type_aliases::RowData;
 
 use super::_command::{set_db_entry_by_id, upsert_db_entry_by_id_for_struct};
@@ -106,7 +100,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
 	let actor_id = || SYSTEM_USER_ID.to_owned();
 
 	log("part 1");
-	// first, add a new link from the old-node's parent to the new-node (which we've generated an id for, and are about to construct)
+	// first, prepare a new link from the old-node's parent to the new-node (which we've generated an id for, and are about to construct)
 	let old_root_links = get_node_links(&ctx, Some(payload.parentNodeID.as_str()), Some(payload.rootNodeID.as_str())).await?;
 	let old_root_link = old_root_links.get(0).ok_or(anyhow!("No child-link found between provided root-node \"{}\" and parent \"{}\".", payload.rootNodeID, payload.parentNodeID))?;
 	let new_root_link = NodeLink {
@@ -117,8 +111,6 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
 		child: get_new_id_str(&payload.rootNodeID),
 		..old_root_link.clone()
 	};
-	log("part 1.5");
-	upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
 	log("part 2");
 	//let mut nodes_needing_clone_history_tag: HashSet<String> = HashSet::new();
@@ -135,6 +127,9 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
 		};
 		upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node).await?;
 	}
+	log("part 2.5");
+	// the root link is saved after the nodes on purpose. a db trigger fills a link's policy targets from its two nodes, so the child has to exist first (else the link gets a broken ":nodes" target)
+	upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 	log("part 3");
 	for rev_old in subtree.nodeRevisions {
 		let rev = NodeRevision { id: get_new_id(&rev_old.id), creator: actor_id(), createdAt: time_since_epoch_ms_i64(), node: get_new_id_str(&rev_old.node), ..rev_old.clone() };

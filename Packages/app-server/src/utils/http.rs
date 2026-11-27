@@ -1,9 +1,7 @@
 use futures_util::TryStreamExt;
+use graphlink_rust::{body_to_bytes, AxumBody};
+use rust_shared::axum::http;
 use rust_shared::hyper::Request;
-use rust_shared::{
-	axum::http,
-	utils::net::{body_to_bytes, AxumBody},
-};
 
 pub async fn clone_request(req: Request<AxumBody>) -> (Request<AxumBody>, Request<AxumBody>) {
 	let (parts, body) = req.into_parts();

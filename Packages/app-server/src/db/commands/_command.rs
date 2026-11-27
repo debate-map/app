@@ -2,13 +2,13 @@ use std::iter::{empty, once};
 
 use deadpool_postgres::{Pool, Transaction};
 use futures_util::{Future, TryStreamExt};
+use graphlink_rust::{json_value_to_guessed_sql_value_param_fragment, match_cond_to_iter, AccessorContext, CustomPGSerializer, IteratorV, SQLFragment, SQLIdent, SQLParam, SQLParamBoxed, SF};
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{self, MaybeUndefined};
 use rust_shared::indoc::indoc;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::serde::Serialize;
 use rust_shared::serde_json::json;
-use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::type_aliases::{JSONValue, RowData};
 use rust_shared::{bytes, serde_json};
 use rust_shared::{
@@ -17,17 +17,6 @@ use rust_shared::{
 };
 
 use crate::db::users::User;
-use crate::utils::db::sql_param::SQLParamBoxed;
-use crate::utils::{
-	db::{
-		accessors::AccessorContext,
-		filter::json_value_to_guessed_sql_value_param_fragment,
-		sql_fragment::{SQLFragment, SF},
-		sql_ident::SQLIdent,
-		sql_param::{CustomPGSerializer, SQLParam},
-	},
-	general::general::match_cond_to_iter,
-};
 
 /*pub struct UserInfo {
 	pub id: String,
@@ -60,96 +49,8 @@ pub async fn set_db_entry_by_filter(ctx: &AccessorContext<'_>, table_name: Strin
 	[...]
 }*/
 
-pub fn to_row_data(data: impl Serialize) -> Result<RowData, Error> {
-	let as_json = serde_json::to_value(data)?;
-	let as_map = as_json.as_object().ok_or(anyhow!("The passed data did not serialize to a json object/map!"))?;
-	Ok(as_map.to_owned())
-}
-
-pub async fn insert_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
-	let struct_as_row_data = to_row_data(new_row_struct)?;
-	set_db_entry_by_id(ctx, table_name, id, struct_as_row_data, false).await
-}
-pub async fn upsert_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
-	let struct_as_row_data = to_row_data(new_row_struct)?;
-	set_db_entry_by_id(ctx, table_name, id, struct_as_row_data, true).await
-}
-
-#[rustfmt::skip]
-pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row: RowData, allow_update: bool) -> Result<Vec<Row>, Error> {
-    // todo: maybe remove this (it's not really necessary to pass the id in separately from the row-data)
-    let id_from_row_data = new_row.get("id").ok_or(anyhow!("No \"id\" field in entry!"))?
-        .as_str().ok_or(anyhow!("The \"id\" field in entry was not a string!"))?;
-    if id_from_row_data != id.as_str() {
-        return Err(anyhow!("ID passed to set_db_entry_by_id does not match the id present in the data structure."));
-    }
-    
-    let mut final_query = SF::merge_lines(chain!(
-        chain!(
-            SF::new("INSERT INTO $I (", vec![SQLIdent::new_boxed(table_name.clone())?]).once(),
-            new_row.iter().enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
-                Ok(SF::merge(chain!(
-                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
-                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
-                ).collect_vec()))
-            }).try_collect2::<Vec<_>>()?,
-            SF::lit(")").once()
-        ),
-        chain!(
-            SF::lit("VALUES(").once(),
-            new_row.iter().enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
-                Ok(SF::merge(chain!(
-                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
-                    //Some(SF::value(key_and_val.1.to_owned())),
-                    Some({
-                        // temp; hard-code the correct type for fields that the guesser guesses wrong (this system really needs cleanup to avoid this ugly hack...)
-                        if table_name == "maps" && key_and_val.0 == "editors" {
-                            let as_array = key_and_val.1.as_array().unwrap().clone();
-                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
-                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
-                        } else if table_name == "nodePhrasings" && key_and_val.0 == "references" {
-                            let as_array = key_and_val.1.as_array().unwrap().clone();
-                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
-                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
-                        } else if table_name == "nodePhrasings" && key_and_val.0 == "terms" {
-                            let as_array = key_and_val.1.as_array().unwrap().clone();
-                            SF::value(CustomPGSerializer::new("::jsonb[]".to_owned(), as_array))
-                        } else if key_and_val.0 == "c_accessPolicyTargets" {
-                            let as_array = key_and_val.1.as_array().unwrap().clone();
-                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
-                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
-                        } else {
-                            json_value_to_guessed_sql_value_param_fragment(key_and_val.1)?
-                        }
-                    })
-                ).collect_vec()))
-            }).try_collect2::<Vec<_>>()?,
-            SF::lit(")").once(),
-        ),
-        match_cond_to_iter(allow_update, chain!(
-            SF::lit("ON CONFLICT (id) DO UPDATE SET").once(),
-            new_row.iter().filter(|key_and_val| key_and_val.0 != "id").enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
-                Ok(SF::merge(chain!(
-                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
-                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
-                    SF::lit(" = EXCLUDED.").once(),
-                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
-                ).collect_vec()))
-            }).try_collect2::<Vec<_>>()?,
-        ), empty()),
-    ).collect_vec());
-    let (sql_text, params) = final_query.into_query_args()?;
-
-    let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
-    // wrap params into boxes, then refs, to satisfy ToSql constraint generically; not ideal, but best approach known atm; see: https://github.com/sfackler/rust-postgres/issues/712
-    let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
-    let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
-
-    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params_as_refs).await
-        .map_err(|err| anyhow!("Got error while running query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?
-        .try_collect().await.map_err(|err| anyhow!("Got error while collecting results of db-query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?;
-    Ok(rows)
-}
+// a row is written as its blob (every other column is generated from it), through the crate's helpers
+pub use graphlink_rust::{insert_db_entry_by_id_for_struct, set_db_entry_by_id, upsert_db_entry_by_id_for_struct};
 
 pub async fn delete_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String) -> Result<Vec<Row>, Error> {
 	Ok(delete_db_entry_by_field_value(ctx, table_name, "id".to_owned(), Box::new(id)).await?)
@@ -298,8 +199,8 @@ pub fn update_field_of_extras(val_in_updates: CanOmit<JSONValue>, old_val: JSONV
 // Note: I've tried creating two variants of this (a pair of pre and post macros, and a regular function); if wanted for reference, view git history.
 macro_rules! command_boilerplate {
 	($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
-		let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
+		let mut anchor = graphlink_rust::DataAnchorFor1::empty(); // holds pg-client
+		let ctx = graphlink_rust::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
 		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx($gql_ctx, &ctx).await?;
 		let input_json = serde_json::to_string(&$input)?;
 
@@ -307,7 +208,7 @@ macro_rules! command_boilerplate {
 
 		if $only_validate.unwrap_or(false) {
 			// before rolling back, ensure that none of the constraints are violated at this point (we must check manually, since commit is never called)
-			$crate::utils::db::accessors::trigger_deferred_constraints(&ctx.tx).await?;
+			graphlink_rust::trigger_deferred_constraints(&ctx.tx).await?;
 
 			// the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
 			ctx.tx.rollback().await?;

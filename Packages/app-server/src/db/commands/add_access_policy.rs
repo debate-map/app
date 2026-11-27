@@ -1,3 +1,4 @@
+use graphlink_rust::{new_uuid_v4_as_b64, time_since_epoch_ms_i64, AccessorContext, DataAnchorFor1, GQLError};
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::Object;
 use rust_shared::async_graphql::{InputObject, SimpleObject, ID};
@@ -6,18 +7,14 @@ use rust_shared::indexmap::IndexMap;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Value};
-use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
+use rust_shared::{anyhow, async_graphql, serde_json};
 use tracing::info;
 
 use crate::db::access_policies_::_access_policy::{AccessPolicy, AccessPolicyInput};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::terms::{Term, TermInput};
 use crate::db::users::User;
-use crate::utils::db::accessors::AccessorContext;
-use crate::utils::general::data_anchor::DataAnchorFor1;
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 
 use super::_command::{command_boilerplate, upsert_db_entry_by_id_for_struct, NoExtras};
 
@@ -56,7 +53,7 @@ pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		permissions_userExtends: policy_.permissions_userExtends,
 	};
 
-	upsert_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "access_policies".to_owned(), policy.id.to_string(), policy.clone()).await?;
 
 	Ok(AddAccessPolicyResult { id: policy.id.to_string() })
 }

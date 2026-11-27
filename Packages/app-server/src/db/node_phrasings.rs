@@ -1,24 +1,18 @@
 use futures_util::{stream, Stream, TryFutureExt};
+use graphlink_rust::{get_db_entries, get_db_entry, handle_generic_gql_collection_query, handle_generic_gql_doc_query, AccessorContext, FilterInput, GQLError, SubError};
 use rust_shared::anyhow::Error;
 use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde;
 use rust_shared::serde::{Deserialize, Serialize};
+use rust_shared::serde_json;
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{serde_json, GQLError, SubError};
 
 use crate::gql_set_impl;
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	filter::FilterInput,
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
-
-use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::TermAttachment;
@@ -114,10 +108,6 @@ pub struct NodePhrasing {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for NodePhrasing {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodePhrasingInput {
 	pub node: String,
@@ -165,8 +155,8 @@ gql_set_impl!(NodePhrasing);
 
 #[derive(Default)] pub struct SubscriptionShard_NodePhrasing;
 #[Subscription] impl SubscriptionShard_NodePhrasing {
-	async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodePhrasing, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter, None).await
+	async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_NodePhrasing, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter, cached_entry_hashes, None).await
 	}
 	async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodePhrasing>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<NodePhrasing>(ctx, "nodePhrasings", id).await

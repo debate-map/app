@@ -5,6 +5,7 @@ use axum::{
 	routing::get,
 	Router,
 };
+use graphlink_rust::{k8s_env, AccessorContext, DataAnchorFor1};
 use rust_shared::anyhow::Error;
 use rust_shared::hyper::{Method, Request};
 use rust_shared::{
@@ -18,7 +19,6 @@ use rust_shared::{
 	http_body_util::Full,
 	tokio::net::TcpListener,
 	tower_http::{self, cors::AllowOrigin, trace::TraceLayer},
-	utils::general::k8s_env,
 };
 use rust_shared::{serde_json::json, tokio};
 use tower_http::cors::CorsLayer;
@@ -31,12 +31,9 @@ use crate::{
 	db::general::{sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info},
 	globals::{set_up_globals, GLOBAL},
 	gql::{self, get_gql_data_from_http_request},
-	links::{
-		monitor_backend_link::{http_response_of_bad_gateway_for_non_pod_caller, is_addr_from_pod, monitor_backend_link_handle_ws_upgrade},
-		pgclient,
-	},
+	links::monitor_backend_link::{http_response_of_bad_gateway_for_non_pod_caller, is_addr_from_pod, monitor_backend_link_handle_ws_upgrade},
 	store::storage::{AppState, AppStateArc},
-	utils::{axum_logging_layer::print_request_response, db::accessors::AccessorContext, general::data_anchor::DataAnchorFor1},
+	utils::axum_logging_layer::print_request_response,
 };
 
 pub fn in_debugger() -> bool {

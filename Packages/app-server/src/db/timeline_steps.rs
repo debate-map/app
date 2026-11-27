@@ -1,4 +1,5 @@
 use futures_util::{stream, Stream, TryFutureExt};
+use graphlink_rust::{get_db_entries, get_db_entry, handle_generic_gql_collection_query, handle_generic_gql_doc_query, AccessorContext, FilterInput, GQLError, OrderKey, SubError};
 use rust_shared::anyhow::Error;
 use rust_shared::async_graphql::{self, Enum, MaybeUndefined};
 use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
@@ -8,18 +9,10 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{futures, serde_json, GQLError, SubError};
+use rust_shared::{futures, serde_json};
 
 use crate::gql_set_impl;
-use crate::utils::db::accessors::get_db_entries;
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	accessors::{get_db_entry, AccessorContext},
-	filter::FilterInput,
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
-use crate::utils::general::order_key::OrderKey;
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::Attachment;
@@ -83,10 +76,6 @@ pub struct TimelineStep {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for TimelineStep {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct TimelineStepInput {
 	pub timelineID: String,
@@ -124,8 +113,8 @@ gql_set_impl!(TimelineStep);
 
 #[derive(Default)] pub struct SubscriptionShard_TimelineStep;
 #[Subscription] impl SubscriptionShard_TimelineStep {
-	async fn timelineSteps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_TimelineStep, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter, None).await
+	async fn timelineSteps<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_TimelineStep, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<TimelineStep, GQLSet_TimelineStep>(ctx, "timelineSteps", filter, cached_entry_hashes, None).await
 	}
 	async fn timelineStep<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<TimelineStep>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<TimelineStep>(ctx, "timelineSteps", id).await

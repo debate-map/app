@@ -118,7 +118,10 @@ def Base64Encode(strToEncode):
 	#return strToEncode.encode("utf-8").base64encode().decode("utf-8")
 	if "'" in strToEncode:
 		fail("Error: base64encode was called, but string contains single-quotes: " + strToEncode)
-	jsCode = "process.stdout.write(Buffer.from(`" + strToEncode + "`).toString(`base64`).slice(0, -2))"
+	# escape the string so it can be embedded in the template-literal below: a raw backtick, "${", or newline would otherwise break the JS (or truncate it, eg. when passed as a command-line arg on Windows)
+	escaped = strToEncode.replace("\r\n", "\n").replace("\r", "\n") # matches how JS template-literals normalize line-endings
+	escaped = escaped.replace("\\", "\\\\").replace("`", "\\`").replace("\n", "\\n").replace("$", "\\$")
+	jsCode = "process.stdout.write(Buffer.from(`" + escaped + "`).toString(`base64`).slice(0, -2))"
 	result_blob = local(["node", "-e", jsCode], echo_off=True, quiet=True)
 	return str(result_blob)
 

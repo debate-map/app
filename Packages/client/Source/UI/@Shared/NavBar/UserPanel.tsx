@@ -94,8 +94,14 @@ export const SignInPanel = observer_mgl((props: {style?: React.CSSProperties, on
    					`.AsMultiline(0)}/>
    				</Row>
    				<Row>
-   					<Text>Username:</Text>
-   					<TextInput ml={5} style={{flex: 1}} value={devUsername} onChange={val=>setDevUsername(val)}/>
+   					{/* avoid the words "username"/"login" (and any name/id containing them) here, since password-managers
+   					keyword-match nearby label text and would otherwise treat this dev-mode impersonation field as a real one;
+   					the data-* attributes are the per-manager opt-outs (Bitwarden currently only honors its one behind a flag) */}
+   					<Text>Dev user:</Text>
+   					<TextInput ml={5} style={{flex: 1}} value={devUsername} onChange={val=>setDevUsername(val)}
+   						autoComplete="off"
+							name="devUser" data-form-type="other"
+							data-bwignore data-1p-ignore data-lpignore="true"/>
    					<SignInButton provider="dev" preferredUsername={devUsername} onJWTReceived={onJWTReceived}/>
    				</Row>
    			</Column>}

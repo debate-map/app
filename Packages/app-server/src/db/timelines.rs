@@ -1,4 +1,5 @@
 use futures_util::{stream, Stream, TryFutureExt};
+use graphlink_rust::{get_db_entry, handle_generic_gql_collection_query, handle_generic_gql_doc_query, AccessorContext, FilterInput, GQLError, SubError};
 use rust_shared::anyhow::Error;
 use rust_shared::async_graphql::{self, Enum, MaybeUndefined};
 use rust_shared::async_graphql::{Context, InputObject, Object, OutputType, Schema, SimpleObject, Subscription, ID};
@@ -7,16 +8,10 @@ use rust_shared::serde;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{futures, serde_json, GQLError, SubError};
+use rust_shared::{futures, serde_json};
 
 use crate::gql_set_impl;
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	accessors::{get_db_entry, AccessorContext},
-	filter::FilterInput,
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::_shared::attachments::Attachment;
 use super::commands::_command::{CanNullOrOmit, CanOmit};
@@ -49,10 +44,6 @@ pub struct Timeline {
 		Ok(serde_json::from_value(self.extras.clone())?)
 	}
 }*/
-impl From<Row> for Timeline {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 /*#[derive(Clone, Serialize, Deserialize)]
 pub struct Timeline_Extras {
 }*/
@@ -92,8 +83,8 @@ gql_set_impl!(Timeline);
 
 #[derive(Default)] pub struct SubscriptionShard_Timeline;
 #[Subscription] impl SubscriptionShard_Timeline {
-	async fn timelines<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Timeline, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter, None).await
+	async fn timelines<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_Timeline, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Timeline, GQLSet_Timeline>(ctx, "timelines", filter, cached_entry_hashes, None).await
 	}
 	async fn timeline<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Timeline>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<Timeline>(ctx, "timelines", id).await

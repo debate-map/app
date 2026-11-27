@@ -39,18 +39,17 @@ use rust_shared::{
 	domains::{get_env, DomainsConstants},
 	sentry, tokio,
 };
+use graphlink_rust::links::pgstream::pgstream::start_pgstream_client_with_restart;
+use graphlink_rust::links::pgstream::db_live_cache::start_db_live_cache;
+use graphlink_rust::DataAnchorFor1;
 use store::storage::AppStateArc;
 use tracing::error;
 
 use crate::{
 	globals::{set_up_globals, set_up_globals_linux},
-	links::{
-		db_live_cache::start_db_live_cache,
-		pgclient::{self, start_pgclient_with_restart},
-	},
+	links::monitor_backend_link::relay_graphlink_monitor_event,
 	router::start_router,
 	store::storage::AppState,
-	utils::general::data_anchor::DataAnchorFor1,
 };
 
 // folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)
@@ -60,6 +59,7 @@ mod store;
 mod utils;
 // files
 mod globals;
+mod graphlink_config;
 mod gql;
 mod router;
 
@@ -72,11 +72,17 @@ async fn main() {
 	#[cfg(unix)]
 	let agent_running = agent.start().unwrap();
 	println!("Setup of globals completed"); // have one regular print-line, in case logger has issues
+	graphlink_config::set_up_graphlink_rust(relay_graphlink_monitor_event); // debate-map's table definitions for the crate, and where its monitor events go
 
 	let app_state = AppState::new_in_arc();
 
+	// build or update the database schema before anything reads from it
+	graphlink_config::run_pre_pgsync_sql(&app_state).await.expect("pre-pgsync sql failed");
+	graphlink_rust::run_pgsync(app_state.clone()).await.expect("pgsync failed");
+	graphlink_config::run_post_pgsync_sql(&app_state).await.expect("post-pgsync sql failed");
+
 	// start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
-	start_pgclient_with_restart(app_state.clone());
+	start_pgstream_client_with_restart(app_state.clone());
 
 	// start db-live-cache; this launches some live-queries for certain data (eg. list of admin user-ids, and access-policies), and keeps those results in memory
 	start_db_live_cache(app_state.clone());

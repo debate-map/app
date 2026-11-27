@@ -62,7 +62,7 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: host } }
         - name: DB_PORT
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: port } }
-        - name: DB_DATABASE
+        - name: DB_NAME
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: dbname } }
         - name: DB_USER
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: user } }

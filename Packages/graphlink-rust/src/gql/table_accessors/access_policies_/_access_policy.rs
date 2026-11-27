@@ -76,9 +76,24 @@ pub struct AccessPolicy {
 	pub creator: String,
 	pub createdAt: i64,
 	pub name: String,
+	#[serde(deserialize_with = "permission_set_keeping_bools")]
 	pub permissions: PermissionSet,
 	#[graphql(name = "permissions_userExtends")]
+	#[serde(deserialize_with = "user_extends_keeping_bools")]
 	pub permissions_userExtends: IndexMapAGQL<String, PermissionSet>,
+}
+// the checks here only read yes/no perms like `access`, so anything richer (eg. approval criteria objects) is dropped on load instead of failing the whole policy
+fn keep_bools(raw: IndexMap<String, IndexMap<String, JSONValue>>) -> PermissionSet {
+	let bools_only = |perms: IndexMap<String, JSONValue>| IndexMapAGQL(perms.into_iter().filter_map(|(perm, val)| val.as_bool().map(|b| (perm, b))).collect()); // perm -> value, minus the non bool ones
+	IndexMapAGQL(raw.into_iter().map(|(table, perms)| (table, bools_only(perms))).collect())
+}
+fn permission_set_keeping_bools<'de, D: serde::Deserializer<'de>>(d: D) -> Result<PermissionSet, D::Error> {
+	let raw: IndexMap<String, IndexMap<String, JSONValue>> = Deserialize::deserialize(d)?; // table -> perm -> value
+	Ok(keep_bools(raw))
+}
+fn user_extends_keeping_bools<'de, D: serde::Deserializer<'de>>(d: D) -> Result<IndexMapAGQL<String, PermissionSet>, D::Error> {
+	let raw: IndexMap<String, IndexMap<String, IndexMap<String, JSONValue>>> = Deserialize::deserialize(d)?; // user id -> table -> perm -> value
+	Ok(IndexMapAGQL(raw.into_iter().map(|(user, set)| (user, keep_bools(set))).collect()))
 }
 impl AccessPolicy {
 	pub fn permission_extends_for_user_and_table(&self, user_id: Option<&str>, table: &str) -> Option<PermissionSetForTable> {

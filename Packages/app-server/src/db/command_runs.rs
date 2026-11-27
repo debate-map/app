@@ -1,17 +1,13 @@
 use futures_util::{stream, Stream, TryFutureExt};
+use graphlink_rust::{handle_generic_gql_collection_query, handle_generic_gql_doc_query, FilterInput, GQLError, QueryFilter, SubError};
 use rust_shared::async_graphql::{Context, Object, OutputType, Schema, SimpleObject, Subscription, ID};
 use rust_shared::rust_macros::{wrap_serde_macros, wrap_slow_macros, Deserialize_Stub, Serialize_Stub};
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
+use rust_shared::{async_graphql, serde, serde_json};
 
 use crate::gql_set_impl;
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	filter::{FilterInput, QueryFilter},
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 
@@ -66,10 +62,6 @@ pub struct CommandRun {
 	#[graphql(name = "c_accessPolicyTargets")]
 	pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl From<Row> for CommandRun {
-	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 gql_set_impl!(CommandRun);
 
 #[derive(Default)] pub struct QueryShard_CommandRun;
@@ -84,8 +76,8 @@ gql_set_impl!(CommandRun);
 
 #[derive(Default)] pub struct SubscriptionShard_CommandRun;
 #[Subscription] impl SubscriptionShard_CommandRun {
-	async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter, None).await
+	async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter, cached_entry_hashes, None).await
 	}
 	async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<CommandRun>(ctx, "commandRuns", id).await

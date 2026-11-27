@@ -1,21 +1,16 @@
 use futures_util::{stream, Future, Stream, StreamExt, TryFutureExt};
+use graphlink_rust::{get_db_entries, get_db_entry, handle_generic_gql_collection_query, handle_generic_gql_doc_query, AccessorContext, FilterInput, GQLError, SubError};
 use rust_shared::anyhow::Error;
 use rust_shared::async_graphql::{async_stream, scalar, Context, EmptySubscription, InputObject, Object, OutputType, Result, Schema, SimpleObject, Subscription, ID};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{async_graphql, serde, serde_json, GQLError, SubError};
+use rust_shared::{async_graphql, serde, serde_json};
 use std::{pin::Pin, task::Poll, time::Duration};
 
 use crate::gql_set_impl;
-use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
-use crate::utils::db::generic_handlers::queries::{handle_generic_gql_collection_query, handle_generic_gql_doc_query};
-use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::db::{
-	filter::FilterInput,
-	generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet},
-};
+use crate::utils::db::generic_handlers::subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet};
 
 use super::commands::_command::CanOmit;
 
@@ -59,12 +54,6 @@ pub struct User {
 	pub edits: i32,
 	pub lastEditAt: Option<i64>,
 }
-impl From<Row> for User {
-	fn from(row: Row) -> Self {
-		postgres_row_to_struct(row).unwrap()
-	}
-}
-
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct UserUpdates {
 	pub displayName: CanOmit<String>,
@@ -92,8 +81,8 @@ impl QueryShard_User {
 pub struct SubscriptionShard_User;
 #[Subscription]
 impl SubscriptionShard_User {
-	async fn users<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
-		handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter, None).await
+	async fn users<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>, cached_entry_hashes: Option<std::collections::HashMap<String, String>>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter, cached_entry_hashes, None).await
 	}
 	async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<User>, SubError>> + 'a {
 		handle_generic_gql_doc_subscription::<User>(ctx, "users", id).await

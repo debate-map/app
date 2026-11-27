@@ -10,15 +10,11 @@ use crate::{
 		nodes::get_node,
 		terms::{get_terms_attached, Term},
 	},
-	utils::db::{
-		accessors::AccessorContext,
-		filter::{FilterInput, QueryFilter},
-		queries::get_entries_in_collection_base,
-		sql_fragment::SQLFragment,
-	},
+	utils::db::pg_row_to_json::blob_rows_to_structs,
 };
 use async_recursion::async_recursion;
 use futures_util::{pin_mut, Future, FutureExt, StreamExt, TryStreamExt};
+use graphlink_rust::{get_entries_in_collection_base, AccessorContext, FilterInput, QueryFilter, SQLFragment};
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::ID;
 use rust_shared::indexmap::IndexMap;
@@ -84,13 +80,13 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
 
 	let mut subtree = Subtree {
-		terms: term_rows.into_iter().map(|a| a.into()).collect(),
-		medias: media_rows.into_iter().map(|a| a.into()).collect(),
-		nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-		nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
-		nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
-		nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
-		nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
+		terms: blob_rows_to_structs(term_rows, "terms")?,
+		medias: blob_rows_to_structs(media_rows, "medias")?,
+		nodes: blob_rows_to_structs(node_rows, "nodes")?,
+		nodeLinks: blob_rows_to_structs(link_rows, "nodeLinks")?,
+		nodeRevisions: blob_rows_to_structs(revision_rows, "nodeRevisions")?,
+		nodePhrasings: blob_rows_to_structs(phrasing_rows, "nodePhrasings")?,
+		nodeTags: blob_rows_to_structs(tag_rows, "nodeTags")?,
 	};
 	subtree.sort_all_entries();
 	Ok(subtree)
@@ -144,13 +140,13 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
 
 	let subtree = Subtree {
-		terms: term_rows.into_iter().map(|a| a.into()).collect(),
-		medias: media_rows.into_iter().map(|a| a.into()).collect(),
-		nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-		nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
-		nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
-		nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
-		nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
+		terms: blob_rows_to_structs(term_rows, "terms")?,
+		medias: blob_rows_to_structs(media_rows, "medias")?,
+		nodes: blob_rows_to_structs(node_rows, "nodes")?,
+		nodeLinks: blob_rows_to_structs(link_rows, "nodeLinks")?,
+		nodeRevisions: blob_rows_to_structs(revision_rows, "nodeRevisions")?,
+		nodePhrasings: blob_rows_to_structs(phrasing_rows, "nodePhrasings")?,
+		nodeTags: blob_rows_to_structs(tag_rows, "nodeTags")?,
 	};
 	//subtree.sort_all_entries();
 	Ok(subtree)

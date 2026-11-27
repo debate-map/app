@@ -3,25 +3,18 @@ use std::{rc::Rc, sync::Arc};
 use super::subtree::Subtree;
 use crate::db::node_revisions::NodeRevision;
 use crate::db::nodes_::_node::Node;
-use crate::{
-	db::{
-		medias::{get_media, Media},
-		node_links::{get_node_links, NodeLink},
-		node_phrasings::{get_node_phrasings, NodePhrasing},
-		node_revisions::get_node_revision,
-		node_tags::{get_node_tags, NodeTag},
-		nodes::get_node,
-		terms::{get_terms_attached, Term},
-	},
-	utils::db::{
-		accessors::AccessorContext,
-		filter::{FilterInput, QueryFilter},
-		queries::get_entries_in_collection_base,
-		sql_fragment::SQLFragment,
-	},
+use crate::db::{
+	medias::{get_media, Media},
+	node_links::{get_node_links, NodeLink},
+	node_phrasings::{get_node_phrasings, NodePhrasing},
+	node_revisions::get_node_revision,
+	node_tags::{get_node_tags, NodeTag},
+	nodes::get_node,
+	terms::{get_terms_attached, Term},
 };
 use async_recursion::async_recursion;
 use futures_util::{pin_mut, Future, FutureExt, StreamExt, TryStreamExt};
+use graphlink_rust::{get_entries_in_collection_base, AccessorContext, FilterInput, QueryFilter, SQLFragment};
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::ID;
 use rust_shared::indexmap::IndexMap;

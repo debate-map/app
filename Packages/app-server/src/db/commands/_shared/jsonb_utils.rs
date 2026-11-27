@@ -1,24 +1,15 @@
 use std::iter::empty;
 
 use deadpool_postgres::{tokio_postgres::types::ToSql, Transaction};
+use graphlink_rust::{match_cond_to_iter, CustomPGSerializer, IteratorV, SQLFragment, SQLIdent, SQLParamBoxed, SF};
 use rust_shared::{
 	anyhow::{anyhow, Context, Error},
 	itertools::{chain, Itertools},
 	serde_json,
-	utils::{general_::extensions::IteratorV, type_aliases::JSONValue},
+	utils::type_aliases::JSONValue,
 };
 
-use crate::{
-	db::commands::_command::ToSqlWrapper,
-	utils::{
-		db::{
-			sql_fragment::{SQLFragment, SF},
-			sql_ident::SQLIdent,
-			sql_param::{CustomPGSerializer, SQLParamBoxed},
-		},
-		general::general::match_cond_to_iter,
-	},
-};
+use crate::db::commands::_command::ToSqlWrapper;
 
 pub async fn jsonb_set(tx: &Transaction<'_>, table: &str, id: &str, field: &str, jsonb_path: Vec<String>, value: Option<JSONValue>) -> Result<(), Error> {
 	let mut sql_fragment = jsonb_set_to_sql_fragment(table, id, field, jsonb_path, value)?;
@@ -40,6 +31,9 @@ pub async fn jsonb_set(tx: &Transaction<'_>, table: &str, id: &str, field: &str,
 
 #[rustfmt::skip]
 pub fn jsonb_set_to_sql_fragment(table: &str, id: &str, field: &str, jsonb_path: Vec<String>, jsonb_value: Option<JSONValue>) -> Result<SQLFragment, Error> {
+	// a row is `id` + a `data` blob now: `extras` is the blob's root (its keys sit at the top level), any other field is a top-level key of the blob
+	let jsonb_path = if field == "extras" { jsonb_path } else { std::iter::once(field.to_owned()).chain(jsonb_path).collect_vec() };
+	let field = "data";
 	Ok(match jsonb_value {
 		Some(jsonb_value) => {
 			// the value for this code-path will always be within a JSONB cell, so just json-serialize it
@@ -123,7 +117,7 @@ mod tests {
 	// run in PowerShell using: `cargo test jsonb_set -- --nocapture`
 	#[test]
 	fn jsonb_set() {
-		let mut sql = jsonb_set_to_sql_fragment("myTable", "myRowID", "myField", vec!["depth1".to_owned(), "depth2".to_owned(), "depth3".to_owned(), "depth4".to_owned()], Some(json!("newValue"))).unwrap();
+		let mut sql = jsonb_set_to_sql_fragment("myTable", "myRowID", "extras", vec!["depth1".to_owned(), "depth2".to_owned(), "depth3".to_owned(), "depth4".to_owned()], Some(json!("newValue"))).unwrap();
 		// meant to match with example shown here: https://stackoverflow.com/a/69534368
 		/*assert_eq!(sql.sql_text, indoc!(r#"
 			UPDATE $I SET $I =
@@ -155,11 +149,11 @@ mod tests {
 			sql_text_final,
 			indoc!(
 				r#"
-            UPDATE "myTable" SET "myField" =
-            jsonb_set(COALESCE("myField", '{}'), array[$1::text],
-            jsonb_set(COALESCE("myField"->$2::text, '{}'), array[$3::text],
-            jsonb_set(COALESCE("myField"->$4::text->$5::text, '{}'), array[$6::text],
-            jsonb_set(COALESCE("myField"->$7::text->$8::text->$9::text, '{}'), array[$10::text],
+            UPDATE "myTable" SET "data" =
+            jsonb_set(COALESCE("data", '{}'), array[$1::text],
+            jsonb_set(COALESCE("data"->$2::text, '{}'), array[$3::text],
+            jsonb_set(COALESCE("data"->$4::text->$5::text, '{}'), array[$6::text],
+            jsonb_set(COALESCE("data"->$7::text->$8::text->$9::text, '{}'), array[$10::text],
             $11::jsonb
             ))))
             WHERE id = $12::text

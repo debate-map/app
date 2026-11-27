@@ -5,6 +5,7 @@ const glob = require("glob");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
+const {SearchForDockerHostForK8sContext} = require("./Scripts/DockerContextForK8sContext.js");
 
 const {noTimings} = SetUpLoggingOfScriptStartAndEndTimes();
 
@@ -306,8 +307,8 @@ function GetPortForwardCommandsStr(context) {
 }
 
 const extraTiltArgs = commandArgs.join(" ");
-function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
-	let command = `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up ${podName} --stream -f ./Tilt/Main.star --context dm-ovh --port ${port} -- --env prod`;
+function RunTiltUp_ForSpecificPod(k8sContext, podName, port, tiltfileArgsStr) {
+	let command = `${PrepDockerCmd()} ${SetTiltEnvCmd(k8sContext)} tilt up ${podName} --stream -f ./Tilt/Main.star --context ${k8sContext} --port ${port} -- --env prod`;
 	if (tiltfileArgsStr) command += ` -- --env prod ${tiltfileArgsStr} ${extraTiltArgs}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = process.platform === "win32"
@@ -351,18 +352,18 @@ Object.assign(scripts, {
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
 		}),*/
 
-		tiltUp_local:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_local_release: `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev  --compileWithRelease ${extraTiltArgs}`,
-		tiltDown_local:       `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-local --port 5190 -- --env dev                       ${extraTiltArgs}`,
-		tiltUp_ovh:           `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt up   -f ./Tilt/Main.star --context dm-ovh   --port 5290 -- --env prod                      ${extraTiltArgs}`,
-		tiltDown_ovh:         `${PrepDockerCmd()} ${SetTiltEnvCmd()} tilt down -f ./Tilt/Main.star --context dm-ovh   --port 5290 -- --env prod                      ${extraTiltArgs}`,
+		tiltUp_local:         Dynamic(()=>TiltCmd("dm-local", "up",   "dev",  5190)),
+		tiltUp_local_release: Dynamic(()=>TiltCmd("dm-local", "up",   "dev",  5190, "--compileWithRelease")),
+		tiltDown_local:       Dynamic(()=>TiltCmd("dm-local", "down", "dev",  5190)),
+		tiltUp_ovh:           Dynamic(()=>TiltCmd("dm-ovh",   "up",   "prod", 5290)),
+		tiltDown_ovh:         Dynamic(()=>TiltCmd("dm-ovh",   "down", "prod", 5290)),
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
-		tiltUp_ovh_webServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
-		tiltUp_ovh_appServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
-		//tiltUp_ovh_appServer_quicker:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift")), // tilt-port +(10+2), as targeted tilt-up #2
-		//tiltUp_ovh_appServer_quickest: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift --compileWithRelease=False")), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_appServer_optimized:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift=False")), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_monitorBackend:       Dynamic(()=>RunTiltUp_ForSpecificPod("dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
+		tiltUp_ovh_webServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
+		tiltUp_ovh_appServer:            Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
+		//tiltUp_ovh_appServer_quicker:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-app-server", 10362, "--compileWithCranelift")), // tilt-port +(10+2), as targeted tilt-up #2
+		//tiltUp_ovh_appServer_quickest: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-app-server", 10362, "--compileWithCranelift --compileWithRelease=False")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_appServer_optimized:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-app-server", 10362, "--compileWithCranelift=False")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_monitorBackend:       Dynamic(()=>RunTiltUp_ForSpecificPod("dm-ovh", "dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
 
 		// Using tilt to deploy is convenient, but does have some negatives -- biggest one being that pressing "Trigger update" delete the pod, builds, then deploy the pod, leaving a gap/downtime.
 		// So provide a way to do a "traditional" `kubectl apply` for the main debate-map pods, which avoids that pod downtime.
@@ -502,12 +503,21 @@ Object.assign(scripts, {
 	},
 });
 scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@JSBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
-function SetTiltEnvCmd() {
+function SetTiltEnvCmd(k8sContext) {
 	return SetEnvVarsCmd({
 		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
+		// have tilt (and the image-builds it triggers) use the docker daemon that backs the targeted k8s cluster (eg. Rancher Desktop's engine for "dm-local"),
+		// rather than whichever docker-context happens to be selected globally (which can be a different, even non-running, engine -- eg. Docker Desktop's)
+		DOCKER_HOST: SearchForDockerHostForK8sContext(k8sContext),
 		//ENVIRONMENT: prod ? "prod" : "dev", // commented; now passed as tilt config (eg. " --env=prod")
 		//CONTEXT: context, // commented; tilt script now reads context using k8s_context() func
 	});
+}
+
+/** Builds a "tilt up/down" command, with the docker connection matched to the targeted k8s context. */
+function TiltCmd(k8sContext, subCommand, env, port, argsAdd = "") {
+	const appendedArgs = process.argv.slice(3).join(" "); // replicate how nps would otherwise append extra args (the Dynamic() wrapper drops them)
+	return `${PrepDockerCmd()} ${SetTiltEnvCmd(k8sContext)} tilt ${subCommand} -f ./Tilt/Main.star --context ${k8sContext} --port ${port} -- --env ${env} ${argsAdd} ${extraTiltArgs} ${appendedArgs}`;
 }
 
 // todo: add function for easily retrieving other "generated within k8s cluster" secrets (eg. dm-jwt-secret-hs256)
@@ -629,18 +639,11 @@ Object.assign(scripts, {
 		// db init/seed commands (using psql to run standard .sql files)
 		buildSeedDBScript: GetBuildSeedDBScriptCommand(),
 		initDB: Dynamic(()=>{
-			// first connect to the "postgres" db, to run @CreateDB.sql (this creates the "debate-map" db if it doesn't exist yet)
+			// connect to the "postgres" db, to run @CreateDB.sql (this creates the "debate-map" db if it doesn't exist yet)
+			// only the empty database is made here. app-server builds the tables itself when it starts, so the old @InitDB.sql (typed tables) is not run anymore
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
 			psqlProcess.stdin.write(`\\i ./Scripts/InitDB/@CreateDB.sql\n`);
 			psqlProcess.stdin.write(`\\q\n`);
-
-			// on completion of the CreateDB script (without error), run the InitDB script
-			psqlProcess.on("close", code=>{
-				if (code != 0) return void console.error(`psql process exited with code ${code}`);
-				const psqlProcess2 = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
-				psqlProcess2.stdin.write(`\\i ./Scripts/InitDB/@InitDB.sql\n`);
-				psqlProcess2.stdin.write(`\\q\n`);
-			});
 		}),
 		seedDB: Dynamic(()=>{
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");

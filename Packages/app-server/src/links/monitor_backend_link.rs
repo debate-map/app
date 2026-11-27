@@ -28,6 +28,7 @@ use rust_shared::{
 	serde_json, tokio,
 	utils::type_aliases::JSONValue,
 };
+use graphlink_rust::MonitorEvent;
 use tracing::{error, info, warn};
 
 use crate::utils::type_aliases::{ABReceiver, ABSender};
@@ -83,6 +84,19 @@ pub static MESSAGE_SENDER_TO_MONITOR_BACKEND: Lazy<(ABSender<Message_ASToMB>, AB
 	// we need to return both, else the receiver is dropped, and the channel closes
 	(s1, r1)
 });
+
+// the crate's live-query events, passed on as the message monitor-backend already knows
+pub fn relay_graphlink_monitor_event(event: MonitorEvent) {
+	let message = match event {
+		MonitorEvent::LQInstanceUpdated { table_name, filter, last_entries, watchers_count, deleting } => {
+			Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries: last_entries.into_iter().map(|entry| entry.0).collect(), watchers_count, deleting }
+		},
+	};
+	// the crate calls this synchronously, so no await; the channel overflows instead of filling up
+	if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.try_broadcast(message) {
+		error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
+	}
+}
 
 async fn read(mut receiver: SplitStream<WebSocket>) {
 	while let Some(Ok(_msg)) = receiver.next().await {
