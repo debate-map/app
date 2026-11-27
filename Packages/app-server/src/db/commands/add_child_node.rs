@@ -88,7 +88,7 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
 
 	let user_hiddens = get_user_hidden(ctx, &actor.id).await?;
 	if user_hiddens.notificationPolicy == "S" {
-		let subscription = AddSubscriptionInputBuilder::new(add_node_link_result.id.clone()).with_add_child_node(true).with_add_child_node(true).with_add_node_link(true).with_add_node_revision(true).with_delete_node(true).with_delete_node_link(true).with_set_node_rating(true).build();
+		let subscription = AddSubscriptionInputBuilder::new(node_id.clone()).with_add_child_node(true).with_add_child_node(true).with_add_node_link(true).with_add_node_revision(true).with_delete_node(true).with_delete_node_link(true).with_set_node_rating(true).build();
 
 		add_or_update_subscription(ctx, actor, false, subscription, Default::default()).await?;
 
