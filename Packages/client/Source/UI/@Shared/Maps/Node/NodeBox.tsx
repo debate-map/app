@@ -228,7 +228,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 			return;
 		}
 
-		if (!IsMouseEnterReal(e, rootRef.current!)) return;
+		if (rootRef.current == null || !IsMouseEnterReal(e, rootRef.current)) return;
 		setState(prevState=>({
 			...prevState,
 			hovered: true
@@ -237,7 +237,7 @@ export const NodeBox = observer_mgl((props: NodeBox_Props)=>{
 	}, [internalCrawlerMode]);
 
 	const onMouseLeave = UseCallback(e=>{
-		if (!IsMouseLeaveReal(e, rootRef.current!)) return;
+		if (rootRef.current != null && !IsMouseLeaveReal(e, rootRef.current)) return; // ref is null while a suspense fallback hides the box (eg. right after a save), so count that as a leave
 		setState(prevState=>({
 			...prevState,
 			hovered: false,
